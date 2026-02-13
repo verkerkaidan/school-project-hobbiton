@@ -1,0 +1,17 @@
+{
+  "name": "bpsee-monorepo",
+  "version": "0.1.0",
+  "description": "BPSEE Proof of Concept - 10 week project",
+  "private": true,
+  "workspaces": [
+    "hobby-frontend",
+    "backend-demo-1",
+    "backend-demo-2",
+    "frontend-demo-2"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces"
+  }
+}

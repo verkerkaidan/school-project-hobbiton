@@ -1,0 +1,23 @@
+[workspace]
+name = "bpsee-monorepo"
+description = "BPSEE Proof of Concept - 10 week project"
+authors = ["Dagmar", "Demi", "Tygo", "Matthijs", "Aidan"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
+
+[dependencies]
+python = "3.11.*"
+
+[tasks]
+# Frontend tasks
+dev-frontend = "cd hobby-frontend && npm run dev"
+build-frontend = "npm run build --workspace=hobby-frontend"
+lint-frontend = "npm run lint --workspace=hobby-frontend"
+
+# Meta tasks - runs all microservices concurrently
+dev = { depends-on = ["dev-frontend"], cmd = "echo 'All services running...' && wait" }
+build = "npm run build --workspaces"
+lint = "npm run lint --workspaces"
+
+[environments]
+default = { solve-group = "default", features = [] }
