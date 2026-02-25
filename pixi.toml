@@ -14,9 +14,14 @@ dev-frontend = "cd hobby-frontend && npm run dev"
 build-frontend = "npm run build --workspace=hobby-frontend"
 lint-frontend = "npm run lint --workspace=hobby-frontend"
 
+# User Connection Service tasks
+dev-connection-service = "cd user-connection-service && mvn spring-boot:run"
+build-connection-service = "cd user-connection-service && mvn clean package -DskipTests"
+test-connection-service = "cd user-connection-service && mvn test"
+
 # Meta tasks - runs all microservices concurrently
-dev = { depends-on = ["dev-frontend"], cmd = "echo 'All services running...' && wait" }
-build = "npm run build --workspaces"
+dev = { depends-on = ["dev-frontend", "dev-connection-service"], cmd = "echo 'All services running...' && wait" }
+build = { depends-on = ["build-frontend", "build-connection-service"], cmd = "echo 'All services built successfully'" }
 lint = "npm run lint --workspaces"
 
 [environments]
