@@ -1,10 +1,8 @@
 ## Voor welke microservice is deze PR?
 
-- [ ] 'Microservice 1'
-- [ ] 'Microservice 2'
-- [ ] 'Microservice 3'
-- [ ] 'Microservice 4'
-- [ ] 'Microservice 5'
+- [ ] 'Frontend'
+- [ ] 'User Connections'
+- [ ] 'Post'
 - [ ] Anders, namelijk:
 
 ## Beschrijving
