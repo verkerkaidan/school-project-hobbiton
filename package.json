@@ -3,15 +3,18 @@
   "version": "0.1.0",
   "description": "BPSEE Proof of Concept - 10 week project",
   "private": true,
+  "packageManager": "npm@10.9.0",
   "workspaces": [
     "hobby-frontend",
-    "backend-demo-1",
-    "backend-demo-2",
-    "frontend-demo-2"
+    "user-connection-service",
+    "post-service"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces",
-    "build": "npm run build --workspaces",
-    "lint": "npm run lint --workspaces"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.11"
   }
 }

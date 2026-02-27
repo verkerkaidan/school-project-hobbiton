@@ -19,8 +19,13 @@ dev-connection-service = "cd user-connection-service && mvn spring-boot:run"
 build-connection-service = "cd user-connection-service && mvn clean package -DskipTests"
 test-connection-service = "cd user-connection-service && mvn test"
 
+# Post Service tasks
+dev-post-service = "cd post-service && mvn spring-boot:run"
+build-post-service = "cd post-service && mvn clean package -DskipTests"
+test-post-service = "cd post-service && mvn test"
+
 # Meta tasks - runs all microservices concurrently
-dev = { depends-on = ["dev-frontend", "dev-connection-service"], cmd = "echo 'All services running...' && wait" }
+dev = "turbo dev --continue"
 build = { depends-on = ["build-frontend", "build-connection-service"], cmd = "echo 'All services built successfully'" }
 lint = "npm run lint --workspaces"
 

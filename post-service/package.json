@@ -1,0 +1,9 @@
+{
+  "name": "post-service",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "mvn spring-boot:run",
+    "build": "mvn clean package -DskipTests",
+    "test": "mvn test"
+  }
+}
