@@ -1,0 +1,20 @@
+{
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "interactive": true
+    },
+    "build": {
+      "outputs": ["dist/**", "build/**", "target/**"],
+      "cache": true
+    },
+    "test": {
+      "cache": false
+    },
+    "lint": {
+      "cache": false
+    }
+  }
+}
