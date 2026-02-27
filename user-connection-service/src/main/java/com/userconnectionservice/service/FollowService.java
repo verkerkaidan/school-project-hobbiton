@@ -39,7 +39,7 @@ public class FollowService {
         User targetUser = userRepository.findById(targetUserId)
             .orElseThrow(() -> new RuntimeException("Target user not found"));
         
-        Optional<Follow> existingFollow = followRepository.findFollowRelationship(currentUserId, targetUserId);
+        Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowingId(currentUserId, targetUserId);
         
         if (existingFollow.isPresent()) {
             followRepository.delete(existingFollow.get());
@@ -59,7 +59,7 @@ public class FollowService {
      * @return true if currentUserId is following targetUserId
      */
     public boolean isFollowing(Long currentUserId, Long targetUserId) {
-        return followRepository.followExists(currentUserId, targetUserId);
+        return followRepository.existsByFollowerIdAndFollowingId(currentUserId, targetUserId);
     }
     
     /**
@@ -72,9 +72,9 @@ public class FollowService {
         userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return followRepository.findAllFollowingByUserId(userId)
+        return followRepository.findByFollowingId(userId)
             .stream()
-            .map(Follow::getFollower)
+            .map(f -> f.getFollower())
             .collect(Collectors.toSet());
     }
     
@@ -88,9 +88,9 @@ public class FollowService {
         userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return followRepository.findAllFollowersByUserId(userId)
+        return followRepository.findByFollowerId(userId)
             .stream()
-            .map(Follow::getFollowing)
+            .map(f -> f.getFollowing())
             .collect(Collectors.toSet());
     }
 }
