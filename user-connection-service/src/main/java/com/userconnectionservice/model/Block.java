@@ -27,11 +27,6 @@ public class Block {
     
     private String reason;
     
-    public Block(User blocker, User blocked) {
-        this.blocker = blocker;
-        this.blocked = blocked;
-    }
-    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
