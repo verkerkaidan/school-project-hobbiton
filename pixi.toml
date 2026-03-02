@@ -10,19 +10,19 @@ python = "3.11.*"
 
 [tasks]
 # Frontend tasks
-dev-frontend = "cd hobby-frontend && npm run dev"
-build-frontend = "npm run build --workspace=hobby-frontend"
-lint-frontend = "npm run lint --workspace=hobby-frontend"
+dev-frontend = "cd apps/hobby-frontend && npm run dev"
+build-frontend = "npm run build --workspace=apps/hobby-frontend"
+lint-frontend = "npm run lint --workspace=apps/hobby-frontend"
 
 # User Connection Service tasks
-dev-connection-service = "cd user-connection-service && mvn spring-boot:run"
-build-connection-service = "cd user-connection-service && mvn clean package -DskipTests"
-test-connection-service = "cd user-connection-service && mvn test"
+dev-connection-service = "cd apps/user-connection-service && mvn spring-boot:run"
+build-connection-service = "cd apps/user-connection-service && mvn clean package -DskipTests"
+test-connection-service = "cd apps/user-connection-service && mvn test"
 
 # Post Service tasks
-dev-post-service = "cd post-service && mvn spring-boot:run"
-build-post-service = "cd post-service && mvn clean package -DskipTests"
-test-post-service = "cd post-service && mvn test"
+dev-post-service = "cd apps/post-service && mvn spring-boot:run"
+build-post-service = "cd apps/post-service && mvn clean package -DskipTests"
+test-post-service = "cd apps/post-service && mvn test"
 
 # Meta tasks - runs all microservices concurrently
 dev = "turbo dev --continue"
