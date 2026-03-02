@@ -39,3 +39,5 @@ htmlcov/
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+pgadmin-data
