@@ -2,8 +2,8 @@
   "name": "user-connection-service",
   "version": "1.0.0",
   "scripts": {
-    "dev": "mvn spring-boot:run",
-    "build": "mvn clean package -DskipTests",
-    "test": "mvn test"
+    "dev": "mvn -f ./pom.xml spring-boot:run",
+    "build": "mvn -f ./pom.xml clean package -DskipTests",
+    "test": "mvn -f ./pom.xml test"
   }
 }
