@@ -16,6 +16,5 @@ public interface MediaFileRepository extends JpaRepository<MediaFile, UUID> {
     Optional<MediaFile> getMediaFileByHash(byte[] hash);
 
     // Check if a given hash is present in the table
-    // TODO is this strictly necessary, since the above function can achieve the same?
     Boolean existsMediaFileByHash(byte[] hash);
 }
