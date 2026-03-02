@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - '5432:5432'
+      - "5432:5432"
     cpus: 1
     mem_limit: 1024m
     volumes:
@@ -14,10 +14,22 @@ services:
       - microservices-network
 
   post-service:
-    build: ./post-service
+    build: ./apps/post-service
     container_name: post-service
     ports:
-      - '8080:8080'
+      - "8080:8080"
+    env_file:
+      - .env
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+
+  user-connection-service:
+    build: ./apps/user-connection-service
+    container_name: user-connection-service
+    ports:
+      - "8081:8081"
     env_file:
       - .env
     cpus: 2
