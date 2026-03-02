@@ -24,6 +24,8 @@ services:
     mem_limit: 2048m
     networks:
       - microservices-network
+    depends_on:
+      - database
 
   user-connection-service:
     build: ./apps/user-connection-service
