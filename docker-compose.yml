@@ -36,6 +36,22 @@ services:
     mem_limit: 2048m
     networks:
       - microservices-network
+    depends_on:
+      - database
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:80"
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
+    links:
+      - "database:database"
+    networks:
+      - microservices-network
 
 networks:
   microservices-network:
