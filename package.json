@@ -5,9 +5,7 @@
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
-    "hobby-frontend",
-    "user-connection-service",
-    "post-service"
+    "apps/*"
   ],
   "scripts": {
     "dev": "turbo dev",
