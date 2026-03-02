@@ -11,4 +11,6 @@ public interface MediaInstanceRepository extends JpaRepository<MediaInstance, UU
     List<MediaInstance> getAllByMediaFile(MediaFile mediaFile);
 
     List<MediaInstance> getAllByUserId(UUID userId);
+
+    List<MediaInstance> getAllByInstanceId(UUID instanceID);
 }

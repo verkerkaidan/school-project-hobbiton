@@ -11,7 +11,7 @@ import java.util.UUID;
 public class MediaInstance {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID instanceId;
 
     @ManyToOne
     @JoinColumn(
@@ -34,12 +34,12 @@ public class MediaInstance {
     public MediaInstance() {
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getInstanceId() {
+        return instanceId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setInstanceId(UUID instanceId) {
+        this.instanceId = instanceId;
     }
 
     public MediaFile getMediaFile() {
