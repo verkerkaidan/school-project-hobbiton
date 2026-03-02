@@ -3,6 +3,10 @@
 - [ ] 'Frontend'
 - [ ] 'User Connections'
 - [ ] 'Post'
+- [ ] 'Media'
+- [ ] 'User Feed'
+- [ ] 'Authentication'/'authorisation'
+- [ ] 'Content warning ai'
 - [ ] Anders, namelijk:
 
 ## Beschrijving
