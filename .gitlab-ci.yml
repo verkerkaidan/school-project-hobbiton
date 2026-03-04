@@ -40,5 +40,3 @@ deploy_to_production:
   environment:
     name: production
     url: https://your-app-url.com
-  tags:
-    - docker
