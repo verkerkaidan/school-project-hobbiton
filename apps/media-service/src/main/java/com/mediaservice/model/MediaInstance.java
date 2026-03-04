@@ -11,14 +11,16 @@ import java.util.UUID;
 public class MediaInstance {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(
+            name = "instance_id"
+    )
     private UUID instanceId;
 
-    @ManyToOne
-    @JoinColumn(
-            name = "hash",
+    @Column(
+            name = "file_id",
             nullable = false
     )
-    private MediaFile mediaFile;
+    private UUID fileId;
 
     @Column(
             name = "user_id",
@@ -26,8 +28,8 @@ public class MediaInstance {
     )
     private UUID userId;
 
-    public MediaInstance(MediaFile mediaFile, UUID userId) {
-        this.mediaFile = mediaFile;
+    public MediaInstance(UUID fileId, UUID userId) {
+        this.fileId = fileId;
         this.userId = userId;
     }
 
@@ -42,12 +44,12 @@ public class MediaInstance {
         this.instanceId = instanceId;
     }
 
-    public MediaFile getMediaFile() {
-        return mediaFile;
+    public UUID getFileId() {
+        return fileId;
     }
 
-    public void setMediaFile(MediaFile mediaFile) {
-        this.mediaFile = mediaFile;
+    public void setFileId(UUID fileId) {
+        this.fileId = fileId;
     }
 
     public UUID getUserId() {

@@ -25,7 +25,7 @@ public class MediaService {
      * @throws RuntimeException -> Database entry not found
      */
     public MediaFile getMediaFile(UUID id) {
-        return mediaFileRepository.getMediaFileById(id)
+        return mediaFileRepository.getMediaFileByFileId(id)
                 .orElseThrow(() -> new RuntimeException("Media file not found"));
     }
     /**
@@ -59,7 +59,7 @@ public class MediaService {
      */
     public void uploadMediaFile(MediaFile mediaFile, UUID userId) {
         mediaFileRepository.save(mediaFile);
-        MediaInstance mediaInstance = new MediaInstance(mediaFile, userId);
+        MediaInstance mediaInstance = new MediaInstance(mediaFile.getId(), userId);
         mediaInstanceRepository.save(mediaInstance);
     }
 }
