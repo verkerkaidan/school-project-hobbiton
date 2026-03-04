@@ -1,0 +1,44 @@
+stages:
+  - deploy
+
+deploy_to_production:
+  stage: deploy
+  image: alpine:latest
+  only:
+    - main
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp $SSH_PRIVATE_KEY ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts 2>/dev/null
+  script:
+    # Create .env file from GitLab secrets
+    - |
+      cat > .env << EOF
+      POSTGRES_DB=$POSTGRES_DB
+      POSTGRES_USER=$POSTGRES_USER
+      POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+      SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
+      SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
+      PGADMIN_DEFAULT_EMAIL=$PGADMIN_DEFAULT_EMAIL
+      PGADMIN_DEFAULT_PASSWORD=$PGADMIN_DEFAULT_PASSWORD
+      PGADMIN_LISTEN_PORT=$PGADMIN_LISTEN_PORT
+      EOF
+
+    # Ensure deployment directory exists
+    - ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "mkdir -p $DEPLOY_PATH"
+
+    # Copy docker-compose.yml and generated .env to the server
+    - scp -P $SSH_PORT docker-compose.yml $SSH_USER@$SSH_HOST:$DEPLOY_PATH/
+    - scp -P $SSH_PORT .env $SSH_USER@$SSH_HOST:$DEPLOY_PATH/
+
+    # Execute deployment commands on the server
+    - ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "cd $DEPLOY_PATH && docker compose down && docker compose up -d"
+  environment:
+    name: production
+    url: https://your-app-url.com
+  tags:
+    - docker
