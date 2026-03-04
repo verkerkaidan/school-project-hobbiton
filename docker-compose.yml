@@ -55,6 +55,20 @@ services:
     depends_on:
       - database
 
+  feed-service:
+    build: ./apps/feed-service
+    container_name: feed-service
+    ports:
+      - "8083:8083"
+    env_file:
+      - .env
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      - database
+
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
