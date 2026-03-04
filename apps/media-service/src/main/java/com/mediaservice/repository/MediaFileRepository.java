@@ -10,7 +10,7 @@ import java.util.UUID;
 @Repository
 public interface MediaFileRepository extends JpaRepository<MediaFile, UUID> {
     // Retrieve the media file that matches the given file identifier
-    Optional<MediaFile> getMediaFileById(UUID id);
+    Optional<MediaFile> getMediaFileByFileId(UUID id);
 
     // Retrieve the media file that matches the given hash
     Optional<MediaFile> getMediaFileByHash(byte[] hash);

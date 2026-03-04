@@ -14,7 +14,10 @@ import java.util.UUID;
 public class MediaFile {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(
+            name = "file_id"
+    )
+    private UUID fileId;
 
     @Column(
             name = "hash",
@@ -22,7 +25,6 @@ public class MediaFile {
             unique = true
     )
     private byte[] hash;
-
 
     @Column(
             name = "content_flag",
@@ -35,11 +37,6 @@ public class MediaFile {
             nullable = false
     )
     private String fileData;
-
-    @OneToMany(
-            mappedBy = "media_files"
-    )
-    private Set<MediaInstance> instances = new HashSet<>();
 
     public MediaFile(byte[] hash, ContentFlag contentFlag, String fileData) {
         this.hash = hash;
@@ -66,11 +63,11 @@ public class MediaFile {
     }
 
     public UUID getId() {
-        return id;
+        return fileId;
     }
 
     public void setId(UUID id) {
-        this.id = id;
+        this.fileId = id;
     }
 
     public ContentFlag getContentFlag() {
@@ -87,17 +84,5 @@ public class MediaFile {
 
     public void setFileData(String fileData) {
         this.fileData = fileData;
-    }
-
-    public Set<MediaInstance> getInstances() {
-        return instances;
-    }
-
-    public void setInstances(Set<MediaInstance> instances) {
-        this.instances = instances;
-    }
-
-    public void setInstances(MediaInstance instance) {
-        this.instances.add(instance);
     }
 }
