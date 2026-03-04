@@ -1,5 +1,6 @@
 package com.postservice.postservice.models;
 
+import com.postservice.postservice.dto.PostDTO;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -12,8 +13,7 @@ public class Post {
     @Column(nullable = false)
     private UUID id;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
@@ -22,7 +22,62 @@ public class Post {
     @Column(nullable = false)
     private UUID userId;
 
-    @OneToMany
-    @Column(nullable = false, name = "instance_list")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post", fetch = FetchType.EAGER)
     private Set<MediaInstance> mediaInstanceSet;
+
+    public Post() {
+    }
+
+    /**
+     * @param postDTO
+     */
+    public Post(PostDTO postDTO){
+        this.description = postDTO.description;
+        this.title = postDTO.title;
+        this.userId = postDTO.userId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public Set<MediaInstance> getMediaInstanceSet() {
+        return mediaInstanceSet;
+    }
+
+    public void setMediaInstanceSet(Set<MediaInstance> mediaInstanceSet) {
+        this.mediaInstanceSet = mediaInstanceSet;
+    }
+
+    public void addMediaInstanceToSet(MediaInstance mediaInstance) {
+        this.mediaInstanceSet.add(mediaInstance);
+    }
+
+    public void removeMediaInstanceFromSet(MediaInstance mediaInstance) {
+        this.mediaInstanceSet.remove(mediaInstance);
+    }
+
+    public UUID getId() {
+        return id;
+    }
 }

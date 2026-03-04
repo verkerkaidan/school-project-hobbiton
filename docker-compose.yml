@@ -44,6 +44,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
+    cpus: 0.5
+    mem_limit: 1024m
     env_file:
       - .env
     ports:
