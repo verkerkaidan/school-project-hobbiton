@@ -57,6 +57,16 @@ services:
     networks:
       - microservices-network
 
+  hobby-frontend:
+    build: ./apps/hobby-frontend
+    container_name: hobby-frontend
+    ports:
+      - "3000:3000"
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - microservices-network
+
 networks:
   microservices-network:
     name: microservices-network
