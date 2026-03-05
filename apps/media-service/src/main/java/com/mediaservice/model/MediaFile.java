@@ -44,12 +44,6 @@ public class MediaFile {
         this.fileData = fileData;
     }
 
-    public MediaFile(byte[] hash, String fileData) {
-        this.hash = hash;
-        this.contentFlag = ContentFlag.NONE;
-        this.fileData = fileData;
-    }
-
     public MediaFile() {
 
     }

@@ -2,10 +2,13 @@ package com.mediaservice.service;
 
 import com.mediaservice.dao.MediaFileDAO;
 import com.mediaservice.dao.MediaInstanceDAO;
+import com.mediaservice.dao.UserDAO;
+import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
 import com.mediaservice.repository.MediaFileRepository;
 import com.mediaservice.repository.MediaInstanceRepository;
+import com.mediaservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,9 @@ public class MediaService {
 
     @Autowired
     private MediaInstanceDAO mediaInstanceDAO;
+
+    @Autowired
+    private UserDAO userDAO;
 
     /**
      * Used to upload a file.
@@ -54,5 +60,52 @@ public class MediaService {
         MediaFile mediaFile = mediaFileDAO.getMediaFile(instance.getFileId());
 
         return mediaFile;
+    }
+
+    /**
+     * Updating the content flag of a requested file
+     *
+     * @param fileId, unique identifier of the file to be updated
+     * @param contentFlag, ContentFlag enum
+     * @return id, unique identifier of the updated MediaFile
+     */
+    public UUID updateMediaContentFlag(UUID fileId, ContentFlag contentFlag) {
+        MediaFile mediaFile = mediaFileDAO.getMediaFile(fileId);
+        mediaFile.setContentFlag(contentFlag);
+        mediaFileDAO.saveMediaFile(mediaFile);
+        return mediaFile.getId();
+    }
+
+    /**
+     * Deletes a given instance from the database
+     * Checks if any instances with the same mediaFile still exist
+     * If not, the MediaFile is deleted
+     *
+     * @param instanceId
+     */
+    public void deleteMediaInstance(UUID instanceId) {
+        MediaInstance mediaInstance = mediaInstanceDAO.getMediaInstance(instanceId);
+        mediaInstanceDAO.deleteMediaInstance(mediaInstance);
+
+        List<MediaInstance> mediaInstanceList =
+                mediaInstanceDAO.getAllMediaInstancesByMediaFileId(
+                        mediaInstance.getFileId()
+                );
+        if (mediaInstanceList.size() == 0) {
+            MediaFile mediaFile = mediaFileDAO.getMediaFile(mediaInstance.getFileId());
+            mediaFileDAO.deleteMediaFile(mediaFile);
+        }
+    }
+
+    /**
+     * Retrieves all instances connected to the user to be deleted and sends them to be removed
+     *
+     * @param userId, unique identifier of the user to be deleted
+     */
+    public void deleteUser(UUID userId) {
+        List<MediaInstance> mediaInstanceList = mediaInstanceDAO.getAllMediaInstancesByUserId(userId);
+        mediaInstanceList.forEach(mediaInstance ->
+                this.deleteMediaInstance(mediaInstance.getInstanceId()));
+        userDAO.deleteUser(userId);
     }
 }

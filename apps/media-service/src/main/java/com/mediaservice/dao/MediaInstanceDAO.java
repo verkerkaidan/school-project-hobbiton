@@ -49,9 +49,18 @@ public class MediaInstanceDAO {
     /**
      * Saving a MediaInstance to database
      *
-     * @param mediaInstance
+     * @param mediaInstance.
      */
     public void saveMediaInstance(MediaInstance mediaInstance) {
         mediaInstanceRepository.save(mediaInstance);
+    }
+
+    /**
+     * Deletes a MediaInstance from database
+     *
+     * @param mediaInstance, as MediaInstance object
+     */
+    public void deleteMediaInstance(MediaInstance mediaInstance) {
+        mediaInstanceRepository.delete(mediaInstance);
     }
 }

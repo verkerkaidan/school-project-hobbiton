@@ -16,10 +16,10 @@ public class User {
     @Column(
             name = "user_id"
     )
-    private UUID user_id;
+    private UUID userId;
 
     public User(UUID user_id) {
-        this.user_id = user_id;
+        this.userId = user_id;
     }
 
     public User(){}

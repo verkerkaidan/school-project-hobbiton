@@ -38,7 +38,7 @@ public class MediaController {
     public ResponseEntity<UUID> uploadMedia(@RequestBody MediaFileDTO mediaFileDTO, @PathVariable UUID userId) {
         byte[] hash = encryptionService.createHash(mediaFileDTO.fileData);
         ContentFlag contentFlag =
-                Objects.requireNonNullElse(mediaFileDTO.contentFlag, ContentFlag.NONE);
+                Objects.requireNonNullElse(mediaFileDTO.contentFlag, ContentFlag.UNASSIGNED);
         MediaFile mediaFile = new MediaFile(hash, contentFlag, mediaFileDTO.fileData);
 
         UUID instanceId = mediaService.uploadMediaFile(mediaFile, userId);
@@ -62,13 +62,45 @@ public class MediaController {
 
     /**
      * Removes the given instance
-     * If no instances of the mediaFile remain, the MediaFile should also be deleted
+     * If no instances of the corresponding mediaFile remain, the MediaFile should also be deleted
      * DELETE /api/media/{instanceId}
      *
      * @param instanceId is unique identifier of a mediaInstance
+     * @return String, confirming deletion
      */
-    @DeleteMapping("/{instanceId}")
+    @DeleteMapping("/file/{instanceId}")
     public ResponseEntity<String> deleteInstance(@PathVariable UUID instanceId) {
+        mediaService.deleteMediaInstance(instanceId);
         return ResponseEntity.ok("Successful deletion");
+    }
+
+    /**
+     * Deletes user. Also deletes their instances, and deletes mediaFiles if relevant
+     *
+     * @param userId, unique identifier of the user being deleted
+     * @return String, confirming deletion
+     */
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable UUID userId) {
+        mediaService.deleteUser(userId);
+        return ResponseEntity.ok("Successful deletion");
+    }
+
+    /**
+     * Update the content flag for a given file
+     *
+     * @param mediaFileId, unique identifier of a MediaFile object
+     * @param mediaFileDTO, with ContentFlag as argument
+     * @return id, unique identifier of the changed MediaFile object
+     */
+    @PutMapping("/{mediaFileId}")
+    public ResponseEntity<UUID> updateContentFlag(
+            @PathVariable UUID mediaFileId,
+            @RequestBody MediaFileDTO mediaFileDTO
+    ) {
+        ContentFlag contentFlag = mediaFileDTO.contentFlag;
+        UUID id = mediaService.updateMediaContentFlag(mediaFileId, contentFlag);
+
+        return ResponseEntity.ok(id);
     }
 }
