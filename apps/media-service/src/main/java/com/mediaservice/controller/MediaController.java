@@ -1,14 +1,15 @@
 package com.mediaservice.controller;
 
+import com.mediaservice.dto.MediaFileDTO;
 import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
-import com.mediaservice.service.CompressionService;
 import com.mediaservice.service.EncryptionService;
 import com.mediaservice.service.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -21,57 +22,53 @@ public class MediaController {
     @Autowired
     private EncryptionService encryptionService;
 
-    @Autowired
-    private CompressionService compressionService;
-
     /**
-     * Upload a mediafile to database
+     * Upload a media file to database
      * POST /api/media/{userId}
-     * Request body: base64 string of media file
+     * Request body: MediaFileDTO with b64 string of file_data and possible contentFlag
      *
-     * If the mediafile's hash is present in database, it will not be uploaded again
+     * If the media file's hash is present in database, it will not be uploaded again
      * Regardless of it being saved now or before, the unique identifier will be retrieved
      *
-     * @param fileData string in the form of base64 (encrypted)
+     * @param mediaFileDTO string in the form of base64 dataURI (encrypted), and possible contentFlag
      * @param userId Identifier of the user that is uploading the image
-     * @return id of mediafile in database
+     * @return id of media file in database
      */
     @PostMapping("/{userId}")
-    public ResponseEntity<UUID> uploadMedia(@RequestBody String fileData, @PathVariable UUID userId) {
-        MediaFile mediaFile;
-        byte[] hash = encryptionService.createHash(fileData);
-        if (mediaService.doesMediaFileExist(hash)) {
-            mediaFile = mediaService.getMediaFile(hash);
-        } else {
-            mediaFile = new MediaFile(hash, ContentFlag.NONE, fileData);
-            mediaService.uploadMediaFile(mediaFile, userId);
-        }
-        return ResponseEntity.ok(mediaFile.getId());
+    public ResponseEntity<UUID> uploadMedia(@RequestBody MediaFileDTO mediaFileDTO, @PathVariable UUID userId) {
+        byte[] hash = encryptionService.createHash(mediaFileDTO.fileData);
+        ContentFlag contentFlag =
+                Objects.requireNonNullElse(mediaFileDTO.contentFlag, ContentFlag.NONE);
+        MediaFile mediaFile = new MediaFile(hash, contentFlag, mediaFileDTO.fileData);
+
+        UUID instanceId = mediaService.uploadMediaFile(mediaFile, userId);
+
+        return ResponseEntity.ok(instanceId);
     }
 
     /**
-     * Retrieves a single file, using given unique identifier
-     * GET /api/media/{mediaId}
+     * Retrieves a single file, using given unique identifier of instance
+     * GET /api/media/{instanceId}
      *
-     * @param mediaId is the unique identifier of a media file
-     * @return MediaFile instance (Will be encrypted)
+     * @param instanceId is the unique identifier of a media instance
+     * @return MediaFileDTO instance (Will be encrypted)
      */
-    @GetMapping("/{mediaId}")
-    public ResponseEntity<MediaFile> retrieveMedia(@PathVariable UUID mediaId) {
-        MediaFile mediaFile = mediaService.getMediaFile(mediaId);
-        return ResponseEntity.ok(mediaFile);
-
+    @GetMapping("/{instanceId}")
+    public ResponseEntity<MediaFileDTO> retrieveMedia(@PathVariable UUID instanceId) {
+        MediaFile mediaFile = mediaService.getMediaFile(instanceId);
+        MediaFileDTO mediaDto = new MediaFileDTO(mediaFile.getFileData(), mediaFile.getContentFlag());
+        return ResponseEntity.ok(mediaDto);
     }
 
     /**
-     * Removes one instance of the given userId from the mediaFile instances
-     * If no instances of the mediaFile remain, the MediaFile itself should be deleted
-     * DELETE /api/media/{mediaId}/{userId} //TODO Should this be changed to @RequestBody params instead of @PathVariables?
+     * Removes the given instance
+     * If no instances of the mediaFile remain, the MediaFile should also be deleted
+     * DELETE /api/media/{instanceId}
      *
-     * @param mediaId is unique identifier of a media file
+     * @param instanceId is unique identifier of a mediaInstance
      */
-    @DeleteMapping("/{mediaId}/{userId}")
-    public ResponseEntity.BodyBuilder deleteUserFile(@PathVariable UUID mediaId, @PathVariable UUID userId) {
-        return ResponseEntity.ok();
+    @DeleteMapping("/{instanceId}")
+    public ResponseEntity<String> deleteInstance(@PathVariable UUID instanceId) {
+        return ResponseEntity.ok("Successful deletion");
     }
 }
