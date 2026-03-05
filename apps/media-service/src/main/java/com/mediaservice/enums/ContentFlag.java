@@ -1,10 +1,9 @@
 package com.mediaservice.enums;
 
 public enum ContentFlag {
-    NONE("None"),
-    LIGHT("Light"),
-    MEDIUM("Medium"),
-    HIGH("High"),
+    UNASSIGNED("Unassigned"),
+    SAFE("Safe"),
+    RISK("Risk")
     ;
     private final String value;
 

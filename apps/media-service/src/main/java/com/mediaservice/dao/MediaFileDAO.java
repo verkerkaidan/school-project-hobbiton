@@ -49,9 +49,18 @@ public class MediaFileDAO {
     /**
      * Saves MediaFile to database
      *
-     * @param mediaFile
+     * @param mediaFile, as a MediaFile object
      */
     public void saveMediaFile(MediaFile mediaFile) {
         mediaFileRepository.save(mediaFile);
+    }
+
+    /**
+     * Deletes MediaFile from database
+     *
+     * @param mediaFile, as a MediaFile object
+     */
+    public void deleteMediaFile(MediaFile mediaFile) {
+        mediaFileRepository.delete(mediaFile);
     }
 }
