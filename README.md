@@ -91,7 +91,8 @@ ENTRYPOINT ["java", "-jar", "/app/target/{snapshot_name}.jar"]
 docker build -t test .
 docker run test
 ```
-3. Voeg *.env* variables toe aan de algemene *.env* (deze pushen we **NOOIT** naar GIT). Update ook de *.env.example*
+3. Voeg *.env* variables toe aan de algemene *.env* (deze pushen we **NOOIT** naar GIT). Update ook de *.env.example*.  
+Voor de database url geldt dat de microservice-specifieke *.env* op localhost moet staan, maar de algemene *.env* op database. Dit is een dingetje van docker, dat die de url anders niet kan vinden/koppelen.
 4. Voeg aan de *docker-compose.yml* het volgende toe: *voor port_id is het 80{8+current count}*
 ```dockerfile
 {service_name}:  
