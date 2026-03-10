@@ -1,13 +1,23 @@
 package com.postservice.postservice.dto;
 
-import java.util.Collections;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.postservice.postservice.models.Post;
+
 import java.util.Set;
 import java.util.UUID;
 
-public class PostDTO {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = GymDTO.class,     name = "GYM"),
+        @JsonSubTypes.Type(value = ReadingDTO.class, name = "BOOK")
+})
+public abstract class PostDTO {
     public UUID id;
     public String description;
     public String title;
     public UUID userId;
     public Set<UUID> mediaInstanceSet;
+
+    public abstract Post toEntity();
 }

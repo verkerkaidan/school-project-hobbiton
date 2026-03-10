@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-public class Post {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Post {
     @Id
     @GeneratedValue
     @Column(nullable = false)
@@ -32,6 +33,9 @@ public class Post {
      * @param postDTO
      */
     public Post(PostDTO postDTO){
+        if(postDTO.id != null) {
+            this.id = postDTO.id;
+        }
         this.description = postDTO.description;
         this.title = postDTO.title;
         this.userId = postDTO.userId;

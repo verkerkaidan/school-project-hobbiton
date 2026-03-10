@@ -1,9 +1,7 @@
 package com.postservice.postservice.dao;
 
 import com.postservice.postservice.models.Post;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.Set;
@@ -11,30 +9,32 @@ import java.util.UUID;
 
 @Component
 public class PostDAO {
-    private PostRepository postRepository;
+
+    private final PostRepository postRepository;
 
     public PostDAO(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
 
-    public Post generatePost(Post post) {
-        Post savedPost = this.postRepository.save(post);
-        return postRepository.findById(savedPost.getId()).orElseThrow();
-    }
-
-    public Set<Post> getPostsByUserId (UUID userId) {
-        return this.postRepository.findByUserId(userId);
-    }
-
-    public Post getPostByPostId(UUID postId) {
+    public Post getPostById(UUID postId) {
         Optional<Post> optionalPost = this.postRepository.findById(postId);
 
-        if(optionalPost.isEmpty()){
-            throw new ResponseStatusException(
-                    HttpStatusCode.valueOf(404)
-            );
+        if (optionalPost.isEmpty()){
+            throw new RuntimeException("Post not found");
         } else {
             return optionalPost.get();
         }
+    }
+
+    public void save(Post post) {
+        this.postRepository.save(post);
+    }
+
+    public Set<Post> getPostByUserId(UUID userId) {
+        return this.postRepository.findByUserId(userId);
+    }
+
+    public void deletePostById(UUID postId) {
+        this.postRepository.deleteById(postId);
     }
 }
