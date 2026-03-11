@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -48,16 +49,29 @@ public class MediaController {
 
     /**
      * Retrieves a single file, using given unique identifier of instance
-     * GET /api/media/{instanceId}
+     * GET /api/media/file/{instanceId}
      *
      * @param instanceId is the unique identifier of a media instance
      * @return MediaFileDTO instance (Will be encrypted)
      */
-    @GetMapping("/{instanceId}")
+    @GetMapping("/file/{instanceId}")
     public ResponseEntity<MediaFileDTO> retrieveMedia(@PathVariable UUID instanceId) {
         MediaFile mediaFile = mediaService.getMediaFile(instanceId);
         MediaFileDTO mediaDto = new MediaFileDTO(mediaFile.getFileData(), mediaFile.getContentFlag());
         return ResponseEntity.ok(mediaDto);
+    }
+
+    /**
+     * Retrieves all mediaFiles that are connected to given user unique identifier
+     * GET /api/media/user/{userId}
+     *
+     * @param userId, unique identifier of the user whose files should be retrieved
+     * @return List of MediaFile instances
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<MediaFile>> retrieveMediaByUser(@PathVariable UUID userId) {
+        List<MediaFile> mediaFileList = mediaService.getMediaFilesByUser(userId);
+        return ResponseEntity.ok(mediaFileList);
     }
 
     /**
