@@ -10,4 +10,4 @@ RUN mvn verify clean --fail-never
 
 RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java", "-jar", "/app/target/user-connection-service-1.0.0.jar"]
+ENTRYPOINT ["java", "-jar", "/app/target/profile-connection-service-1.0.0.jar"]

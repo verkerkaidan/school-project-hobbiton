@@ -27,9 +27,9 @@ services:
     depends_on:
       - database
 
-  user-connection-service:
-    build: ./apps/user-connection-service
-    container_name: user-connection-service
+  profile-connection-service:
+    build: ./apps/profile-connection-service
+    container_name: profile-connection-service
     ports:
       - "8081:8081"
     env_file:

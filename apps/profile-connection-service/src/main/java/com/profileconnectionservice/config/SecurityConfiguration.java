@@ -1,4 +1,4 @@
-package com.userconnectionservice.config;
+package com.profileconnectionservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

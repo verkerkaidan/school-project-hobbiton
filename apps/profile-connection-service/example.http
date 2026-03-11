@@ -1,0 +1,298 @@
+### Profile Connection Service - REST API Examples
+### Base URL: http://localhost:8081
+
+### Profile IDs (from DatabaseSeeder)
+@profile1 = 550e8400-e29b-41d4-a716-446655440000
+@profile2 = 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+@profile3 = f47ac10b-58cc-4372-a567-0e02b2c3d479
+@profile4 = d62d0b05-9dad-11d1-80b4-00c04fd430c8
+@profile5 = a1b2c3d4-e5f6-47d8-9e0f-1a2b3c4d5e6f
+@profile6 = b2c3d4e5-f6a7-48e9-af10-2b3c4d5e6f7f
+@profile7 = c3d4e5f6-a7b8-49fa-b011-3c4d5e6f7a8d
+@profile8 = d4e5f6a7-b8c9-4a0b-b112-4d5e6f7a8b9e
+@profile9 = e5f6a7b8-c9da-4b1c-b213-5e6f7a8b9caf
+@profile10 = f6a7b8c9-daeb-4c2d-b314-6f7a8b9cada0
+
+###
+### FOLLOW/UNFOLLOW OPERATIONS
+###
+
+### Toggle follow - Profile1 follows Profile4 (new follow)
+PUT http://localhost:8081/api/follows/{{profile4}}
+X-Profile-Id: {{profile1}}
+
+### Toggle follow - Profile1 unfollows Profile4 (existing follow)
+PUT http://localhost:8081/api/follows/{{profile4}}
+X-Profile-Id: {{profile1}}
+
+### Toggle follow - Profile1 tries to follow Profile2 (already following)
+PUT http://localhost:8081/api/follows/{{profile2}}
+X-Profile-Id: {{profile1}}
+
+### Toggle follow - Profile3 follows Profile5 (new follow)
+PUT http://localhost:8081/api/follows/{{profile5}}
+X-Profile-Id: {{profile3}}
+
+### Toggle follow - Profile6 tries to follow Profile3 (new follow)
+PUT http://localhost:8081/api/follows/{{profile3}}
+X-Profile-Id: {{profile6}}
+
+### Toggle follow - Profile5 unfollows Profile2 (existing follow)
+PUT http://localhost:8081/api/follows/{{profile2}}
+X-Profile-Id: {{profile5}}
+
+### Toggle follow - Profile7 follows Profile8 (new follow)
+PUT http://localhost:8081/api/follows/{{profile8}}
+X-Profile-Id: {{profile7}}
+
+### Toggle follow - Profile9 follows Profile10 (new follow)
+PUT http://localhost:8081/api/follows/{{profile10}}
+X-Profile-Id: {{profile9}}
+
+### Toggle follow - Profile10 follows Profile7 (new follow)
+PUT http://localhost:8081/api/follows/{{profile7}}
+X-Profile-Id: {{profile10}}
+
+###
+### GET FOLLOWERS
+###
+
+### Get all followers of Profile1
+### Expected: Profile4 and Profile6 follow Profile1
+GET http://localhost:8081/api/follows/{{profile1}}/followers
+
+### Get all followers of Profile2
+### Expected: Profile1 and Profile5 follow Profile2
+GET http://localhost:8081/api/follows/{{profile2}}/followers
+
+### Get all followers of Profile3
+### Expected: Profile1 and Profile2 follow Profile3
+GET http://localhost:8081/api/follows/{{profile3}}/followers
+
+### Get all followers of Profile4
+### Expected: Profile2 and Profile3 follow Profile4
+GET http://localhost:8081/api/follows/{{profile4}}/followers
+
+### Get all followers of Profile5
+### Expected: Profile1 and Profile4 follow Profile5
+GET http://localhost:8081/api/follows/{{profile5}}/followers
+
+### Get all followers of Profile6
+### Expected: Profile3 follows Profile6
+GET http://localhost:8081/api/follows/{{profile6}}/followers
+
+### Get all followers of Profile7
+### Expected: Profile10 follows Profile7
+GET http://localhost:8081/api/follows/{{profile7}}/followers
+
+### Get all followers of Profile8
+### Expected: Profile7 and Profile10 follow Profile8
+GET http://localhost:8081/api/follows/{{profile8}}/followers
+
+### Get all followers of Profile9
+### Expected: Profile8 follows Profile9
+GET http://localhost:8081/api/follows/{{profile9}}/followers
+
+### Get all followers of Profile10
+### Expected: Profile9 follows Profile10
+GET http://localhost:8081/api/follows/{{profile10}}/followers
+
+###
+### GET FOLLOWING (who a profile is following)
+###
+
+### Get all profiles that Profile1 is following
+### Expected: Profile2, Profile3, Profile5
+GET http://localhost:8081/api/follows/{{profile1}}/following
+
+### Get all profiles that Profile2 is following
+### Expected: Profile3, Profile4
+GET http://localhost:8081/api/follows/{{profile2}}/following
+
+### Get all profiles that Profile3 is following
+### Expected: Profile4, Profile6
+GET http://localhost:8081/api/follows/{{profile3}}/following
+
+### Get all profiles that Profile4 is following
+### Expected: Profile1, Profile5
+GET http://localhost:8081/api/follows/{{profile4}}/following
+
+### Get all profiles that Profile5 is following
+### Expected: Profile2
+GET http://localhost:8081/api/follows/{{profile5}}/following
+
+### Get all profiles that Profile6 is following
+### Expected: Profile1
+GET http://localhost:8081/api/follows/{{profile6}}/following
+
+### Get all profiles that Profile7 is following
+### Expected: Profile2, Profile5, Profile8
+GET http://localhost:8081/api/follows/{{profile7}}/following
+
+### Get all profiles that Profile8 is following
+### Expected: Profile3, Profile9
+GET http://localhost:8081/api/follows/{{profile8}}/following
+
+### Get all profiles that Profile9 is following
+### Expected: Profile1, Profile10
+GET http://localhost:8081/api/follows/{{profile9}}/following
+
+### Get all profiles that Profile10 is following
+### Expected: Profile5, Profile7, Profile8
+GET http://localhost:8081/api/follows/{{profile10}}/following
+
+###
+### ERROR CASES
+###
+
+### Try to follow yourself (should fail with IllegalArgumentException)
+PUT http://localhost:8081/api/follows/{{profile1}}
+X-Profile-Id: {{profile1}}
+
+###
+### BLOCK/UNBLOCK OPERATIONS
+###
+
+### Toggle block - Profile1 blocks Profile2 (new block)
+PUT http://localhost:8081/api/blocks/{{profile2}}
+X-Profile-Id: {{profile1}}
+
+### Toggle block - Profile1 unblocks Profile2 (existing block)
+PUT http://localhost:8081/api/blocks/{{profile2}}
+X-Profile-Id: {{profile1}}
+
+### Toggle block - Profile2 blocks Profile4 (already blocked)
+PUT http://localhost:8081/api/blocks/{{profile4}}
+X-Profile-Id: {{profile2}}
+
+### Toggle block - Profile4 blocks Profile6 (new block)
+PUT http://localhost:8081/api/blocks/{{profile6}}
+X-Profile-Id: {{profile4}}
+
+### Toggle block - Profile6 blocks Profile2 (new block)
+PUT http://localhost:8081/api/blocks/{{profile2}}
+X-Profile-Id: {{profile6}}
+
+### Toggle block - Profile1 blocks Profile5 (new block)
+PUT http://localhost:8081/api/blocks/{{profile5}}
+X-Profile-Id: {{profile1}}
+
+### Toggle block - Profile7 blocks Profile3 (already blocked in seeder)
+PUT http://localhost:8081/api/blocks/{{profile3}}
+X-Profile-Id: {{profile7}}
+
+### Toggle block - Profile8 blocks Profile9 (new block)
+PUT http://localhost:8081/api/blocks/{{profile9}}
+X-Profile-Id: {{profile8}}
+
+### Toggle block - Profile10 blocks Profile2 (already blocked in seeder)
+PUT http://localhost:8081/api/blocks/{{profile2}}
+X-Profile-Id: {{profile10}}
+
+###
+### GET BLOCKED USERS
+###
+
+### Get all profiles blocked by Profile1
+### Expected: Profile2, Profile5 (after toggle operations)
+GET http://localhost:8081/api/blocks/{{profile1}}/blocked
+
+### Get all profiles blocked by Profile2
+### Expected: Profile4
+GET http://localhost:8081/api/blocks/{{profile2}}/blocked
+
+### Get all profiles blocked by Profile3
+### Expected: Profile1
+GET http://localhost:8081/api/blocks/{{profile3}}/blocked
+
+### Get all profiles blocked by Profile4
+### Expected: Profile6
+GET http://localhost:8081/api/blocks/{{profile4}}/blocked
+
+### Get all profiles blocked by Profile5
+### Expected: Profile6
+GET http://localhost:8081/api/blocks/{{profile5}}/blocked
+
+### Get all profiles blocked by Profile6
+### Expected: Profile1, Profile2
+GET http://localhost:8081/api/blocks/{{profile6}}/blocked
+
+### Get all profiles blocked by Profile7
+### Expected: Profile3 (toggled in test above)
+GET http://localhost:8081/api/blocks/{{profile7}}/blocked
+
+### Get all profiles blocked by Profile8
+### Expected: Profile9 (toggled in test above)
+GET http://localhost:8081/api/blocks/{{profile8}}/blocked
+
+### Get all profiles blocked by Profile9
+### Expected: Profile4
+GET http://localhost:8081/api/blocks/{{profile9}}/blocked
+
+### Get all profiles blocked by Profile10
+### Expected: Profile2 (toggled in test above)
+GET http://localhost:8081/api/blocks/{{profile10}}/blocked
+
+###
+### COMBINED FOLLOW/BLOCK SCENARIOS
+###
+
+### 1. Test blocking removes existing follows
+### Profile1 currently follows Profile2 and Profile3
+### Get Profile1's following list (should include Profile2, Profile3, Profile5)
+GET http://localhost:8081/api/follows/{{profile1}}/following
+
+### 2. Block Profile2 - should remove the follow relationship
+PUT http://localhost:8081/api/blocks/{{profile2}}
+X-Profile-Id: {{profile1}}
+
+### 3. Check Profile1's following list after blocking Profile2
+### Expected: Profile3, Profile5 (Profile2 should be removed)
+GET http://localhost:8081/api/follows/{{profile1}}/following
+
+### 4. Check Profile2's following list 
+### Profile2 follows Profile3 and Profile4, but if Profile2 also followed Profile1, that would be removed
+GET http://localhost:8081/api/follows/{{profile2}}/following
+
+### 5. Create a bidirectional follow scenario and then block
+### Profile3 follows Profile4, and Profile4 follows Profile3
+### First verify they follow each other
+GET http://localhost:8081/api/follows/{{profile3}}/following
+GET http://localhost:8081/api/follows/{{profile4}}/following
+
+### 6. Block in one direction - removes both follow relationships
+PUT http://localhost:8081/api/blocks/{{profile3}}
+X-Profile-Id: {{profile4}}
+
+### 7. Verify both follow relationships are gone
+### Profile3 no longer has Profile4 in following list
+GET http://localhost:8081/api/follows/{{profile3}}/following
+
+### Profile4 no longer has Profile3 in following list
+GET http://localhost:8081/api/follows/{{profile4}}/following
+
+###
+### ERROR CASES FOR BLOCKS
+###
+
+### Try to block yourself (should fail with IllegalArgumentException)
+PUT http://localhost:8081/api/blocks/{{profile1}}
+X-Profile-Id: {{profile1}}
+
+###
+### ADVANCED SCENARIOS WITH USERS 7-10
+###
+
+### Test bidirectional block blocking
+### Profile9 follows Profile10, Profile10 follows Profile9
+### First verify the follows exist
+GET http://localhost:8081/api/follows/{{profile9}}/following
+GET http://localhost:8081/api/follows/{{profile10}}/following
+
+### Profile9 blocks Profile10 - should remove both follow relationships
+PUT http://localhost:8081/api/blocks/{{profile10}}
+X-Profile-Id: {{profile9}}
+
+### Verify the follows are gone
+GET http://localhost:8081/api/follows/{{profile9}}/following
+GET http://localhost:8081/api/follows/{{profile10}}/following
