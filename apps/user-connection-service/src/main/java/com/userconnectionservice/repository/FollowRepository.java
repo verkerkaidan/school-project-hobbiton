@@ -6,19 +6,20 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface FollowRepository extends JpaRepository<Follow, Long> {
-    
+public interface FollowRepository extends JpaRepository<Follow, UUID> {
+
     // Find the follow relationship between two users
-    Optional<Follow> findByFollowerIdAndFollowingId(Long followerId, Long followingId);
-    
+    Optional<Follow> findByFollowerAndFollowing(UUID follower, UUID following);
+
     // Check if a follow relationship exists
-    boolean existsByFollowerIdAndFollowingId(Long followerId, Long followingId);
-    
+    boolean existsByFollowerAndFollowing(UUID follower, UUID following);
+
     // Get all users that this user is following
-    List<Follow> findByFollowerId(Long followerId);
-    
+    List<Follow> findByFollower(UUID follower);
+
     // Get all followers of a user (users who follow this user)
-    List<Follow> findByFollowingId(Long followingId);
+    List<Follow> findByFollowing(UUID following);
 }
