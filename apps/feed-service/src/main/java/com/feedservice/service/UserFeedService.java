@@ -1,14 +1,46 @@
+package com.feedservice.service;
+
+import com.feedservice.dao.UserFeedDAO;
+import com.feedservice.model.UserFeed;
+import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.UUID;
+
+@Service
 public class UserFeedService {
-    // This service will be responsible for fetching the feed for a user, which includes posts and media files.
-    // It will interact with the PostService and MediaService to get the necessary data.
+    private UserFeedDAO userFeedDAO;
 
-    // For example, it might have a method like this:
-    public UserFeedDTO getUserFeed(String userId) {
-        // 1. Fetch posts for the user from PostService
-        // 2. Fetch media files for the user from MediaService
-        // 3. Combine the data into a UserFeedDTO and return it
+    public UserFeedService(UserFeedDAO userFeedDAO) {
+        this.userFeedDAO = userFeedDAO;
+    }
 
-        // This is just a placeholder implementation
-        return new UserFeedDTO();
+    /**
+     * Fetch all posts for a specific user
+     *
+     * @param userId the user ID to fetch posts for
+     * @return Set of posts for the user
+     */
+    public Set<UserFeed> getUserFeedPosts(UUID userId) {
+        return this.userFeedDAO.getUserFeedPostsByUserId(userId);
+    }
+
+    /**
+     * Fetch a single post by its ID
+     *
+     * @param userFeedId the user feed ID
+     * @return the UserFeed object
+     */
+    public UserFeed getUserFeedPostById(UUID userFeedId) {
+        return this.userFeedDAO.getUserFeedPostById(userFeedId);
+    }
+
+    /**
+     * Fetch all posts from the database
+     *
+     * @return Set of all posts
+     */
+    public Set<UserFeed> getAllUserFeedPosts() {
+        return this.userFeedDAO.getAllUserFeedPosts();
     }
 }
