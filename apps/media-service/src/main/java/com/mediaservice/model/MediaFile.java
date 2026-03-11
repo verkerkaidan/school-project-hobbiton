@@ -3,8 +3,6 @@ package com.mediaservice.model;
 import com.mediaservice.enums.ContentFlag;
 import jakarta.persistence.*;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity

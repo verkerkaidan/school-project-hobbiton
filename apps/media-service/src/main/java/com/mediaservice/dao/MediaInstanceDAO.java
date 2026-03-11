@@ -49,7 +49,7 @@ public class MediaInstanceDAO {
     /**
      * Saving a MediaInstance to database
      *
-     * @param mediaInstance.
+     * @param mediaInstance
      */
     public void saveMediaInstance(MediaInstance mediaInstance) {
         mediaInstanceRepository.save(mediaInstance);

@@ -2,13 +2,9 @@ package com.mediaservice.service;
 
 import com.mediaservice.dao.MediaFileDAO;
 import com.mediaservice.dao.MediaInstanceDAO;
-import com.mediaservice.dao.UserDAO;
 import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
-import com.mediaservice.repository.MediaFileRepository;
-import com.mediaservice.repository.MediaInstanceRepository;
-import com.mediaservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +18,6 @@ public class MediaService {
 
     @Autowired
     private MediaInstanceDAO mediaInstanceDAO;
-
-    @Autowired
-    private UserDAO userDAO;
 
     /**
      * Used to upload a file.
@@ -60,6 +53,23 @@ public class MediaService {
         MediaFile mediaFile = mediaFileDAO.getMediaFile(instance.getFileId());
 
         return mediaFile;
+    }
+
+    /**
+     * Retrieves all instances of a given user, and from that retrieves all relevant mediaFiles
+     *
+     * @param userId, unique identifier of the user
+     * @return List of MediaFile instances
+     */
+    public List<MediaFile> getMediaFilesByUser(UUID userId) {
+        List<MediaInstance> mediaInstanceList = mediaInstanceDAO.getAllMediaInstancesByUserId(userId);
+        List<UUID> filesIds = mediaInstanceList.stream()
+                .map(
+                        mediaInstance -> mediaInstance.getFileId()
+                ).toList();
+        List<MediaFile> mediaFileList = mediaFileDAO.getCollectionOfMediaFiles(filesIds);
+
+        return mediaFileList;
     }
 
     /**
@@ -106,6 +116,5 @@ public class MediaService {
         List<MediaInstance> mediaInstanceList = mediaInstanceDAO.getAllMediaInstancesByUserId(userId);
         mediaInstanceList.forEach(mediaInstance ->
                 this.deleteMediaInstance(mediaInstance.getInstanceId()));
-        userDAO.deleteUser(userId);
     }
 }

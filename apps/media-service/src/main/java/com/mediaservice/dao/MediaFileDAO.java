@@ -6,6 +6,7 @@ import com.mediaservice.repository.MediaFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -62,5 +63,15 @@ public class MediaFileDAO {
      */
     public void deleteMediaFile(MediaFile mediaFile) {
         mediaFileRepository.delete(mediaFile);
+    }
+
+    /**
+     * Retrieves multiple media files
+     *
+     * @param fileIds, List of file unique identifiers
+     * @return List of mediaFile instances
+     */
+    public List<MediaFile> getCollectionOfMediaFiles(List<UUID> fileIds) {
+        return mediaFileRepository.findByFileIdIn(fileIds);
     }
 }
