@@ -25,14 +25,14 @@ public class MediaInstanceDAO {
     }
 
     /**
-     * Retrieves all media instances of a specific user
+     * Retrieves all media instances of a specific owner
      * Used for account deletion purposes
      *
-     * @param id, unique identifier of a User object
+     * @param id, unique identifier of a user or chat
      * @return list of MediaInstances
      */
-    public List<MediaInstance> getAllMediaInstancesByUserId(UUID id) {
-        return mediaInstanceRepository.getAllByUserId(id);
+    public List<MediaInstance> getAllMediaInstancesByOwnerId(UUID id) {
+        return mediaInstanceRepository.getAllByOwnerId(id);
     }
 
     /**
