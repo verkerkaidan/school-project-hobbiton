@@ -23,14 +23,14 @@ public class MediaInstance {
     private UUID fileId;
 
     @Column(
-            name = "user_id",
+            name = "owner_id",
             nullable = false
     )
-    private UUID userId;
+    private UUID ownerId;
 
-    public MediaInstance(UUID fileId, UUID userId) {
+    public MediaInstance(UUID fileId, UUID ownerId) {
         this.fileId = fileId;
-        this.userId = userId;
+        this.ownerId = ownerId;
     }
 
     public MediaInstance() {
@@ -52,11 +52,11 @@ public class MediaInstance {
         this.fileId = fileId;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 }

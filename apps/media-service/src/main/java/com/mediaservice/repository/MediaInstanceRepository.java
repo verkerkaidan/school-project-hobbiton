@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface MediaInstanceRepository extends JpaRepository<MediaInstance, UUID> {
     List<MediaInstance> getAllByFileId(UUID fileId);
 
-    List<MediaInstance> getAllByUserId(UUID userId);
+    List<MediaInstance> getAllByOwnerId(UUID ownerId);
 
     Optional<MediaInstance> getByInstanceId(UUID instanceID);
 }

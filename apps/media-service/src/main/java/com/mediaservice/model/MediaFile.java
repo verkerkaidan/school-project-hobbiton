@@ -31,15 +31,28 @@ public class MediaFile {
     private ContentFlag contentFlag;
 
     @Column(
-            name = "file_data",
+            name = "content_type",
             nullable = false
     )
-    private String fileData;
+    private String contentType;
 
-    public MediaFile(byte[] hash, ContentFlag contentFlag, String fileData) {
+    @Column(
+            name = "original",
+            nullable = false
+    )
+    private byte[] original;
+
+    @Column(
+            name = "thumbnail",
+            nullable = true
+    )
+    private byte[] thumbnail;
+
+    public MediaFile(byte[] original, byte[] hash, ContentFlag contentFlag, String contentType) {
+        this.original = original;
         this.hash = hash;
         this.contentFlag = contentFlag;
-        this.fileData = fileData;
+        this.contentType = contentType;
     }
 
     public MediaFile() {
@@ -70,11 +83,31 @@ public class MediaFile {
         this.contentFlag = contentFlag;
     }
 
-    public String getFileData() {
-        return fileData;
+    public UUID getFileId() {
+        return fileId;
     }
 
-    public void setFileData(String fileData) {
-        this.fileData = fileData;
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public byte[] getOriginal() {
+        return original;
+    }
+
+    public void setOriginal(byte[] original) {
+        this.original = original;
+    }
+
+    public byte[] getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(byte[] thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }
