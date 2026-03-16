@@ -29,9 +29,6 @@ public abstract class Post {
     public Post() {
     }
 
-    /**
-     * @param postDTO
-     */
     public Post(PostDTO postDTO){
         if(postDTO.id != null) {
             this.id = postDTO.id;

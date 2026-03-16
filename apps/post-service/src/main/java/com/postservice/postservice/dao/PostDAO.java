@@ -1,8 +1,10 @@
 package com.postservice.postservice.dao;
 
 import com.postservice.postservice.models.Post;
+import com.postservice.postservice.models.reading.Reading;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -11,9 +13,13 @@ import java.util.UUID;
 public class PostDAO {
 
     private final PostRepository postRepository;
+    private final GymRepository gymRepository;
+    private final ReadingRepository readingRepository;
 
-    public PostDAO(PostRepository postRepository) {
+    public PostDAO(PostRepository postRepository, GymRepository gymRepository, ReadingRepository readingRepository) {
         this.postRepository = postRepository;
+        this.gymRepository = gymRepository;
+        this.readingRepository = readingRepository;
     }
 
     public Post getPostById(UUID postId) {
@@ -36,5 +42,13 @@ public class PostDAO {
 
     public void deletePostById(UUID postId) {
         this.postRepository.deleteById(postId);
+    }
+
+    public List<? extends Post> getPostsByHobbyProperty(String propertyType) {
+        switch(propertyType){
+            case "GYM": return this.gymRepository.findAll();
+            case "READING": return this.readingRepository.findAll();
+            default: throw new RuntimeException("Post Type not found");
+        }
     }
 }
