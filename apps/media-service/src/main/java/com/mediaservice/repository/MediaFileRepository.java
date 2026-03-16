@@ -1,5 +1,6 @@
 package com.mediaservice.repository;
 
+import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,7 @@ public interface MediaFileRepository extends JpaRepository<MediaFile, UUID> {
 
     // Retrieve all files from a collection of file identifiers
     List<MediaFile> findByFileIdIn(Collection<UUID> fileIds);
+
+    // Retrieve all files with a contentFlag of "unassigned"
+    List<MediaFile> queryMediaFileByContentFlag(ContentFlag contentFlag);
 }

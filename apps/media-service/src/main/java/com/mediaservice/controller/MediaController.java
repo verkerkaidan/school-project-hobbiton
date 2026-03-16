@@ -1,5 +1,6 @@
 package com.mediaservice.controller;
 
+import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.dto.MediaFileDTO;
 import com.mediaservice.enums.ContentFlag;
@@ -25,11 +26,10 @@ public class MediaController {
 
     /**
      * Upload a media file to database
-     * POST /api/media/{ownerId}
-     * Request body: MediaEntryDTO with string of dataURI
-     *
      * If the media file's hash is present in database, it will not be uploaded again
      * Regardless of it being saved now or before, the unique identifier will be retrieved
+     * POST /api/media/{ownerId}
+     * Request body: MediaEntryDTO with string of fileUri
      *
      * @param mediaEntryDTO string in the form of base64 dataURI (encrypted)
      * @param ownerId Identifier of the owner that is uploading the image
@@ -100,21 +100,41 @@ public class MediaController {
     }
 
     /**
-     * Update the content flag for a given file
+     * Update the content flag for all given files
      * Should only be called by api-gateway, after AI-response
      * No action in frontend should be the direct cause of this endpoint being called
      *
-     * @param mediaFileId, unique identifier of a MediaFile object
-     * @param contentFlag, instance of ContentFlag enum
+     * @param files, List of ContentFlagUpdateDTO instances with ContentFlag enum and file identifier
      * @return id, unique identifier of the changed MediaFile object
      */
-    @PutMapping("/{mediaFileId}")
-    public ResponseEntity<UUID> updateContentFlag(
-            @PathVariable UUID mediaFileId,
-            @RequestBody ContentFlag contentFlag
+    @PutMapping
+    public ResponseEntity<String> updateContentFlag(
+            @RequestBody List<ContentFlagUpdateDTO> files
     ) {
-        UUID fileId = mediaService.updateMediaContentFlag(mediaFileId, contentFlag);
+        for (int i=0; i<files.size();i++) {
+            ContentFlagUpdateDTO file = files.get(i);
+            mediaService.updateMediaContentFlag(file.fileId, file.contentFlag);
+        }
 
-        return ResponseEntity.ok(fileId);
+        return ResponseEntity.ok("Succesful update");
+    }
+
+    /**
+     * Retrieves all MediaFiles which don't yet have a content flag assigned
+     *
+     * @return ContentFlagUpdateDTO, with file identifier, contentFlag and file byte[]
+     */
+    @GetMapping
+    public ResponseEntity<List<ContentFlagUpdateDTO>> getUnassignedMediaFiles() {
+        List<MediaFile> allUnassigned = mediaService.getAllUnassigned();
+        List<ContentFlagUpdateDTO> updateDTOS = allUnassigned.stream()
+                .map(
+                        mediaFile -> new ContentFlagUpdateDTO(
+                                mediaFile.getFileId(),
+                                mediaFile.getOriginal()
+                        )
+                ).toList();
+
+        return ResponseEntity.ok(updateDTOS);
     }
 }

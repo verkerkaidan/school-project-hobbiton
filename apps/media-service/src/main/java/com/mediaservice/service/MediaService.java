@@ -48,7 +48,7 @@ public class MediaService {
             mediaFileDAO.saveMediaFile(mediaFile);
             this.addFileThumbnail(mediaFile);
         }
-        MediaInstance mediaInstance = new MediaInstance(mediaFile.getId(), ownerId);
+        MediaInstance mediaInstance = new MediaInstance(mediaFile.getFileId(), ownerId);
         mediaInstanceDAO.saveMediaInstance(mediaInstance);
 
         return mediaInstance.getInstanceId();
@@ -96,7 +96,7 @@ public class MediaService {
         MediaFile mediaFile = mediaFileDAO.getMediaFile(fileId);
         mediaFile.setContentFlag(contentFlag);
         mediaFileDAO.saveMediaFile(mediaFile);
-        return mediaFile.getId();
+        return mediaFile.getFileId();
     }
 
     /**
@@ -129,6 +129,15 @@ public class MediaService {
         List<MediaInstance> mediaInstanceList = mediaInstanceDAO.getAllMediaInstancesByOwnerId(ownerId);
         mediaInstanceList.forEach(mediaInstance ->
                 this.deleteMediaInstance(mediaInstance.getInstanceId()));
+    }
+
+    /**
+     * Retrieves all MediaFiles with ContentFlag: "unassigned"
+     *
+     * @return List of MediaFile instances
+     */
+    public List<MediaFile> getAllUnassigned() {
+        return mediaFileDAO.getAllUnassigned();
     }
 
     /**

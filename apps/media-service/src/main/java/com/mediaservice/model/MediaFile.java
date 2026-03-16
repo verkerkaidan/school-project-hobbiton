@@ -67,14 +67,6 @@ public class MediaFile {
         this.hash = hash;
     }
 
-    public UUID getId() {
-        return fileId;
-    }
-
-    public void setId(UUID id) {
-        this.fileId = id;
-    }
-
     public ContentFlag getContentFlag() {
         return contentFlag;
     }
