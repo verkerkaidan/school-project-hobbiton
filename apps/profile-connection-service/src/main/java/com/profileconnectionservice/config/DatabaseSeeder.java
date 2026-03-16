@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import com.profileconnectionservice.model.Block;
 import com.profileconnectionservice.model.Follow;
 import com.profileconnectionservice.model.Profile;
+import com.profileconnectionservice.model.Report;
 import com.profileconnectionservice.repository.BlockRepository;
 import com.profileconnectionservice.repository.FollowRepository;
 import com.profileconnectionservice.repository.ProfileRepository;
+import com.profileconnectionservice.repository.ReportRepository;
 
 import java.util.UUID;
 
@@ -24,6 +26,9 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Autowired
     private BlockRepository blockRepository;
+
+    @Autowired
+    private ReportRepository reportRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -151,9 +156,43 @@ public class DatabaseSeeder implements CommandLineRunner {
         // Profile10 blocks Profile2
         blockRepository.save(new Block(profile10Id, profile2Id));
 
+        // Create mock reports
+        // Profile1 reports Profile4 for harassment
+        reportRepository.save(new Report(profile1Id, profile4Id, Report.ReportReason.HARASSMENT,
+                "Profile4 has been harassing me with inappropriate messages"));
+
+        // Profile2 reports Profile6 for spam
+        reportRepository.save(new Report(profile2Id, profile6Id, Report.ReportReason.SPAM,
+                "Constantly spamming promotional links"));
+
+        // Profile3 reports Profile7 for hate speech
+        reportRepository.save(new Report(profile3Id, profile7Id, Report.ReportReason.HATE_SPEECH,
+                "Posted offensive content targeting specific groups"));
+
+        // Profile5 reports Profile2 for misinformation
+        reportRepository.save(new Report(profile5Id, profile2Id, Report.ReportReason.MISINFORMATION,
+                "Sharing false and misleading information"));
+
+        // Profile8 reports Profile9 for inappropriate content
+        reportRepository.save(new Report(profile8Id, profile9Id, Report.ReportReason.INAPPROPRIATE_CONTENT,
+                "Posted NSFW content in public timeline"));
+
+        // Profile10 reports Profile3 for impersonation
+        reportRepository.save(new Report(profile10Id, profile3Id, Report.ReportReason.IMPERSONATION,
+                "Profile appears to be impersonating a public figure"));
+
+        // Profile6 reports Profile4 for scam/fraud
+        reportRepository.save(new Report(profile6Id, profile4Id, Report.ReportReason.SCAM_FRAUD,
+                "Attempting to run a cryptocurrency scam"));
+
+        // Profile9 reports Profile1 for violence
+        reportRepository.save(new Report(profile9Id, profile1Id, Report.ReportReason.VIOLENCE,
+                "Posting content promoting violence"));
+
         System.out.println("Database seeded with mock data");
         System.out.println("Profiles: 10");
         System.out.println("Follows: 17");
         System.out.println("Blocks: 9");
+        System.out.println("Reports: 8");
     }
 }

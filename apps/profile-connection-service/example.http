@@ -296,3 +296,258 @@ X-Profile-Id: {{profile9}}
 ### Verify the follows are gone
 GET http://localhost:8081/api/follows/{{profile9}}/following
 GET http://localhost:8081/api/follows/{{profile10}}/following
+###
+### REPORT OPERATIONS
+###
+
+### Create a report - Profile1 reports Profile2 for harassment
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile1}}",
+  "targetId": "{{profile2}}",
+  "reason": "HARASSMENT",
+  "description": "This user has been repeatedly sending harassing messages."
+}
+
+### Create a report - Profile3 reports Profile4 for hate speech
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile3}}",
+  "targetId": "{{profile4}}",
+  "reason": "HATE_SPEECH",
+  "description": "Posted hateful content targeting a protected group."
+}
+
+### Create a report - Profile5 reports Profile6 for spam
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile5}}",
+  "targetId": "{{profile6}}",
+  "reason": "SPAM",
+  "description": "Repeatedly posting commercial spam content."
+}
+
+### Create a report - Profile7 reports Profile8 for misinformation
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile7}}",
+  "targetId": "{{profile8}}",
+  "reason": "MISINFORMATION",
+  "description": "Spreading false and misleading information to deceive users."
+}
+
+### Create a report - Profile9 reports Profile10 for impersonation
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile9}}",
+  "targetId": "{{profile10}}",
+  "reason": "IMPERSONATION",
+  "description": "User is pretending to be a public figure."
+}
+
+### Create a report - Profile10 reports Profile1 for scam/fraud
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile10}}",
+  "targetId": "{{profile1}}",
+  "reason": "SCAM_FRAUD",
+  "description": "Attempting to defraud users through a fake investment scheme."
+}
+
+### Create a report - Profile2 reports Profile3 for sexual content
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile2}}",
+  "targetId": "{{profile3}}",
+  "reason": "SEXUAL_CONTENT",
+  "description": "Posted explicit sexual content without appropriate warnings."
+}
+
+### Create a report - Profile4 reports Profile5 for violence
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile4}}",
+  "targetId": "{{profile5}}",
+  "reason": "VIOLENCE",
+  "description": "Content promoting violence and harmful behavior."
+}
+
+### Create a report - Profile6 reports Profile7 with OTHER reason
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile6}}",
+  "targetId": "{{profile7}}",
+  "reason": "OTHER",
+  "description": "General rule violation not covered by other categories."
+}
+
+###
+### GET REPORT DETAILS
+###
+
+### Get a specific report by ID (adjust UUID based on actual report creation)
+### This will fail with a random UUID, but shows the endpoint
+GET http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099
+
+###
+### GET REPORTS BY DIFFERENT FILTERS
+###
+
+### Get all reports where Profile1 is the target
+GET http://localhost:8081/api/reports/target/{{profile1}}
+
+### Get all reports where Profile2 is the target
+GET http://localhost:8081/api/reports/target/{{profile2}}
+
+### Get all reports initiated by Profile1
+GET http://localhost:8081/api/reports/initiator/{{profile1}}
+
+### Get all reports initiated by Profile5
+GET http://localhost:8081/api/reports/initiator/{{profile5}}
+
+### Get all reports with PENDING status
+GET http://localhost:8081/api/reports/status/PENDING
+
+### Get all reports with UNDER_REVIEW status
+GET http://localhost:8081/api/reports/status/UNDER_REVIEW
+
+### Get all reports with RESOLVED status
+GET http://localhost:8081/api/reports/status/RESOLVED
+
+### Get all reports with DISMISSED status
+GET http://localhost:8081/api/reports/status/DISMISSED
+
+### Get all reports with ACTION_TAKEN status
+GET http://localhost:8081/api/reports/status/ACTION_TAKEN
+
+### Get all pending reports (convenience endpoint)
+GET http://localhost:8081/api/reports/pending
+
+###
+### UPDATE REPORT STATUS
+###
+
+### Move a report to UNDER_REVIEW status (adjust reportId as needed)
+PUT http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099/status
+Content-Type: application/json
+
+{
+  "status": "UNDER_REVIEW"
+}
+
+### Resolve a report - set status to RESOLVED
+PUT http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099/status
+Content-Type: application/json
+
+{
+  "status": "RESOLVED"
+}
+
+### Dismiss a report - set status to DISMISSED
+PUT http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099/status
+Content-Type: application/json
+
+{
+  "status": "DISMISSED"
+}
+
+### Take action on a report - set status to ACTION_TAKEN
+PUT http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099/status
+Content-Type: application/json
+
+{
+  "status": "ACTION_TAKEN"
+}
+
+###
+### DELETE REPORT
+###
+
+### Delete a specific report (adjust reportId as needed)
+DELETE http://localhost:8081/api/reports/550e8400-e29b-41d4-a716-446655440099
+
+###
+### REPORT WORKFLOW SCENARIOS
+###
+
+### Workflow Report ID (update this after Step 1 with the ID from the response)
+@reportId = 550e8400-e29b-41d4-a716-446655440099
+
+### Scenario 1: Complete report lifecycle
+### Step 1: Create initial report (copy the 'id' from response and update @reportId variable above)
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile1}}",
+  "targetId": "{{profile9}}",
+  "reason": "HARASSMENT",
+  "description": "Repeated harassing comments on my posts."
+}
+
+### Step 2: Get pending reports to review
+GET http://localhost:8081/api/reports/pending
+
+### Step 3: Get all reports about the target
+GET http://localhost:8081/api/reports/target/{{profile9}}
+
+### Step 4: Move the report to under review (replace {{reportId}} with actual ID from Step 1)
+PUT http://localhost:8081/api/reports/{{reportId}}/status
+Content-Type: application/json
+
+{
+  "status": "UNDER_REVIEW"
+}
+
+### Step 5: Take action
+PUT http://localhost:8081/api/reports/{{reportId}}/status
+Content-Type: application/json
+
+{
+  "status": "ACTION_TAKEN"
+}
+
+###
+### ERROR CASES FOR REPORTS
+###
+
+### Try to create a report with missing fields (should fail)
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile1}}",
+  "reason": "HARASSMENT"
+}
+
+### Try to create a report with a non-existent target (should fail)
+POST http://localhost:8081/api/reports
+Content-Type: application/json
+
+{
+  "initiatorId": "{{profile1}}",
+  "targetId": "00000000-0000-0000-0000-000000000000",
+  "reason": "SPAM",
+  "description": "Invalid target profile"
+}
+
+### Get reports about a non-existent profile
+GET http://localhost:8081/api/reports/target/00000000-0000-0000-0000-000000000000
