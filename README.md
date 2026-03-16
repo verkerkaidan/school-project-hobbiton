@@ -95,19 +95,24 @@ docker run test
 Voor de database url geldt dat de microservice-specifieke *.env* op localhost moet staan, maar de algemene *.env* op database. Dit is een dingetje van docker, dat die de url anders niet kan vinden/koppelen.
 4. Voeg aan de *docker-compose.yml* het volgende toe: *voor port_id is het 80{8+current count}*
 ```dockerfile
-{service_name}:  
-  build: ./{target_folder}
-  container_name: {service_name}
-  ports:  
-    - '{port_id}:{port_id}'  
-  env_file:  
-    - .env  
-  cpus: 2  
-  mem_limit: 2048m  
-  networks:  
-    - microservices-network  
-  depends_on:  
-    - database
+  {service_name}:
+    build: ./apps/post-service
+    container_name: post-service
+    ports:
+      - "{port}:{port}"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${.ENV_VARIABLE_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${.ENV_VARIABLE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${.ENV_VARIABLE_PASSWORD}
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
 ```
 Om nu te testen of updated docker-compose werkt, run het volgende commando:
 ```dockerfile
