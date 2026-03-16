@@ -6,4 +6,7 @@ public class MediaEntryDTO {
     public MediaEntryDTO(String fileUri) {
         this.fileUri = fileUri;
     }
+
+    public MediaEntryDTO() {
+    }
 }

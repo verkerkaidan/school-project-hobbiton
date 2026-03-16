@@ -1,6 +1,7 @@
 package com.mediaservice.dao;
 
 
+import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.repository.MediaFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,5 +74,14 @@ public class MediaFileDAO {
      */
     public List<MediaFile> getCollectionOfMediaFiles(List<UUID> fileIds) {
         return mediaFileRepository.findByFileIdIn(fileIds);
+    }
+
+    /**
+     * Retrieves all MediaFiles with ContentFlag: "unassigned"
+     *
+     * @return List of MediaFile instances
+     */
+    public List<MediaFile> getAllUnassigned() {
+        return mediaFileRepository.queryMediaFileByContentFlag(ContentFlag.UNASSIGNED);
     }
 }
