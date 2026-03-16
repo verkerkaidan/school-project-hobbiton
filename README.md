@@ -19,16 +19,18 @@ Scope
 
 Monorepo-structuur (aanbevolen)
 
-- /apps/frontend — Next.js app (React, TypeScript)
-- /apps/backend — Spring Boot service
-- /apps/services — losse microservices (elk service in eigen submap)
+- /apps/hobby-frontend — Next.js app (React, TypeScript)
+- /apps/feed-service — Spring Boot service
+- /apps/media-service — Spring Boot service
+- /apps/post-service — Spring Boot service
+- /apps/profile-connection-service — Spring Boot service
 
 Werkwijze & workflow
 
 - Branching: werk met korte feature-branches op basis van `main`.
 - Pull Requests: verplicht code review (minimaal één reviewer).
 - Commits: schrijf duidelijke commit messages; één feature per branch.
-- Code quality: configureer en gebruik ESLint/Prettier voor frontend en formatter/checkstyle voor backend.
+- Code quality: configureer en gebruik ESLint/Prettier voor frontend en een formatter/checkstyle voor backend.
 
 Monorepo tooling (suggesties)
 
@@ -36,20 +38,16 @@ Monorepo tooling (suggesties)
 
 CI / CD (kort)
 
-- Pipeline via GitHub actions om te deployen?
-
-Conventies
-  
--  
+- TODO: Pipeline via GitHub actions om te deployen
 
 Testing
 
 - Frontend: unit tests met Vitest/Jest/React Testing Library;
-- Backend: unit- en integratietests met JUnit + Spring Test.
+- Backend: unittesting met JUnit + Spring Test.
 
 Deployment (POC)
 
-- Voor de POC is een eenvoudige deployment naar één staging omgeving voldoende.
+- Voor de POC is een eenvoudige deployment naar de RON SERVER voldoende.
 - Monorepo deployment met Docker zodat we de hele applicatie met 1 command kunnen runnen.
 
 Gitignore

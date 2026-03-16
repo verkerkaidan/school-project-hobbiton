@@ -1,11 +1,11 @@
 ## Voor welke microservice is deze PR?
 
 - [ ] 'Frontend'
-- [ ] 'User Connections'
+- [ ] 'Profile Connections'
 - [ ] 'Post'
 - [ ] 'Media'
 - [ ] 'User Feed'
-- [ ] 'Authentication'/'authorisation'
+- [ ] 'Authentication/Authorisation'
 - [ ] 'Content warning ai'
 - [ ] Anders, namelijk:
 
