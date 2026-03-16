@@ -47,7 +47,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         UUID instanceId2 = mediaService.uploadMediaFile(mediaEntry2, owner1);
         mediaService.uploadMediaFile(mediaEntry1, owner1);
         ContentFlag contentFlag1 = ContentFlag.RISK;
-        ContentFlag contentFlag2 = ContentFlag.SAFE;
+        ContentFlag contentFlag2 = ContentFlag.UNASSIGNED;
 
         UUID fileId = mediaInstanceDAO.getMediaInstance(instanceId1).getFileId();
         MediaFile mediaFile1 = mediaFileDAO.getMediaFile(fileId);

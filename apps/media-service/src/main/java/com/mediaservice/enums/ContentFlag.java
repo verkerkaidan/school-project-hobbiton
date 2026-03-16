@@ -1,9 +1,9 @@
 package com.mediaservice.enums;
 
 public enum ContentFlag {
-    UNASSIGNED("Unassigned"),
-    SAFE("Safe"),
-    RISK("Risk")
+    SAFE("SAFE"),
+    RISK("RISK"),
+    UNASSIGNED("UNASSIGNED")
     ;
     private final String value;
 
