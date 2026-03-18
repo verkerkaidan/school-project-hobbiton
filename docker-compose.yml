@@ -130,6 +130,29 @@ services:
     networks:
       - microservices-network
 
+  library-service:
+    build: ./apps/library-service
+    container_name: library-service
+    restart: no
+    ports:
+      - "8087:8087"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_LIBRARY}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_LIBRARY}
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
+      GOOGLE_BOOKS_API_URL: ${GOOGLE_BOOKS_API_URL}
+      GOOGLE_BOOKS_API_MAX_RESULTS: ${GOOGLE_BOOKS_API_MAX_RESULTS}
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
 networks:
   microservices-network:
     name: microservices-network
