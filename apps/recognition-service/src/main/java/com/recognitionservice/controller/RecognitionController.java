@@ -1,8 +1,8 @@
-package com.recognitionservice.recognitionservice.controller;
+package com.recognitionservice.controller;
 
-import com.recognitionservice.recognitionservice.DTO.ContentFlagUpdateDTO;
-import com.recognitionservice.recognitionservice.enums.ContentFlag;
-import com.recognitionservice.recognitionservice.services.RecognitionService;
+import com.recognitionservice.DTO.ContentFlagUpdateDTO;
+import com.recognitionservice.enums.ContentFlag;
+import com.recognitionservice.services.RecognitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +19,12 @@ public class RecognitionController {
     @Autowired
     private RecognitionService recognitionService;
 
+    /**
+     * Generates a content risk assessment for each of the given files
+     *
+     * @param DTOToBeUpdatedList, list of objects with fileId (UUID) and file (byte[]) specified
+     * @return list of objects with fileId (UUID) and contentFlag (ContentFlag) specified
+     */
     @GetMapping
     public ResponseEntity<List<ContentFlagUpdateDTO>> generateContentFlags(
             @RequestBody List<ContentFlagUpdateDTO> DTOToBeUpdatedList

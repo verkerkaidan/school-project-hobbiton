@@ -1,6 +1,6 @@
-package com.recognitionservice.recognitionservice.DTO;
+package com.recognitionservice.DTO;
 
-import com.recognitionservice.recognitionservice.enums.ContentFlag;
+import com.recognitionservice.enums.ContentFlag;
 
 import java.util.UUID;
 

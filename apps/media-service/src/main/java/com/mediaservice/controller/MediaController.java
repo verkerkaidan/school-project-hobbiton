@@ -3,18 +3,14 @@ package com.mediaservice.controller;
 import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.dto.MediaFileDTO;
-import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
-import com.mediaservice.service.CompressionService;
-import com.mediaservice.service.EncryptionService;
 import com.mediaservice.service.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -68,9 +64,16 @@ public class MediaController {
      * @return List of MediaFile instances
      */
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<MediaFile>> retrieveMediaByOwner(@PathVariable UUID ownerId) {
+    public ResponseEntity<List<MediaFileDTO>> retrieveMediaByOwner(@PathVariable UUID ownerId) {
         List<MediaFile> mediaFileList = mediaService.getMediaFilesByOwner(ownerId);
-        return ResponseEntity.ok(mediaFileList);
+        List<MediaFileDTO> dtoList = mediaFileList.stream().map(
+            (mediaFile -> new MediaFileDTO(
+                        mediaFile.getOriginal(),
+                        mediaFile.getThumbnail(),
+                        mediaFile.getContentType(),
+                        mediaFile.getContentFlag()
+            ))).toList();
+        return ResponseEntity.ok(dtoList);
     }
 
     /**
@@ -79,24 +82,24 @@ public class MediaController {
      * DELETE /api/media/{instanceId}
      *
      * @param instanceId is unique identifier of a mediaInstance
-     * @return String, confirming deletion
+     * @return UUID, uuid of deleted instance, confirming deletion
      */
     @DeleteMapping("/file/{instanceId}")
-    public ResponseEntity<String> deleteInstance(@PathVariable UUID instanceId) {
+    public ResponseEntity<UUID> deleteInstance(@PathVariable UUID instanceId) {
         mediaService.deleteMediaInstance(instanceId);
-        return ResponseEntity.ok("Successful deletion");
+        return ResponseEntity.ok(instanceId);
     }
 
     /**
      * Deletes all instances of the given owner, and deletes mediaFiles if relevant
      *
      * @param ownerId, unique identifier of the owner being deleted
-     * @return String, confirming deletion
+     * @return UUID, uuid of deleted owner, confirming deletion
      */
     @DeleteMapping("/owner/{ownerId}")
-    public ResponseEntity<String> deleteOwner(@PathVariable UUID ownerId) {
+    public ResponseEntity<UUID> deleteOwner(@PathVariable UUID ownerId) {
         mediaService.deleteOwner(ownerId);
-        return ResponseEntity.ok("Successful deletion");
+        return ResponseEntity.ok(ownerId);
     }
 
     /**
@@ -108,15 +111,17 @@ public class MediaController {
      * @return id, unique identifier of the changed MediaFile object
      */
     @PutMapping
-    public ResponseEntity<String> updateContentFlag(
+    public ResponseEntity<List<UUID>> updateContentFlag(
             @RequestBody List<ContentFlagUpdateDTO> files
     ) {
+        List<UUID> updatedMediaFiles = new ArrayList<>();
         for (int i=0; i<files.size();i++) {
             ContentFlagUpdateDTO file = files.get(i);
             mediaService.updateMediaContentFlag(file.fileId, file.contentFlag);
+            updatedMediaFiles.add(file.fileId);
         }
 
-        return ResponseEntity.ok("Succesful update");
+        return ResponseEntity.ok(updatedMediaFiles);
     }
 
     /**
