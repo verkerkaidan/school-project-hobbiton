@@ -1,0 +1,131 @@
+stages:
+  - test
+
+# Template for Maven test jobs
+.maven_test_template: &maven_test_template
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  cache:
+    paths:
+      - apps/*/target/
+      - ~/.m2/repository/
+
+# Test profile-connection-service
+test:profile-connection-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/profile-connection-service/**/*
+  script:
+    - cd apps/profile-connection-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/profile-connection-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/profile-connection-service/target/surefire-reports/
+      - apps/profile-connection-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test post-service
+test:post-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/post-service/**/*
+  script:
+    - cd apps/post-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/post-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/post-service/target/surefire-reports/
+      - apps/post-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test feed-service
+test:feed-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/feed-service/**/*
+  script:
+    - cd apps/feed-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/feed-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/feed-service/target/surefire-reports/
+      - apps/feed-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test media-service
+test:media-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/media-service/**/*
+  script:
+    - cd apps/media-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/media-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/media-service/target/surefire-reports/
+      - apps/media-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test library-service
+test:library-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/library-service/**/*
+  script:
+    - cd apps/library-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/library-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/library-service/target/surefire-reports/
+      - apps/library-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test recognition-service
+test:recognition-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/recognition-service/**/*
+  script:
+    - cd apps/recognition-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/recognition-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/recognition-service/target/surefire-reports/
+      - apps/recognition-service/target/site/jacoco/
+    expire_in: 30 days
