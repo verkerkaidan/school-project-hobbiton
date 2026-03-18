@@ -1,12 +1,18 @@
-package com.recognitionservice.recognitionservice.services;
+package com.recognitionservice.services;
 
-import com.recognitionservice.recognitionservice.enums.ContentFlag;
+import com.recognitionservice.enums.ContentFlag;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
 @Service
 public class RecognitionService {
+    /**
+     * Assesses the risk factor of a given file
+     *
+     * @param fileData, in the form of byte[]
+     * @return ContentFlag. TODO -- currently random integer, later AI should be used
+     */
     public ContentFlag flagFile(byte[] fileData) {
         ContentFlag contentFlag;
 

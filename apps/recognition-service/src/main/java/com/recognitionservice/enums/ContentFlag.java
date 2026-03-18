@@ -1,4 +1,4 @@
-package com.recognitionservice.recognitionservice.enums;
+package com.recognitionservice.enums;
 
 public enum ContentFlag {
     UNASSIGNED("UNASSIGNED"),
