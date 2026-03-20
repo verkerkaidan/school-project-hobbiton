@@ -13,7 +13,7 @@ public class Gym extends Post {
 
     // One gym session owns many exercises
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post")
     private Set<GymExcercise> exercises = new HashSet<>();
 
     @Column(name = "total_duration")
