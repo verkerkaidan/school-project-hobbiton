@@ -1,6 +1,14 @@
 package com.libraryservice.dto.book;
 
-public class BookResponse {
+import com.libraryservice.dto.common.SearchResult;
+
+/**
+ * Book-specific response DTO.
+ * Implements SearchResult so it can be returned from SearchableService
+ * alongside ExerciseResponse without the controller caring which it is.
+ */
+public class BookResponse implements SearchResult {
+
     private String title;
     private String authorDisplay;
     private String description;
@@ -11,40 +19,17 @@ public class BookResponse {
     private String language;
     private String thumbnailUrl;
     private String infoLink;
-    private String category;
     private double averageRating;
     private int ratingsCount;
-
-    // -------------------------
-    // Constructors
-    // -------------------------
+    private String source;
 
     public BookResponse() {
     }
 
-    public BookResponse(String title, String authorDisplay, String description,
-                        String publisher, String publishedDate, String isbn,
-                        int pageCount, String language, String thumbnailUrl,
-                        String infoLink, String category,
-                        double averageRating, int ratingsCount) {
-        this.title = title;
-        this.authorDisplay = authorDisplay;
-        this.description = description;
-        this.publisher = publisher;
-        this.publishedDate = publishedDate;
-        this.isbn = isbn;
-        this.pageCount = pageCount;
-        this.language = language;
-        this.thumbnailUrl = thumbnailUrl;
-        this.infoLink = infoLink;
-        this.category = category;
-        this.averageRating = averageRating;
-        this.ratingsCount = ratingsCount;
+    @Override
+    public String getResultType() {
+        return "book";
     }
-
-    // -------------------------
-    // Getters
-    // -------------------------
 
     public String getTitle() {
         return title;
@@ -86,10 +71,6 @@ public class BookResponse {
         return infoLink;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
     public double getAverageRating() {
         return averageRating;
     }
@@ -98,9 +79,9 @@ public class BookResponse {
         return ratingsCount;
     }
 
-    // -------------------------
-    // Setters
-    // -------------------------
+    public String getSource() {
+        return source;
+    }
 
     public void setTitle(String title) {
         this.title = title;
@@ -142,15 +123,15 @@ public class BookResponse {
         this.infoLink = infoLink;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
     }
 
     public void setRatingsCount(int ratingsCount) {
         this.ratingsCount = ratingsCount;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }

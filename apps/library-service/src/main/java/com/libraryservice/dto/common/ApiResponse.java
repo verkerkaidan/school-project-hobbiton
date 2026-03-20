@@ -10,10 +10,6 @@ public class ApiResponse<T> {
     private T data;
     private LocalDateTime timestamp;
 
-    // -------------------------
-    // Constructors
-    // -------------------------
-
     public ApiResponse() {
     }
 
@@ -25,10 +21,6 @@ public class ApiResponse<T> {
         this.timestamp = timestamp;
     }
 
-    // -------------------------
-    // Static factory methods
-    // -------------------------
-
     public static <T> ApiResponse<T> success(T data, int total, String message) {
         return new ApiResponse<>(true, message, total, data, LocalDateTime.now());
     }
@@ -36,10 +28,6 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(false, message, 0, null, LocalDateTime.now());
     }
-
-    // -------------------------
-    // Getters
-    // -------------------------
 
     public boolean isSuccess() {
         return success;
@@ -60,10 +48,6 @@ public class ApiResponse<T> {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
-
-    // -------------------------
-    // Setters
-    // -------------------------
 
     public void setSuccess(boolean success) {
         this.success = success;
