@@ -1,13 +1,10 @@
 package com.libraryservice.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.*;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -15,32 +12,40 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
+/**
+ * DAO for Open Library API.
+ * <p>
+ * Search:  GET <a href="https://openlibrary.org/search.json?q=...&limit=10">...</a>
+ * Response: { "docs": [ {...} ] }
+ * <p>
+ * ISBN:    GET <a href="https://openlibrary.org/api/books?bibkeys=ISBN:xxx&format=json&jscmd=data">...</a>
+ * Response: { "ISBN:xxx": { "title": "...", "authors": [...] } }
+ * <p>
+ * No API key required — Open Library is fully open.
+ */
 @Component
 public class OpenLibraryDAO {
-    private static final Logger logger = LoggerFactory.getLogger(OpenLibraryDAO.class);
+
+    private static final Logger logger = Logger.getLogger(OpenLibraryDAO.class.getName());
+    private static final String BASE_URL = "https://openlibrary.org";
+
     private final RestTemplate restTemplate;
 
     public OpenLibraryDAO() {
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(5000);
-        requestFactory.setReadTimeout(5000);
-        this.restTemplate = new RestTemplate(requestFactory);
+        this.restTemplate = new RestTemplate();
     }
 
-    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> searchBooks(String query, int maxResults) {
         try {
-            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-
-            String baseUrl = "https://openlibrary.org/search.json";
-            URI uri = UriComponentsBuilder.fromUriString(baseUrl)
-                    .queryParam("q", encodedQuery)
+            URI uri = UriComponentsBuilder.fromUriString(BASE_URL + "/search.json")
+                    .queryParam("q", query)
                     .queryParam("limit", maxResults)
                     .build()
                     .toUri();
 
-            logger.info("Calling OpenLibrary URL: {}", uri);
+            logger.info("Calling OpenLibrary URL: " + uri);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("User-Agent", "Mozilla/5.0");
@@ -51,24 +56,43 @@ public class OpenLibraryDAO {
             ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                logger.warn("OpenLibrary returned status {} for query '{}'", response.getStatusCode(), query);
+                logger.warning("OpenLibrary returned status {} for query '{}'");
                 return Collections.emptyList();
             }
 
             Map<String, Object> body = response.getBody();
             if (body == null || !body.containsKey("docs")) {
-                logger.info("No docs found for query '{}'", query);
+                logger.info("No docs found for query '{}'");
                 return Collections.emptyList();
             }
 
             return (List<Map<String, Object>>) body.get("docs");
 
         } catch (RestClientException e) {
-            logger.error("REST error searching books for query '{}'", query, e);
+            logger.warning("REST error searching books for query '{}'");
         } catch (Exception e) {
-            logger.error("Unexpected error searching books for query '{}'", query, e);
+            logger.warning("Unexpected error searching books for query '{}'");
         }
 
-        return Collections.emptyList();
+        return Collections.emptyList(); // altijd returnen
+    }
+
+    public Map<String, Object> findByIsbn(String isbn) {
+        String url = UriComponentsBuilder
+                .fromUriString(BASE_URL + "/api/books")
+                .queryParam("bibkeys", "ISBN:" + isbn)
+                .queryParam("format", "json")
+                .queryParam("jscmd", "data")
+                .toUriString();
+
+        logger.info("OpenLibraryDAO ISBN lookup: " + url);
+
+        try {
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            return (response == null) ? Collections.emptyMap() : response;
+        } catch (Exception e) {
+            logger.severe("Open Library ISBN error: " + e.getMessage());
+            throw new RuntimeException("Open Library ISBN error: " + e.getMessage(), e);
+        }
     }
 }
