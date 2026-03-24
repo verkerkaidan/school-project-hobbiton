@@ -10,6 +10,6 @@ package com.libraryservice.enums;
  */
 public enum SearchType {
     BOOK,
-    GYM,
+    EXERCISE,
     MOVIE
 }

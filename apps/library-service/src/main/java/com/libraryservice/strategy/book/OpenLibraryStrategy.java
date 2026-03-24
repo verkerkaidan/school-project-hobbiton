@@ -11,19 +11,22 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * STRATEGY + ADAPTER — Open Library implementation.
+ * STRATEGY + ADAPTER — implementatie voor Open Library.
  * <p>
- * Open Library's JSON is structured completely differently from Google Books.
- * Search docs: { "title", "author_name": [], "isbn": [], "first_publish_year" }
- * ISBN data:   { "title", "authors": [{"name":"..."}], "publishers": [{"name":"..."}] }
+ * Verantwoordelijkheid:
+ * - Ophalen van data via OpenLibraryDAO
+ * - Omzetten van Open Library JSON-structuur naar het interne Book model
  * <p>
- * All of that complexity is hidden here. BookService sees only BookApiStrategy.
+ * Adapter functie:
+ * Open Library gebruikt een afwijkende JSON-structuur.
+ * Deze class vertaalt die structuur naar het uniforme Book model.
+ * <p>
+ * Hierdoor blijft BookService volledig onafhankelijk van externe API-structuren.
  */
 @Component
 public class OpenLibraryStrategy implements BookApiStrategy {
 
     private static final Logger logger = Logger.getLogger(OpenLibraryStrategy.class.getName());
-    private static final String STRATEGY_NAME = "openlibrary";
 
     private final OpenLibraryDAO openLibraryDAO;
 
@@ -31,11 +34,13 @@ public class OpenLibraryStrategy implements BookApiStrategy {
         this.openLibraryDAO = openLibraryDAO;
     }
 
-    @Override
-    public String getStrategyName() {
-        return STRATEGY_NAME;
-    }
-
+    /**
+     * Zoekt boeken via Open Library op basis van een query.
+     *
+     * @param query      zoekterm
+     * @param maxResults maximaal aantal resultaten
+     * @return lijst van Book objecten
+     */
     @Override
     public List<Book> searchBooks(String query, int maxResults) {
         logger.info("OpenLibraryStrategy: searching '" + query + "'");
@@ -44,6 +49,12 @@ public class OpenLibraryStrategy implements BookApiStrategy {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Haalt één boek op via ISBN.
+     *
+     * @param isbn ISBN nummer
+     * @return Book object of null indien niet gevonden
+     */
     @Override
     public Book findByIsbn(String isbn) {
         logger.info("OpenLibraryStrategy: ISBN lookup " + isbn);
@@ -52,6 +63,12 @@ public class OpenLibraryStrategy implements BookApiStrategy {
         return mapIsbnDataToBook(isbn, (Map<String, Object>) raw.get("ISBN:" + isbn));
     }
 
+    /**
+     * Zet een Open Library search document om naar een Book object.
+     *
+     * @param doc ruwe API data
+     * @return Book model
+     */
     private Book mapSearchDocToBook(Map<String, Object> doc) {
         Book book = new Book();
         book.setTitle((String) doc.getOrDefault("title", "Unknown Title"));
@@ -77,10 +94,17 @@ public class OpenLibraryStrategy implements BookApiStrategy {
         book.setDescription("No description available.");
         book.setAverageRating(0.0);
         book.setRatingsCount(0);
-        book.setSource(STRATEGY_NAME);
         return book;
     }
 
+
+    /**
+     * Zet ISBN-detail data om naar een Book object.
+     *
+     * @param isbn het ISBN-nummer
+     * @param data ruwe API-data van Open Library
+     * @return Book model
+     */
     private Book mapIsbnDataToBook(String isbn, Map<String, Object> data) {
         Book book = new Book();
         book.setIsbn(isbn);
@@ -104,10 +128,15 @@ public class OpenLibraryStrategy implements BookApiStrategy {
         book.setDescription("No description available.");
         book.setAverageRating(0.0);
         book.setRatingsCount(0);
-        book.setSource(STRATEGY_NAME);
         return book;
     }
 
+    /**
+     * Helper methode om een Object veilig om te zetten naar int.
+     *
+     * @param val input waarde
+     * @return integer waarde of 0 bij ongeldige input
+     */
     private int toInt(Object val) {
         return val instanceof Number ? ((Number) val).intValue() : 0;
     }

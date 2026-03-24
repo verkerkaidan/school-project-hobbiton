@@ -9,31 +9,19 @@ import java.util.List;
 /**
  * FACTORY PATTERN
  * <p>
- * WHY SearchResult<T> GENERIC?
- * Books and exercises have totally different fields.
- * SearchResult<T> lets each domain return its own DTO type
- * while still fitting the shared response envelope (ApiResponse).
+ * WAAROM SearchResult (generiek)?
+ * Boeken en oefeningen hebben volledig verschillende velden.
+ * SearchResult maakt het mogelijk dat elk domein zijn eigen DTO-type gebruikt,
+ * terwijl het toch binnen dezelfde response structuur (ApiResponse) past.
  * <p>
- * The two methods cover your requirements:
- * search()      — text search (POST /search with a query)
- * findById()    — lookup by ID (GET /library/{type}/{id})
+ * Deze interface definieert de standaard contracten voor zoekservices:
+ * - search() → zoekopdracht op basis van een query
+ * - findById() → ophalen van één item op basis van ID
  */
 public interface SearchableService {
-
-    /**
-     * Which SearchType this service handles.
-     * The factory uses this to match the right service.
-     */
     SearchType getSearchType();
 
-    /**
-     * Searches for items based on the request query.
-     */
     List<SearchResult> search(SearchRequest request);
 
-    /**
-     * Finds a single item by its identifier.
-     * For books: ISBN. For exercises: exerciseId.
-     */
     SearchResult findById(String id);
 }

@@ -1,17 +1,19 @@
 package com.libraryservice.dto.common;
 
 /**
- * WHY A MARKER INTERFACE FOR RESULTS?
+ * WAAROM EEN MARKER INTERFACE VOOR RESULTATEN?
  * <p>
- * SearchableService.search() returns List<SearchResult>.
- * BookResponse and ExerciseResponse both implement this interface.
+ * SearchableService.search() retourneert een List<SearchResult>.
+ * BookResponse en ExerciseResponse implementeren beide deze interface.
  * <p>
- * This means the LibraryController can hold and return ANY result type
- * without knowing what it is — Jackson serializes the concrete type
- * (BookResponse or ExerciseResponse) to JSON correctly at runtime.
+ * Dit betekent dat de LibraryController elk type resultaat kan verwerken
+ * en teruggeven zonder te weten welk specifiek type het is.
+ * Jackson serialiseert automatisch het concrete type
+ * (BookResponse of ExerciseResponse) naar JSON tijdens runtime.
  * <p>
- * It's a clean way to say "this object is a valid search result"
- * without forcing all domains into the same fields.
+ * Dit is een nette manier om aan te geven:
+ * "dit object is een geldig zoekresultaat"
+ * zonder dat alle domeinen dezelfde velden moeten hebben.
  */
 public interface SearchResult {
     String getResultType();

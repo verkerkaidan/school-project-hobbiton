@@ -7,31 +7,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * THE UNIFIED SEARCH REQUEST
+ * GECENTRALISEERDE SEARCH REQUEST
  * <p>
- * This is the single body for POST /api/v1/library/search.
- * The 'type' field tells the Factory which service to use.
- * The 'source' field tells the Strategy which API to use (books only for now).
+ * Dit is de enige request body voor:
+ * POST /API/v1/library/search
  * <p>
- * Example for books:
+ * Het veld 'type' bepaalt via de Factory welke service gebruikt wordt.
+ * Voorbeeld voor boeken:
  * {
  * "type": "BOOK",
  * "query": "clean code",
- * "source": "google",
  * "maxResults": 10
  * }
  * <p>
- * Example for exercises:
+ * Voorbeeld voor oefeningen:
  * {
  * "type": "EXERCISE",
  * "query": "bench press",
  * "maxResults": 10
  * }
  * <p>
- * WHY ONE SHARED REQUEST DTO?
- * One endpoint, one request shape. The 'type' field routes everything.
- * Simple for the client — they always POST to the same URL.
- * 'source' is optional and ignored for exercise searches.
+ * WAAROM ÉÉN GEDEELDE REQUEST DTO?
+ * - Eén endpoint, één uniforme request structuur
+ * - Het 'type' veld bepaalt de routing naar de juiste service
+ * - Eenvoudig voor de client: altijd dezelfde endpoint gebruiken
  */
 public class SearchRequest {
 
@@ -41,10 +40,6 @@ public class SearchRequest {
     @NotBlank(message = "Query must not be empty")
     private String query;
 
-    // Optional: which API source to use. Relevant for BOOK, ignored for EXERCISE.
-    // Values: "google", "openlibrary", "all" (default)
-    private String source = "all";
-
     @Min(value = 1, message = "Minimaal 1 resultaat")
     @Max(value = 40, message = "Maximaal 40 resultaten")
     private int maxResults = 10;
@@ -52,10 +47,9 @@ public class SearchRequest {
     public SearchRequest() {
     }
 
-    public SearchRequest(SearchType type, String query, String source, int maxResults) {
+    public SearchRequest(SearchType type, String query, int maxResults) {
         this.type = type;
         this.query = query;
-        this.source = source;
         this.maxResults = maxResults;
     }
 
@@ -65,10 +59,6 @@ public class SearchRequest {
 
     public String getQuery() {
         return query;
-    }
-
-    public String getSource() {
-        return source;
     }
 
     public int getMaxResults() {
@@ -81,10 +71,6 @@ public class SearchRequest {
 
     public void setQuery(String query) {
         this.query = query;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
     }
 
     public void setMaxResults(int maxResults) {
