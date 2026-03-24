@@ -5,18 +5,16 @@ import com.libraryservice.model.Book;
 import java.util.List;
 
 /**
- * STRATEGY PATTERN — interface for book API sources.
+ * STRATEGY PATTERN — interface voor boek API-bronnen.
+ * Elke boek API (bijv. Google Books, Open Library of toekomstige API’s)
+ * implementeert deze interface.
  * <p>
- * Every book API (Google Books, Open Library, future ones) implements this.
- * BookService only knows about BookApiStrategy — never the concrete classes.
+ * BookService werkt alleen met BookApiStrategy en kent de concrete
+ * implementaties niet.
  * <p>
- * getStrategyName() is used by BookService to select the right strategy
- * based on the 'source' field in the request ("google", "openlibrary", "all").
+ * De methode getStrategyName() wordt gebruikt door BookService om de juiste
  */
 public interface BookApiStrategy {
-
-    String getStrategyName();
-
     List<Book> searchBooks(String query, int maxResults);
 
     Book findByIsbn(String isbn);

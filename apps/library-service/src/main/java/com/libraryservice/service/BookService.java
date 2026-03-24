@@ -14,18 +14,19 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * FACTORY PATTERN — this is what the factory produces for SearchType.BOOK.
- * STRATEGY PATTERN — internally selects the right BookApiStrategy.
+ * Service voor het verwerken van boek-zoekopdrachten.
  * <p>
- * This service implements SearchableService, which means:
- * - The Factory can return it as a SearchableService
- * - The LibraryController never sees "BookService" — only SearchableService
+ * Design patterns:
+ * - Factory Pattern: deze service wordt geleverd door de SearchServiceFactory
+ * - Strategy Pattern: gebruikt meerdere BookApiStrategy implementaties (bijv. OpenLibrary, Google)
  * <p>
- * Internally it holds a List<BookApiStrategy> (Google, OpenLibrary) and
- * picks the right one based on request.getSource().
+ * Verantwoordelijkheden:
+ * - Zoeken van boeken via één of meerdere API-strategieën
+ * - Ophalen van boeken op basis van ISBN
+ * - Omzetten van domain object (Book) naar DTO (BookResponse)
  * <p>
- * Spring auto-collects all @Component classes that implement BookApiStrategy
- * into the injected List — same collection injection pattern as before.
+ * Spring injecteert automatisch alle BookApiStrategy implementaties
+ * in de List<BookApiStrategy>.
  */
 @Service
 public class BookService implements SearchableService {
@@ -43,19 +44,28 @@ public class BookService implements SearchableService {
         return SearchType.BOOK;
     }
 
+    /**
+     * Voert een zoekopdracht uit voor boeken.
+     * <p>
+     * Flow:
+     * 1. Itereert over alle beschikbare BookApiStrategy implementaties
+     * 2. Roept elke API aan en verzamelt resultaten
+     * 3. Zet alle Book objecten om naar BookResponse DTO’s
+     * <p>
+     * Voordeel:
+     * - Resultaten kunnen uit meerdere bronnen tegelijk komen
+     *
+     * @param request bevat zoekterm en maxResults
+     * @return lijst van SearchResult (BookResponse)
+     */
     @Override
     public List<SearchResult> search(SearchRequest request) {
-        logger.info("BookService.search: query='" + request.getQuery() + "', source=" + request.getSource());
+        logger.info("BookService.search: query='" + request.getQuery() + "'");
 
         List<Book> books = new ArrayList<>();
 
-        if ("all".equalsIgnoreCase(request.getSource())) {
-            for (BookApiStrategy strategy : strategies) {
-                books.addAll(strategy.searchBooks(request.getQuery(), request.getMaxResults()));
-            }
-        } else {
-            BookApiStrategy strategy = findStrategy(request.getSource());
-            books = strategy.searchBooks(request.getQuery(), request.getMaxResults());
+        for (BookApiStrategy strategy : strategies) {
+            books.addAll(strategy.searchBooks(request.getQuery(), request.getMaxResults()));
         }
 
         return books.stream()
@@ -63,6 +73,14 @@ public class BookService implements SearchableService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Haalt één boek op via ISBN.
+     * <p>
+     * Doorloopt alle beschikbare strategieën totdat er een resultaat gevonden wordt.
+     *
+     * @param isbn het ISBN van het boek
+     * @return SearchResult (BookResponse) of null indien niet gevonden
+     */
     @Override
     public SearchResult findById(String isbn) {
         logger.info("BookService.findById: ISBN=" + isbn);
@@ -74,14 +92,16 @@ public class BookService implements SearchableService {
         return null;
     }
 
-    private BookApiStrategy findStrategy(String name) {
-        return strategies.stream()
-                .filter(s -> s.getStrategyName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Unknown source: '" + name + "'. Valid values: openlibrary, all"));
-    }
-
+    /**
+     * Zet een Book domain object om naar een BookResponse DTO.
+     * <p>
+     * Bevat extra logica zoals:
+     * - Formattering van auteurs
+     * - Afkorten van lange beschrijvingen
+     *
+     * @param book het domain model
+     * @return DTO geschikt voor API-response
+     */
     private BookResponse toResponse(Book book) {
         String authorDisplay = (book.getAuthors() == null || book.getAuthors().isEmpty())
                 ? "Unknown Author"
@@ -104,6 +124,12 @@ public class BookService implements SearchableService {
         return r;
     }
 
+    /**
+     * Kort een tekst af tot maximaal 300 karakters.
+     *
+     * @param text input tekst
+     * @return afgekorte tekst of fallback tekst indien null
+     */
     private String truncate(String text) {
         if (text == null) return "No description available.";
         return text.length() > 300 ? text.substring(0, 297) + "..." : text;
