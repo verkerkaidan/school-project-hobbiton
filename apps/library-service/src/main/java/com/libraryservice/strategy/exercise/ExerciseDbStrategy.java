@@ -68,20 +68,19 @@ public class ExerciseDbStrategy implements ExerciseApiStrategy {
      * @return gestructureerd Exercise object
      */
     private Exercise mapToExercise(Map<String, Object> raw) {
-        Exercise exercise = new Exercise();
-        exercise.setExerciseId((String) raw.getOrDefault("exerciseId", "unknown"));
-        exercise.setName((String) raw.getOrDefault("name", "Unknown Exercise"));
-        exercise.setBodyParts((List<String>) raw.getOrDefault("bodyParts", Collections.emptyList()));
-        exercise.setTargetMuscles((List<String>) raw.getOrDefault("targetMuscles", Collections.emptyList()));
-        exercise.setSecondaryMuscles((List<String>) raw.getOrDefault("secondaryMuscles", Collections.emptyList()));
-        exercise.setEquipments((List<String>) raw.getOrDefault("equipments", Collections.emptyList()));
-        exercise.setExerciseType((String) raw.getOrDefault("exerciseType", "UNKNOWN"));
-        exercise.setOverview((String) raw.getOrDefault("overview", "No overview available."));
-        exercise.setInstructions((List<String>) raw.getOrDefault("instructions", Collections.emptyList()));
-        exercise.setExerciseTips((List<String>) raw.getOrDefault("exerciseTips", Collections.emptyList()));
-        exercise.setImageUrl((String) raw.getOrDefault("imageUrl", ""));
-        exercise.setVideoUrl((String) raw.getOrDefault("videoUrl", ""));
-        return exercise;
+        return new Exercise(
+                (String) raw.getOrDefault("exerciseId", "unknown"),
+                (String) raw.getOrDefault("name", "Unknown Exercise"),
+                (List<String>) raw.getOrDefault("bodyParts", Collections.emptyList()),
+                (List<String>) raw.getOrDefault("targetMuscles", Collections.emptyList()),
+                (List<String>) raw.getOrDefault("secondaryMuscles", Collections.emptyList()),
+                (List<String>) raw.getOrDefault("equipments", Collections.emptyList()),
+                (String) raw.getOrDefault("exerciseType", "UNKNOWN"),
+                (String) raw.getOrDefault("overview", "No overview available."),
+                (List<String>) raw.getOrDefault("instructions", Collections.emptyList()),
+                (List<String>) raw.getOrDefault("exerciseTips", Collections.emptyList()),
+                (String) raw.getOrDefault("imageUrl", ""),
+                (String) raw.getOrDefault("videoUrl", "")
+        );
     }
-
 }
