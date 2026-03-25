@@ -1,7 +1,7 @@
 package com.postservice.postservice.dao;
 
 import com.postservice.postservice.models.Post;
-import com.postservice.postservice.models.reading.Reading;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -45,10 +45,19 @@ public class PostDAO {
     }
 
     public List<? extends Post> getPostsByHobbyProperty(String propertyType, Pageable pageable) {
-        switch(propertyType){
-            case "GYM": return this.gymRepository.findAllByOrderByCreatedAtDesc(pageable);
-            case "READING": return this.readingRepository.findAllByOrderByCreatedAtDesc(pageable);
-            default: throw new RuntimeException("Post Type not found");
-        }
+        return switch (propertyType) {
+            case "GYM" -> this.gymRepository.findAllByOrderByCreatedAtDesc(pageable);
+            case "READING" -> this.readingRepository.findAllByOrderByCreatedAtDesc(pageable);
+            default -> throw new RuntimeException("Post Type not found");
+        };
+    }
+
+    /**
+     * Transactional is used, because all items in child classes should also be deleted
+     * @param userId userId that is to be deleted
+     */
+    @Transactional
+    public void deletePostsByUserId(UUID userId) {
+        this.postRepository.deleteByUserId(userId);
     }
 }

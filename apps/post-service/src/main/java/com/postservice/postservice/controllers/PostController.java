@@ -1,7 +1,5 @@
 package com.postservice.postservice.controllers;
 
-import com.postservice.postservice.dao.GymRepository;
-import com.postservice.postservice.dao.MediaInstanceRepository;
 import com.postservice.postservice.dao.PostDAO;
 import com.postservice.postservice.dto.PostDTO;
 import com.postservice.postservice.models.MediaInstance;
@@ -24,21 +22,17 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-    private final MediaInstanceRepository mediaInstanceRepository;
-    private final GymRepository gymRepository;
     private final PostDAO postDAO;
 
-    public PostController(PostService postService, MediaInstanceRepository mediaInstanceRepository, GymRepository gymRepository, PostDAO postDAO) {
+    public PostController(PostService postService, PostDAO postDAO) {
         this.postService = postService;
-        this.mediaInstanceRepository = mediaInstanceRepository;
-        this.gymRepository = gymRepository;
         this.postDAO = postDAO;
     }
 
     /**
      * RequestMapping, because @PutMapping and @PostMapping can't be put under each other
      * Updates or creates post
-     * @param postDTO
+     * @param postDTO body of post that is to be made or updated
      * @return ResponseEntity with post inside it
      */
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
@@ -63,8 +57,8 @@ public class PostController {
 
     /**
      * Gets all posts by the user id, if user doesn't exist, 0 fetches.
-     * @param user_id
-     * @return
+     * @param user_id get all posts by user
+     * @return Return a ResponseEntity with a set (list) of posts by user
      */
     @GetMapping("/users/{user_id}")
     public ResponseEntity<Set<Post>> getAllPostsByUserId(@PathVariable UUID user_id) {
@@ -73,8 +67,8 @@ public class PostController {
 
     /**
      * Gets post by postId, always singular
-     * @param post_id
-     * @return
+     * @param post_id fetch by post id
+     * @return if post is found, return post, else throw error in postDAO
      */
     @GetMapping("/{post_id}")
     public ResponseEntity<Post> getPostById(@PathVariable UUID post_id) {
@@ -98,12 +92,24 @@ public class PostController {
 
     /**
      * Delete the post by id, always executes delete query even if post does not exist
-     * @param post_id
+     * @param post_id delete post by post id
      */
     @DeleteMapping("/{post_id}")
     public ResponseEntity<UUID> deletePostById(@PathVariable UUID post_id){
         this.postDAO.deletePostById(post_id);
 
         return ResponseEntity.ok(post_id);
+    }
+
+    /**
+     * Delete based on user_id
+     * @param user_id userId that is to be deleted
+     * @return ResponseEntity 200, response is ok
+     */
+    @DeleteMapping("/users/{user_id}")
+    public ResponseEntity deleteAllPostsByUserId(@PathVariable UUID user_id){
+        this.postDAO.deletePostsByUserId(user_id);
+
+        return ResponseEntity.ok().build();
     }
 }
