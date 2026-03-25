@@ -7,6 +7,8 @@ import com.postservice.postservice.dto.PostDTO;
 import com.postservice.postservice.models.MediaInstance;
 import com.postservice.postservice.models.Post;
 import com.postservice.postservice.services.PostService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,10 +42,21 @@ public class PostController {
      * @return ResponseEntity with post inside it
      */
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
-    public ResponseEntity<Post> save(@RequestBody PostDTO postDTO){
+    public ResponseEntity<Post> save(@RequestBody PostDTO postDTO) {
+        Post post;
+
+        if (postDTO.id != null) {
+            post = this.postDAO.getPostById(postDTO.id);
+            post.setTitle(postDTO.title);
+            post.setDescription(postDTO.description);
+            post.setUserId(postDTO.userId);
+        } else {
+            post = postDTO.toEntity();
+        }
+
         Set<MediaInstance> mediaInstanceSet = new HashSet<>();
-        Post post = postDTO.toEntity(); 
         post.setMediaInstanceSet(this.postService.saveAsSetMediaInstanceFromSetUUID(mediaInstanceSet, postDTO.mediaInstanceSet, post));
+
         this.postDAO.save(post);
         return ResponseEntity.ok(this.postDAO.getPostById(post.getId()));
     }
@@ -74,8 +87,13 @@ public class PostController {
      * @return
      */
     @GetMapping("/hobby/{propertyType}")
-    public ResponseEntity<List<? extends Post>> getPostsByHobbyProperty(@PathVariable String propertyType) {
-        return ResponseEntity.ok(this.postDAO.getPostsByHobbyProperty(propertyType));
+    public ResponseEntity<List<? extends Post>> getPostsByHobbyProperty(
+            @PathVariable String propertyType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pagesize){
+        Pageable pageable = PageRequest.of(page, pagesize);
+
+        return ResponseEntity.ok(this.postDAO.getPostsByHobbyProperty(propertyType, pageable));
     }
 
     /**
@@ -83,7 +101,9 @@ public class PostController {
      * @param post_id
      */
     @DeleteMapping("/{post_id}")
-    public void deletePostById(@PathVariable UUID post_id){
+    public ResponseEntity<UUID> deletePostById(@PathVariable UUID post_id){
         this.postDAO.deletePostById(post_id);
+
+        return ResponseEntity.ok(post_id);
     }
 }
