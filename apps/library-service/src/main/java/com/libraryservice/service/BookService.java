@@ -106,22 +106,20 @@ public class BookService implements SearchableService {
         String authorDisplay = (book.getAuthors() == null || book.getAuthors().isEmpty())
                 ? "Unknown Author"
                 : String.join(" & ", book.getAuthors());
-
-        BookResponse r = new BookResponse();
-        r.setTitle(book.getTitle());
-        r.setAuthorDisplay(authorDisplay);
-        r.setDescription(truncate(book.getDescription()));
-        r.setPublisher(book.getPublisher());
-        r.setPublishedDate(book.getPublishedDate());
-        r.setIsbn(book.getIsbn());
-        r.setPageCount(book.getPageCount());
-        r.setLanguage(book.getLanguage());
-        r.setThumbnailUrl(book.getThumbnailUrl());
-        r.setInfoLink(book.getInfoLink());
-        r.setAverageRating(book.getAverageRating());
-        r.setRatingsCount(book.getRatingsCount());
-        r.setSource(book.getSource());
-        return r;
+        return new BookResponse(
+                book.getTitle(),
+                authorDisplay,
+                truncate(book.getDescription()),
+                book.getPublisher(),
+                book.getPublishedDate(),
+                book.getIsbn(),
+                book.getPageCount(),
+                book.getLanguage(),
+                book.getThumbnailUrl(),
+                book.getInfoLink(),
+                book.getAverageRating(),
+                book.getRatingsCount()
+        );
     }
 
     /**

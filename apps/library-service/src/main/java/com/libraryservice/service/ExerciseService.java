@@ -91,17 +91,17 @@ public class ExerciseService implements SearchableService {
      * @return DTO geschikt voor API-response
      */
     private ExerciseResponse toResponse(Exercise exercise) {
-        ExerciseResponse r = new ExerciseResponse();
-        r.setExerciseId(exercise.getExerciseId());
-        r.setName(exercise.getName());
-        r.setBodyParts(exercise.getBodyParts());
-        r.setTargetMuscles(exercise.getTargetMuscles());
-        r.setSecondaryMuscles(exercise.getSecondaryMuscles());
-        r.setEquipments(exercise.getEquipments());
-        r.setExerciseType(exercise.getExerciseType());
-        r.setOverview(exercise.getOverview());
-        r.setInstructions(exercise.getInstructions());
-        r.setImageUrl(exercise.getImageUrl());
-        return r;
+        return new ExerciseResponse(
+                exercise.getExerciseId(),
+                exercise.getName(),
+                exercise.getBodyParts(),
+                exercise.getTargetMuscles(),
+                exercise.getSecondaryMuscles(),
+                exercise.getEquipments(),
+                exercise.getExerciseType(),
+                exercise.getOverview(),
+                exercise.getInstructions(),
+                exercise.getImageUrl()
+        );
     }
 }
