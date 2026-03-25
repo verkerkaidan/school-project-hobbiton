@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,16 +35,19 @@ public class PostDAOTest {
     @InjectMocks
     private PostDAO postDAO;
 
+    Pageable pageable = PageRequest.of(0, 20);
+
     @Test
     @DisplayName("When property type is 'GYM', all gym posts should be returned from the gym repository")
     void getPostsByHobbyProperty_gymType_returnsGymPosts() {
         List<Gym> gymPosts = List.of(new Gym(), new Gym());
-        when(gymRepository.findAll()).thenReturn(gymPosts);
 
-        List<? extends Post> result = postDAO.getPostsByHobbyProperty("GYM");
+        when(gymRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(gymPosts); // ✅ updated
+
+        List<? extends Post> result = postDAO.getPostsByHobbyProperty("GYM", pageable);
 
         assertThat(result).isEqualTo(gymPosts).hasSize(2);
-        verify(gymRepository, times(1)).findAll();
+        verify(gymRepository, times(1)).findAllByOrderByCreatedAtDesc(pageable); // ✅ updated
         verifyNoInteractions(readingRepository);
     }
 
@@ -50,19 +55,21 @@ public class PostDAOTest {
     @DisplayName("When property type is 'READING', all reading posts should be returned from the reading repository")
     void getPostsByHobbyProperty_readingType_returnsReadingPosts() {
         List<Reading> readingPosts = List.of(new Reading(), new Reading());
-        when(readingRepository.findAll()).thenReturn(readingPosts);
 
-        List<? extends Post> result = postDAO.getPostsByHobbyProperty("READING");
+        when(readingRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(readingPosts); // ✅ updated
+
+        List<? extends Post> result = postDAO.getPostsByHobbyProperty("READING", pageable);
 
         assertThat(result).isEqualTo(readingPosts).hasSize(2);
-        verify(readingRepository, times(1)).findAll();
+        verify(readingRepository, times(1)).findAllByOrderByCreatedAtDesc(pageable); // ✅ updated
         verifyNoInteractions(gymRepository);
     }
 
     @Test
     @DisplayName("When property type is unrecognized, a RuntimeException should be thrown with message 'Post Type not found'")
     void getPostsByHobbyProperty_unknownType_throwsRuntimeException() {
-        assertThatThrownBy(() -> postDAO.getPostsByHobbyProperty("UNKNOWN"))
+
+        assertThatThrownBy(() -> postDAO.getPostsByHobbyProperty("UNKNOWN", pageable))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Post Type not found");
 
@@ -70,21 +77,21 @@ public class PostDAOTest {
     }
 
     @Test
-    @DisplayName("When property type is 'GYM' and no gyms exist, an empty list should be returned")
+    @DisplayName("When property type is 'GYM' and no gym posts exist, an empty list should be returned")
     void getPostsByHobbyProperty_gymType_noResults_returnsEmptyList() {
-        when(gymRepository.findAll()).thenReturn(Collections.emptyList());
+        when(gymRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(Collections.emptyList()); // ✅ updated
 
-        List<? extends Post> result = postDAO.getPostsByHobbyProperty("GYM");
+        List<? extends Post> result = postDAO.getPostsByHobbyProperty("GYM", pageable);
 
         assertThat(result).isEmpty();
     }
 
     @Test
-    @DisplayName("When property type is 'READING' and no readings exist, an empty list should be returned")
+    @DisplayName("When property type is 'READING' and no reading posts exist, an empty list should be returned")
     void getPostsByHobbyProperty_readingType_noResults_returnsEmptyList() {
-        when(readingRepository.findAll()).thenReturn(Collections.emptyList());
+        when(readingRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(Collections.emptyList()); // ✅ updated
 
-        List<? extends Post> result = postDAO.getPostsByHobbyProperty("READING");
+        List<? extends Post> result = postDAO.getPostsByHobbyProperty("READING", pageable);
 
         assertThat(result).isEmpty();
     }

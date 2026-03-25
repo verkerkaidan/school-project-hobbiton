@@ -3,7 +3,7 @@ package com.postservice.postservice.dao;
 import com.postservice.postservice.models.Post;
 import com.postservice.postservice.models.reading.Reading;
 import org.springframework.stereotype.Component;
-
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,10 +44,10 @@ public class PostDAO {
         this.postRepository.deleteById(postId);
     }
 
-    public List<? extends Post> getPostsByHobbyProperty(String propertyType) {
+    public List<? extends Post> getPostsByHobbyProperty(String propertyType, Pageable pageable) {
         switch(propertyType){
-            case "GYM": return this.gymRepository.findAll();
-            case "READING": return this.readingRepository.findAll();
+            case "GYM": return this.gymRepository.findAllByOrderByCreatedAtDesc(pageable);
+            case "READING": return this.readingRepository.findAllByOrderByCreatedAtDesc(pageable);
             default: throw new RuntimeException("Post Type not found");
         }
     }
