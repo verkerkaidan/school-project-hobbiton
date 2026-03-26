@@ -5,6 +5,9 @@ import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.ReportUpdatedDTO;
 import com.mediaservice.model.FileReport;
 import com.mediaservice.model.MediaFile;
+import com.mediaservice.model.MediaInstance;
+import com.mediaservice.model.ReportedFile;
+import com.mediaservice.repository.ReportedFileRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,9 @@ public class ReportService {
 
     @Autowired
     private ReportDAO reportDAO;
+
+    @Autowired
+    private ReportedFileRepository reportedFileRepository;
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -71,5 +77,16 @@ public class ReportService {
                 "report.updated",
                 event
         );
+    }
+
+    /**
+     * Saves the hash of a deleted file, so it can't be uploaded in the future
+     *
+     * @param fileId, unique identifier of the file that was deleted
+     */
+    public void createNewBannedFile(UUID fileId) {
+        MediaFile mediaFile = mediaService.getMediaFileByFileId(fileId);
+        ReportedFile reportedFile = new ReportedFile(mediaFile.getHash());
+        reportedFileRepository.save(reportedFile);
     }
 }

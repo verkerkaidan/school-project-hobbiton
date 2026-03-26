@@ -170,6 +170,7 @@ public class MediaController {
      */
     @DeleteMapping("/admin/{fileId}")
     public ResponseEntity<UUID> deleteMediaFile(@PathVariable UUID fileId) {
+        reportService.createNewBannedFile(fileId);
         mediaService.deleteMediaFile(fileId);
         return ResponseEntity.ok(fileId);
     }

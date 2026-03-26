@@ -6,6 +6,7 @@ import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
+import com.mediaservice.repository.ReportedFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,9 @@ public class MediaService {
     private MediaInstanceDAO mediaInstanceDAO;
 
     @Autowired
+    private ReportedFileRepository reportedFileRepository;
+
+    @Autowired
     private EncryptionService encryptionService;
 
     @Autowired
@@ -29,6 +33,7 @@ public class MediaService {
 
     /**
      * Used to upload a file.
+     * If the file is banned, throw an error
      * If the file is known, retrieve that file to save a new instance
      * If the file isn't known, save the MediaFile, and use it to save a new instance
      *
@@ -39,6 +44,10 @@ public class MediaService {
     public UUID uploadMediaFile(MediaEntryDTO mediaEntryDTO, UUID ownerId) {
         MediaFile mediaFile;
         byte[] hash = encryptionService.createHash(mediaEntryDTO.fileUri);
+
+        if (reportedFileRepository.existsByHash(hash)) {
+            throw new RuntimeException("This file was banned from this platform");
+        }
 
         if (mediaFileDAO.doesMediaFileExist(hash)) {
             mediaFile = mediaFileDAO.getMediaFile(hash);
@@ -66,6 +75,17 @@ public class MediaService {
         MediaFile mediaFile = mediaFileDAO.getMediaFile(instance.getFileId());
 
         return mediaFile;
+    }
+
+    /**
+     * Retrieves a mediafile using an mediaFile identifier.
+     * Not responsible for checking the existence, that happens a layer down
+     *
+     * @param fileId unique identifier of a MediaFile
+     * @return mediaFile, MediaFile object
+     */
+    public MediaFile getMediaFileByFileId(UUID fileId) {
+        return mediaFileDAO.getMediaFile(fileId);
     }
 
     /**
