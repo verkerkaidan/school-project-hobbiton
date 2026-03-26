@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build:
+      context: ./apps/hobby-frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - microservices-network
+
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
@@ -10,10 +20,9 @@ services:
       - "8000:80"
     volumes:
       - ./pgadmin-data:/var/lib/pgadmin
-    links:
-      - "database:database"
     networks:
       - microservices-network
+
   database:
     image: postgres:16
     container_name: db
@@ -40,9 +49,10 @@ services:
       start_period: 10s
 
   post-service:
-    build: ./apps/post-service
-    restart: always
+    build:
+      context: ./apps/post-service
     container_name: post-service
+    restart: always
     ports:
       - "8080:8080"
     environment:
@@ -60,7 +70,8 @@ services:
         condition: service_healthy
 
   profile-connection-service:
-    build: ./apps/profile-connection-service
+    build:
+      context: ./apps/profile-connection-service
     container_name: profile-connection-service
     restart: always
     ports:
@@ -80,7 +91,8 @@ services:
         condition: service_healthy
 
   media-service:
-    build: ./apps/media-service
+    build:
+      context: ./apps/media-service
     container_name: media-service
     restart: always
     ports:
@@ -100,7 +112,8 @@ services:
         condition: service_healthy
 
   feed-service:
-    build: ./apps/feed-service
+    build:
+      context: ./apps/feed-service
     container_name: feed-service
     restart: always
     ports:
@@ -120,7 +133,8 @@ services:
         condition: service_healthy
 
   recognition-service:
-    build: ./apps/recognition-service
+    build:
+      context: ./apps/recognition-service
     container_name: recognition-service
     restart: always
     ports:
@@ -131,7 +145,8 @@ services:
       - microservices-network
 
   library-service:
-    build: ./apps/library-service
+    build:
+      context: ./apps/library-service
     container_name: library-service
     restart: no
     ports:
@@ -154,5 +169,6 @@ networks:
   microservices-network:
     name: microservices-network
     driver: bridge
+
 volumes:
   postgres_data:
