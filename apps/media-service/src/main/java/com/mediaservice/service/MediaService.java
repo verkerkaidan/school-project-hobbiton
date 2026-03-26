@@ -148,7 +148,7 @@ public class MediaService {
      * @param hash, in the form of byte[]
      * @return new MediaFile instance without a connection to database
      */
-    private MediaFile createMediaFile(MediaEntryDTO mediaEntryDTO, byte[] hash) {
+    MediaFile createMediaFile(MediaEntryDTO mediaEntryDTO, byte[] hash) {
         String contentType = compressionService.extractContentType(mediaEntryDTO.fileUri);
         byte[] original = compressionService.decodeDataUri(mediaEntryDTO.fileUri);
         byte[] file = compressionService.resizeToUniform(original);
@@ -162,7 +162,7 @@ public class MediaService {
      *
      * @param mediaFile, MediaFile instance
      */
-    private void addFileThumbnail(MediaFile mediaFile) {
+    void addFileThumbnail(MediaFile mediaFile) {
         Thread thumbThread = new Thread(() -> {
             byte[] thumb = compressionService.resizeToThumb(mediaFile.getOriginal());
             mediaFile.setThumbnail(thumb);
