@@ -141,6 +141,16 @@ public class MediaService {
     }
 
     /**
+     * Deletes all instances related to the given file, and then the file itself
+     *
+     * @param fileId, unique identifier of the file that is to be deleted
+     */
+    public void deleteMediaFile(UUID fileId) {
+        mediaInstanceDAO.deleteInstancesByFile(fileId);
+        mediaFileDAO.deleteMediaFile(fileId);
+    }
+
+    /**
      * Controls the logic for creating a MediaFile from a MediaEntryDTO
      * Resizes all files to be uniform
      *

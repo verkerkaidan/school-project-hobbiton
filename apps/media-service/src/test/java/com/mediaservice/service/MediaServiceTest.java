@@ -250,13 +250,13 @@ public class MediaServiceTest {
                 .deleteMediaInstance(any());
         doNothing()
                 .when(mediaFileDAO)
-                .deleteMediaFile(any());
+                .deleteMediaFile(any(MediaFile.class));
 
         // Act
         mediaService.deleteMediaInstance(mockInstanceId);
 
         // Assert
         verify(mediaFileDAO).getMediaFile(any(UUID.class));
-        verify(mediaFileDAO).deleteMediaFile(any());
+        verify(mediaFileDAO).deleteMediaFile(any(MediaFile.class));
     }
 }

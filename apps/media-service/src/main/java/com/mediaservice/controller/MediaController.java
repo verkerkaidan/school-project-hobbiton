@@ -161,6 +161,20 @@ public class MediaController {
     }
 
     /**
+     * Deleting a mediaFile no matter how many instances are present
+     * Instances are also deleted
+     * Used when an image is simply too harmful
+     *
+     * @param fileId, unique identifier of the MediaFile to be deleted
+     * @return fileId, unique identifier of the deleted MediaFile
+     */
+    @DeleteMapping("/admin/{fileId}")
+    public ResponseEntity<UUID> deleteMediaFile(@PathVariable UUID fileId) {
+        mediaService.deleteMediaFile(fileId);
+        return ResponseEntity.ok(fileId);
+    }
+
+    /**
      * When a user reports a file, the instance is sent, and used to note the file that was reported
      *
      * @param userId, identifier of the user that reported

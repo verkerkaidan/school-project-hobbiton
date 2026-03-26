@@ -26,4 +26,6 @@ public interface MediaFileRepository extends JpaRepository<MediaFile, UUID> {
 
     // Retrieve all files with a contentFlag of "unassigned"
     List<MediaFile> queryMediaFileByContentFlag(ContentFlag contentFlag);
+
+    void deleteMediaFileByFileId(UUID fileId);
 }
