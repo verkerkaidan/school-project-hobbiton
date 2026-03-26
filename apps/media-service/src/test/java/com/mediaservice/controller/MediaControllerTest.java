@@ -72,8 +72,8 @@ class MediaControllerTest {
         UUID fileId1 = UUID.randomUUID();
         UUID fileId2 = UUID.randomUUID();
 
-        ContentFlagUpdateDTO dto1 = new ContentFlagUpdateDTO(ContentFlag.RISK, fileId1);
-        ContentFlagUpdateDTO dto2 = new ContentFlagUpdateDTO(ContentFlag.SAFE, fileId2);
+        ContentFlagUpdateDTO dto1 = new ContentFlagUpdateDTO(ContentFlag.RISK, fileId1, "Test");
+        ContentFlagUpdateDTO dto2 = new ContentFlagUpdateDTO(ContentFlag.SAFE, fileId2, "Test");
 
         List<ContentFlagUpdateDTO> input = List.of(dto1, dto2);
 
