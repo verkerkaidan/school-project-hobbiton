@@ -2,7 +2,9 @@ package com.profileconnectionservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.profileconnectionservice.model.Block;
 
@@ -28,4 +30,16 @@ public interface BlockRepository extends JpaRepository<Block, UUID> {
     // Get all profiles that have blocked this profile
     @Query("SELECT b FROM Block b WHERE b.target = :target")
     List<Block> findByBlocked(UUID target);
+
+    // Delete all blocks where this profile is the blocker
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Block b WHERE b.initiator = :initiator")
+    int deleteByInitiator(UUID initiator);
+
+    // Delete all blocks where this profile is the blocked target
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Block b WHERE b.target = :target")
+    int deleteByTarget(UUID target);
 }

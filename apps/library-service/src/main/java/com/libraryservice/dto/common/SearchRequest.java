@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+
 /**
  * GECENTRALISEERDE SEARCH REQUEST
  * <p>
@@ -32,6 +33,7 @@ import jakarta.validation.constraints.NotNull;
  * - Het 'type' veld bepaalt de routing naar de juiste service
  * - Eenvoudig voor de client: altijd dezelfde endpoint gebruiken
  */
+
 public class SearchRequest {
 
     @NotNull(message = "Type is required: BOOK, EXERCISE, MOVIE")
@@ -44,25 +46,17 @@ public class SearchRequest {
     @Max(value = 40, message = "Maximaal 40 resultaten")
     private int maxResults = 10;
 
-    public SearchRequest() {
-    }
-
     public SearchRequest(SearchType type, String query, int maxResults) {
         this.type = type;
         this.query = query;
         this.maxResults = maxResults;
     }
 
+    public SearchRequest() {
+    }
+
     public SearchType getType() {
         return type;
-    }
-
-    public String getQuery() {
-        return query;
-    }
-
-    public int getMaxResults() {
-        return maxResults;
     }
 
     public void setType(SearchType type) {
@@ -73,7 +67,15 @@ public class SearchRequest {
         this.query = query;
     }
 
+    public int getMaxResults() {
+        return maxResults;
+    }
+
     public void setMaxResults(int maxResults) {
         this.maxResults = maxResults;
+    }
+
+    public String getQuery() {
+        return query;
     }
 }

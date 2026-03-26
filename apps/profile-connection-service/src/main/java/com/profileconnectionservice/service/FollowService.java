@@ -6,16 +6,22 @@ import org.springframework.stereotype.Service;
 import com.profileconnectionservice.model.Follow;
 import com.profileconnectionservice.repository.FollowRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FollowService {
 
     @Autowired
     private FollowRepository followRepository;
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * Toggles follow relationship between two profiles.
@@ -31,7 +37,8 @@ public class FollowService {
             throw new IllegalArgumentException("A profile cannot follow themselves");
         }
 
-        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowing(currentProfileId, targetProfileId);
+        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowing(currentProfileId,
+                targetProfileId);
 
         if (existingFollow.isPresent()) {
             followRepository.delete(existingFollow.get());
@@ -78,5 +85,39 @@ public class FollowService {
                 .stream()
                 .map(Follow::getFollowing)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Delete all follow records associated with a user (both as initiator and
+     * target).
+     * This is used for GDPR compliance and right-to-be-forgotten requests.
+     * 
+     * @param userUUID the user whose follow records should be deleted
+     * @return the total number of follow records deleted
+     */
+    public int deleteAllUserData(UUID userUUID) {
+        log.info("Starting deletion of all follow data for user: {}", userUUID);
+        try {
+            // Delete all follows where the user is the initiator (follower)
+            int deletedAsInitiator = followRepository.deleteByInitiator(userUUID);
+            log.trace("Deleted {} follows where user was initiator", deletedAsInitiator);
+
+            // Delete all follows where the user is the target (being followed)
+            int deletedAsTarget = followRepository.deleteByTarget(userUUID);
+            log.trace("Deleted {} follows where user was target", deletedAsTarget);
+
+            int totalDeleted = deletedAsInitiator + deletedAsTarget;
+            log.debug("Total follows deleted for user {}: {}", userUUID, totalDeleted);
+
+            // Log the deletion for audit trail
+            String details = String.format("Deleted as initiator: %d, as target: %d", deletedAsInitiator,
+                    deletedAsTarget);
+            auditLogService.logDeletion(userUUID, "FOLLOW", totalDeleted, details);
+
+            return totalDeleted;
+        } catch (Exception e) {
+            log.error("Error deleting follow data for user {}: {}", userUUID, e.getMessage(), e);
+            throw e;
+        }
     }
 }

@@ -3,8 +3,5 @@
   "version": "0.1.0",
   "description": "BPSEE Proof of Concept - 10 week project",
   "private": true,
-  "packageManager": "npm@10.9.0",
-  "workspaces": [
-    "apps/*"
-  ]
+  "packageManager": "npm@10.9.0"
 }

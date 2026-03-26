@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  * <p>
  * Wordt gebruikt door controllers om uniforme responses terug te geven.
  */
+
 public class ApiResponse<T> {
 
     private boolean success;
@@ -22,15 +23,7 @@ public class ApiResponse<T> {
     private T data;
     private LocalDateTime timestamp;
 
-    public ApiResponse() {
-    }
-
-    public ApiResponse(boolean success, String message, int totalResults, T data, LocalDateTime timestamp) {
-        this.success = success;
-        this.message = message;
-        this.totalResults = totalResults;
-        this.data = data;
-        this.timestamp = timestamp;
+    public ApiResponse(boolean b, String message, int total, T data, LocalDateTime now) {
     }
 
     /**
@@ -55,43 +48,4 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, 0, null, LocalDateTime.now());
     }
 
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public int getTotalResults() {
-        return totalResults;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setTotalResults(int totalResults) {
-        this.totalResults = totalResults;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }

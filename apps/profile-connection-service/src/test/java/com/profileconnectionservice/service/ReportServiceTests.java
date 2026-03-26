@@ -24,6 +24,9 @@ class ReportServiceTests {
     @Mock
     private ReportRepository reportRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private ReportService reportService;
 
@@ -213,5 +216,73 @@ class ReportServiceTests {
 
         // Assert
         verify(reportRepository, times(1)).deleteById(reportId);
+    }
+
+    // ========== deleteAllUserData Tests ==========
+
+    @Test
+    void deleteAllUserData_WithValidUser_DeletesReportsAndReturnsCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        int deletedAsInitiator = 5;
+        int deletedAsTarget = 3;
+        when(reportRepository.deleteByInitiator(userId)).thenReturn(deletedAsInitiator);
+        when(reportRepository.deleteByTarget(userId)).thenReturn(deletedAsTarget);
+
+        // Act
+        int result = reportService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(8, result);
+        verify(reportRepository, times(1)).deleteByInitiator(userId);
+        verify(reportRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithReportedByOnly_ReturnsOnlyInitiatorCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(reportRepository.deleteByInitiator(userId)).thenReturn(4);
+        when(reportRepository.deleteByTarget(userId)).thenReturn(0);
+
+        // Act
+        int result = reportService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(4, result);
+        verify(reportRepository, times(1)).deleteByInitiator(userId);
+        verify(reportRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithReportedAboutOnly_ReturnsOnlyTargetCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(reportRepository.deleteByInitiator(userId)).thenReturn(0);
+        when(reportRepository.deleteByTarget(userId)).thenReturn(6);
+
+        // Act
+        int result = reportService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(6, result);
+        verify(reportRepository, times(1)).deleteByInitiator(userId);
+        verify(reportRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithZeroReports_ReturnsZero() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(reportRepository.deleteByInitiator(userId)).thenReturn(0);
+        when(reportRepository.deleteByTarget(userId)).thenReturn(0);
+
+        // Act
+        int result = reportService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(0, result);
+        verify(reportRepository, times(1)).deleteByInitiator(userId);
+        verify(reportRepository, times(1)).deleteByTarget(userId);
     }
 }

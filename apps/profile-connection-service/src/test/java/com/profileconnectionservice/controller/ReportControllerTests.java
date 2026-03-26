@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.profileconnectionservice.TestFixtures;
 import com.profileconnectionservice.config.TestSecurityConfiguration;
 import com.profileconnectionservice.controller.dto.CreateReportRequest;
+import com.profileconnectionservice.model.AuditLog;
 import com.profileconnectionservice.model.Report;
+import com.profileconnectionservice.service.AuditLogService;
 import com.profileconnectionservice.service.ReportService;
 
 @WebMvcTest(ReportController.class)
@@ -36,6 +38,9 @@ class ReportControllerTests {
 
         @MockBean
         private ReportService reportService;
+
+        @MockBean
+        private AuditLogService auditLogService;
 
         @Autowired
         private ObjectMapper objectMapper;
@@ -241,5 +246,82 @@ class ReportControllerTests {
                 mockMvc.perform(delete("/reports/{reportId}", reportId))
                                 .andExpect(status().isNoContent());
                 verify(reportService, times(1)).deleteReport(reportId);
+        }
+
+        // ========== deleteUserData Tests ==========
+
+        @Test
+        void deleteUserData_WithValidUserId_ReturnsOkWithDeletionSummary() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                int deletedCount = 9;
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(reportService.deleteAllUserData(userId)).thenReturn(deletedCount);
+                when(auditLogService.logDeletion(userId, "REPORT", deletedCount)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/reports/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(deletedCount)))
+                                .andExpect(jsonPath("$.auditLogId").exists())
+                                .andExpect(jsonPath("$.timestamp").exists())
+                                .andExpect(jsonPath("$.message").exists());
+
+                verify(reportService, times(1)).deleteAllUserData(userId);
+        }
+
+        @Test
+        void deleteUserData_WithReportedByAndAbout_ReturnsTotalCount() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                int deletedCount = 18; // 10 reported by + 8 reported about
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(reportService.deleteAllUserData(userId)).thenReturn(deletedCount);
+                when(auditLogService.logDeletion(userId, "REPORT", deletedCount)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/reports/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(deletedCount)))
+                                .andExpect(jsonPath("$.message", containsString("18")));
+
+                verify(reportService, times(1)).deleteAllUserData(userId);
+        }
+
+        @Test
+        void deleteUserData_WithNoReports_ReturnsZero() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(reportService.deleteAllUserData(userId)).thenReturn(0);
+                when(auditLogService.logDeletion(userId, "REPORT", 0)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/reports/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(0)));
+
+                verify(reportService, times(1)).deleteAllUserData(userId);
+        }
+
+        @Test
+        void deleteUserData_WithHighReportCount_ReturnsLargeCount() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                int deletedCount = 150;
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(reportService.deleteAllUserData(userId)).thenReturn(deletedCount);
+                when(auditLogService.logDeletion(userId, "REPORT", deletedCount)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/reports/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(deletedCount)));
+
+                verify(reportService, times(1)).deleteAllUserData(userId);
         }
 }
