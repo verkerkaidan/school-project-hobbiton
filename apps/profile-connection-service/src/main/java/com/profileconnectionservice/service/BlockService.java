@@ -7,11 +7,14 @@ import com.profileconnectionservice.model.Block;
 import com.profileconnectionservice.repository.BlockRepository;
 import com.profileconnectionservice.repository.FollowRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class BlockService {
 
@@ -20,6 +23,9 @@ public class BlockService {
 
     @Autowired
     private FollowRepository followRepository;
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * Toggles block relationship between two profiles.
@@ -89,5 +95,39 @@ public class BlockService {
                 .stream()
                 .map(Block::getBlocked)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Delete all block records associated with a user (both as initiator and
+     * target).
+     * This is used for GDPR compliance and right-to-be-forgotten requests.
+     * 
+     * @param userUUID the user whose block records should be deleted
+     * @return the total number of block records deleted
+     */
+    public int deleteAllUserData(UUID userUUID) {
+        log.info("Starting deletion of all block data for user: {}", userUUID);
+        try {
+            // Delete all blocks where the user is the initiator (blocker)
+            int deletedAsInitiator = blockRepository.deleteByInitiator(userUUID);
+            log.trace("Deleted {} blocks where user was initiator", deletedAsInitiator);
+
+            // Delete all blocks where the user is the target (blocked)
+            int deletedAsTarget = blockRepository.deleteByTarget(userUUID);
+            log.trace("Deleted {} blocks where user was target", deletedAsTarget);
+
+            int totalDeleted = deletedAsInitiator + deletedAsTarget;
+            log.debug("Total blocks deleted for user {}: {}", userUUID, totalDeleted);
+
+            // Log the deletion for audit trail
+            String details = String.format("Deleted as initiator: %d, as target: %d", deletedAsInitiator,
+                    deletedAsTarget);
+            auditLogService.logDeletion(userUUID, "BLOCK", totalDeleted, details);
+
+            return totalDeleted;
+        } catch (Exception e) {
+            log.error("Error deleting block data for user {}: {}", userUUID, e.getMessage(), e);
+            throw e;
+        }
     }
 }

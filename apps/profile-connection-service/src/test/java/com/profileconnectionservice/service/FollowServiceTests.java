@@ -25,6 +25,9 @@ class FollowServiceTests {
     @Mock
     private FollowRepository followRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private FollowService followService;
 
@@ -147,6 +150,58 @@ class FollowServiceTests {
         assertEquals(2, result.size());
         assertTrue(result.contains(followingId1));
         assertTrue(result.contains(followingId2));
+    }
+
+    // ========== deleteAllUserData Tests ==========
+
+    @Test
+    void deleteAllUserData_WithValidUser_DeletesFollowsAndReturnsCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        int deletedAsInitiator = 7;
+        int deletedAsTarget = 3;
+        when(followRepository.deleteByInitiator(userId)).thenReturn(deletedAsInitiator);
+        when(followRepository.deleteByTarget(userId)).thenReturn(deletedAsTarget);
+
+        // Act
+        int result = followService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(10, result);
+        verify(followRepository, times(1)).deleteByInitiator(userId);
+        verify(followRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithFollowerOnly_ReturnsOnlyFollowerCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(followRepository.deleteByInitiator(userId)).thenReturn(5);
+        when(followRepository.deleteByTarget(userId)).thenReturn(0);
+
+        // Act
+        int result = followService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(5, result);
+        verify(followRepository, times(1)).deleteByInitiator(userId);
+        verify(followRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithFollowingOnly_ReturnsOnlyFollowingCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(followRepository.deleteByInitiator(userId)).thenReturn(0);
+        when(followRepository.deleteByTarget(userId)).thenReturn(8);
+
+        // Act
+        int result = followService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(8, result);
+        verify(followRepository, times(1)).deleteByInitiator(userId);
+        verify(followRepository, times(1)).deleteByTarget(userId);
     }
 
 }

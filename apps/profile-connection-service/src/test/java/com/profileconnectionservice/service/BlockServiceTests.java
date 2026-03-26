@@ -30,6 +30,9 @@ class BlockServiceTests {
     @Mock
     private FollowRepository followRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private BlockService blockService;
 
@@ -186,6 +189,53 @@ class BlockServiceTests {
         assertEquals(2, result.size());
         assertTrue(result.contains(blockedId1));
         assertTrue(result.contains(blockedId2));
+    }
+
+    // ========== deleteAllUserData Tests ==========
+
+    @Test
+    void deleteAllUserData_WithValidUser_DeletesBlocksAndReturnsCount() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        int deletedAsInitiator = 3;
+        int deletedAsTarget = 2;
+        when(blockRepository.deleteByInitiator(userId)).thenReturn(deletedAsInitiator);
+        when(blockRepository.deleteByTarget(userId)).thenReturn(deletedAsTarget);
+
+        // Act
+        int result = blockService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(5, result);
+        verify(blockRepository, times(1)).deleteByInitiator(userId);
+        verify(blockRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WithNoRecords_ReturnsZero() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(blockRepository.deleteByInitiator(userId)).thenReturn(0);
+        when(blockRepository.deleteByTarget(userId)).thenReturn(0);
+
+        // Act
+        int result = blockService.deleteAllUserData(userId);
+
+        // Assert
+        assertEquals(0, result);
+        verify(blockRepository, times(1)).deleteByInitiator(userId);
+        verify(blockRepository, times(1)).deleteByTarget(userId);
+    }
+
+    @Test
+    void deleteAllUserData_WhenDeleted_Succeeds() {
+        // Arrange
+        UUID userId = TestFixtures.PROFILE_ID_1;
+        when(blockRepository.deleteByInitiator(userId)).thenReturn(10);
+        when(blockRepository.deleteByTarget(userId)).thenReturn(5);
+
+        // Act & Assert - should not throw
+        assertDoesNotThrow(() -> blockService.deleteAllUserData(userId));
     }
 
 }
