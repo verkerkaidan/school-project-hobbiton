@@ -19,11 +19,11 @@ public class JWTUtil {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    public String generateToken(String email) throws IllegalArgumentException, JWTCreationException {
+    public String generateToken(String userId) throws IllegalArgumentException, JWTCreationException {
 
         return JWT.create()
                 .withSubject("User Details")
-                .withClaim("email", email)
+                .withClaim("userId", userId)
                 .withIssuedAt(new Date())
                 .withExpiresAt(this.createExpirationDate())
                 .withIssuer(issuer)
@@ -36,7 +36,7 @@ public class JWTUtil {
                 .withIssuer(issuer)
                 .build();
         DecodedJWT jwt = verifier.verify(token);
-        return jwt.getClaim("email").asString();
+        return jwt.getClaim("userId").asString();
     }
 
     private Date createExpirationDate(){
