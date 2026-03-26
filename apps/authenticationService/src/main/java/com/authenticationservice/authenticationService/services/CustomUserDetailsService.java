@@ -28,16 +28,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-        public UserDetails loadUserByUsername(String email)
+        public UserDetails loadUserByUsername(String userId)
                 throws UsernameNotFoundException {
 
-            Optional<CustomUser> optionalUser = userRepository.findByEmail(email);
+            Optional<CustomUser> optionalUser = userRepository.findById(UUID.fromString(userId));
 
             if (optionalUser.isEmpty()) {
                 return new org.springframework.security.core.userdetails.User(
                         " ", " ", true, true, true, true,
                         getAuthorities(Collections.singletonList(
-                                roleRepository.findByName("ROLE_USER"))));
+                                roleRepository.findByName("ROLE_USER"))
+                        )
+                );
             }
 
             CustomUser user = optionalUser.get();
