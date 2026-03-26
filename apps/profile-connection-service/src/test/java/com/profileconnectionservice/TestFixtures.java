@@ -30,6 +30,9 @@ public class TestFixtures {
     public static final UUID FOLLOW_ID_1 = UUID.fromString("880e8400-e29b-41d4-a716-446655440000");
     public static final UUID FOLLOW_ID_2 = UUID.fromString("880e8400-e29b-41d4-a716-446655440001");
 
+    // Test AuditLog IDs
+    public static final UUID AUDIT_LOG_ID_1 = UUID.fromString("990e8400-e29b-41d4-a716-446655440000");
+
     /**
      * Creates a Block entity with the given blocker and blocked profile IDs.
      */

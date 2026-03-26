@@ -2,7 +2,9 @@ package com.profileconnectionservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.profileconnectionservice.model.Follow;
 
@@ -28,4 +30,16 @@ public interface FollowRepository extends JpaRepository<Follow, UUID> {
     // Get all followers of a profile (profiles who follow this profile)
     @Query("SELECT f FROM Follow f WHERE f.target = :target")
     List<Follow> findByFollowing(UUID target);
+
+    // Delete all follows where this profile is the follower
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Follow f WHERE f.initiator = :initiator")
+    int deleteByInitiator(UUID initiator);
+
+    // Delete all follows where this profile is the target being followed
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Follow f WHERE f.target = :target")
+    int deleteByTarget(UUID target);
 }

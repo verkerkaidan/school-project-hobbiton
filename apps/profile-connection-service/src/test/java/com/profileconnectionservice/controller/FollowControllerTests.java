@@ -1,6 +1,6 @@
 package com.profileconnectionservice.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.profileconnectionservice.TestFixtures;
 import com.profileconnectionservice.config.TestSecurityConfiguration;
+import com.profileconnectionservice.model.AuditLog;
+import com.profileconnectionservice.service.AuditLogService;
 import com.profileconnectionservice.service.FollowService;
 
 @WebMvcTest(FollowController.class)
@@ -32,6 +34,9 @@ class FollowControllerTests {
 
         @MockBean
         private FollowService followService;
+
+        @MockBean
+        private AuditLogService auditLogService;
 
         private UUID currentProfileId;
         private UUID targetProfileId;
@@ -100,5 +105,64 @@ class FollowControllerTests {
                 mockMvc.perform(get("/follows/{profileId}/following", currentProfileId))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.length()", is(2)));
+        }
+
+        // ========== deleteUserData Tests ==========
+
+        @Test
+        void deleteUserData_WithValidUserId_ReturnsOkWithDeletionSummary() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                int deletedCount = 12;
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(followService.deleteAllUserData(userId)).thenReturn(deletedCount);
+                when(auditLogService.logDeletion(userId, "FOLLOW", deletedCount)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/follows/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(deletedCount)))
+                                .andExpect(jsonPath("$.auditLogId").exists())
+                                .andExpect(jsonPath("$.timestamp").exists())
+                                .andExpect(jsonPath("$.message").exists());
+
+                verify(followService, times(1)).deleteAllUserData(userId);
+        }
+
+        @Test
+        void deleteUserData_WithFollowsAndFollowers_ReturnsTotalCount() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                int deletedCount = 25; // 15 following + 10 followers
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(followService.deleteAllUserData(userId)).thenReturn(deletedCount);
+                when(auditLogService.logDeletion(userId, "FOLLOW", deletedCount)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/follows/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(deletedCount)))
+                                .andExpect(jsonPath("$.message", containsString("25")));
+
+                verify(followService, times(1)).deleteAllUserData(userId);
+        }
+
+        @Test
+        void deleteUserData_WithNoFollows_ReturnsZero() throws Exception {
+                // Arrange
+                UUID userId = TestFixtures.PROFILE_ID_1;
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(TestFixtures.AUDIT_LOG_ID_1);
+                when(followService.deleteAllUserData(userId)).thenReturn(0);
+                when(auditLogService.logDeletion(userId, "FOLLOW", 0)).thenReturn(auditLog);
+
+                // Act & Assert
+                mockMvc.perform(delete("/follows/user/{userUUID}", userId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.deletedCount", is(0)));
+
+                verify(followService, times(1)).deleteAllUserData(userId);
         }
 }
