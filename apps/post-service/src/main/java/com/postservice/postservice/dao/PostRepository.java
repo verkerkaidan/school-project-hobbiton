@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface PostRepository extends JpaRepository<Post, UUID> {
     Set<Post> findByUserId(UUID userId);
+
+    void deleteByUserId(UUID userId);
 //    Set<Post> findByProperty(String property);
 }
