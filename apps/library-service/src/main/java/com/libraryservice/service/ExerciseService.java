@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
  * <p>
  * Design pattern:
  * - Strategy Pattern: gebruikt ExerciseApiStrategy voor externe API calls
- * - Meerdere strategieën mogelijk (bijv. verschillende exercise API’s)
  * <p>
  * Verantwoordelijkheden:
  * - Aanroepen van de juiste strategy
@@ -31,10 +30,10 @@ public class ExerciseService implements SearchableService {
 
     private static final Logger logger = Logger.getLogger(ExerciseService.class.getName());
 
-    private final List<ExerciseApiStrategy> strategies;
+    private final ExerciseApiStrategy exerciseApiStrategy;
 
-    public ExerciseService(List<ExerciseApiStrategy> strategies) {
-        this.strategies = strategies;
+    public ExerciseService(ExerciseApiStrategy exerciseApiStrategy) {
+        this.exerciseApiStrategy = exerciseApiStrategy;
     }
 
     @Override
@@ -57,10 +56,9 @@ public class ExerciseService implements SearchableService {
     public List<SearchResult> search(SearchRequest request) {
         logger.info("ExerciseService.search: query='" + request.getQuery() + "'");
 
-        ExerciseApiStrategy strategy = strategies.getFirst();
+        List<Exercise> exercises = exerciseApiStrategy.searchExercises(request.getQuery(), request.getMaxResults());
 
-        return strategy.searchExercises(request.getQuery(), request.getMaxResults())
-                .stream()
+        return exercises.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -68,7 +66,6 @@ public class ExerciseService implements SearchableService {
     /**
      * Haalt één specifieke oefening op via ID.
      * <p>
-     * Probeert alle beschikbare strategieën totdat een resultaat gevonden wordt.
      *
      * @param exerciseId uniek ID van de oefening
      * @return SearchResult (ExerciseResponse) of null indien niet gevonden
@@ -77,11 +74,8 @@ public class ExerciseService implements SearchableService {
     public SearchResult findById(String exerciseId) {
         logger.info("ExerciseService.findById: " + exerciseId);
 
-        for (ExerciseApiStrategy strategy : strategies) {
-            Exercise exercise = strategy.findById(exerciseId);
-            if (exercise != null) return toResponse(exercise);
-        }
-        return null;
+        Exercise exercise = exerciseApiStrategy.findById(exerciseId);
+        return (exercise != null) ? toResponse(exercise) : null;
     }
 
     /**
@@ -101,7 +95,7 @@ public class ExerciseService implements SearchableService {
                 exercise.getExerciseType(),
                 exercise.getOverview(),
                 exercise.getInstructions(),
-                exercise.getImageUrl()
+                exercise.getGifUrl()
         );
     }
 }

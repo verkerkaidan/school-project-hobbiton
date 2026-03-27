@@ -1,5 +1,6 @@
 package com.libraryservice.dto.exercise;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.libraryservice.dto.common.SearchResult;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * equipments, exerciseType, overview, instructions, imageUrl
  */
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ExerciseResponse implements SearchResult {
 
     private String exerciseId;
@@ -26,90 +28,59 @@ public class ExerciseResponse implements SearchResult {
     private String exerciseType;
     private String overview;
     private List<String> instructions;
-    private String imageUrl;
+    private String gifUrl;
 
-    public ExerciseResponse(String exerciseId, String name, List<String> bodyParts, List<String> targetMuscles, List<String> secondaryMuscles, List<String> equipments, String exerciseType, String overview, List<String> instructions, String imageUrl) {
+    public ExerciseResponse(String exerciseId, String name, List<String> bodyParts, List<String> targetMuscles, List<String> secondaryMuscles, List<String> equipments, String exerciseType, String overview, List<String> instructions, String gifUrl) {
+        this.exerciseId = exerciseId;
+        this.name = name;
+        this.bodyParts = bodyParts;
+        this.targetMuscles = targetMuscles;
+        this.secondaryMuscles = secondaryMuscles;
+        this.equipments = equipments;
+        this.exerciseType = exerciseType;
+        this.overview = overview;
+        this.instructions = instructions;
+        this.gifUrl = gifUrl;
     }
 
     public String getExerciseId() {
         return exerciseId;
     }
 
-
-    public void setExerciseId(String exerciseId) {
-        this.exerciseId = exerciseId;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<String> getBodyParts() {
         return bodyParts;
     }
 
-    public void setBodyParts(List<String> bodyParts) {
-        this.bodyParts = bodyParts;
-    }
-
     public List<String> getTargetMuscles() {
         return targetMuscles;
-    }
-
-    public void setTargetMuscles(List<String> targetMuscles) {
-        this.targetMuscles = targetMuscles;
     }
 
     public List<String> getSecondaryMuscles() {
         return secondaryMuscles;
     }
 
-    public void setSecondaryMuscles(List<String> secondaryMuscles) {
-        this.secondaryMuscles = secondaryMuscles;
-    }
-
     public List<String> getEquipments() {
         return equipments;
-    }
-
-    public void setEquipments(List<String> equipments) {
-        this.equipments = equipments;
     }
 
     public String getExerciseType() {
         return exerciseType;
     }
 
-    public void setExerciseType(String exerciseType) {
-        this.exerciseType = exerciseType;
-    }
-
     public String getOverview() {
         return overview;
-    }
-
-    public void setOverview(String overview) {
-        this.overview = overview;
     }
 
     public List<String> getInstructions() {
         return instructions;
     }
 
-    public void setInstructions(List<String> instructions) {
-        this.instructions = instructions;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public String getGifUrl() {
+        return gifUrl;
     }
 
     @Override
