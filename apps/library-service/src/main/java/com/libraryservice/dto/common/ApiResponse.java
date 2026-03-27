@@ -23,7 +23,12 @@ public class ApiResponse<T> {
     private T data;
     private LocalDateTime timestamp;
 
-    public ApiResponse(boolean b, String message, int total, T data, LocalDateTime now) {
+    public ApiResponse(boolean success, String message, int totalResults, T data, LocalDateTime timestamp) {
+        this.success = success;
+        this.message = message;
+        this.totalResults = totalResults;
+        this.data = data;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -48,4 +53,23 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, 0, null, LocalDateTime.now());
     }
 
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public int getTotalResults() {
+        return totalResults;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
 }
