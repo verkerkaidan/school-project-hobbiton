@@ -48,7 +48,7 @@ public class CompressionService {
         int size = 1600;
         float quality = 0.8f;
 
-        return this.resize(input, size, quality);
+        return this.resize(input, size, quality, "");
     }
 
     /**
@@ -58,10 +58,10 @@ public class CompressionService {
      * @return byte[], compressed thumbnail file
      */
     public byte[] resizeToThumb(byte[] input) {
-        int size = 300;
-        float quality = 0.7f;
+        int size = 200;
+        float quality = 0.5f;
 
-        return this.resize(input, size, quality);
+        return this.resize(input, size, quality, "jpg");
     }
 
     /**
@@ -72,14 +72,22 @@ public class CompressionService {
      * @param quality, float that decides quality percentage
      * @return byte[], compressed file
      */
-    private byte[] resize(byte[] input, int size, float quality) {
+    private byte[] resize(byte[] input, int size, float quality, String format) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
-            Thumbnails.of(new ByteArrayInputStream(input))
-                    .size(size, size)
-                    .outputFormat("png")
-                    .outputQuality(quality)
-                    .toOutputStream(output);
+            if (format != "") {
+                Thumbnails.of(new ByteArrayInputStream(input))
+                        .size(size, size)
+                        .outputQuality(quality)
+                        .outputFormat(format)
+                        .toOutputStream(output);
+            }
+            else {
+                Thumbnails.of(new ByteArrayInputStream(input))
+                        .size(size, size)
+                        .outputQuality(quality)
+                        .toOutputStream(output);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
