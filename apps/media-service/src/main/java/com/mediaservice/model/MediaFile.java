@@ -79,6 +79,10 @@ public class MediaFile {
         return fileId;
     }
 
+    public void setFileId(UUID fileId) {
+        this.fileId = fileId;
+    }
+
     public String getContentType() {
         return contentType;
     }
