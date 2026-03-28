@@ -5,7 +5,6 @@ import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.ReportUpdatedDTO;
 import com.mediaservice.model.FileReport;
 import com.mediaservice.model.MediaFile;
-import com.mediaservice.model.MediaInstance;
 import com.mediaservice.model.ReportedFile;
 import com.mediaservice.repository.ReportedFileRepository;
 import jakarta.transaction.Transactional;
@@ -18,21 +17,21 @@ import java.util.UUID;
 
 @Service
 public class ReportService {
-    @Autowired
-    private MediaService mediaService;
-
-    @Autowired
-    private ReportDAO reportDAO;
-
-    @Autowired
-    private ReportedFileRepository reportedFileRepository;
-
+    private final MediaService mediaService;
+    private final ReportDAO reportDAO;
+    private final ReportedFileRepository reportedFileRepository;
     private final RabbitTemplate rabbitTemplate;
 
-    public ReportService(RabbitTemplate rabbitTemplate) {
+    @Autowired
+    public ReportService(MediaService mediaService,
+                         ReportDAO reportDAO,
+                         ReportedFileRepository reportedFileRepository,
+                         RabbitTemplate rabbitTemplate) {
+        this.mediaService = mediaService;
+        this.reportDAO = reportDAO;
+        this.reportedFileRepository = reportedFileRepository;
         this.rabbitTemplate = rabbitTemplate;
     }
-
     /**
      * Creating a new report using a userId and the identifier of the instance that was reported
      *
@@ -88,9 +87,7 @@ public class ReportService {
      */
     public void createNewBannedFile(UUID fileId) {
         MediaFile mediaFile = mediaService.getMediaFileByFileId(fileId);
-        System.out.println("[REPORTSERVICE createNewBannedFile] mediaFile: " + mediaFile.toString());
         ReportedFile reportedFile = new ReportedFile(mediaFile.getHash());
-        System.out.println("[REPORTSERVICE createNewBannedFile] mediaFile: " + reportedFile.getFileId());
         reportedFileRepository.save(reportedFile);
     }
 
