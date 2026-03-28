@@ -70,8 +70,8 @@ public class AuthController {
                 CustomUser registeredUser = new CustomUser(registerRequest.email, encodedPassword, role);
 
                 userRepository.save(registeredUser);
-                String token = jwtUtil.generateToken(registeredUser.getEmail());
-                AuthenticationResponse authResponse = new AuthenticationResponse(registeredUser.getEmail(), token);
+                String token = jwtUtil.generateToken(String.valueOf(registeredUser.getId()));
+                AuthenticationResponse authResponse = new AuthenticationResponse(registeredUser.getId(), token);
                 return ResponseEntity.ok(authResponse);
         }
 
@@ -87,8 +87,6 @@ public class AuthController {
 
                 authManager.authenticate(authInputToken);
 
-                String token = jwtUtil.generateToken(body.email);
-
                 Optional<CustomUser> customUserOptional = userRepository.findByEmail(body.email);
                 if(customUserOptional.isEmpty()){
                         throw new ResponseStatusException(
@@ -96,7 +94,8 @@ public class AuthController {
                         );
                 }
                 CustomUser customUser = customUserOptional.get();
-                AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getEmail(), token);
+                String token = jwtUtil.generateToken(String.valueOf(customUser.getId()));
+                AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getId(), token);
 
                 return ResponseEntity.ok(loginResponse);
 

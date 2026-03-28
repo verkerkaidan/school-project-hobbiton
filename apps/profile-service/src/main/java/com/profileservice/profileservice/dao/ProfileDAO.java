@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,32 +26,32 @@ public class ProfileDAO {
         }
         Profile profile = optionalProfile.get();
 
-        if(!profileDTO.username.isEmpty()) {
+        if(!(profileDTO.username == null)) {
             profile.setUsername(profileDTO.username);
         }
-        if(!profileDTO.name.isEmpty()) {
+        if(!(profileDTO.name == null)) {
             profile.setName(profileDTO.name);
         }
-        if(!profileDTO.biography.isEmpty()) {
+        if(!(profileDTO.biography == null)) {
             // check if this is not too long?
             profile.setBiography(profileDTO.biography);
         }
-        if(!profileDTO.imageUrl.isEmpty()) {
-            String image_url = CredentialValidator.validateImageUrl(profileDTO.imageUrl);
-            profile.setImageUrl(image_url);
+        if(!(profileDTO.mediaPointer == null)){
+            String mediaPointer = CredentialValidator.validateMediaPointer(profileDTO.mediaPointer);
+            profile.setMediaPointer(mediaPointer);
         }
-        if(!profileDTO.link.isEmpty()) {
+        if(!(profileDTO.link == null)) {
             profile.setLink(profileDTO.link);
         }
-        if(!profileDTO.location.isEmpty()) {
+        if(!(profileDTO.location == null)) {
             profile.setLocation(profileDTO.location);
         }
-
+        profile.setLastEdited(OffsetDateTime.now());
         return profile;
     }
 
     public Profile createProfile(UUID userId, ProfileDTO createProfileDTO) {
-        String image_url = CredentialValidator.validateImageUrl(createProfileDTO.imageUrl);
+        String mediaPointer = CredentialValidator.validateMediaPointer(createProfileDTO.mediaPointer);
         String location = CredentialValidator.validateLocation(createProfileDTO.location);
         String username= CredentialValidator.validateUsername(createProfileDTO.username);
 
@@ -59,7 +60,7 @@ public class ProfileDAO {
                 username,
                 createProfileDTO.name,
                 createProfileDTO.biography,
-                image_url,
+                mediaPointer,
                 createProfileDTO.link,
                 location
         );

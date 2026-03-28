@@ -4,7 +4,7 @@ public class ProfileDTO {
     public String username;
     public String name;
     public String biography;
-    public String imageUrl;
+    public String mediaPointer;
     public String link;
     public String location;
 }
