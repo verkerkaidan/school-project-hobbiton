@@ -14,13 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -70,8 +70,8 @@ public class AuthController {
                 CustomUser registeredUser = new CustomUser(registerRequest.email, encodedPassword, role);
 
                 userRepository.save(registeredUser);
-                String token = jwtUtil.generateToken(registeredUser.getEmail());
-                AuthenticationResponse authResponse = new AuthenticationResponse(registeredUser.getEmail(), token);
+                String token = jwtUtil.generateToken(String.valueOf(registeredUser.getId()));
+                AuthenticationResponse authResponse = new AuthenticationResponse(registeredUser.getId(), token);
                 return ResponseEntity.ok(authResponse);
         }
 
@@ -87,8 +87,6 @@ public class AuthController {
 
                 authManager.authenticate(authInputToken);
 
-                String token = jwtUtil.generateToken(body.email);
-
                 Optional<CustomUser> customUserOptional = userRepository.findByEmail(body.email);
                 if(customUserOptional.isEmpty()){
                         throw new ResponseStatusException(
@@ -96,7 +94,8 @@ public class AuthController {
                         );
                 }
                 CustomUser customUser = customUserOptional.get();
-                AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getEmail(), token);
+                String token = jwtUtil.generateToken(String.valueOf(customUser.getId()));
+                AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getId(), token);
 
                 return ResponseEntity.ok(loginResponse);
 
@@ -120,8 +119,39 @@ public class AuthController {
                 );
             }
             CustomUser user = userOptional.get();
+            if (!passwordEncoder.matches(authenticationRequest.password, user.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
+            }
             userRepository.delete(user);
 
             return ResponseEntity.ok("Succesfully removed user");
         }
+
+        @PutMapping("/admin/new/{userId}")
+        public ResponseEntity<String> adminFunctionality(@PathVariable String userId){
+            Optional<CustomUser> userOptional = userRepository.findById(UUID.fromString(userId));
+            if(userOptional.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "No valid user provided"
+                );
+            }
+            CustomUser user = userOptional.get();
+            Role staffRole = roleRepository.findByName("ROLE_ADMIN");
+            user.setRoles(Collections.singletonList(staffRole));
+            return ResponseEntity.ok("Successfully made user " + userId + " an Administrator");        }
+
+        @PutMapping("/staff/new/{userId}")
+        public ResponseEntity<String> staffFunctionality(@PathVariable String userId){
+            Optional<CustomUser> userOptional = userRepository.findById(UUID.fromString(userId));
+            if(userOptional.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "No valid user provided"
+                );
+            }
+            CustomUser user = userOptional.get();
+            Role staffRole = roleRepository.findByName("ROLE_STAFF");
+            user.setRoles(Collections.singletonList(staffRole));
+            userRepository.save(user);
+            return ResponseEntity.ok("Successfully made user " + userId + " a Staff member");        }
+
     }

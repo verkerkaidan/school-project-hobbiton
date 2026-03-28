@@ -25,7 +25,10 @@ public class ProfileController {
     /// unprotected endpoint
     @PostMapping("/create")
     public ResponseEntity<Profile> createProfile(@RequestBody ProfileDTO profileDTO){
-        UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if(profileRepository.findById(userId).isPresent()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
+        }
         Profile profile = profileDAO.createProfile(userId, profileDTO);
         return ResponseEntity.ok(profile);
     }
@@ -33,7 +36,10 @@ public class ProfileController {
     ///  This endpoint("api/profile/update") will enable changing aspects of the user's profile
     @PutMapping("/update")
     public ResponseEntity<Profile> updateProfile(@RequestBody ProfileDTO updateProfileDTO){
-        UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if(profileRepository.findById(userId).isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User doesn't exists");
+        }
         Profile profile = profileDAO.updateProfile(userId, updateProfileDTO);
         return ResponseEntity.ok(profile);
     }
@@ -50,8 +56,8 @@ public class ProfileController {
     }
 
     ///  This endpoint("api/profile/userId") will return a user's profile information
-    @GetMapping()
-    public ResponseEntity<Profile> getProfileByID(@RequestHeader String userId){
+    @GetMapping("{userId}")
+    public ResponseEntity<Profile> getProfileByID(@PathVariable("userId") String userId){
         Optional<Profile> profile = profileRepository.findById(UUID.fromString(userId));
         if(profile.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");

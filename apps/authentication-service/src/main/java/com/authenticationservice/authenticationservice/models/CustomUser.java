@@ -25,7 +25,6 @@ public class CustomUser {
     @NonNull
     private String password;
     private boolean enabled;
-    private boolean tokenExpired;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
@@ -41,6 +40,16 @@ public class CustomUser {
     @CreationTimestamp
     @Column(name = "created_at")
     public OffsetDateTime created_at;
+
+    public CustomUser(){
+
+    }
+    public CustomUser(@NonNull String email, List<Role> roleUser) {
+        this.email = email;
+        this.roles = roleUser;
+        this.enabled = true;
+        this.lastEdited = OffsetDateTime.now();
+    }
 
     public CustomUser(@NonNull String email, @NonNull String encodedPassword, List<Role> roleUser) {
         this.email = email;
