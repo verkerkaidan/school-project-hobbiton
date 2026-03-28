@@ -144,6 +144,52 @@ services:
     networks:
       - microservices-network
 
+  authentication-service:
+    build: ./apps/authentication-service
+    container_name: authentication-service
+    restart: no
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_AUTHENTICATION_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_AUTHENTICATION}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_AUTHENTICATION}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_SECRET: ${JWT_SECRET}
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
+  profile-service:
+    build: ./apps/profile-service
+    container_name: profile-service
+    restart: no
+    ports:
+      - "8086:8086"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_PROFILE_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_PROFILE}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_TEST_USER: ${ADMIN_TEST_USER}
+      ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
   library-service:
     build:
       context: ./apps/library-service
@@ -157,6 +203,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_LIBRARY}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_LIBRARY}
+      OMDB_API_KEY: ${OMDB_API_KEY}
+      OMDB_API_URL: ${OMDB_API_URL}
     cpus: 2
     mem_limit: 2048m
     networks:

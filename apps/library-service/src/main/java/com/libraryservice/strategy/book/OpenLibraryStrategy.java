@@ -4,7 +4,6 @@ import com.libraryservice.dao.OpenLibraryDAO;
 import com.libraryservice.model.Book;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -27,40 +26,32 @@ import java.util.stream.Collectors;
 public class OpenLibraryStrategy implements BookApiStrategy {
 
     private static final Logger logger = Logger.getLogger(OpenLibraryStrategy.class.getName());
-
     private final OpenLibraryDAO openLibraryDAO;
 
     public OpenLibraryStrategy(OpenLibraryDAO openLibraryDAO) {
         this.openLibraryDAO = openLibraryDAO;
     }
 
-    /**
-     * Zoekt boeken via Open Library op basis van een query.
-     *
-     * @param query      zoekterm
-     * @param maxResults maximaal aantal resultaten
-     * @return lijst van Book objecten
-     */
     @Override
     public List<Book> searchBooks(String query, int maxResults) {
-        logger.info("OpenLibraryStrategy: searching '" + query + "'");
         return openLibraryDAO.searchBooks(query, maxResults).stream()
                 .map(this::mapToBook)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Haalt één boek op via ISBN.
-     *
-     * @param isbn ISBN nummer
-     * @return Book object of null indien niet gevonden
-     */
     @Override
     public Book findByIsbn(String isbn) {
         logger.info("OpenLibraryStrategy: ISBN lookup " + isbn);
+
         Map<String, Object> raw = openLibraryDAO.findByIsbn(isbn);
-        if (raw == null || raw.isEmpty() || !raw.containsKey("ISBN:" + isbn)) return null;
-        return mapIsbnDataToBook(isbn, (Map<String, Object>) raw.get("ISBN:" + isbn));
+        if (raw == null || raw.isEmpty()) return null;
+
+        String apiKey = "ISBN:" + isbn;
+        if (raw.containsKey(apiKey)) {
+            return mapIsbnDataToBook(isbn, (Map<String, Object>) raw.get(apiKey));
+        }
+
+        return null;
     }
 
     /**
@@ -69,22 +60,27 @@ public class OpenLibraryStrategy implements BookApiStrategy {
      * @param raw ruwe API data
      * @return Book model
      */
+
     private Book mapToBook(Map<String, Object> raw) {
-        return new Book(
-                (String) raw.getOrDefault("id", "unknown"), // id
-                (String) raw.getOrDefault("title", "Unknown Title"),
-                (List<String>) raw.getOrDefault("authors", Collections.emptyList()),
-                (String) raw.getOrDefault("description", "Unknown Description"),
-                (String) raw.getOrDefault("publisher", "Unknown Publisher"),
-                (String) raw.getOrDefault("publishedDate", "Unknown"),
-                (String) raw.getOrDefault("ISBN", "Unknown"), // isbn op juiste plek
-                toInt(raw.getOrDefault("pageCount", 0)),
-                (String) raw.getOrDefault("language", "unknown"),
-                (String) raw.getOrDefault("thumbnailUrl", ""),
-                (String) raw.getOrDefault("infoLink", ""),
-                ((Number) raw.getOrDefault("averageRating", 0.0)).doubleValue(),
-                toInt(raw.getOrDefault("ratingsCount", 0))
-        );
+        Book book = new Book();
+        book.setId((String) raw.get("key"));
+        book.setTitle((String) raw.get("title"));
+        book.setAuthors((List<String>) raw.get("author_name"));
+        book.setPublisher((List<String>) raw.get("publisher"));
+        book.setIsbn((List<String>) raw.get("isbn"));
+        book.setLanguage((List<String>) raw.get("language"));
+
+        Object year = raw.get("first_publish_year");
+        book.setPublishedDate(year != null ? String.valueOf(year) : null);
+
+        Object pages = raw.get("number_of_pages_median");
+        book.setPageCount(pages != null ? String.valueOf(pages) : null);
+
+        Object coverI = raw.get("cover_i");
+        if (coverI != null) {
+            book.setThumbnailUrl("https://covers.openlibrary.org/b/id/" + coverI + "-M.jpg");
+        }
+        return book;
     }
 
     /**
@@ -94,31 +90,16 @@ public class OpenLibraryStrategy implements BookApiStrategy {
      * @param data ruwe API-data van Open Library
      * @return Book model
      */
-    private Book mapIsbnDataToBook(String isbn, Map<String, Object> data) {
-        return new Book(
-                (String) data.getOrDefault("key", "unknown"), // id
-                (String) data.getOrDefault("title", "Unknown Title"),
-                (List<String>) data.getOrDefault("authors", Collections.emptyList()),
-                (String) data.getOrDefault("description", "Unknown Description"),
-                (String) data.getOrDefault("publishers", "Unknown Publisher"),
-                (String) data.getOrDefault("publish_date", "Unknown"),
-                isbn,
-                toInt(data.getOrDefault("number_of_pages", 0)),
-                (String) data.getOrDefault("languages", "unknown"),
-                (String) data.getOrDefault("cover", ""),
-                (String) data.getOrDefault("url", ""),
-                ((Number) data.getOrDefault("average_rating", 0.0)).doubleValue(),
-                toInt(data.getOrDefault("ratings_count", 0))
-        );
-    }
 
-    /**
-     * Helper methode om een Object veilig om te zetten naar int.
-     *
-     * @param val input waarde
-     * @return integer waarde of 0 bij ongeldige input
-     */
-    private int toInt(Object val) {
-        return val instanceof Number ? ((Number) val).intValue() : 0;
+    private Book mapIsbnDataToBook(String isbn, Map<String, Object> data) {
+        Book book = new Book();
+        book.setIsbn(List.of(isbn));
+        book.setTitle((String) data.get("title"));
+
+        if (data.containsKey("cover")) {
+            Map<String, String> covers = (Map<String, String>) data.get("cover");
+            book.setThumbnailUrl(covers.get("medium"));
+        }
+        return book;
     }
 }

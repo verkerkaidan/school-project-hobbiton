@@ -2,28 +2,51 @@ package com.libraryservice.model;
 
 import java.util.List;
 
+/**
+ * Kern Model voor de Library Service.
+ * Aangepast om consistent te zijn met de data types van de Open Library API.
+ */
 public class Book {
 
     private String id;
     private String title;
     private List<String> authors;
     private String description;
-    private String publisher;
+    private List<String> publisher;
     private String publishedDate;
-    private String isbn;
-    private int pageCount;
-    private String language;
+    private List<String> isbn;
+    private String pageCount;
+    private List<String> language;
     private String thumbnailUrl;
     private String infoLink;
-    private double averageRating;
-    private int ratingsCount;
+    private String averageRating;
+    private String ratingsCount;
 
-    public Book(String orDefault, String orDefault1, List<String> authors, String orDefault2, String orDefault3, String orDefault4, String isbn, int numberOfPages, String orDefault5, String cover, String url, double averageRating, int ratingsCount) {
-    }
-
+    // Default constructor
     public Book() {
     }
 
+    // Volledige constructor
+    public Book(String id, String title, List<String> authors, String description,
+                List<String> publisher, String publishedDate, List<String> isbn,
+                String pageCount, List<String> language, String thumbnailUrl,
+                String infoLink, String averageRating, String ratingsCount) {
+        this.id = id;
+        this.title = title;
+        this.authors = authors;
+        this.description = description;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+        this.isbn = isbn;
+        this.pageCount = pageCount;
+        this.language = language;
+        this.thumbnailUrl = thumbnailUrl;
+        this.infoLink = infoLink;
+        this.averageRating = averageRating;
+        this.ratingsCount = ratingsCount;
+    }
+
+    // Getters en Setters
     public String getId() {
         return id;
     }
@@ -56,11 +79,11 @@ public class Book {
         this.description = description;
     }
 
-    public String getPublisher() {
+    public List<String> getPublisher() {
         return publisher;
     }
 
-    public void setPublisher(String publisher) {
+    public void setPublisher(List<String> publisher) {
         this.publisher = publisher;
     }
 
@@ -72,27 +95,27 @@ public class Book {
         this.publishedDate = publishedDate;
     }
 
-    public String getIsbn() {
+    public List<String> getIsbn() {
         return isbn;
     }
 
-    public void setIsbn(String isbn) {
+    public void setIsbn(List<String> isbn) {
         this.isbn = isbn;
     }
 
-    public int getPageCount() {
+    public String getPageCount() {
         return pageCount;
     }
 
-    public void setPageCount(int pageCount) {
+    public void setPageCount(String pageCount) {
         this.pageCount = pageCount;
     }
 
-    public String getLanguage() {
+    public List<String> getLanguage() {
         return language;
     }
 
-    public void setLanguage(String language) {
+    public void setLanguage(List<String> language) {
         this.language = language;
     }
 
@@ -112,19 +135,19 @@ public class Book {
         this.infoLink = infoLink;
     }
 
-    public double getAverageRating() {
+    public String getAverageRating() {
         return averageRating;
     }
 
-    public void setAverageRating(double averageRating) {
+    public void setAverageRating(String averageRating) {
         this.averageRating = averageRating;
     }
 
-    public int getRatingsCount() {
+    public String getRatingsCount() {
         return ratingsCount;
     }
 
-    public void setRatingsCount(int ratingsCount) {
+    public void setRatingsCount(String ratingsCount) {
         this.ratingsCount = ratingsCount;
     }
 }

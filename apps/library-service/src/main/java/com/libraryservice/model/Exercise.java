@@ -13,13 +13,12 @@ public class Exercise {
     private String overview;
     private List<String> instructions;
     private List<String> exerciseTips;
-    private String imageUrl;
-    private String videoUrl;
+    private String gifUrl;
 
     public Exercise() {
     }
 
-    public Exercise(String exerciseId, String name, List<String> bodyParts, List<String> targetMuscles, List<String> secondaryMuscles, List<String> equipments, String exerciseType, String overview, List<String> instructions, List<String> exerciseTips, String imageUrl, String videoUrl) {
+    public Exercise(String exerciseId, String name, List<String> bodyParts, List<String> targetMuscles, List<String> secondaryMuscles, List<String> equipments, String exerciseType, String overview, List<String> instructions, List<String> exerciseTips, String gifUrl) {
         this.exerciseId = exerciseId;
         this.name = name;
         this.bodyParts = bodyParts;
@@ -30,8 +29,7 @@ public class Exercise {
         this.overview = overview;
         this.instructions = instructions;
         this.exerciseTips = exerciseTips;
-        this.imageUrl = imageUrl;
-        this.videoUrl = videoUrl;
+        this.gifUrl = gifUrl;
     }
 
     public String getExerciseId() {
@@ -114,20 +112,12 @@ public class Exercise {
         this.exerciseTips = exerciseTips;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getGifUrl() {
+        return gifUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+    public void setGifUrl(String gifUrl) {
+        this.gifUrl = gifUrl;
     }
 }
 

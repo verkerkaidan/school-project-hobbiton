@@ -4,7 +4,6 @@ import com.libraryservice.dao.ExerciseDAO;
 import com.libraryservice.model.Exercise;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -41,6 +40,7 @@ public class ExerciseDbStrategy implements ExerciseApiStrategy {
      * @param maxResults maximaal aantal resultaten
      * @return lijst van Exercise objecten
      */
+    @Override
     public List<Exercise> searchExercises(String query, int maxResults) {
         logger.info("searchExercises query: " + query);
         return exerciseDAO.searchExercises(query, maxResults).stream()
@@ -69,18 +69,17 @@ public class ExerciseDbStrategy implements ExerciseApiStrategy {
      */
     private Exercise mapToExercise(Map<String, Object> raw) {
         return new Exercise(
-                (String) raw.getOrDefault("exerciseId", "unknown"),
-                (String) raw.getOrDefault("name", "Unknown Exercise"),
-                (List<String>) raw.getOrDefault("bodyParts", Collections.emptyList()),
-                (List<String>) raw.getOrDefault("targetMuscles", Collections.emptyList()),
-                (List<String>) raw.getOrDefault("secondaryMuscles", Collections.emptyList()),
-                (List<String>) raw.getOrDefault("equipments", Collections.emptyList()),
-                (String) raw.getOrDefault("exerciseType", "UNKNOWN"),
-                (String) raw.getOrDefault("overview", "No overview available."),
-                (List<String>) raw.getOrDefault("instructions", Collections.emptyList()),
-                (List<String>) raw.getOrDefault("exerciseTips", Collections.emptyList()),
-                (String) raw.getOrDefault("imageUrl", ""),
-                (String) raw.getOrDefault("videoUrl", "")
+                (String) raw.get("exerciseId"),
+                (String) raw.get("name"),
+                (List<String>) raw.get("bodyParts"),
+                (List<String>) raw.get("targetMuscles"),
+                (List<String>) raw.get("secondaryMuscles"),
+                (List<String>) raw.get("equipments"),
+                (String) raw.get("exerciseType"),
+                (String) raw.get("overview"),
+                (List<String>) raw.get("instructions"),
+                (List<String>) raw.get("exerciseTips"),
+                (String) raw.get("gifUrl")
         );
     }
 }
