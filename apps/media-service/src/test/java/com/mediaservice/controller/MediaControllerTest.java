@@ -8,6 +8,7 @@ import com.mediaservice.dto.MediaFileDTO;
 import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.service.MediaService;
+import com.mediaservice.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,8 @@ class MediaControllerTest {
 
     @Mock
     private MediaService mediaService;
+    @Mock
+    private ReportService reportService;
 
     @InjectMocks
     private MediaController mediaController;
