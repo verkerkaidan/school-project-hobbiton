@@ -42,6 +42,10 @@ public class CustomUser {
     @Column(name = "created_at")
     public OffsetDateTime created_at;
 
+    public CustomUser(){
+
+    }
+
     public CustomUser(@NonNull String email, @NonNull String encodedPassword, List<Role> roleUser) {
         this.email = email;
         this.password = encodedPassword;
