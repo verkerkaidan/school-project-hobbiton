@@ -3,6 +3,8 @@ package com.mediaservice.controller;
 import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.dto.MediaFileDTO;
+import com.mediaservice.enums.ContentFlag;
+import com.mediaservice.model.FileReport;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.service.MediaService;
 import com.mediaservice.service.ReportService;
@@ -163,6 +165,7 @@ public class MediaController {
     /**
      * Deleting a mediaFile no matter how many instances are present
      * Instances are also deleted
+     * Reporters are notified and reports deleted
      * Used when an image is simply too harmful
      *
      * @param fileId, unique identifier of the MediaFile to be deleted
@@ -172,6 +175,11 @@ public class MediaController {
     public ResponseEntity<UUID> deleteMediaFile(@PathVariable UUID fileId) {
         reportService.createNewBannedFile(fileId);
         mediaService.deleteMediaFile(fileId);
+
+        List<ContentFlagUpdateDTO> updateDTOS = new ArrayList<>();
+        updateDTOS.add(new ContentFlagUpdateDTO(ContentFlag.RISK, fileId, "File was deleted and banned"));
+        reportService.updateReports(updateDTOS);
+
         return ResponseEntity.ok(fileId);
     }
 
@@ -186,5 +194,20 @@ public class MediaController {
     public ResponseEntity<UUID> createNewFileReport(@PathVariable UUID userId, @PathVariable UUID instanceId) {
         UUID reportId = reportService.createNewReport(userId, instanceId);
         return ResponseEntity.ok(reportId);
+    }
+
+    /**
+     * Retrieve all unique files that have been reported
+     * Should only be an admin feature
+     *
+     * @return ContentFlagUpdateDTO[] with FileId (UUID) and file (byte[])
+     */
+    @GetMapping("/report")
+    public ResponseEntity<List<ContentFlagUpdateDTO>> getAllReportedFiles() {
+        return ResponseEntity.ok(
+                reportService.getAllDistinctReports().stream().map(
+                    (mediaFile -> new ContentFlagUpdateDTO(mediaFile.getFileId(), mediaFile.getOriginal()))
+            ).toList()
+        );
     }
 }

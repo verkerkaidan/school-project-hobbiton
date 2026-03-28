@@ -24,4 +24,8 @@ public class ReportDAO {
     public void saveReport(FileReport report) {
         reportRepository.save(report);
     }
+
+    public List<UUID> getAllDistinctFiles() {
+        return reportRepository.getDistinctFileIds();
+    }
 }

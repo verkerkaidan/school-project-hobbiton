@@ -11,4 +11,7 @@ public class ReportUpdatedDTO {
         this.userId = userId;
         this.note = note;
     }
+
+    public ReportUpdatedDTO() {
+    }
 }

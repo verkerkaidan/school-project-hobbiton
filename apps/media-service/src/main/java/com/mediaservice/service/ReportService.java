@@ -8,6 +8,7 @@ import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
 import com.mediaservice.model.ReportedFile;
 import com.mediaservice.repository.ReportedFileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class ReportService {
      *
      * @param dtoList, <String fileId, ContentFlag contentFlag, String note>[]
      */
+    @Transactional
     public void updateReports(List<ContentFlagUpdateDTO> dtoList) {
         dtoList.forEach((dto) -> {
             List<UUID> relevantUsers = reportDAO.getFileReportsByFileId(dto.fileId)
@@ -86,7 +88,22 @@ public class ReportService {
      */
     public void createNewBannedFile(UUID fileId) {
         MediaFile mediaFile = mediaService.getMediaFileByFileId(fileId);
+        System.out.println("[REPORTSERVICE createNewBannedFile] mediaFile: " + mediaFile.toString());
         ReportedFile reportedFile = new ReportedFile(mediaFile.getHash());
+        System.out.println("[REPORTSERVICE createNewBannedFile] mediaFile: " + reportedFile.getFileId());
         reportedFileRepository.save(reportedFile);
+    }
+
+    /**
+     * Retrieve all unique fileId's from the FileReports
+     * Retrieve MediaFiles accordingly
+     *
+     * @return MediaFile[]
+     */
+    public List<MediaFile> getAllDistinctReports() {
+        List<UUID> fileIds = reportDAO.getAllDistinctFiles();
+        return fileIds.stream().map(
+                (id) -> mediaService.getMediaFileByFileId(id)
+        ).toList();
     }
 }

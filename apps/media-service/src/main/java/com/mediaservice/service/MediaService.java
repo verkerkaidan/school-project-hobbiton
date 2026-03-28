@@ -7,6 +7,7 @@ import com.mediaservice.enums.ContentFlag;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
 import com.mediaservice.repository.ReportedFileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -162,9 +163,11 @@ public class MediaService {
 
     /**
      * Deletes all instances related to the given file, and then the file itself
+     * It's best to call this only after
      *
      * @param fileId, unique identifier of the file that is to be deleted
      */
+    @Transactional
     public void deleteMediaFile(UUID fileId) {
         mediaInstanceDAO.deleteInstancesByFile(fileId);
         mediaFileDAO.deleteMediaFile(fileId);
