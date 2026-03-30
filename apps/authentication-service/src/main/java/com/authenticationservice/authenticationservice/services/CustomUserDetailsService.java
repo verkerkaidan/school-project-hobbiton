@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Service("userDetailsService")
+@Service
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
