@@ -55,7 +55,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         private List<String> getPrivileges(Collection<Role> roles) {
-
             List<String> privileges = new ArrayList<>();
             List<Privilege> collection = new ArrayList<>();
             for (Role role : roles) {

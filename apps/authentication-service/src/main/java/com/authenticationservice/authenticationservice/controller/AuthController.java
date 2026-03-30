@@ -14,9 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -82,18 +80,19 @@ public class AuthController {
         @PostMapping("/login")
         public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest body) {
             try {
+                Optional<CustomUser> customUserOptional = userRepository.findByEmail(body.email);
+                if(customUserOptional.isEmpty()){
+                    throw new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "No valid credentials"
+                    );
+                }
+                CustomUser customUser = customUserOptional.get();
+
                 UsernamePasswordAuthenticationToken authInputToken =
-                        new UsernamePasswordAuthenticationToken(body.email, body.password);
+                        new UsernamePasswordAuthenticationToken(customUser.getId(), body.password);
 
                 authManager.authenticate(authInputToken);
 
-                Optional<CustomUser> customUserOptional = userRepository.findByEmail(body.email);
-                if(customUserOptional.isEmpty()){
-                        throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "No valid credentials"
-                        );
-                }
-                CustomUser customUser = customUserOptional.get();
                 String token = jwtUtil.generateToken(String.valueOf(customUser.getId()));
                 AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getId(), token);
 
