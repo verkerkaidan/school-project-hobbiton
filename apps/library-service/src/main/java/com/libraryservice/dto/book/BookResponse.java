@@ -1,5 +1,6 @@
 package com.libraryservice.dto.book;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,7 +18,8 @@ public class BookResponse implements SearchResult {
 
     private String title;
 
-    @JsonProperty("author_name")
+    @JsonProperty("authors")
+    @JsonAlias("author_name")
     private List<String> authors;
 
     private String description;
