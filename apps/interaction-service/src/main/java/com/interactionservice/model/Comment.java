@@ -1,24 +1,31 @@
 package com.interactionservice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.UUID;
 
 @Entity
+@Table(
+        name = "comment"
+)
 public class Comment {
     @GeneratedValue
     @Id
+    @Column(
+            name = "id"
+    )
     private UUID id;
 
-    private UUID reference_id;
-    private UUID user_id;
+    @Column(name = "reference_id")
+    private UUID referenceId;
+    @Column(name = "user_id")
+    private UUID userId;
+    @Column(name = "comment")
     private String comment;
 
-    public Comment(UUID reference_id, UUID user_id, String comment) {
-        this.reference_id = reference_id;
-        this.user_id = user_id;
+    public Comment(UUID referenceId, UUID userId, String comment) {
+        this.referenceId = referenceId;
+        this.userId = userId;
         this.comment = comment;
     }
 
@@ -33,20 +40,20 @@ public class Comment {
         this.id = id;
     }
 
-    public UUID getReference_id() {
-        return reference_id;
+    public UUID getReferenceId() {
+        return referenceId;
     }
 
-    public void setReference_id(UUID reference_id) {
-        this.reference_id = reference_id;
+    public void setReferenceId(UUID reference_id) {
+        this.referenceId = reference_id;
     }
 
-    public UUID getUser_id() {
-        return user_id;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setUser_id(UUID user_id) {
-        this.user_id = user_id;
+    public void setUserId(UUID user_id) {
+        this.userId = user_id;
     }
 
     public String getComment() {

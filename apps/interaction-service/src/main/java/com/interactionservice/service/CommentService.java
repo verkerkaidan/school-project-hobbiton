@@ -1,6 +1,7 @@
 package com.interactionservice.service;
 
 import com.interactionservice.dao.CommentDAO;
+import com.interactionservice.dao.LikeDAO;
 import com.interactionservice.dto.CommentDTO;
 import com.interactionservice.model.Comment;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,9 @@ import java.util.UUID;
 public class CommentService {
     @Autowired
     private CommentDAO commentDAO;
+
+    @Autowired
+    private LikeDAO likeDAO;
 
     /**
      * Creating a Comment from the dto and sending to DAO
@@ -32,10 +36,23 @@ public class CommentService {
 
     @Transactional
     public UUID deleteComment(UUID id) {
-        return commentDAO.deleteComment(id);
+        likeDAO.deleteAllByReference(id);
+        this.deleteAllByReference(id);
+        UUID commentId = commentDAO.deleteComment(id);
+        return commentId;
     }
 
     public List<Comment> getAllComments(UUID referenceId) {
         return commentDAO.getAllComments(referenceId);
+    }
+
+    @Transactional
+    public void deleteAllByReference(UUID postId) {
+        commentDAO.deleteCommentsByReference(postId);
+    }
+
+    public void deleteAllByUser(UUID userId) {
+        List<Comment> comments = commentDAO.retrieveCommentsByUser(userId);
+        comments.forEach(comment -> deleteComment(comment.getId()));
     }
 }

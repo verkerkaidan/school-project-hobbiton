@@ -1,7 +1,7 @@
 package com.interactionservice.service;
 
 import com.interactionservice.dao.LikeDAO;
-import com.interactionservice.model.Like;
+import com.interactionservice.model.CustomLike;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class LikeService {
             return false;
         }
         else {
-            likeDAO.saveLike(new Like(referenceId, userId));
+            likeDAO.saveLike(new CustomLike(referenceId, userId));
             return true;
         }
     }
@@ -48,8 +48,18 @@ public class LikeService {
     public List<UUID> getUsersThatLiked(UUID referenceId) {
         List<UUID> usersList = likeDAO.getLikesByReference(referenceId)
                 .stream().map(
-                        (like -> like.getUser_id())
+                        (like -> like.getUserId())
                 ).toList();
         return usersList;
+    }
+
+    @Transactional
+    public void deleteAllByReference(UUID referenceId) {
+        likeDAO.deleteAllByReference(referenceId);
+    }
+
+    @Transactional
+    public void deleteAllByUser(UUID userId) {
+        likeDAO.deleteAllByUser(userId);
     }
 }

@@ -1,26 +1,28 @@
 package com.interactionservice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.UUID;
 
 @Entity
-public class Like {
+@Table(name = "custom_like")
+public class CustomLike {
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private UUID id;
 
+    @Column(name = "reference_id")
     private UUID referenceId;
-    private UUID user_id;
+    @Column(name = "user_id")
+    private UUID userId;
 
-    public Like(UUID referenceId, UUID user_id) {
+    public CustomLike(UUID referenceId, UUID userId) {
         this.referenceId = referenceId;
-        this.user_id = user_id;
+        this.userId = userId;
     }
 
-    public Like() {
+    public CustomLike() {
     }
 
     public UUID getId() {
@@ -39,11 +41,11 @@ public class Like {
         this.referenceId = referenceId;
     }
 
-    public UUID getUser_id() {
-        return user_id;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setUser_id(UUID user_id) {
-        this.user_id = user_id;
+    public void setUserId(UUID user_id) {
+        this.userId = user_id;
     }
 }

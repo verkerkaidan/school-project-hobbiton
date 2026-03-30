@@ -46,6 +46,14 @@ public class CommentDAO {
     }
 
     public List<Comment> getAllComments(UUID referenceId) {
-        return commentRepository.getAllByReference_id(referenceId);
+        return commentRepository.getAllByReferenceId(referenceId);
+    }
+
+    public void deleteCommentsByReference(UUID referenceId) {
+        commentRepository.deleteAllByReferenceId(referenceId);
+    }
+
+    public List<Comment> retrieveCommentsByUser(UUID userId) {
+        return commentRepository.findByUserId(userId);
     }
 }

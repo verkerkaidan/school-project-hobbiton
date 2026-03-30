@@ -14,5 +14,11 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     Optional<Comment> getCommentByIdIs(UUID id);
 
     // Get all comments from a single reference
-    List<Comment> getAllByReference_id(UUID id);
+    List<Comment> getAllByReferenceId(UUID id);
+
+    // Delete all comments that are connected to the given reference
+    void deleteAllByReferenceId(UUID referenceId);
+
+    // Delete all comments that are connected to the given user
+    List<Comment> findByUserId(UUID userId);
 }
