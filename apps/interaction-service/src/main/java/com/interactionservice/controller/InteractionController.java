@@ -88,6 +88,14 @@ public class InteractionController {
         return ResponseEntity.ok(users);
     }
 
+    /**
+     * Deletes all comments from the given user
+     * and deletes all likes by the given user
+     * Comments are deleted cascadingly through the comments and likes
+     *
+     * @param userId, identifier of the user to be deleted
+     * @return UUID of the user that was deleted
+     */
     @DeleteMapping("user/{userId}")
     public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId) {
         likeService.deleteAllByUser(userId);
@@ -95,6 +103,12 @@ public class InteractionController {
         return ResponseEntity.ok(userId);
     }
 
+    /**
+     * Deletes a post and comments and likes accordingly
+     *
+     * @param postId, identifier of the post to be deleted
+     * @return uuid of the deleted post
+     */
     @DeleteMapping("post/{postId}")
     public ResponseEntity<UUID> deletePost(@PathVariable UUID postId) {
         likeService.deleteAllByReference(postId);
