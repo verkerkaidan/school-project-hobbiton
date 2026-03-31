@@ -3,8 +3,11 @@ package com.mediaservice.controller;
 import com.mediaservice.dto.ContentFlagUpdateDTO;
 import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.dto.MediaFileDTO;
+import com.mediaservice.enums.ContentFlag;
+import com.mediaservice.model.FileReport;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.service.MediaService;
+import com.mediaservice.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,8 @@ public class MediaController {
 
     @Autowired
     private MediaService mediaService;
+    @Autowired
+    private ReportService reportService;
 
     /**
      * Upload a media file to database
@@ -121,6 +126,8 @@ public class MediaController {
             updatedMediaFiles.add(file.fileId);
         }
 
+        reportService.updateReports(files);
+
         return ResponseEntity.ok(updatedMediaFiles);
     }
 
@@ -141,5 +148,66 @@ public class MediaController {
                 ).toList();
 
         return ResponseEntity.ok(updateDTOS);
+    }
+
+    /**
+     * When a user reports an image, an admin needs to be able to get the full MediaFile.
+     * UUID of the file (not instance) is needed to change the contentFlag using the @PutMapping
+     *
+     * @param instanceId, UUID
+     * @return MediaFile Object
+     */
+    @GetMapping("/admin/{instanceId}")
+    public ResponseEntity<MediaFile> getCompleteMediaFile(@PathVariable UUID instanceId) {
+        return ResponseEntity.ok(mediaService.getMediaFile(instanceId));
+    }
+
+    /**
+     * Deleting a mediaFile no matter how many instances are present
+     * Instances are also deleted
+     * Reporters are notified and reports deleted
+     * Used when an image is simply too harmful
+     *
+     * @param fileId, unique identifier of the MediaFile to be deleted
+     * @return fileId, unique identifier of the deleted MediaFile
+     */
+    @DeleteMapping("/admin/{fileId}")
+    public ResponseEntity<UUID> deleteMediaFile(@PathVariable UUID fileId) {
+        reportService.createNewBannedFile(fileId);
+        mediaService.deleteMediaFile(fileId);
+
+        List<ContentFlagUpdateDTO> updateDTOS = new ArrayList<>();
+        updateDTOS.add(new ContentFlagUpdateDTO(ContentFlag.RISK, fileId, "File was deleted and banned"));
+        reportService.updateReports(updateDTOS);
+
+        return ResponseEntity.ok(fileId);
+    }
+
+    /**
+     * When a user reports a file, the instance is sent, and used to note the file that was reported
+     *
+     * @param userId, identifier of the user that reported
+     * @param instanceId, identifier of the instance that was reported
+     * @return reportId, UUID identifier of the report
+     */
+    @PostMapping("/report/{userId}/{instanceId}")
+    public ResponseEntity<UUID> createNewFileReport(@PathVariable UUID userId, @PathVariable UUID instanceId) {
+        UUID reportId = reportService.createNewReport(userId, instanceId);
+        return ResponseEntity.ok(reportId);
+    }
+
+    /**
+     * Retrieve all unique files that have been reported
+     * Should only be an admin feature
+     *
+     * @return ContentFlagUpdateDTO[] with FileId (UUID) and file (byte[])
+     */
+    @GetMapping("/report")
+    public ResponseEntity<List<ContentFlagUpdateDTO>> getAllReportedFiles() {
+        return ResponseEntity.ok(
+                reportService.getAllDistinctReports().stream().map(
+                    (mediaFile -> new ContentFlagUpdateDTO(mediaFile.getFileId(), mediaFile.getOriginal()))
+            ).toList()
+        );
     }
 }

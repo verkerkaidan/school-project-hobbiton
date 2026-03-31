@@ -32,7 +32,7 @@ public class RecognitionController {
         List<CompletableFuture<ContentFlagUpdateDTO>> futures = DTOToBeUpdatedList.stream()
                 .map(dto -> CompletableFuture.supplyAsync(() -> {
                     ContentFlag contentFlag = recognitionService.flagFile(dto.file);
-                    return new ContentFlagUpdateDTO(dto.fileId, contentFlag);
+                    return new ContentFlagUpdateDTO(dto.fileId, contentFlag, "AI driven change");
                 }))
                 .toList();
 
