@@ -63,4 +63,8 @@ public class MediaInstanceDAO {
     public void deleteMediaInstance(MediaInstance mediaInstance) {
         mediaInstanceRepository.delete(mediaInstance);
     }
+
+    public void deleteInstancesByFile(UUID fileId) {
+        mediaInstanceRepository.deleteAllByFileId(fileId);
+    }
 }

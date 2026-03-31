@@ -84,4 +84,8 @@ public class MediaFileDAO {
     public List<MediaFile> getAllUnassigned() {
         return mediaFileRepository.queryMediaFileByContentFlag(ContentFlag.UNASSIGNED);
     }
+
+    public void deleteMediaFile(UUID fileID) {
+        mediaFileRepository.deleteMediaFileByFileId(fileID);
+    }
 }
