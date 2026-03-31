@@ -15,4 +15,6 @@ public interface MediaInstanceRepository extends JpaRepository<MediaInstance, UU
     List<MediaInstance> getAllByOwnerId(UUID ownerId);
 
     Optional<MediaInstance> getByInstanceId(UUID instanceID);
+
+    void deleteAllByFileId(UUID fileId);
 }

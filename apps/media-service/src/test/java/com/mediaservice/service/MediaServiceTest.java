@@ -5,6 +5,7 @@ import com.mediaservice.dao.MediaInstanceDAO;
 import com.mediaservice.dto.MediaEntryDTO;
 import com.mediaservice.model.MediaFile;
 import com.mediaservice.model.MediaInstance;
+import com.mediaservice.repository.ReportedFileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,8 @@ public class MediaServiceTest {
 
     @Mock
     private CompressionService compressionService;
+    @Mock
+    private ReportService reportService;
 
     @Mock
     private MediaFileDAO mediaFileDAO;
@@ -37,6 +40,9 @@ public class MediaServiceTest {
 
     @Mock
     private EncryptionService encryptionService;
+
+    @Mock
+    private ReportedFileRepository reportedFileRepository;
 
     @Test
     @DisplayName("Should upload new media file and mediainstance when file is not yet known in database")
@@ -250,13 +256,13 @@ public class MediaServiceTest {
                 .deleteMediaInstance(any());
         doNothing()
                 .when(mediaFileDAO)
-                .deleteMediaFile(any());
+                .deleteMediaFile(any(MediaFile.class));
 
         // Act
         mediaService.deleteMediaInstance(mockInstanceId);
 
         // Assert
         verify(mediaFileDAO).getMediaFile(any(UUID.class));
-        verify(mediaFileDAO).deleteMediaFile(any());
+        verify(mediaFileDAO).deleteMediaFile(any(MediaFile.class));
     }
 }
