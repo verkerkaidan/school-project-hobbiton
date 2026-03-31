@@ -1,13 +1,16 @@
 package com.libraryservice.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Kern Model voor de Library Service.
  * Aangepast om consistent te zijn met de data types van de Open Library API.
  */
-public class Book {
-
+public class Book implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String id;
     private String title;
     private List<String> authors;
