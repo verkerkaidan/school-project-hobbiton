@@ -1,0 +1,71 @@
+# schema.graphqls
+
+type Query {
+  getPostsByHobbyType(hobbyType: HobbyType): [Post]
+  getPosts: [Post]
+}
+
+interface Post {
+  id: ID
+  title: String
+  description: String
+  userId: ID
+  createdAt: String
+  updatedAt: String
+  mediaSet: [Media]
+  hobbyType: String
+}
+
+type Gym implements Post {
+  id: ID
+  title: String
+  description: String
+  userId: ID
+  createdAt: String
+  updatedAt: String
+  mediaSet: [Media]
+  hobbyType: String
+  totalDuration: Float
+  exercises: [GymExercise]
+}
+
+type Reading implements Post {
+  id: ID
+  title: String
+  description: String
+  userId: ID
+  createdAt: String
+  updatedAt: String
+  mediaSet: [Media]
+  hobbyType: String
+  bookTitle: String
+  pagesRead: String
+  totalPagesRead: String
+  bookFinished: Boolean
+}
+
+type GymExercise {
+  id: ID
+  title: String
+  reps: Int
+  weight: Float
+  rpe: Float
+}
+
+type Media {
+    fileData: String
+    fileThumb: String
+    contentType: String
+    contentFlag: ContentFlag
+}
+
+enum HobbyType {
+  GYM
+  READING
+}
+
+enum ContentFlag {
+    SAFE
+    RISK
+    UNASSIGNED
+}

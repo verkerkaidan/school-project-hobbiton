@@ -40,6 +40,8 @@ public abstract class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    private String hobbyType;
+
     public Post() {
     }
 
@@ -106,5 +108,13 @@ public abstract class Post {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getHobbyType() {
+        return hobbyType;
+    }
+
+    public void setHobbyType(String hobbyType) {
+        this.hobbyType = hobbyType;
     }
 }

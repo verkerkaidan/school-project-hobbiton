@@ -60,4 +60,8 @@ public class PostDAO {
     public void deletePostsByUserId(UUID userId) {
         this.postRepository.deleteByUserId(userId);
     }
+
+    public List<? extends Post> getPosts(Pageable pageable) {
+        return this.postRepository.findAllByOrderByCreatedAtDesc(pageable);
+    }
 }
