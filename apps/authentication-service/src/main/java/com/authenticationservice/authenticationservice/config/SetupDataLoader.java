@@ -30,7 +30,7 @@ public class SetupDataLoader implements
 
     @Value("${admin.user}")
     private String adminUser;
-    @Value("$admin.password")
+    @Value("${admin.password}")
     private String adminPassword;
 
     @Autowired
@@ -62,7 +62,6 @@ public class SetupDataLoader implements
 
         Role adminRole = roleRepository.findByName("ROLE_ADMIN");
 
-        // Fixed - only insert if user doesn't exist yet
         String encodedPassword = passwordEncoder.encode(adminPassword);
         if (userRepository.findByEmail(adminUser).isEmpty()) {
             CustomUser user = new CustomUser(
