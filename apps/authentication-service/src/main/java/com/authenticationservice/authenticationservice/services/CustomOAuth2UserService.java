@@ -1,38 +1,31 @@
 package com.authenticationservice.authenticationservice.services;
 
-import com.authenticationservice.authenticationservice.dao.RoleRepository;
-import com.authenticationservice.authenticationservice.dao.UserRepository;
-import com.authenticationservice.authenticationservice.models.CustomUser;
-import com.authenticationservice.authenticationservice.models.Role;
+import com.authenticationservice.authenticationservice.strategy.OAuthProvisioningStrategy;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-
+/**
+ * This service is still needed by Spring's OAuth2 filter chain to load the
+ * OAuth2User during the authorization code flow, but user provisioning
+ * is no longer its concern.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    private final RoleRepository roleRepository;
-
+    private final OAuthProvisioningStrategy oAuthProvisioningStrategy;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(request);
-        String email = oAuth2User.getAttribute("email");
 
-        List<Role> role = Collections.singletonList(roleRepository.findByName("ROLE_USER"));
-        userRepository.findByEmail(email).orElseGet(() ->
-                userRepository.save(new CustomUser(email, role))
-        );
+        // Ensure the user exists in our DB before Spring completes authentication.
+        // JWT issuance happens later in OAuthSuccessHandler.
+        oAuthProvisioningStrategy.provisionAndGenerateToken(oAuth2User);
 
         return oAuth2User;
     }
