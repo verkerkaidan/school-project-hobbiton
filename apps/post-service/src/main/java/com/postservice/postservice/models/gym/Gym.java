@@ -25,6 +25,7 @@ public class Gym extends Post {
 
     public Gym(GymDTO gymDTO) {
         super(gymDTO);
+        super.setHobbyType("GYM");
         for(GymExcerciseDTO gymExcerciseDTO : gymDTO.excercises) {
             this.exercises.add(new GymExcercise(gymExcerciseDTO));
         }
