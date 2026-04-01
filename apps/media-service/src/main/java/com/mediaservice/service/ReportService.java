@@ -73,11 +73,13 @@ public class ReportService {
      * @param event, ReportUpdatedDTO with userId's and the note given with the file update
      */
     void publishReportUpdated(ReportUpdatedDTO event) {
-        rabbitTemplate.convertAndSend(
-                "HobbyApp_reportEvents",
-                "report.updated",
-                event
-        );
+        // TODO De bedoeling is dat dit in periode 4 geïmplementeerd gaat worden.
+        //  Vinden het niet nodig om nu te verwijderen
+//        rabbitTemplate.convertAndSend(
+//                "HobbyApp_reportEvents",
+//                "report.updated",
+//                event
+//        );
     }
 
     /**

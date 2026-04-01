@@ -12,7 +12,7 @@ interface Post {
   userId: ID
   createdAt: String
   updatedAt: String
-  mediaSet: [Media]
+  mediaDTOSet: [Media]
   hobbyType: String
 }
 
@@ -23,7 +23,7 @@ type Gym implements Post {
   userId: ID
   createdAt: String
   updatedAt: String
-  mediaSet: [Media]
+  mediaDTOSet: [Media]
   hobbyType: String
   totalDuration: Float
   exercises: [GymExercise]
@@ -36,7 +36,7 @@ type Reading implements Post {
   userId: ID
   createdAt: String
   updatedAt: String
-  mediaSet: [Media]
+  mediaDTOSet: [Media]
   hobbyType: String
   bookTitle: String
   pagesRead: String

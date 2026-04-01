@@ -127,26 +127,6 @@ public class ReportServiceTest {
     }
 
     @Test
-    @DisplayName("Should publish report updated event to RabbitMQ")
-    void publishReportUpdated_validEvent_sendsMessage() {
-        // Arrange
-        List<UUID> userIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-        String note = "Test note";
-
-        ReportUpdatedDTO event = new ReportUpdatedDTO(userIds, note);
-
-        // Act
-        reportService.publishReportUpdated(event);
-
-        // Assert
-        verify(rabbitTemplate).convertAndSend(
-                "HobbyApp_reportEvents",
-                "report.updated",
-                event
-        );
-    }
-
-    @Test
     @DisplayName("Should create new banned file and save it to repository")
     void createNewBannedFile_validFileId_savesReportedFile() {
         // Arrange
