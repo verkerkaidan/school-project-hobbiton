@@ -1,20 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-import {motion} from 'framer-motion';
 import {SIDEBAR_NAV_ITEMS} from '@/constants/navigation';
 import {UserAvatar} from '@/components/ui/UserAvatar';
+import {useNavigation} from '../navigation/useNavigation';
+import {motion} from "framer-motion";
 
 export const Sidebar = () => {
-    const pathname = usePathname();
+    const {isActive, navigate} = useNavigation();
+    const [, setHasAnimated] = useState(false);
+    const firstRender = useRef(true);
+
+    useEffect(() => {
+        if (firstRender.current) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setHasAnimated(true);
+            firstRender.current = false;
+        }
+    }, []);
 
     return (
-        <motion.aside
-            initial={{x: -100, opacity: 0}}
-            animate={{x: 0, opacity: 1}}
-            transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
+        <aside
             className="fixed top-0 left-0 h-screen w-20 md:w-64 bg-black/20 backdrop-blur-xl border-r border-white/5 flex flex-col items-center md:items-start py-8 px-4 z-50"
         >
             {/* Logo */}
@@ -30,20 +37,23 @@ export const Sidebar = () => {
             <nav className="flex-1 w-full space-y-3">
                 {SIDEBAR_NAV_ITEMS.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href;
+                    const active = isActive(item.href);
 
                     return (
-                        <Link key={item.label} href={item.href} className="block group">
+                        <Link key={item.label} href={item.href} className="block group" onClick={e => {
+                            e.preventDefault();
+                            navigate(item.href);
+                        }}>
                             <motion.div
                                 className={`relative flex items-center gap-4 p-4 rounded-xl transition-all duration-300
-                                ${isActive
+                                ${active
                                     ? 'bg-brand-muted text-brand-light border border-brand/20'
                                     : 'hover:bg-white/5 text-accent hover:text-white border border-transparent'
                                 }`}
                                 whileHover={{x: 5}}
                                 transition={{type: 'spring', stiffness: 300, damping: 20}}
                             >
-                                <Icon className="w-6 h-6 shrink-0" strokeWidth={isActive ? 2 : 1.5}/>
+                                <Icon className="w-6 h-6 shrink-0" strokeWidth={active ? 2 : 1.5}/>
                                 <span className="text-sm font-medium hidden md:block">{item.label}</span>
 
                                 {item.badge && (
@@ -53,7 +63,7 @@ export const Sidebar = () => {
                                     </span>
                                 )}
 
-                                {isActive && (
+                                {active && (
                                     <motion.div
                                         layoutId="activeSideIndicator"
                                         className="absolute left-0 top-3 bottom-3 w-1 bg-brand rounded-full"
@@ -73,6 +83,6 @@ export const Sidebar = () => {
                 isOnline={true}
             />
 
-        </motion.aside>
+        </aside>
     );
 };
