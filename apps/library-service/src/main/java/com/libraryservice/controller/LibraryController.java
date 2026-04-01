@@ -76,7 +76,7 @@ public class LibraryController {
      * 4. Voert search uit
      * <p>
      * Voordeel:
-     * - Handig voor simpele requests en testen via browser/Postman
+     * - Handig voor simpele requests en sten via browser/Postman
      *
      * @param query      de zoekterm
      * @param type       type van zoekactie (bijv. BOOK, EXERCISE)
