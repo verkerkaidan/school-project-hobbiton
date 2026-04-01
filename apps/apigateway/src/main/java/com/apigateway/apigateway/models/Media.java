@@ -2,7 +2,10 @@ package com.apigateway.apigateway.models;
 
 import com.apigateway.apigateway.enums.ContentFlag;
 
+import java.util.UUID;
+
 public class Media {
+    public UUID fileId;
     public String fileData;
     public String fileThumb;
     public String contentType;
@@ -11,11 +14,20 @@ public class Media {
     public Media() {
     }
 
-    public Media(String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
+    public Media(UUID fileId, String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
+        this.fileId = fileId;
         this.fileData = fileData;
         this.fileThumb = fileThumb;
         this.contentType = contentType;
         this.contentFlag = contentFlag;
+    }
+
+    public UUID getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(UUID fileId) {
+        this.fileId = fileId;
     }
 
     public String getFileData() {

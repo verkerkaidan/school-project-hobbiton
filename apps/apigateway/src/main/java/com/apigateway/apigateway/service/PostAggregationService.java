@@ -3,7 +3,7 @@ package com.apigateway.apigateway.service;
 import com.apigateway.apigateway.clients.MediaClient;
 import com.apigateway.apigateway.clients.PostClient;
 import com.apigateway.apigateway.enums.HobbyType;
-import com.apigateway.apigateway.models.Media;
+import com.apigateway.apigateway.DTO.MediaDTO;
 import com.apigateway.apigateway.models.MediaInstance;
 import com.apigateway.apigateway.models.Post;
 import org.springframework.stereotype.Service;
@@ -29,15 +29,15 @@ public class PostAggregationService {
         return postClient.getAllPosts();
     }
 
-    public List<Media> getMedia(List<MediaInstance> instanceIds) {
-        List<Media> mediaList = new ArrayList<Media>();
+    public List<MediaDTO> getMedia(List<MediaInstance> instanceIds) {
+        List<MediaDTO> mediaDTOList = new ArrayList<MediaDTO>();
         for (MediaInstance instance : instanceIds) {
             System.out.println(instance.instanceId);
-            mediaList.add(mediaClient.getMediaByInstanceId(instance.instanceId));
+            mediaDTOList.add(mediaClient.getMediaByInstanceId(instance.instanceId));
         }
 
-        System.out.println(mediaList.size());
+        System.out.println(mediaDTOList.size());
 
-        return mediaList;
+        return mediaDTOList;
     }
 }

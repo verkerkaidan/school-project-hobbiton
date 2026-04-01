@@ -1,7 +1,7 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.enums.HobbyType;
-import com.apigateway.apigateway.models.Media;
+import com.apigateway.apigateway.DTO.MediaDTO;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.service.PostAggregationService;
@@ -11,14 +11,11 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @Controller
@@ -33,7 +30,7 @@ public class PostsController {
     private static final Logger log = LoggerFactory.getLogger(PostsController.class);
 
     @SchemaMapping
-    public List<Media> mediaSet (Post post) {
+    public List<MediaDTO> mediaSet (Post post) {
         return service.getMedia(post.getMediaInstanceSet());
     }
 

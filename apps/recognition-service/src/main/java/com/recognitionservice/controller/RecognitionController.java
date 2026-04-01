@@ -5,15 +5,13 @@ import com.recognitionservice.enums.ContentFlag;
 import com.recognitionservice.services.RecognitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
+@CrossOrigin(origins = {"*"})
 @RequestMapping("/recognition")
 public class RecognitionController {
     @Autowired
@@ -25,7 +23,7 @@ public class RecognitionController {
      * @param DTOToBeUpdatedList, list of objects with fileId (UUID) and file (byte[]) specified
      * @return list of objects with fileId (UUID) and contentFlag (ContentFlag) specified
      */
-    @GetMapping
+    @PostMapping
     public ResponseEntity<List<ContentFlagUpdateDTO>> generateContentFlags(
             @RequestBody List<ContentFlagUpdateDTO> DTOToBeUpdatedList
     ) {
