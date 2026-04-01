@@ -117,8 +117,8 @@ public class InteractionControllerTest {
     }
 
     @Test
-    @DisplayName("Deleting a comment returns the deleted comment UUID")
-    void deleteComment_returnsDeletedCommentId() {
+    @DisplayName("Deleting a comment or post returns the deleted object UUID")
+    void deleteReference_returnsDeletedObjectId() {
         // Arrange
         UUID commentId = UUID.randomUUID();
 
@@ -126,7 +126,7 @@ public class InteractionControllerTest {
 
         // Act
         ResponseEntity<UUID> response =
-                interactionController.deleteComment(commentId);
+                interactionController.deleteReference(commentId);
 
         // Assert status
         assertEquals(200, response.getStatusCodeValue());
@@ -192,30 +192,6 @@ public class InteractionControllerTest {
         // Verify service interactions
         verify(likeService).deleteAllByUser(userId);
         verify(commentService).deleteAllByUser(userId);
-        verifyNoMoreInteractions(likeService, commentService);
-    }
-
-    @Test
-    @DisplayName("Deleting a post removes all likes and comments and returns postId")
-    void deletePost_removesInteractionsAndReturnsPostId() {
-        // Arrange
-        UUID postId = UUID.randomUUID();
-
-        // Act
-        ResponseEntity<UUID> response =
-                interactionController.deletePost(postId);
-
-        // Assert status
-        assertEquals(200, response.getStatusCodeValue());
-
-        // Assert body
-        UUID responseId = response.getBody();
-        assertNotNull(responseId);
-        assertEquals(postId, responseId);
-
-        // Verify service interactions
-        verify(likeService).deleteAllByReference(postId);
-        verify(commentService).deleteAllByReference(postId);
         verifyNoMoreInteractions(likeService, commentService);
     }
 }

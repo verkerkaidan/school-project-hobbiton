@@ -3,6 +3,7 @@ package com.interactionservice.service;
 import com.interactionservice.dao.CommentDAO;
 import com.interactionservice.dao.LikeDAO;
 import com.interactionservice.dto.CommentDTO;
+import com.interactionservice.events.CommentDeletedEvent;
 import com.interactionservice.model.Comment;
 import com.interactionservice.model.CustomLike;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +30,8 @@ public class CommentServiceTest {
     private CommentDAO commentDAO;
     @Mock
     private LikeDAO likeDAO;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Test
     @DisplayName("createComment returns the saved Comment object")
@@ -62,25 +67,28 @@ public class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("deleteComment removes likes, related comments, and returns the deleted comment UUID")
-    void deleteComment_removesInteractionsAndReturnsCommentId() {
+    @DisplayName("deleteComment deletes comment, removes likes, publishes event, and returns commentId")
+    void deleteComment_deletesComment_removesLikes_publishesEvent_andReturnsId() {
         // Arrange
         UUID commentId = UUID.randomUUID();
 
         when(commentDAO.deleteComment(commentId)).thenReturn(commentId);
 
-        CommentService spyService = spy(commentService);
-
         // Act
-        UUID result = spyService.deleteComment(commentId);
+        UUID result = commentService.deleteComment(commentId);
 
         // Assert
         assertNotNull(result);
         assertEquals(commentId, result);
 
-        // Verify service/DAO interactions
-        verify(likeDAO).deleteAllByReference(commentId);
-        verify(spyService).deleteAllByReference(commentId);
+        // Verify DAO interactions
         verify(commentDAO).deleteComment(commentId);
+        verify(likeDAO).deleteAllByReference(commentId);
+
+        // ✅ Clean and correct verification
+        verify(eventPublisher).publishEvent(new CommentDeletedEvent(commentId));
+
+        // Ensure no unexpected interactions
+        verifyNoMoreInteractions(commentDAO, likeDAO, eventPublisher);
     }
 }
