@@ -64,14 +64,14 @@ public class InteractionController {
     }
 
     /**
-     * Deleting a comment
+     * Deleting a comment or post
      *
-     * @param commentId, The identifier of the comment itself
-     * @return UUID of the deleted comment
+     * @param referenceId, The identifier of the comment or post itself
+     * @return UUID of the deleted comment or post
      */
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<UUID> deleteComment(@PathVariable UUID commentId) {
-        UUID deletedCommentId = commentService.deleteComment(commentId);
+    @DeleteMapping("/{referenceId}")
+    public ResponseEntity<UUID> deleteReference(@PathVariable UUID referenceId) {
+        UUID deletedCommentId = commentService.deleteComment(referenceId);
         return ResponseEntity.ok(deletedCommentId);
     }
 
@@ -101,18 +101,5 @@ public class InteractionController {
         likeService.deleteAllByUser(userId);
         commentService.deleteAllByUser(userId);
         return ResponseEntity.ok(userId);
-    }
-
-    /**
-     * Deletes a post and comments and likes accordingly
-     *
-     * @param postId, identifier of the post to be deleted
-     * @return uuid of the deleted post
-     */
-    @DeleteMapping("post/{postId}")
-    public ResponseEntity<UUID> deletePost(@PathVariable UUID postId) {
-        likeService.deleteAllByReference(postId);
-        commentService.deleteAllByReference(postId);
-        return ResponseEntity.ok(postId);
     }
 }
