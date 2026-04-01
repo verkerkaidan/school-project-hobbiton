@@ -17,7 +17,7 @@ public abstract class PostDTO {
     public String description;
     public String title;
     public UUID userId;
+    public String hobbyType;
     public Set<UUID> mediaInstanceSet;
-
     public abstract Post toEntity();
 }

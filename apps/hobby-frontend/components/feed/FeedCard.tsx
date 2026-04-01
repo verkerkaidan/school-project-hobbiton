@@ -1,7 +1,6 @@
 'use client';
 import {motion} from 'framer-motion';
 import Link from 'next/link';
-import {Post} from '@/types';
 import Image from "next/image";
 
 export const FeedCard = ({item, index}: { item: Post, index: number }) => {
@@ -10,6 +9,11 @@ export const FeedCard = ({item, index}: { item: Post, index: number }) => {
         medium: 'aspect-square',
         tall: 'aspect-[3/4]'
     };
+    function getRandomAspectRatio(): string {
+        const values = Object.values(aspectRatios); // ["aspect-video", "aspect-square", "aspect-[3/4]"]
+        const randomIndex = Math.floor(Math.random() * values.length);
+        return values[randomIndex];
+    }
 
     return (
         <motion.div
@@ -19,12 +23,11 @@ export const FeedCard = ({item, index}: { item: Post, index: number }) => {
             transition={{duration: 0.5, delay: index * 0.05}}
             className="break-inside-avoid group mb-6"
         >
-            <Link href={item.href}
-                  className="block relative overflow-hidden rounded-post glass-card glass-card-hover">
+            {/* <Link href={item.href} className="block relative overflow-hidden rounded-post glass-card glass-card-hover"> */}
 
                 {/* Image Container */}
-                <div className={`relative w-full overflow-hidden ${aspectRatios[item.size]}`}>
-                    <Image src={item.image} alt={item.title} fill
+                <div className={`relative w-full overflow-hidden ${getRandomAspectRatio()}`}>
+                    <Image src="https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000" alt={item.title} fill
                            sizes={"(max-width: 768px) 100vw, 50vw"}
                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
@@ -35,14 +38,14 @@ export const FeedCard = ({item, index}: { item: Post, index: number }) => {
                 {/* Content Area */}
                 <div className="p-6 space-y-3">
                     <div className="flex items-center gap-3">
-                        <span className={`w-2 h-2 rounded-full ${item.color} shadow-lg shadow-current/50`}/>
-                        <span className="text-xs font-mono uppercase tracking-tighter text-accent">{item.type}</span>
+                        <span className={`w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-current/50`}/>
+                        <span className="text-xs font-mono uppercase tracking-tighter text-accent">{item.hobbyType}</span>
                     </div>
                     <h2 className="text-2xl font-semibold group-hover:text-brand-light transition-colors duration-300">
                         {item.title}
                     </h2>
                     <p className="text-accent text-sm leading-relaxed">
-                        {item.content}
+                        {item.description}
                     </p>
                 </div>
 
@@ -57,7 +60,7 @@ export const FeedCard = ({item, index}: { item: Post, index: number }) => {
                         </button>
                     </div>
                 </div>
-            </Link>
+            {/* </Link> */}
         </motion.div>
     );
 };

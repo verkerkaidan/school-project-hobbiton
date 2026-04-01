@@ -87,7 +87,18 @@ public class PostController {
             @RequestParam(defaultValue = "20") int pagesize){
         Pageable pageable = PageRequest.of(page, pagesize);
 
-        return ResponseEntity.ok(this.postDAO.getPostsByHobbyProperty(propertyType, pageable));
+        List<?extends Post> posts =this.postDAO.getPostsByHobbyProperty(propertyType, pageable);
+
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<? extends Post>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pagesize){
+        Pageable pageable = PageRequest.of(page, pagesize);
+        return ResponseEntity.ok(this.postDAO.getPosts(pageable));
+
     }
 
     /**

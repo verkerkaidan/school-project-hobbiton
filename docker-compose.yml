@@ -238,6 +238,20 @@ services:
       database:
         condition: service_healthy
 
+  middleware-service:
+    build:
+      context: ./apps/apigateway
+    container_name: apigateway-service
+    restart: always
+    ports:
+      - "23738:23738"
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    environment:
+      MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
+      POST_SERVICE_URL: ${POST_SERVICE_URL}
 networks:
   microservices-network:
     name: microservices-network

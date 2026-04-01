@@ -1,0 +1,18 @@
+package com.apigateway.apigateway.clients;
+
+import com.apigateway.apigateway.enums.HobbyType;
+import com.apigateway.apigateway.models.Post;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
+
+@FeignClient(name = "post-service", url="${post.service.url}")
+public interface PostClient {
+    @GetMapping("/posts/hobby/{hobbyType}")
+    List<Post> getPostsByHobbyType(@PathVariable HobbyType hobbyType);
+
+    @GetMapping("/posts")
+    List<Post> getAllPosts();
+}
