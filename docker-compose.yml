@@ -5,7 +5,7 @@ services:
     container_name: frontend
     restart: always
     ports:
-      - "3000:3000"
+      - "19293:19293"
     networks:
       - microservices-network
 
@@ -54,10 +54,8 @@ services:
     container_name: post-service
     restart: always
     ports:
-      - "8080:8080"
+      - "29293:29293"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_POSTS_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_POSTS}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_POSTS}
@@ -75,10 +73,8 @@ services:
     container_name: profile-connection-service
     restart: always
     ports:
-      - "8081:8081"
+      - "29574:29574"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
@@ -96,34 +92,11 @@ services:
     container_name: media-service
     restart: always
     ports:
-      - "8082:8082"
+      - "27086:27086"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
-    cpus: 2
-    mem_limit: 2048m
-    networks:
-      - microservices-network
-    depends_on:
-      database:
-        condition: service_healthy
-
-  feed-service:
-    build:
-      context: ./apps/feed-service
-    container_name: feed-service
-    restart: always
-    ports:
-      - "8083:8083"
-    environment:
-      DB_HOST: database
-      DB_PORT: 5432
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_FEED_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_FEED}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_FEED}
     cpus: 2
     mem_limit: 2048m
     networks:
@@ -138,7 +111,7 @@ services:
     container_name: recognition-service
     restart: always
     ports:
-      - "8084:8084"
+      - "27088:27088"
     cpus: 2
     mem_limit: 2048m
     networks:
@@ -147,12 +120,10 @@ services:
   authentication-service:
     build: ./apps/authentication-service
     container_name: authentication-service
-    restart: no
+    restart: always
     ports:
-      - "8085:8085"
+      - "21525:21525"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_AUTHENTICATION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_AUTHENTICATION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_AUTHENTICATION}
@@ -175,7 +146,7 @@ services:
     container_name: profile-service
     restart: no
     ports:
-      - "8086:8086"
+      - "21526:21526"
     environment:
       DB_HOST: database
       DB_PORT: 5432
@@ -200,13 +171,8 @@ services:
     container_name: library-service
     restart: no
     ports:
-      - "8087:8087"
+      - "28877:28877"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_LIBRARY}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_LIBRARY}
       OMDB_API_KEY: ${OMDB_API_KEY}
       OMDB_API_URL: ${OMDB_API_URL}
     cpus: 2
@@ -223,10 +189,8 @@ services:
     container_name: interaction-service
     restart: always
     ports:
-      - "8088:8088"
+      - "27087:27087"
     environment:
-      DB_HOST: database
-      DB_PORT: 5432
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_INTERACTION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_INTERACTION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_INTERACTION}
