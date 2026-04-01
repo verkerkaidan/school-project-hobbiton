@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Service("userDetailsService")
+@Service
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -55,7 +55,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         private List<String> getPrivileges(Collection<Role> roles) {
-
             List<String> privileges = new ArrayList<>();
             List<Privilege> collection = new ArrayList<>();
             for (Role role : roles) {
