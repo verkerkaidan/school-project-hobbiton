@@ -1,11 +1,13 @@
 package com.interactionservice.service;
 
+import com.interactionservice.events.CommentDeletedEvent;
 import com.interactionservice.dao.CommentDAO;
 import com.interactionservice.dao.LikeDAO;
 import com.interactionservice.dto.CommentDTO;
 import com.interactionservice.model.Comment;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +17,9 @@ import java.util.UUID;
 public class CommentService {
     @Autowired
     private CommentDAO commentDAO;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private LikeDAO likeDAO;
@@ -34,11 +39,18 @@ public class CommentService {
         return commentDAO.createComment(commentObject);
     }
 
+    /**
+     * EventEmitter comment delete
+     * Deletes comment and publishes event so each child comment is deleted
+     *
+     * @param commentId
+     * @return
+     */
     @Transactional
-    public UUID deleteComment(UUID id) {
-        likeDAO.deleteAllByReference(id);
-        this.deleteAllByReference(id);
-        UUID commentId = commentDAO.deleteComment(id);
+    public UUID deleteComment(UUID commentId) {
+        commentDAO.deleteComment(commentId);
+        likeDAO.deleteAllByReference(commentId);
+        eventPublisher.publishEvent(new CommentDeletedEvent(commentId));
         return commentId;
     }
 
@@ -46,11 +58,24 @@ public class CommentService {
         return commentDAO.getAllComments(referenceId);
     }
 
+    /**
+     * Deletes all comments that are connected to a given post
+     *
+     * @param postId, identifier of the post to be deleted
+     */
     @Transactional
     public void deleteAllByReference(UUID postId) {
-        commentDAO.deleteCommentsByReference(postId);
+        List<Comment> comments = commentDAO.getAllComments(postId);
+        for (Comment comment : comments) {
+            deleteComment(comment.getId());
+        }
     }
 
+    /**
+     * Retrieves all comments placed by the given user and deletes those
+     *
+     * @param userId, identifier of the user to be deleted
+     */
     public void deleteAllByUser(UUID userId) {
         List<Comment> comments = commentDAO.retrieveCommentsByUser(userId);
         comments.forEach(comment -> deleteComment(comment.getId()));
