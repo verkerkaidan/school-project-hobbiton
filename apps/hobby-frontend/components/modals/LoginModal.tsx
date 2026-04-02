@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Modal } from "./Modal";
 import { login } from "@/lib/authenticationClient";
 import { useRouter } from "next/navigation";
+import { LoginForm, ModalProps } from "@/types/interfaces";
 
 export function LoginModal({ isOpen, onClose }: ModalProps) {
     const [form, setForm] = useState<LoginForm>({ email: "", password: "" });

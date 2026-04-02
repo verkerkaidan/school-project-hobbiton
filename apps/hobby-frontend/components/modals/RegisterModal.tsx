@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Modal } from "./Modal";
 import { register } from "@/lib/authenticationClient";
 import { useRouter } from "next/navigation";
+import { ModalProps, RegisterForm } from "@/types/interfaces";
 
 export function RegisterModal({ isOpen, onClose }: ModalProps) {
     const [form, setForm] = useState<RegisterForm>({

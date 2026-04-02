@@ -1,5 +1,5 @@
+// types/posts.ts
 export interface Exercise {
-  id: string;
   title: string;
   reps: number;
   weight: number;
