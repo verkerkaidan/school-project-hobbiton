@@ -37,6 +37,11 @@ public class InteractionController {
         return ResponseEntity.ok(likeNowExists);
     }
 
+    @GetMapping("/{userId}/{referenceId}")
+    public ResponseEntity<Boolean> hasUserLiked(@PathVariable UUID userId, @PathVariable UUID referenceId) {
+        return ResponseEntity.ok(likeService.doesLikeExist(userId, referenceId));
+    }
+
     /**
      * Count the likes of the given post or comment identifier
      * Retrieve the comments that are linked to it

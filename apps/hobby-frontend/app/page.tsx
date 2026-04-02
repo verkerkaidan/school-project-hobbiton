@@ -16,7 +16,7 @@ export default function HomePage() {
           <span className="text-brand">{currentUser?.username ?? "..."}</span>
         </h1>
         <p className="text-accent text-lg max-w-sm">
-          Jouw persoonlijke stroom van literatuur, cinema en beweging.
+          Your personal dose of reading, cinema en exercise.
         </p>
       </header>
         <button

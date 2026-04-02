@@ -34,6 +34,17 @@ public class LikeService {
         }
     }
 
+    /**
+     * Checks if the user has liked the post or comment
+     *
+     * @param userId, uuid of the user
+     * @param referenceId, uuid of the post or comment
+     * @return true if the like exists, false if not
+     */
+    public boolean doesLikeExist(UUID userId, UUID referenceId) {
+        return likeDAO.doesExist(userId, referenceId);
+    }
+
     public Integer countLikesOfReference(UUID referenceId) {
         return likeDAO.countLikes(referenceId);
     }

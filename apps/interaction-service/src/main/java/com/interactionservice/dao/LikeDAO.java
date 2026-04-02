@@ -14,7 +14,7 @@ public class LikeDAO {
     private LikeRepository likeRepository;
 
     public boolean doesExist(UUID userId, UUID referenceId) {
-        return likeRepository.existsByReferenceIdAndUserId(userId, referenceId);
+        return likeRepository.existsByReferenceIdAndUserId(referenceId, userId);
     }
 
     /**
