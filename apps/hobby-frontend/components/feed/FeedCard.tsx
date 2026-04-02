@@ -1,66 +1,78 @@
-'use client';
-import {motion} from 'framer-motion';
-import Link from 'next/link';
+"use client";
+import { motion } from "framer-motion";
+import Link from "next/link";
 import Image from "next/image";
+import { Post } from "@/types/posts";
 
-export const FeedCard = ({item, index}: { item: Post, index: number }) => {
-    const aspectRatios = {
-        short: 'aspect-video',
-        medium: 'aspect-square',
-        tall: 'aspect-[3/4]'
-    };
-    function getRandomAspectRatio(): string {
-        const values = Object.values(aspectRatios); // ["aspect-video", "aspect-square", "aspect-[3/4]"]
-        const randomIndex = Math.floor(Math.random() * values.length);
-        return values[randomIndex];
-    }
+export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
+  const aspectRatios = {
+    short: "aspect-video",
+    medium: "aspect-square",
+    tall: "aspect-[3/4]",
+  };
+  function getRandomAspectRatio(): string {
+    const values = Object.values(aspectRatios); // ["aspect-video", "aspect-square", "aspect-[3/4]"]
+    const randomIndex = Math.floor(Math.random() * values.length);
+    return values[randomIndex];
+  }
 
-    return (
-        <motion.div
-            initial={{opacity: 0, scale: 0.95}}
-            whileInView={{opacity: 1, scale: 1}}
-            viewport={{once: true, amount: 0.3}}
-            transition={{duration: 0.5, delay: index * 0.05}}
-            className="break-inside-avoid group mb-6"
-        >
-            {/* <Link href={item.href} className="block relative overflow-hidden rounded-post glass-card glass-card-hover"> */}
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+      className="break-inside-avoid group mb-6"
+    >
+      {/* <Link href={item.href} className="block relative overflow-hidden rounded-post glass-card glass-card-hover"> */}
 
-                {/* Image Container */}
-                <div className={`relative w-full overflow-hidden ${getRandomAspectRatio()}`}>
-                    <Image src="https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000" alt={item.title} fill
-                           sizes={"(max-width: 768px) 100vw, 50vw"}
-                           className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    />
-                    <div
-                        className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60"/>
-                </div>
+      {/* Image Container */}
+      <div
+        className={`relative w-full overflow-hidden ${getRandomAspectRatio()}`}
+      >
+        <Image
+          src="https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000"
+          alt={item.title}
+          fill
+          sizes={"(max-width: 768px) 100vw, 50vw"}
+          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
+        <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
+      </div>
 
-                {/* Content Area */}
-                <div className="p-6 space-y-3">
-                    <div className="flex items-center gap-3">
-                        <span className={`w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-current/50`}/>
-                        <span className="text-xs font-mono uppercase tracking-tighter text-accent">{item.hobbyType}</span>
-                    </div>
-                    <h2 className="text-2xl font-semibold group-hover:text-brand-light transition-colors duration-300">
-                        {item.title}
-                    </h2>
-                    <p className="text-accent text-sm leading-relaxed">
-                        {item.description}
-                    </p>
-                </div>
+      {/* Content Area */}
+      <div className="p-6 space-y-3">
+        <div className="flex items-center gap-3">
+          <span
+            className={`w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-current/50`}
+          />
+          <span className="text-xs font-mono uppercase tracking-tighter text-accent">
+            {item.hobbyType}
+          </span>
+        </div>
+        <h2 className="text-2xl font-semibold group-hover:text-brand-light transition-colors duration-300">
+          {item.title}
+        </h2>
+        <p className="text-accent text-sm leading-relaxed">
+          {item.description}
+        </p>
+      </div>
 
-                {/* Interaction Footer */}
-                <div className="px-6 py-4 border-t border-white/5 flex justify-between items-center bg-white/2">
-                    <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
-                        Bekijk Post
-                    </span>
-                    <div className="flex gap-4 text-accent">
-                        <button className="hover:text-rose-500 transition-colors transform hover:scale-110">♡</button>
-                        <button className="hover:text-brand-light transition-colors transform hover:scale-110">⟲
-                        </button>
-                    </div>
-                </div>
-            {/* </Link> */}
-        </motion.div>
-    );
+      {/* Interaction Footer */}
+      <div className="px-6 py-4 border-t border-white/5 flex justify-between items-center bg-white/2">
+        <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
+          Bekijk Post
+        </span>
+        <div className="flex gap-4 text-accent">
+          <button className="hover:text-rose-500 transition-colors transform hover:scale-110">
+            ♡
+          </button>
+          <button className="hover:text-brand-light transition-colors transform hover:scale-110">
+            ⟲
+          </button>
+        </div>
+      </div>
+      {/* </Link> */}
+    </motion.div>
+  );
 };

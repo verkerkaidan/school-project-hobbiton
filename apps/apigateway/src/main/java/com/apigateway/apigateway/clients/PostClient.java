@@ -8,11 +8,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "post-service", url="${post.service.url}")
+@FeignClient(name = "post-service", url = "${post.service.url}")
 public interface PostClient {
     @GetMapping("/posts/hobby/{hobbyType}")
     List<Post> getPostsByHobbyType(@PathVariable HobbyType hobbyType);
 
     @GetMapping("/posts")
     List<Post> getAllPosts();
+
+    @GetMapping("/posts/users/{user_id}")
+    List<Post> getUserPosts(@PathVariable("user_id") java.util.UUID userId);
 }

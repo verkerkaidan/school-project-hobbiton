@@ -23,8 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JWTFilter filter;
 
-
-    ///  All endpoints in for the Profile microservice are only accessible as the authenticated user.
+    /// All endpoints in for the Profile microservice are only accessible as the
+    /// authenticated user.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -34,8 +34,8 @@ public class SecurityConfig {
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").anonymous()
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("GET", "/profile/**").permitAll()
+                        .anyRequest().authenticated())
                 .build();
     }
 
@@ -45,7 +45,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

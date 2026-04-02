@@ -1,11 +1,12 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { ProfileView } from "@/components/profile/ProfileView";
+import { CURRENT_USER_ID } from "@/lib/auth";
+
+export default function ProfilePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <p>Profile page</p>
-      </main>
+    <div className="mx-auto px-6 pt-16 pb-20 max-w-7xl">
+      <ProfileView userId={CURRENT_USER_ID} isOwnProfile={true} />
     </div>
   );
 }

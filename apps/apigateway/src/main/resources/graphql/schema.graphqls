@@ -1,8 +1,25 @@
 # schema.graphqls
 
+type Mutation {
+  toggleFollow(targetUserId: ID!, currentUserId: ID!): Boolean
+  toggleBlock(targetUserId: ID!, currentUserId: ID!): Boolean
+  createReport(
+    initiatorId: ID!
+    targetId: ID!
+    reason: String!
+    description: String
+  ): Boolean
+}
+
 type Query {
   getPostsByHobbyType(hobbyType: HobbyType): [Post]
   getPosts: [Post]
+  getProfile(userId: ID!): UserProfile
+  getUserPosts(userId: ID!): [Post]
+  getFollowers(userId: ID!): [User]
+  getFollowing(userId: ID!): [User]
+  isFollowing(currentUserId: ID!, targetUserId: ID!): Boolean
+  isBlocking(currentUserId: ID!, targetUserId: ID!): Boolean
 }
 
 interface Post {
@@ -53,10 +70,10 @@ type GymExercise {
 }
 
 type Media {
-    fileData: String
-    fileThumb: String
-    contentType: String
-    contentFlag: ContentFlag
+  fileData: String
+  fileThumb: String
+  contentType: String
+  contentFlag: ContentFlag
 }
 
 enum HobbyType {
@@ -65,7 +82,22 @@ enum HobbyType {
 }
 
 enum ContentFlag {
-    SAFE
-    RISK
-    UNASSIGNED
+  SAFE
+  RISK
+  UNASSIGNED
+}
+
+type UserProfile {
+  id: ID
+  username: String
+  bio: String
+  profilePictureUrl: String
+  followerCount: Int
+  followingCount: Int
+}
+
+type User {
+  id: ID
+  username: String
+  profilePictureUrl: String
 }

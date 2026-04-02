@@ -1,5 +1,4 @@
-// types/posts.ts
-interface Exercise {
+export interface Exercise {
   id: string;
   title: string;
   reps: number;
@@ -7,14 +6,14 @@ interface Exercise {
   rpe: number;
 }
 
-interface MediaSet {
+export interface MediaSet {
   fileData: string;
   fileThumb: string;
   contentType: string;
   contentFlag: string;
 }
 
-interface Post {
+export interface Post {
   id: string;
   title: string;
   description: string;
@@ -25,15 +24,14 @@ interface Post {
   mediaSet: MediaSet[];
 }
 
-interface Gym extends Post {
+export interface Gym extends Post {
   totalDuration?: number;
   exercises?: Exercise[];
 }
 
-interface Reading extends Post {
+export interface Reading extends Post {
   bookTitle?: string;
   pagesRead?: number;
   totalPagesRead?: number;
   bookFinished?: boolean;
 }
-

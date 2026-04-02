@@ -44,7 +44,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -218,6 +218,8 @@ services:
     environment:
       MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
       POST_SERVICE_URL: ${POST_SERVICE_URL}
+      PROFILE_SERVICE_URL: ${PROFILE_SERVICE_URL}
+      PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
       RECOGNITION_SERVICE_URL: ${RECOGNITION_SERVICE_URL}
 networks:
   microservices-network:
