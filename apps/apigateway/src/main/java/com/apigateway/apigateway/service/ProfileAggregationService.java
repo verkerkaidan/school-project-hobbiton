@@ -146,6 +146,25 @@ public class ProfileAggregationService {
         }
     }
 
+    public List<User> getBlockedUsers(UUID userId) {
+        logger.info("[getBlockedUsers] Starting blocked users fetch for userId: {}", userId);
+        try {
+            Set<UUID> blockedIds = profileConnectionClient.getBlockedIds(userId);
+            logger.debug("[getBlockedUsers] Retrieved {} blocked IDs", blockedIds.size());
+            List<User> blockedUsers = blockedIds.stream()
+                    .map(this::convertUUIDToUser)
+                    .filter(user -> user != null)
+                    .collect(Collectors.toList());
+            logger.info("[getBlockedUsers] Successfully converted {} blocked IDs to User objects for userId: {}",
+                    blockedUsers.size(), userId);
+            return blockedUsers;
+        } catch (Exception e) {
+            logger.error("[getBlockedUsers] FAILED to fetch blocked users for userId: {} - Exception: {}", userId,
+                    e.getClass().getName(), e);
+            throw new RuntimeException("Failed to fetch blocked users for user: " + userId, e);
+        }
+    }
+
     public Boolean isBlocking(UUID currentUserId, UUID targetUserId) {
         try {
             Set<UUID> blockedIds = profileConnectionClient.getBlockedIds(currentUserId);

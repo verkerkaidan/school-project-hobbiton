@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
-import { CURRENT_USER_ID } from "@/lib/auth";
 
 interface CurrentUser {
   id: string;
@@ -17,8 +17,14 @@ export function useCurrentUser(): CurrentUser | null {
   const [user, setUser] = useState<CurrentUser | null>(cachedUser);
 
   useEffect(() => {
+    const userId = Cookies.get("userId") ?? "";
+    if (!userId) return;
+    // Invalidate cache if a different user is now logged in (e.g. after re-login)
+    if (cachedUser && cachedUser.id !== userId) {
+      cachedUser = null;
+    }
     if (cachedUser) return;
-    getProfile(CURRENT_USER_ID)
+    getProfile(userId)
       .then((profile) => {
         cachedUser = {
           id: profile.id,

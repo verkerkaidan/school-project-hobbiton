@@ -16,7 +16,7 @@ import {
   checkIsFollowing,
   checkIsBlocking,
 } from "@/queries/getProfile";
-import { CURRENT_USER_ID } from "@/lib/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { UserProfile, User } from "@/types/profile";
 
 interface ProfileViewProps {
@@ -25,6 +25,9 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
+  const currentUser = useCurrentUser();
+  const currentUserId = currentUser?.id ?? "";
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,10 +80,10 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
           const [profileData, following, blocking, followsBack] =
             await Promise.all([
               getProfile(userId),
-              checkIsFollowing(CURRENT_USER_ID, userId),
-              checkIsBlocking(CURRENT_USER_ID, userId),
+              checkIsFollowing(currentUserId, userId),
+              checkIsBlocking(currentUserId, userId),
               // Check whether the target user follows the current user (mutual follow indicator)
-              checkIsFollowing(userId, CURRENT_USER_ID),
+              checkIsFollowing(userId, currentUserId),
             ]);
           setProfile(profileData);
           setIsFollowing(following);
@@ -101,7 +104,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
   // subsequent calls are no-ops so we don't hammer the API on repeated modal opens
   const ensureCurrentUserFollowing = () =>
     !currentUserFollowingLoaded
-      ? getFollowing(CURRENT_USER_ID)
+      ? getFollowing(currentUserId)
           .then((data) => {
             setCurrentUserFollowing(data);
             // For own-profile views, the target's following list IS the current user's list
@@ -151,40 +154,40 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
 
   // Toggles follow state and updates the follower count + cached followers list optimistically
   const handleFollow = async () => {
-    const nowFollowing = await toggleFollow(CURRENT_USER_ID, userId);
+    const nowFollowing = await toggleFollow(currentUserId, userId);
     setIsFollowing(nowFollowing);
     setFollowerCountOffset((prev) => prev + (nowFollowing ? 1 : -1));
     if (followers.length > 0) {
       if (nowFollowing) {
         // Add current user to the cached followers list if not already present
         setFollowers((prev) =>
-          prev.some((u) => u.id === CURRENT_USER_ID)
+          prev.some((u) => u.id === currentUserId)
             ? prev
             : [
                 ...prev,
                 {
-                  id: CURRENT_USER_ID,
+                  id: currentUserId,
                   username: "",
                   profilePictureUrl: "/jpeg.png",
                 },
               ],
         );
       } else {
-        setFollowers((prev) => prev.filter((u) => u.id !== CURRENT_USER_ID));
+        setFollowers((prev) => prev.filter((u) => u.id !== currentUserId));
       }
     }
   };
 
   // Toggles block state; blocking automatically removes any mutual follow relationship
   const handleBlock = async () => {
-    const nowBlocking = await toggleBlock(CURRENT_USER_ID, userId);
+    const nowBlocking = await toggleBlock(currentUserId, userId);
     setIsBlocked(nowBlocking);
     if (nowBlocking) {
       // Clean up follow state so counts and UI don't show stale "following" indicators
       if (isFollowing) {
         setIsFollowing(false);
         setFollowerCountOffset((prev) => prev - 1);
-        setFollowers((prev) => prev.filter((u) => u.id !== CURRENT_USER_ID));
+        setFollowers((prev) => prev.filter((u) => u.id !== currentUserId));
       }
       if (targetFollowsCurrentUser) {
         setFollowingCountOffset((prev) => prev - 1);
@@ -199,7 +202,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
     targetUserId: string,
     _isCurrentlyFollowing: boolean,
   ): Promise<boolean> => {
-    const isNowFollowing = await toggleFollow(CURRENT_USER_ID, targetUserId);
+    const isNowFollowing = await toggleFollow(currentUserId, targetUserId);
     // Build a state updater function depending on whether we're now following or unfollowing
     const updater = isNowFollowing
       ? (prev: User[]) =>
@@ -291,7 +294,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
         title="Followers"
         users={followers}
         isLoading={loadingFollowers}
-        currentUserId={CURRENT_USER_ID}
+        currentUserId={currentUserId}
         followingIds={currentUserFollowingIds}
         onToggleFollow={handleToggleFollowInModal}
       />
@@ -302,7 +305,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
         title="Following"
         users={targetFollowing}
         isLoading={loadingFollowing}
-        currentUserId={CURRENT_USER_ID}
+        currentUserId={currentUserId}
         followingIds={currentUserFollowingIds}
         onToggleFollow={handleToggleFollowInModal}
       />
@@ -312,7 +315,7 @@ export function ProfileView({ userId, isOwnProfile }: ProfileViewProps) {
           isOpen={showReportModal}
           targetUsername={profile.username}
           onConfirm={async (reason, description) => {
-            await createReport(CURRENT_USER_ID, userId, reason, description);
+            await createReport(currentUserId, userId, reason, description);
           }}
           onClose={() => setShowReportModal(false)}
         />

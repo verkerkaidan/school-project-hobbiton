@@ -75,6 +75,20 @@ public class ProfileController {
                 UUID.fromString(currentUserId), UUID.fromString(targetUserId));
     }
 
+    // GraphQL query: returns the list of users that the given userId has blocked
+    @QueryMapping
+    public List<User> getBlockedUsers(@Argument String userId) {
+        logger.info("[getBlockedUsers] Received request for userId: {}", userId);
+        try {
+            List<User> blockedUsers = profileAggregationService.getBlockedUsers(UUID.fromString(userId));
+            logger.info("[getBlockedUsers] Retrieved {} blocked users for userId: {}", blockedUsers.size(), userId);
+            return blockedUsers;
+        } catch (Exception e) {
+            logger.error("[getBlockedUsers] Error retrieving blocked users for userId: {}", userId, e);
+            throw e;
+        }
+    }
+
     // GraphQL query: checks whether currentUser has blocked targetUser
     @QueryMapping
     public Boolean isBlocking(@Argument String currentUserId, @Argument String targetUserId) {
