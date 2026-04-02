@@ -156,6 +156,24 @@ export async function toggleFollow(
   return data.toggleFollow;
 }
 
+const GET_BLOCKED_USERS_QUERY = `
+  query GetBlockedUsers($userId: ID!) {
+    getBlockedUsers(userId: $userId) {
+      id
+      username
+      profilePictureUrl
+    }
+  }
+`;
+
+export async function getBlockedUsers(userId: string): Promise<User[]> {
+  const data = await gqlRequest<{ getBlockedUsers: User[] }>(
+    GET_BLOCKED_USERS_QUERY,
+    { userId },
+  );
+  return data.getBlockedUsers ?? [];
+}
+
 const TOGGLE_BLOCK_MUTATION = `
   mutation ToggleBlock($targetUserId: ID!, $currentUserId: ID!) {
     toggleBlock(targetUserId: $targetUserId, currentUserId: $currentUserId)

@@ -20,6 +20,7 @@ type Query {
   getFollowing(userId: ID!): [User]
   isFollowing(currentUserId: ID!, targetUserId: ID!): Boolean
   isBlocking(currentUserId: ID!, targetUserId: ID!): Boolean
+  getBlockedUsers(userId: ID!): [User]
 }
 
 interface Post {

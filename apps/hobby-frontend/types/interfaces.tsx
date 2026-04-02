@@ -14,6 +14,8 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
+  username: string;
+  name: string;
 }
 
 export interface BaseCreatePost {
