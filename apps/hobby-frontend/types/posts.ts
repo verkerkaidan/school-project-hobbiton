@@ -1,3 +1,5 @@
+import {Comment} from "@/types/interaction";
+
 export interface Exercise {
   title: string;
   reps: number;
@@ -17,18 +19,6 @@ export interface CompletePost {
   post: Post;
   likes: number;
   comments: Comment[];
-}
-
-export interface Interaction {
-  likes: number;
-  comments: Comment[];
-}
-
-export interface Comment {
-  id: string;
-  referenceId: string;
-  userId: string;
-  comment: string;
 }
 
 export interface Post {

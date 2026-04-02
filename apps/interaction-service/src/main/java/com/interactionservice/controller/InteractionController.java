@@ -50,7 +50,7 @@ public class InteractionController {
      * @return Integer -> number of likes
      */
     @GetMapping("/{referenceId}")
-    public ResponseEntity<InteractionReturnDTO> getLikesFromReference(@PathVariable UUID referenceId) {
+    public ResponseEntity<InteractionReturnDTO> getInteractionFromReference(@PathVariable UUID referenceId) {
         int likes = likeService.countLikesOfReference(referenceId);
         List<Comment> commentList = commentService.getAllComments(referenceId);
         InteractionReturnDTO dto = new InteractionReturnDTO(likes, commentList);
