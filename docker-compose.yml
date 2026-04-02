@@ -2,6 +2,8 @@ services:
   frontend:
     build:
       context: ./apps/hobby-frontend
+      args:
+        NEXT_PUBLIC_AUTHENTICATION_URL: ${NEXT_PUBLIC_AUTHENTICATION_URL}
     container_name: frontend
     restart: always
     ports:
