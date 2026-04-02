@@ -1,4 +1,3 @@
-// components/Modal.tsx
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,7 +12,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps & { children: Re
       onClick={onClose}
     >
       <div
-        className="bg-zinc-900 border border-white/10 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl"
+        className="bg-zinc-900 border border-white/10 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         {children}

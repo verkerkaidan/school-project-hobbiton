@@ -15,7 +15,7 @@ public class Reading extends Post {
     public Reading(ReadingDTO readingDTO){
         super(readingDTO);
         super.setHobbyType("READING");
-        this.bookTitle = readingDTO.title;
+        this.bookTitle = readingDTO.bookTitle;
         this.pagesRead = readingDTO.pagesRead;
         this.totalPagesRead = readingDTO.totalPagesRead;
         this.bookFinished = readingDTO.bookFinished;

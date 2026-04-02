@@ -1,5 +1,6 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.DTO.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.DTO.MediaDTO;
 import com.apigateway.apigateway.models.Post;
@@ -10,8 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.List;
 
 @RestController
 @Controller
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:19293"})
 public class PostsController {
 
     private final PostAggregationService service;
@@ -49,7 +54,8 @@ public class PostsController {
     }
 
     @PostMapping("/create-post")
-    public Post createPost(){
-        return new Gym();
+    public ResponseEntity<Object> createPost(@RequestBody PostDTO dto) {
+        Object response = service.forwardCreatePost(dto);
+        return ResponseEntity.ok(response);
     }
 }

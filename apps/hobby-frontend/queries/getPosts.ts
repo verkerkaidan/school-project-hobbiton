@@ -30,12 +30,7 @@ query {
         totalPagesRead
         bookFinished
     }
-    mediaSet {
-      fileData
-      fileThumb
-      contentType
-      contentFlag
-    }
+    mediaSet
   }
 }
 `;
