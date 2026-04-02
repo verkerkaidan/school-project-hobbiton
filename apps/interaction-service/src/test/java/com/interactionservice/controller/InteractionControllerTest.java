@@ -68,7 +68,7 @@ public class InteractionControllerTest {
 
         // Act
         ResponseEntity<InteractionReturnDTO> response =
-                interactionController.getLikesFromReference(referenceId);
+                interactionController.getInteractionFromReference(referenceId);
 
         // Assert status
         assertEquals(200, response.getStatusCodeValue());

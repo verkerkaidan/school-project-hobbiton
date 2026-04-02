@@ -1,6 +1,7 @@
 import ImageSlider from "@/components/ui/ImageSlider";
 import { gqlRequest } from "@/lib/graphQlClient";
-import { PostResponse, Gym, Reading } from "@/types/posts";
+import {PostResponse, Gym, Reading} from "@/types/posts";
+import CompleteInteraction from "@/components/interaction/completeInteraction";
 
 interface PostPageProps {
     params: Promise<{ id: string }>; // ✅ should be a Promise
@@ -31,6 +32,13 @@ const GET_POST_BY_ID_QUERY = `
                 totalPagesRead
                 bookFinished
             }
+            mediaSet {
+              relevantId
+              fileData
+              fileThumb
+              contentType
+              contentFlag
+            }
         }
     }
 `;
@@ -46,7 +54,6 @@ function isReading(post: PostResponse): post is Reading {
 
 export default async function PostPage({ params }: PostPageProps) {
     const { id } = await params;
-    console.log(id);
     const { getPostById: post } = await gqlRequest<{ getPostById: PostResponse }>(
         GET_POST_BY_ID_QUERY,
         { id }
@@ -84,6 +91,8 @@ export default async function PostPage({ params }: PostPageProps) {
                     <p>Finished: {post.bookFinished ? "Yes" : "No"}</p>
                 </div>
             )}
+
+            <CompleteInteraction postId={post.id}/>
         </main>
     );
 }

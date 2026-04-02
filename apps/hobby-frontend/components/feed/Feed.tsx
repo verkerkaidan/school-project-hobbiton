@@ -2,7 +2,8 @@
 import { getAllPosts } from "@/queries/getPosts";
 import { FeedCard } from "./FeedCard";
 import { useEffect, useState } from "react";
-import {CompletePost, Interaction} from "@/types/posts";
+import {CompletePost} from "@/types/posts";
+import {Interaction} from "@/types/interaction";
 import {getInteraction} from "@/lib/interactionClient";
 
 export const Feed = () => {

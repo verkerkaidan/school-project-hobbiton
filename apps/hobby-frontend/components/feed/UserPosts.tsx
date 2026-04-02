@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FeedCard } from "./FeedCard";
-import {CompletePost, Interaction, Post} from "@/types/posts";
+import {CompletePost, Post} from "@/types/posts";
+import {Interaction} from "@/types/interaction";
 import {getInteraction} from "@/lib/interactionClient";
 
 interface UserPostsProps {
