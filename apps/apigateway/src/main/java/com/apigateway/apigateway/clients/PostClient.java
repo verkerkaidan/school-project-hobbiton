@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.UUID;
 
 @FeignClient(name = "post-service", url = "${post.service.url}")
 public interface PostClient {
@@ -18,4 +19,7 @@ public interface PostClient {
 
     @GetMapping("/posts/users/{user_id}")
     List<Post> getUserPosts(@PathVariable("user_id") java.util.UUID userId);
+
+    @GetMapping("/posts/{id}")
+    Post getPostById(@PathVariable UUID id);
 }

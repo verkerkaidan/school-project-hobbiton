@@ -25,7 +25,7 @@ export const GymExercise = ({ ex, index, onRemove, onChange }: GymExerciseProps)
                 placeholder="Exercise name"
                 value={ex.title}
                 onChange={(e) => onChange(index, "title", e.target.value)}
-                className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                className="text-black border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             />
             <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col gap-1">

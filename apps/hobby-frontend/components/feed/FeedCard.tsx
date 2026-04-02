@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Post } from "@/types/posts";
+import { useRouter } from "next/navigation";
 
 export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
   const aspectRatios = {
@@ -10,11 +11,14 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
     medium: "aspect-square",
     tall: "aspect-[3/4]",
   };
+  const router = useRouter();
+
   function getRandomAspectRatio(): string {
     const values = Object.values(aspectRatios); // ["aspect-video", "aspect-square", "aspect-[3/4]"]
     const randomIndex = Math.floor(Math.random() * values.length);
     return values[randomIndex];
   }
+
 
   return (
     <motion.div
@@ -23,10 +27,9 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
       className="break-inside-avoid group mb-6"
-    >
-      {/* <Link href={item.href} className="block relative overflow-hidden rounded-post glass-card glass-card-hover"> */}
+      onClick={() => router.push(`/posts/${item.id}`)}
 
-      {/* Image Container */}
+    >
       <div
         className={`relative w-full overflow-hidden ${getRandomAspectRatio()}`}
       >
@@ -72,7 +75,6 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
           </button>
         </div>
       </div>
-      {/* </Link> */}
     </motion.div>
   );
 };

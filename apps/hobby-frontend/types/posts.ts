@@ -1,4 +1,3 @@
-// types/posts.ts
 export interface Exercise {
   title: string;
   reps: number;
@@ -35,3 +34,5 @@ export interface Reading extends Post {
   totalPagesRead?: number;
   bookFinished?: boolean;
 }
+
+export type PostResponse = Gym | Reading;

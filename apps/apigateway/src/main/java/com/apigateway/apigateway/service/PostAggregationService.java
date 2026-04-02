@@ -56,4 +56,8 @@ public class PostAggregationService {
                 .bodyToMono(Object.class)
                 .block();
     }
+
+    public Post getPostById(UUID id) {
+        return postClient.getPostById(id);
+    }
 }
