@@ -76,12 +76,7 @@ const GET_USER_POSTS_QUERY = `
         totalPagesRead
         bookFinished
       }
-      mediaSet {
-        fileData
-        fileThumb
-        contentType
-        contentFlag
-      }
+      mediaSet
     }
   }
 `;
