@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Controller
@@ -51,6 +52,10 @@ public class PostsController {
 
 
         return postSet;
+    }
+    @QueryMapping
+    public Post getPostById(@Argument UUID id) {
+        return service.getPostById(id);
     }
 
     @PostMapping("/create-post")

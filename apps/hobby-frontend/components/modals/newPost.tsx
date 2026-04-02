@@ -7,6 +7,7 @@ import { ReadingFields } from "../createPost/ReadingFields";
 import { postCreateRequest } from "@/lib/graphQlClient";
 import { BaseCreatePost, CreateGymPost, CreatePost, CreateReadingPost, ModalProps } from "@/types/interfaces";
 import Cookies from "js-cookie";
+import { Post } from "@/types/posts";
 
 type PostType = "GYM" | "READING";
 
@@ -155,7 +156,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         try {
             setLoading(true);
             await postCreateRequest(form);
-            router.refresh();
+            router.push("/profile")
             onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Creation of post failed.");
@@ -177,8 +178,8 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
                         onChange={handleTypeChange}
                         className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                     >
-                        <option value="GYM">Gym</option>
-                        <option value="READING">Reading</option>
+                        <option className="text-black" value="GYM">Gym</option>
+                        <option className="text-black" value="READING">Reading</option>
                     </select>
                 </div>
 
