@@ -18,181 +18,207 @@ import java.util.UUID;
 @Configuration
 public class DatabaseSeeder implements CommandLineRunner {
 
-    @Autowired
-    private ProfileRepository profileRepository;
+        @Autowired
+        private ProfileRepository profileRepository;
 
-    @Autowired
-    private FollowRepository followRepository;
+        @Autowired
+        private FollowRepository followRepository;
 
-    @Autowired
-    private BlockRepository blockRepository;
+        @Autowired
+        private BlockRepository blockRepository;
 
-    @Autowired
-    private ReportRepository reportRepository;
+        @Autowired
+        private ReportRepository reportRepository;
 
-    @Override
-    public void run(String... args) throws Exception {
-        // Only seed if there are no profiles
-        if (profileRepository.count() > 0) {
-            return;
+        @Override
+        public void run(String... args) throws Exception {
+                // Only seed if there are no profiles
+                if (profileRepository.count() > 0) {
+                        return;
+                }
+
+                // Create mock profiles
+                UUID profile1Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+                UUID profile2Id = UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+                UUID profile3Id = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+                UUID profile4Id = UUID.fromString("d62d0b05-9dad-11d1-80b4-00c04fd430c8");
+                UUID profile5Id = UUID.fromString("a1b2c3d4-e5f6-47d8-9e0f-1a2b3c4d5e6f");
+                UUID profile6Id = UUID.fromString("b2c3d4e5-f6a7-48e9-af10-2b3c4d5e6f7f");
+                UUID profile7Id = UUID.fromString("c3d4e5f6-a7b8-49fa-b011-3c4d5e6f7a8d");
+                UUID profile8Id = UUID.fromString("d4e5f6a7-b8c9-4a0b-b112-4d5e6f7a8b9e");
+                UUID profile9Id = UUID.fromString("e5f6a7b8-c9da-4b1c-b213-5e6f7a8b9caf");
+                UUID profile10Id = UUID.fromString("f6a7b8c9-daeb-4c2d-b314-6f7a8b9cada0");
+                UUID dionaidanId = UUID.fromString("0c3066a9-99ad-41e3-a936-2ca10d18985e");
+
+                Profile profile1 = new Profile();
+                profile1.setId(profile1Id);
+
+                Profile profile2 = new Profile();
+                profile2.setId(profile2Id);
+
+                Profile profile3 = new Profile();
+                profile3.setId(profile3Id);
+
+                Profile profile4 = new Profile();
+                profile4.setId(profile4Id);
+
+                Profile profile5 = new Profile();
+                profile5.setId(profile5Id);
+
+                Profile profile6 = new Profile();
+                profile6.setId(profile6Id);
+
+                Profile profile7 = new Profile();
+                profile7.setId(profile7Id);
+
+                Profile profile8 = new Profile();
+                profile8.setId(profile8Id);
+
+                Profile profile9 = new Profile();
+                profile9.setId(profile9Id);
+
+                Profile profile10 = new Profile();
+                profile10.setId(profile10Id);
+
+                Profile dionaidan = new Profile();
+                dionaidan.setId(dionaidanId);
+
+                profileRepository.save(profile1);
+                profileRepository.save(profile2);
+                profileRepository.save(profile3);
+                profileRepository.save(profile4);
+                profileRepository.save(profile5);
+                profileRepository.save(profile6);
+                profileRepository.save(profile7);
+                profileRepository.save(profile8);
+                profileRepository.save(profile9);
+                profileRepository.save(profile10);
+                profileRepository.save(dionaidan);
+
+                // Create mock follows - building an interesting follow graph
+                // Profile1 follows: Profile2, Profile3, Profile5
+                followRepository.save(new Follow(profile1Id, profile2Id));
+                followRepository.save(new Follow(profile1Id, profile3Id));
+                followRepository.save(new Follow(profile1Id, profile5Id));
+
+                // Profile2 follows: Profile3, Profile4
+                followRepository.save(new Follow(profile2Id, profile3Id));
+                followRepository.save(new Follow(profile2Id, profile4Id));
+
+                // Profile3 follows: Profile4, Profile6
+                followRepository.save(new Follow(profile3Id, profile4Id));
+                followRepository.save(new Follow(profile3Id, profile6Id));
+
+                // Profile4 follows: Profile1, Profile5
+                followRepository.save(new Follow(profile4Id, profile1Id));
+                followRepository.save(new Follow(profile4Id, profile5Id));
+
+                // Profile5 follows: Profile2
+                followRepository.save(new Follow(profile5Id, profile2Id));
+
+                // Profile6 follows: Profile1
+                followRepository.save(new Follow(profile6Id, profile1Id));
+
+                // Profile7 follows: Profile2, Profile5
+                followRepository.save(new Follow(profile7Id, profile2Id));
+                followRepository.save(new Follow(profile7Id, profile5Id));
+
+                // Profile8 follows: Profile3, Profile9
+                followRepository.save(new Follow(profile8Id, profile3Id));
+                followRepository.save(new Follow(profile8Id, profile9Id));
+
+                // Profile9 follows: Profile1, Profile10
+                followRepository.save(new Follow(profile9Id, profile1Id));
+                followRepository.save(new Follow(profile9Id, profile10Id));
+
+                // Profile10 follows: Profile5, Profile8
+                followRepository.save(new Follow(profile10Id, profile5Id));
+                followRepository.save(new Follow(profile10Id, profile8Id));
+
+                // Dionaidan (current user) follows all 10 profiles
+                followRepository.save(new Follow(dionaidanId, profile1Id));
+                followRepository.save(new Follow(dionaidanId, profile2Id));
+                followRepository.save(new Follow(dionaidanId, profile3Id));
+                followRepository.save(new Follow(dionaidanId, profile4Id));
+                followRepository.save(new Follow(dionaidanId, profile5Id));
+                followRepository.save(new Follow(dionaidanId, profile6Id));
+                followRepository.save(new Follow(dionaidanId, profile7Id));
+                followRepository.save(new Follow(dionaidanId, profile8Id));
+                followRepository.save(new Follow(dionaidanId, profile9Id));
+                followRepository.save(new Follow(dionaidanId, profile10Id));
+
+                // 7 profiles follow dionaidan back (reciprocal)
+                followRepository.save(new Follow(profile1Id, dionaidanId));
+                followRepository.save(new Follow(profile2Id, dionaidanId));
+                followRepository.save(new Follow(profile3Id, dionaidanId));
+                followRepository.save(new Follow(profile4Id, dionaidanId));
+                followRepository.save(new Follow(profile5Id, dionaidanId));
+                followRepository.save(new Follow(profile6Id, dionaidanId));
+                followRepository.save(new Follow(profile7Id, dionaidanId));
+
+                // Create mock blocks
+                // Profile2 blocks Profile4
+                blockRepository.save(new Block(profile2Id, profile4Id));
+
+                // Profile3 blocks Profile1
+                blockRepository.save(new Block(profile3Id, profile1Id));
+
+                // Profile5 blocks Profile6
+                blockRepository.save(new Block(profile5Id, profile6Id));
+
+                // Profile4 blocks Profile6
+                blockRepository.save(new Block(profile4Id, profile6Id));
+
+                // Profile6 blocks Profile1 and Profile2
+                blockRepository.save(new Block(profile6Id, profile1Id));
+                blockRepository.save(new Block(profile6Id, profile2Id));
+
+                // Profile7 blocks Profile3
+                blockRepository.save(new Block(profile7Id, profile3Id));
+
+                // Profile9 blocks Profile4
+                blockRepository.save(new Block(profile9Id, profile4Id));
+
+                // Profile10 blocks Profile2
+                blockRepository.save(new Block(profile10Id, profile2Id));
+
+                // Create mock reports
+                // Profile1 reports Profile4 for harassment
+                reportRepository.save(new Report(profile1Id, profile4Id, Report.ReportReason.HARASSMENT,
+                                "Profile4 has been harassing me with inappropriate messages"));
+
+                // Profile2 reports Profile6 for spam
+                reportRepository.save(new Report(profile2Id, profile6Id, Report.ReportReason.SPAM,
+                                "Constantly spamming promotional links"));
+
+                // Profile3 reports Profile7 for hate speech
+                reportRepository.save(new Report(profile3Id, profile7Id, Report.ReportReason.HATE_SPEECH,
+                                "Posted offensive content targeting specific groups"));
+
+                // Profile5 reports Profile2 for misinformation
+                reportRepository.save(new Report(profile5Id, profile2Id, Report.ReportReason.MISINFORMATION,
+                                "Sharing false and misleading information"));
+
+                // Profile8 reports Profile9 for inappropriate content
+                reportRepository.save(new Report(profile8Id, profile9Id, Report.ReportReason.INAPPROPRIATE_CONTENT,
+                                "Posted NSFW content in public timeline"));
+
+                // Profile10 reports Profile3 for impersonation
+                reportRepository.save(new Report(profile10Id, profile3Id, Report.ReportReason.IMPERSONATION,
+                                "Profile appears to be impersonating a public figure"));
+
+                // Profile6 reports Profile4 for scam/fraud
+                reportRepository.save(new Report(profile6Id, profile4Id, Report.ReportReason.SCAM_FRAUD,
+                                "Attempting to run a cryptocurrency scam"));
+
+                // Profile9 reports Profile1 for violence
+                reportRepository.save(new Report(profile9Id, profile1Id, Report.ReportReason.VIOLENCE,
+                                "Posting content promoting violence"));
+
+                System.out.println("Database seeded with mock data");
+                System.out.println("Profiles: 11");
+                System.out.println("Follows: 34");
+                System.out.println("Blocks: 9");
+                System.out.println("Reports: 8");
         }
-
-        // Create mock profiles
-        UUID profile1Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-        UUID profile2Id = UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
-        UUID profile3Id = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
-        UUID profile4Id = UUID.fromString("d62d0b05-9dad-11d1-80b4-00c04fd430c8");
-        UUID profile5Id = UUID.fromString("a1b2c3d4-e5f6-47d8-9e0f-1a2b3c4d5e6f");
-        UUID profile6Id = UUID.fromString("b2c3d4e5-f6a7-48e9-af10-2b3c4d5e6f7f");
-        UUID profile7Id = UUID.fromString("c3d4e5f6-a7b8-49fa-b011-3c4d5e6f7a8d");
-        UUID profile8Id = UUID.fromString("d4e5f6a7-b8c9-4a0b-b112-4d5e6f7a8b9e");
-        UUID profile9Id = UUID.fromString("e5f6a7b8-c9da-4b1c-b213-5e6f7a8b9caf");
-        UUID profile10Id = UUID.fromString("f6a7b8c9-daeb-4c2d-b314-6f7a8b9cada0");
-
-        Profile profile1 = new Profile();
-        profile1.setId(profile1Id);
-
-        Profile profile2 = new Profile();
-        profile2.setId(profile2Id);
-
-        Profile profile3 = new Profile();
-        profile3.setId(profile3Id);
-
-        Profile profile4 = new Profile();
-        profile4.setId(profile4Id);
-
-        Profile profile5 = new Profile();
-        profile5.setId(profile5Id);
-
-        Profile profile6 = new Profile();
-        profile6.setId(profile6Id);
-
-        Profile profile7 = new Profile();
-        profile7.setId(profile7Id);
-
-        Profile profile8 = new Profile();
-        profile8.setId(profile8Id);
-
-        Profile profile9 = new Profile();
-        profile9.setId(profile9Id);
-
-        Profile profile10 = new Profile();
-        profile10.setId(profile10Id);
-
-        profileRepository.save(profile1);
-        profileRepository.save(profile2);
-        profileRepository.save(profile3);
-        profileRepository.save(profile4);
-        profileRepository.save(profile5);
-        profileRepository.save(profile6);
-        profileRepository.save(profile7);
-        profileRepository.save(profile8);
-        profileRepository.save(profile9);
-        profileRepository.save(profile10);
-
-        // Create mock follows - building an interesting follow graph
-        // Profile1 follows: Profile2, Profile3, Profile5
-        followRepository.save(new Follow(profile1Id, profile2Id));
-        followRepository.save(new Follow(profile1Id, profile3Id));
-        followRepository.save(new Follow(profile1Id, profile5Id));
-
-        // Profile2 follows: Profile3, Profile4
-        followRepository.save(new Follow(profile2Id, profile3Id));
-        followRepository.save(new Follow(profile2Id, profile4Id));
-
-        // Profile3 follows: Profile4, Profile6
-        followRepository.save(new Follow(profile3Id, profile4Id));
-        followRepository.save(new Follow(profile3Id, profile6Id));
-
-        // Profile4 follows: Profile1, Profile5
-        followRepository.save(new Follow(profile4Id, profile1Id));
-        followRepository.save(new Follow(profile4Id, profile5Id));
-
-        // Profile5 follows: Profile2
-        followRepository.save(new Follow(profile5Id, profile2Id));
-
-        // Profile6 follows: Profile1
-        followRepository.save(new Follow(profile6Id, profile1Id));
-
-        // Profile7 follows: Profile2, Profile5
-        followRepository.save(new Follow(profile7Id, profile2Id));
-        followRepository.save(new Follow(profile7Id, profile5Id));
-
-        // Profile8 follows: Profile3, Profile9
-        followRepository.save(new Follow(profile8Id, profile3Id));
-        followRepository.save(new Follow(profile8Id, profile9Id));
-
-        // Profile9 follows: Profile1, Profile10
-        followRepository.save(new Follow(profile9Id, profile1Id));
-        followRepository.save(new Follow(profile9Id, profile10Id));
-
-        // Profile10 follows: Profile5, Profile8
-        followRepository.save(new Follow(profile10Id, profile5Id));
-        followRepository.save(new Follow(profile10Id, profile8Id));
-
-        // Create mock blocks
-        // Profile2 blocks Profile4
-        blockRepository.save(new Block(profile2Id, profile4Id));
-
-        // Profile3 blocks Profile1
-        blockRepository.save(new Block(profile3Id, profile1Id));
-
-        // Profile5 blocks Profile6
-        blockRepository.save(new Block(profile5Id, profile6Id));
-
-        // Profile4 blocks Profile6
-        blockRepository.save(new Block(profile4Id, profile6Id));
-
-        // Profile6 blocks Profile1 and Profile2
-        blockRepository.save(new Block(profile6Id, profile1Id));
-        blockRepository.save(new Block(profile6Id, profile2Id));
-
-        // Profile7 blocks Profile3
-        blockRepository.save(new Block(profile7Id, profile3Id));
-
-        // Profile9 blocks Profile4
-        blockRepository.save(new Block(profile9Id, profile4Id));
-
-        // Profile10 blocks Profile2
-        blockRepository.save(new Block(profile10Id, profile2Id));
-
-        // Create mock reports
-        // Profile1 reports Profile4 for harassment
-        reportRepository.save(new Report(profile1Id, profile4Id, Report.ReportReason.HARASSMENT,
-                "Profile4 has been harassing me with inappropriate messages"));
-
-        // Profile2 reports Profile6 for spam
-        reportRepository.save(new Report(profile2Id, profile6Id, Report.ReportReason.SPAM,
-                "Constantly spamming promotional links"));
-
-        // Profile3 reports Profile7 for hate speech
-        reportRepository.save(new Report(profile3Id, profile7Id, Report.ReportReason.HATE_SPEECH,
-                "Posted offensive content targeting specific groups"));
-
-        // Profile5 reports Profile2 for misinformation
-        reportRepository.save(new Report(profile5Id, profile2Id, Report.ReportReason.MISINFORMATION,
-                "Sharing false and misleading information"));
-
-        // Profile8 reports Profile9 for inappropriate content
-        reportRepository.save(new Report(profile8Id, profile9Id, Report.ReportReason.INAPPROPRIATE_CONTENT,
-                "Posted NSFW content in public timeline"));
-
-        // Profile10 reports Profile3 for impersonation
-        reportRepository.save(new Report(profile10Id, profile3Id, Report.ReportReason.IMPERSONATION,
-                "Profile appears to be impersonating a public figure"));
-
-        // Profile6 reports Profile4 for scam/fraud
-        reportRepository.save(new Report(profile6Id, profile4Id, Report.ReportReason.SCAM_FRAUD,
-                "Attempting to run a cryptocurrency scam"));
-
-        // Profile9 reports Profile1 for violence
-        reportRepository.save(new Report(profile9Id, profile1Id, Report.ReportReason.VIOLENCE,
-                "Posting content promoting violence"));
-
-        System.out.println("Database seeded with mock data");
-        System.out.println("Profiles: 10");
-        System.out.println("Follows: 17");
-        System.out.println("Blocks: 9");
-        System.out.println("Reports: 8");
-    }
 }

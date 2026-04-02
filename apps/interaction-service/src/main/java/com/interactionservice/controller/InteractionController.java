@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = {"*"})
 @RequestMapping("/interaction")
 public class InteractionController {
     @Autowired
@@ -34,6 +35,11 @@ public class InteractionController {
     ) {
         boolean likeNowExists = likeService.toggleLike(userId, referenceId);
         return ResponseEntity.ok(likeNowExists);
+    }
+
+    @GetMapping("/{userId}/{referenceId}")
+    public ResponseEntity<Boolean> hasUserLiked(@PathVariable UUID userId, @PathVariable UUID referenceId) {
+        return ResponseEntity.ok(likeService.doesLikeExist(userId, referenceId));
     }
 
     /**

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = {"*"})
 @RequestMapping("/media")
 public class MediaController {
 

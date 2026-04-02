@@ -1,27 +1,29 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
-import com.apigateway.apigateway.models.Media;
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Post;
-import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.service.PostAggregationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @Controller
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:19293"})
 public class PostsController {
 
     private final PostAggregationService service;
@@ -32,11 +34,10 @@ public class PostsController {
 
     private static final Logger log = LoggerFactory.getLogger(PostsController.class);
 
-    @SchemaMapping
-    public List<Media> mediaSet (Post post) {
+    @SchemaMapping(typeName = "Post", field = "mediaSet")
+    public List<MediaDTO> mediaSet(Post post) {
         return service.getMedia(post.getMediaInstanceSet());
     }
-
     @QueryMapping
     public List<Post> getPostsByHobbyType(@Argument HobbyType hobbyType) {
         List<Post> postSet = new ArrayList<>(service.getPostsByHobbyType(hobbyType));
@@ -50,9 +51,14 @@ public class PostsController {
 
         return postSet;
     }
+    @QueryMapping
+    public Post getPostById(@Argument UUID id) {
+        return service.getPostById(id);
+    }
 
     @PostMapping("/create-post")
-    public Post createPost(){
-        return new Gym();
+    public ResponseEntity<Object> createPost(@RequestBody PostDTO dto) {
+        Object response = service.forwardCreatePost(dto);
+        return ResponseEntity.ok(response);
     }
 }

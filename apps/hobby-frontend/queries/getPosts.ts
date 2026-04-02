@@ -2,6 +2,7 @@
 
 import { gqlRequest } from "@/lib/graphQlClient";
 import { HobbyType } from "@/types/enums";
+import { Post, Gym, Reading, PostResponse } from "@/types/posts";
 
 const GET_POSTS_QUERY = `
 query {
@@ -30,6 +31,7 @@ query {
         bookFinished
     }
     mediaSet {
+      relevantId
       fileData
       fileThumb
       contentType
@@ -39,12 +41,11 @@ query {
 }
 `;
 
-type PostResponse = Gym | Reading;
 
 export async function getAllPosts(): Promise<Post[]> {
   const data = await gqlRequest<{ getPosts: PostResponse[] }>(GET_POSTS_QUERY);
 
-  return data.getPosts.map(post => ({
+  return data.getPosts.map((post) => ({
     ...post,
     hobbyType: post.hobbyType || "UNKNOWN", // fallback if GraphQL doesn’t send it
   }));

@@ -1,5 +1,6 @@
 package com.apigateway.apigateway.models;
 
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.models.reading.Reading;
 
@@ -8,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @JsonTypeInfo(
@@ -38,7 +38,7 @@ public abstract class Post {
     private List<MediaInstance> mediaInstanceSet;
     private String hobbyType;
 
-    private List<Media> mediaSet;
+    private List<MediaDTO> mediaDTOSet;
 
     public Post() {
     }
@@ -106,11 +106,11 @@ public abstract class Post {
         this.hobbyType = hobbyType;
     }
 
-    public List<Media> getMediaSet() {
-        return mediaSet;
+    public List<MediaDTO> getMediaSet() {
+        return mediaDTOSet;
     }
 
-    public void setMediaSet(List<Media> mediaSet) {
-        this.mediaSet = mediaSet;
+    public void setMediaSet(List<MediaDTO> mediaDTOSet) {
+        this.mediaDTOSet = mediaDTOSet;
     }
 }
