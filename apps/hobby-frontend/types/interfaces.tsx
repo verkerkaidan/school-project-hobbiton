@@ -23,7 +23,7 @@ export interface BaseCreatePost {
   description: string;
   totalDuration: number;
   userId: string;
-  mediaInstanceSet: string[];
+  mediaInstanceDTOSet: string[];
 }
 
 export interface CreateGymPost extends BaseCreatePost {

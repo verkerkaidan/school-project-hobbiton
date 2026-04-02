@@ -6,6 +6,7 @@ export interface Exercise {
 }
 
 export interface MediaSet {
+  relevantId: string;
   fileData: string;
   fileThumb: string;
   contentType: string;

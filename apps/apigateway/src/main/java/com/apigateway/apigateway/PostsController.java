@@ -1,10 +1,9 @@
 package com.apigateway.apigateway;
 
-import com.apigateway.apigateway.DTO.posts.PostDTO;
+import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
-import com.apigateway.apigateway.DTO.MediaDTO;
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Post;
-import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.service.PostAggregationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +34,10 @@ public class PostsController {
 
     private static final Logger log = LoggerFactory.getLogger(PostsController.class);
 
-    @SchemaMapping
-    public List<MediaDTO> mediaSet (Post post) {
+    @SchemaMapping(typeName = "Post", field = "mediaSet")
+    public List<MediaDTO> mediaSet(Post post) {
         return service.getMedia(post.getMediaInstanceSet());
     }
-
     @QueryMapping
     public List<Post> getPostsByHobbyType(@Argument HobbyType hobbyType) {
         List<Post> postSet = new ArrayList<>(service.getPostsByHobbyType(hobbyType));

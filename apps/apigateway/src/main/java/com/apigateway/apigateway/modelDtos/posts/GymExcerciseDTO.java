@@ -1,4 +1,4 @@
-package com.apigateway.apigateway.DTO.posts;
+package com.apigateway.apigateway.modelDtos.posts;
 
 public class GymExcerciseDTO {
     public String title;

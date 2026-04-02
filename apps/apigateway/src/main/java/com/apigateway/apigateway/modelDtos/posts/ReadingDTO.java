@@ -1,7 +1,4 @@
-package com.apigateway.apigateway.DTO.posts;
-
-import com.apigateway.apigateway.models.Post;
-import com.apigateway.apigateway.models.reading.Reading;
+package com.apigateway.apigateway.modelDtos.posts;
 
 public class ReadingDTO extends PostDTO{
 

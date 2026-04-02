@@ -1,8 +1,11 @@
-package com.apigateway.apigateway.DTO;
+package com.apigateway.apigateway.modelDtos.media;
 
 import com.apigateway.apigateway.enums.ContentFlag;
 
+import java.util.UUID;
+
 public class MediaDTO {
+    public UUID relevantId;
     public String fileData;
     public String fileThumb;
     public String contentType;
@@ -11,11 +14,27 @@ public class MediaDTO {
     public MediaDTO() {
     }
 
+    public MediaDTO(UUID relevantId, String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
+        this.relevantId = relevantId;
+        this.fileData = fileData;
+        this.fileThumb = fileThumb;
+        this.contentType = contentType;
+        this.contentFlag = contentFlag;
+    }
+
     public MediaDTO(String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
         this.fileData = fileData;
         this.fileThumb = fileThumb;
         this.contentType = contentType;
         this.contentFlag = contentFlag;
+    }
+
+    public UUID getRelevantId() {
+        return relevantId;
+    }
+
+    public void setRelevantId(UUID relevantId) {
+        this.relevantId = relevantId;
     }
 
     public String getFileData() {

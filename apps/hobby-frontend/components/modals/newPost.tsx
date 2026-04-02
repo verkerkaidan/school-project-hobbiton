@@ -23,7 +23,7 @@ const BASE_DEFAULTS: BaseCreatePost = {
     description: "",
     totalDuration: 0,
     userId: "",
-    mediaInstanceSet: [],
+    mediaInstanceDTOSet: [],
 };
 
 const GYM_DEFAULTS: CreateGymPost = {
@@ -165,6 +165,28 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         }
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (form.mediaInstanceDTOSet.length >= 3) {
+            setError("You can upload up to 3 images.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+
+            setForm((prev) => ({
+                ...prev,
+                mediaInstanceDTOSet: [...prev.mediaInstanceDTOSet, dataUrl],
+            }));
+        };
+
+        reader.readAsDataURL(file);
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <h2 className="text-xl font-bold mb-4">Create Post</h2>
@@ -248,6 +270,29 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
                 {/* READING-specific fields */}
                 {form.type === "READING" && (
                     <ReadingFields form={form} onChange={handleReadingChange} />
+                )}
+
+                {/* imaging */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-white">Upload image</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="text-sm text-white"
+                    />
+                </div>
+                {form.mediaInstanceDTOSet.length > 0 && (
+                    <div className="flex gap-2 flex-wrap">
+                        {form.mediaInstanceDTOSet.map((img, i) => (
+                            <img
+                                key={i}
+                                src={img}
+                                alt={`preview-${i}`}
+                                className="w-20 h-20 object-cover rounded"
+                            />
+                        ))}
+                    </div>
                 )}
 
                 {error && <p className="text-red-500 text-sm">{error}</p>}

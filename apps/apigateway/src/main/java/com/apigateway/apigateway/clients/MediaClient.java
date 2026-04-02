@@ -1,7 +1,7 @@
 package com.apigateway.apigateway.clients;
 
-import com.apigateway.apigateway.DTO.MediaDTO;
-import com.apigateway.apigateway.DTO.ContentFlagUpdateDTO;
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

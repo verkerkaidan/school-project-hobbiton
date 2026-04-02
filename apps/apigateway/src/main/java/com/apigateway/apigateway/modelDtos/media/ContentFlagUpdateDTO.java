@@ -1,4 +1,4 @@
-package com.apigateway.apigateway.DTO;
+package com.apigateway.apigateway.modelDtos.media;
 
 
 import com.apigateway.apigateway.enums.ContentFlag;

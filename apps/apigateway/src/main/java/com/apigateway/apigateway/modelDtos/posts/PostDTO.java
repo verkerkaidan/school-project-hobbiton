@@ -1,6 +1,5 @@
-package com.apigateway.apigateway.DTO.posts;
+package com.apigateway.apigateway.modelDtos.posts;
 
-import com.apigateway.apigateway.models.Post;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -18,5 +17,6 @@ public abstract class PostDTO {
     public String title;
     public UUID userId;
     public String hobbyType;
+    public Set<String> mediaInstanceDTOSet;
     public Set<UUID> mediaInstanceSet;
 }
