@@ -13,6 +13,24 @@ export interface MediaSet {
   contentFlag: string;
 }
 
+export interface CompletePost {
+  post: Post;
+  likes: number;
+  comments: Comment[];
+}
+
+export interface Interaction {
+  likes: number;
+  comments: Comment[];
+}
+
+export interface Comment {
+  id: string;
+  referenceId: string;
+  userId: string;
+  comment: string;
+}
+
 export interface Post {
   id: string;
   title: string;

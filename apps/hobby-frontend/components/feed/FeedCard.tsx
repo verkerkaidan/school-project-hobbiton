@@ -4,10 +4,16 @@ import Image from "next/image";
 import { Post } from "@/types/posts";
 import { useRouter } from "next/navigation";
 import {ImageMenu} from "@/components/ui/ImageMenu";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Cookies from "js-cookie";
+import {doesLikeExist, toggleLike} from "@/lib/interactionClient";
+import { Heart } from "lucide-react";
 
-export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
+export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLikes: number; index: number }) => {
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(initialLikes);
+  const [revealed, setRevealed] = useState(false);
+
   const aspectRatios = {
     short: "aspect-video",
     medium: "aspect-square",
@@ -17,9 +23,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
 
     const media = item.mediaSet?.[0];
     const imageSrc = media
-        ? `data:${media.contentType};base64,${media.fileData}`
-        : "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000";
-  const [revealed, setRevealed] = useState(false);
+        ? `data:${media.contentType};base64,${media.fileData}` : "";
 
   const showOverlay = media?.contentFlag === "RISK" && !revealed;
 
@@ -29,7 +33,22 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
         return values[randomIndex];
     })
 
+  async function onToggleLike() {
+      setLiked((prev) => !prev);
+      const likeNowExists = await toggleLike(Cookies.get("userId")!, item.id);
+      setLikes((prev) => likeNowExists ? prev + 1 : prev - 1);
+  }
 
+    useEffect(() => {
+        async function fetchLike() {
+            const userId = Cookies.get("userId");
+            if (!userId) return;
+            const exists = await doesLikeExist(userId, item.id);
+            console.log("exists " + exists)
+            setLiked(exists);
+        }
+        fetchLike();
+    }, [item.id]);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -103,16 +122,23 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       {/* Interaction Footer */}
       <div className="px-6 py-4 border-t border-white/5 flex justify-between items-center bg-white/2">
         <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
-          Bekijk Post
+          View Post
         </span>
-        <div className="flex gap-4 text-accent">
-          <button className="hover:text-rose-500 transition-colors transform hover:scale-110">
-            ♡
-          </button>
-          <button className="hover:text-brand-light transition-colors transform hover:scale-110">
-            ⟲
-          </button>
-        </div>
+          <div className="flex gap-4 text-accent">
+              <Heart
+                  onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleLike();
+                  }}
+                  className={`w-5 h-5 cursor-pointer transition-all duration-200 hover:scale-110 ${
+                      liked
+                          ? "fill-rose-500 text-rose-500 stroke-rose-500" 
+                          : "text-accent"
+                  }`}
+              />
+              {/* Small textbox showing number of likes */}
+              <span className="text-sm font-medium text-stone-700">{likes}</span>
+          </div>
       </div>
     </motion.div>
   );
