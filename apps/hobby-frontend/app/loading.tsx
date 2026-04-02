@@ -49,7 +49,7 @@ export default function Loading() {
                 transition={{delay: 0.5}}
                 className="mt-6 text-accent text-sm font-medium tracking-widest uppercase"
             >
-                Loading Universe...
+                Loading Creativity...
             </motion.p>
         </div>
     );
