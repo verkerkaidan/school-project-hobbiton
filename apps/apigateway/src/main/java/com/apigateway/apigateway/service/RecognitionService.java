@@ -1,6 +1,6 @@
 package com.apigateway.apigateway.service;
 
-import com.apigateway.apigateway.DTO.ContentFlagUpdateDTO;
+import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
 import com.apigateway.apigateway.clients.MediaClient;
 import com.apigateway.apigateway.clients.RecognitionClient;
 import org.springframework.scheduling.annotation.Scheduled;

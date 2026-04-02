@@ -1,8 +1,7 @@
 package com.apigateway.apigateway.clients;
 
-import com.apigateway.apigateway.DTO.ContentFlagUpdateDTO;
+import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 

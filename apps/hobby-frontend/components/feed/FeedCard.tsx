@@ -1,9 +1,11 @@
 "use client";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import {motion} from "framer-motion";
 import Image from "next/image";
 import { Post } from "@/types/posts";
 import { useRouter } from "next/navigation";
+import {ImageMenu} from "@/components/ui/ImageMenu";
+import {useState} from "react";
+import Cookies from "js-cookie";
 
 export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
   const aspectRatios = {
@@ -11,13 +13,21 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
     medium: "aspect-square",
     tall: "aspect-[3/4]",
   };
-  const router = useRouter();
+    const router = useRouter();
 
-  function getRandomAspectRatio(): string {
-    const values = Object.values(aspectRatios); // ["aspect-video", "aspect-square", "aspect-[3/4]"]
-    const randomIndex = Math.floor(Math.random() * values.length);
-    return values[randomIndex];
-  }
+    const media = item.mediaSet?.[0];
+    const imageSrc = media
+        ? `data:${media.contentType};base64,${media.fileData}`
+        : "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000";
+  const [revealed, setRevealed] = useState(false);
+
+  const showOverlay = media?.contentFlag === "RISK" && !revealed;
+
+    const [aspectRatio] = useState(() => {
+        const values = Object.values(aspectRatios);
+        const randomIndex = Math.floor(Math.random() * values.length);
+        return values[randomIndex];
+    })
 
 
   return (
@@ -28,20 +38,49 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       transition={{ duration: 0.5, delay: index * 0.05 }}
       className="break-inside-avoid group mb-6"
       onClick={() => router.push(`/posts/${item.id}`)}
-
-    >
-      <div
-        className={`relative w-full overflow-hidden ${getRandomAspectRatio()}`}
       >
-        <Image
-          src="https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=1000"
-          alt={item.title}
-          fill
-          sizes={"(max-width: 768px) 100vw, 50vw"}
-          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
-      </div>
+
+      {/* Image Container */}
+      {media && (
+        <div
+          className={`relative w-full overflow-hidden ${aspectRatio}`}
+        >
+            {/* 3-dot menu (top-right) */}
+            <div className="absolute top-2 right-2 z-20">
+                <ImageMenu relevantId={media.relevantId} userId={Cookies.get("userId")!} />
+            </div>
+          <Image
+            src={imageSrc}
+            alt={item.title}
+            fill
+            sizes={"(max-width: 768px) 100vw, 50vw"}
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
+          {/* 🚨 Content Warning Overlay */}
+          {showOverlay && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4">
+
+                <div className="max-w-xs">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Content Warning
+                  </h3>
+                  <p className="text-sm opacity-80 mb-4">
+                    This image may contain sensitive or disturbing content.
+                  </p>
+
+                  <button
+                      onClick={() => setRevealed(true)}
+                      className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                  >
+                    View Image
+                  </button>
+                </div>
+
+              </div>
+          )}
+        </div>
+      )}
 
       {/* Content Area */}
       <div className="p-6 space-y-3">

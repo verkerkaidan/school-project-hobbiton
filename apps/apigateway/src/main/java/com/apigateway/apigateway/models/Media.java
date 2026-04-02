@@ -5,7 +5,7 @@ import com.apigateway.apigateway.enums.ContentFlag;
 import java.util.UUID;
 
 public class Media {
-    public UUID fileId;
+    public UUID relevantId;
     public String fileData;
     public String fileThumb;
     public String contentType;
@@ -14,20 +14,20 @@ public class Media {
     public Media() {
     }
 
-    public Media(UUID fileId, String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
-        this.fileId = fileId;
+    public Media(UUID relevantId, String fileData, String fileThumb, String contentType, ContentFlag contentFlag) {
+        this.relevantId = relevantId;
         this.fileData = fileData;
         this.fileThumb = fileThumb;
         this.contentType = contentType;
         this.contentFlag = contentFlag;
     }
 
-    public UUID getFileId() {
-        return fileId;
+    public UUID getRelevantId() {
+        return relevantId;
     }
 
-    public void setFileId(UUID fileId) {
-        this.fileId = fileId;
+    public void setRelevantId(UUID relevantId) {
+        this.relevantId = relevantId;
     }
 
     public String getFileData() {
