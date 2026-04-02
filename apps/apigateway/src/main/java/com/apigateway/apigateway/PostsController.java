@@ -44,13 +44,13 @@ public class PostsController {
         postSet.forEach(p -> log.info("Post class = {}", p.getClass().getName()));
         return postSet;
     }
+
     @QueryMapping
     public List<Post> getPosts() {
         List<Post> postSet = new ArrayList<>(service.getAllPosts());
-
-
         return postSet;
     }
+
     @QueryMapping
     public Post getPostById(@Argument UUID id) {
         return service.getPostById(id);

@@ -4,14 +4,11 @@ import Image from "next/image";
 import { Post } from "@/types/posts";
 import { useRouter } from "next/navigation";
 import {ImageMenu} from "@/components/ui/ImageMenu";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import Cookies from "js-cookie";
-import {doesLikeExist, toggleLike} from "@/lib/interactionClient";
-import { Heart } from "lucide-react";
+import LikeButton from "@/components/interaction/LikeButton";
 
 export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLikes: number; index: number }) => {
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(initialLikes);
   const [revealed, setRevealed] = useState(false);
 
   const aspectRatios = {
@@ -33,22 +30,6 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
         return values[randomIndex];
     })
 
-  async function onToggleLike() {
-      setLiked((prev) => !prev);
-      const likeNowExists = await toggleLike(Cookies.get("userId")!, item.id);
-      setLikes((prev) => likeNowExists ? prev + 1 : prev - 1);
-  }
-
-    useEffect(() => {
-        async function fetchLike() {
-            const userId = Cookies.get("userId");
-            if (!userId) return;
-            const exists = await doesLikeExist(userId, item.id);
-            console.log("exists " + exists)
-            setLiked(exists);
-        }
-        fetchLike();
-    }, [item.id]);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -124,21 +105,7 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
         <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
           View Post
         </span>
-          <div className="flex gap-4 text-accent">
-              <Heart
-                  onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleLike();
-                  }}
-                  className={`w-5 h-5 cursor-pointer transition-all duration-200 hover:scale-110 ${
-                      liked
-                          ? "fill-rose-500 text-rose-500 stroke-rose-500" 
-                          : "text-accent"
-                  }`}
-              />
-              {/* Small textbox showing number of likes */}
-              <span className="text-sm font-medium text-stone-700">{likes}</span>
-          </div>
+          <LikeButton itemId={item.id} initialLikes={initialLikes}/>
       </div>
     </motion.div>
   );
