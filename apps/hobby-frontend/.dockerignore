@@ -18,6 +18,9 @@
 # production
 /build
 
+# env files (never bake local secrets/overrides into Docker image)
+.env*
+
 # misc
 .DS_Store
 *.pem

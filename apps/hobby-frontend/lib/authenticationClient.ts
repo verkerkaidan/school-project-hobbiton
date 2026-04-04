@@ -1,14 +1,15 @@
 import Cookies from "js-cookie";
 
 const BASE_URL = process.env.NEXT_PUBLIC_AUTHENTICATION_URL;
+console.log("[authClient] BASE_URL =", BASE_URL);
 
 export interface AuthResponse {
-    token: string;
-    userId: string;
+  token: string;
+  userId: string;
 }
 
 export interface AuthError {
-    message: string;
+  message: string;
 }
 
 /**
@@ -17,9 +18,10 @@ export interface AuthError {
  * @returns the data again
  */
 async function handleResponse<T>(res: Response): Promise<T> {
-    const data = await res.json();
-    if (!res.ok) throw new Error((data as AuthError).message ?? "Something went wrong.");
-    return data as T;
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error((data as AuthError).message ?? "Something went wrong.");
+  return data as T;
 }
 
 /**
@@ -29,22 +31,21 @@ async function handleResponse<T>(res: Response): Promise<T> {
  * @param password User password for login
  */
 export async function login(email: string, password: string): Promise<void> {
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-    });
+  const res = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
 
-    if (res.status == 200) {
-        const data = await handleResponse<AuthResponse>(res);
-        saveSession(data);
-    } else {
-        // Parse the error body if your API returns one, fallback to a generic message
-        const errorData = await res.json().catch(() => null);
-        const message = errorData?.message ?? `Login failed (${res.status})`;
-        throw new Error(message);
-    }
-
+  if (res.status == 200) {
+    const data = await handleResponse<AuthResponse>(res);
+    saveSession(data);
+  } else {
+    // Parse the error body if your API returns one, fallback to a generic message
+    const errorData = await res.json().catch(() => null);
+    const message = errorData?.message ?? `Login failed (${res.status})`;
+    throw new Error(message);
+  }
 }
 /**
  * Tries to register user by fetching with post, if return is 200 goes to handleResponse and saves into cookies with savesSession()
@@ -53,28 +54,29 @@ export async function login(email: string, password: string): Promise<void> {
  * @param password User password for login
  */
 export async function register(email: string, password: string): Promise<void> {
-    const res = await fetch(`${BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-    });
+  console.log("BASE URL: " + BASE_URL);
+  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
 
-    if (res.status == 200) {
-        const data = await handleResponse<AuthResponse>(res);
-        saveSession(data);
-    } else {
-        // Parse the error body if your API returns one, fallback to a generic message
-        const errorData = await res.json().catch(() => null);
-        const message = errorData?.message ?? `Login failed (${res.status})`;
-        throw new Error(message);
-    }
+  if (res.status == 200) {
+    const data = await handleResponse<AuthResponse>(res);
+    saveSession(data);
+  } else {
+    // Parse the error body if your API returns one, fallback to a generic message
+    const errorData = await res.json().catch(() => null);
+    const message = errorData?.message ?? `Login failed (${res.status})`;
+    throw new Error(message);
+  }
 }
 
 /**
  * Saves token and userId into cookies for 2 days
- * @param res total result of auth requests 
+ * @param res total result of auth requests
  */
 function saveSession(res: AuthResponse) {
-    Cookies.set("token", res.token, { expires: 2 });
-    Cookies.set("userId", res.userId, { expires: 2 });
+  Cookies.set("token", res.token, { expires: 2 });
+  Cookies.set("userId", res.userId, { expires: 2 });
 }

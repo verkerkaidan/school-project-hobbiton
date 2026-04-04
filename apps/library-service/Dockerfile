@@ -1,13 +1,22 @@
-FROM java:21
-FROM maven:sapmachine
-
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-COPY . /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
-ADD pom.xml /app
-RUN mvn verify clean --fail-never
+RUN chmod +x mvnw
 
-RUN mvn clean package -DskipTests
+RUN ./mvnw dependency:go-offline
 
-ENTRYPOINT ["java", "-jar", "/app/target/library-service-0.0.1-SNAPSHOT.jar"]
+COPY src src
+
+RUN ./mvnw clean package -DskipTests
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

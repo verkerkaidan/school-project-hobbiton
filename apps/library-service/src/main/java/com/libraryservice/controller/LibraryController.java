@@ -29,7 +29,7 @@ import java.util.List;
  * <p>
  * Ondersteunt meerdere zoektypes (bijv. BOOK, EXERCISE, etc.) via het Strategy + Factory pattern.
  */
-@CrossOrigin(origins = "http://localhost:19293")
+@CrossOrigin(originPatterns = { "http://localhost:*", "http://*.student.inf.st.hsleiden.nl:*" }, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/v1/library")
 public class LibraryController {
