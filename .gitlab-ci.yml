@@ -1,5 +1,7 @@
 stages:
   - test
+  - build
+  - deploy
 
 # Template for Maven test jobs
 .maven_test_template: &maven_test_template
@@ -50,26 +52,6 @@ test:post-service:
       - apps/post-service/target/site/jacoco/
     expire_in: 30 days
 
-# Test feed-service
-test:feed-service:
-  <<: *maven_test_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - apps/feed-service/**/*
-  script:
-    - cd apps/feed-service
-    - mvn clean test
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - apps/feed-service/target/surefire-reports/TEST-*.xml
-    paths:
-      - apps/feed-service/target/surefire-reports/
-      - apps/feed-service/target/site/jacoco/
-    expire_in: 30 days
-
 # Test media-service
 test:media-service:
   <<: *maven_test_template
@@ -89,7 +71,7 @@ test:media-service:
       - apps/media-service/target/surefire-reports/
       - apps/media-service/target/site/jacoco/
     expire_in: 30 days
-    
+
 # Test media-service
 test:interaction-service:
   <<: *maven_test_template
@@ -149,3 +131,124 @@ test:recognition-service:
       - apps/recognition-service/target/surefire-reports/
       - apps/recognition-service/target/site/jacoco/
     expire_in: 30 days
+
+# Build all services and push to GitLab registry
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - |
+      until docker info > /dev/null 2>&1; do
+        echo "Waiting for Docker daemon..."
+        sleep 1
+      done
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+  script:
+    - |
+      set -e
+      for SERVICE_NAME in apigateway authentication-service interaction-service library-service media-service post-service profile-connection-service profile-service recognition-service; do
+        echo "Building $SERVICE_NAME..."
+        docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
+        echo "Pushing $SERVICE_NAME..."
+        docker push "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
+        docker rmi "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
+      done
+      echo "Building hobby-frontend with env vars..."
+      echo "NEXT_PUBLIC_AUTHENTICATION_URL=$NEXT_PUBLIC_AUTHENTICATION_URL"
+      echo "NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE"
+      echo "NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE=$NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE"
+      docker build --no-cache \
+        --build-arg NEXT_PUBLIC_AUTHENTICATION_URL="$NEXT_PUBLIC_AUTHENTICATION_URL" \
+        --build-arg NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE="$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE" \
+        --build-arg NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE="$NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE" \
+        --build-arg NEXT_PUBLIC_MEDIA_URL="$NEXT_PUBLIC_MEDIA_URL" \
+        --build-arg NEXT_PUBLIC_INTERACTION_URL="$NEXT_PUBLIC_INTERACTION_URL" \
+        --build-arg NEXT_PUBLIC_LIBRARY_SERVICE_URL="$NEXT_PUBLIC_LIBRARY_SERVICE_URL" \
+        -t "$CI_REGISTRY_IMAGE/hobby-frontend:latest" apps/hobby-frontend
+      docker push "$CI_REGISTRY_IMAGE/hobby-frontend:latest"
+      docker rmi "$CI_REGISTRY_IMAGE/hobby-frontend:latest"
+
+# Deploy on Student Server
+deploy:
+  stage: deploy
+  image: alpine:latest
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  variables:
+    DEPLOY_USER: gl_groep-01_6306
+    DEPLOY_HOST: student.inf.st.hsleiden.nl
+  before_script:
+    # Install SSH and SCP
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Add host to known_hosts
+    - ssh-keyscan -t ed25519 $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+    # Configure SSH
+    - echo -e "Host $DEPLOY_HOST\n  StrictHostKeyChecking accept-new" > ~/.ssh/config
+    - chmod 600 ~/.ssh/config
+  script:
+    - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
+      set -e
+      cd ~
+      echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+      export CI_REGISTRY_IMAGE='$CI_REGISTRY_IMAGE'
+      export POSTGRES_USER='$POSTGRES_USER'
+      export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
+      export PGADMIN_DEFAULT_EMAIL='$PGADMIN_DEFAULT_EMAIL'
+      export PGADMIN_DEFAULT_PASSWORD='$PGADMIN_DEFAULT_PASSWORD'
+      export SPRING_DATASOURCE_POSTS_DATABASE='$SPRING_DATASOURCE_POSTS_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_POSTS='$SPRING_DATASOURCE_USERNAME_POSTS'
+      export SPRING_DATASOURCE_PASSWORD_POSTS='$SPRING_DATASOURCE_PASSWORD_POSTS'
+      export SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE='$SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION='$SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION'
+      export SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION='$SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION'
+      export SPRING_DATASOURCE_MEDIA_DATABASE='$SPRING_DATASOURCE_MEDIA_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_MEDIA='$SPRING_DATASOURCE_USERNAME_MEDIA'
+      export SPRING_DATASOURCE_PASSWORD_MEDIA='$SPRING_DATASOURCE_PASSWORD_MEDIA'
+      export SPRING_DATASOURCE_AUTHENTICATION_DATABASE='$SPRING_DATASOURCE_AUTHENTICATION_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_AUTHENTICATION='$SPRING_DATASOURCE_USERNAME_AUTHENTICATION'
+      export SPRING_DATASOURCE_PASSWORD_AUTHENTICATION='$SPRING_DATASOURCE_PASSWORD_AUTHENTICATION'
+      export SPRING_DATASOURCE_PROFILE_DATABASE='$SPRING_DATASOURCE_PROFILE_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_PROFILE='$SPRING_DATASOURCE_USERNAME_PROFILE'
+      export SPRING_DATASOURCE_PASSWORD_PROFILE='$SPRING_DATASOURCE_PASSWORD_PROFILE'
+      export SPRING_DATASOURCE_INTERACTION_DATABASE='$SPRING_DATASOURCE_INTERACTION_DATABASE'
+      export SPRING_DATASOURCE_USERNAME_INTERACTION='$SPRING_DATASOURCE_USERNAME_INTERACTION'
+      export SPRING_DATASOURCE_PASSWORD_INTERACTION='$SPRING_DATASOURCE_PASSWORD_INTERACTION'
+      export JWT_ISSUER='$JWT_ISSUER'
+      export JWT_SECRET='$JWT_SECRET'
+      export OAUTH_CLIENT_ID='$OAUTH_CLIENT_ID'
+      export OAUTH_CLIENT_SECRET='$OAUTH_CLIENT_SECRET'
+      export ADMIN_TEST_USER='$ADMIN_TEST_USER'
+      export ADMIN_TEST_PASSWORD='$ADMIN_TEST_PASSWORD'
+      export OMDB_API_KEY='$OMDB_API_KEY'
+      export OMDB_API_URL='$OMDB_API_URL'
+      export MEDIA_SERVICE_URL='$MEDIA_SERVICE_URL'
+      export POST_SERVICE_URL='$POST_SERVICE_URL'
+      export RECOGNITION_SERVICE_URL='$RECOGNITION_SERVICE_URL'
+      export PROFILE_SERVICE_URL='$PROFILE_SERVICE_URL'
+      export PROFILE_CONNECTION_SERVICE_URL='$PROFILE_CONNECTION_SERVICE_URL'
+      export NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE='$NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE'
+      export NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE='$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE'
+      export NEXT_PUBLIC_AUTHENTICATION_URL='$NEXT_PUBLIC_AUTHENTICATION_URL'
+      export NEXT_PUBLIC_LIBRARY_SERVICE_URL='$NEXT_PUBLIC_LIBRARY_SERVICE_URL'
+      export NEXT_PUBLIC_MEDIA_URL='$NEXT_PUBLIC_MEDIA_URL'
+      export NEXT_PUBLIC_INTERACTION_URL='$NEXT_PUBLIC_INTERACTION_URL'
+      docker compose -f docker-compose-prod.yml pull
+      docker compose -f docker-compose-prod.yml stop frontend
+      docker compose -f docker-compose-prod.yml rm -f frontend
+      docker compose -f docker-compose-prod.yml up -d --remove-orphans
+      EOF

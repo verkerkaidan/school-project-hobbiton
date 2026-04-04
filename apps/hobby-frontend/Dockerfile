@@ -25,7 +25,9 @@ ENV NEXT_PUBLIC_LIBRARY_SERVICE_URL=${NEXT_PUBLIC_LIBRARY_SERVICE_URL}
 
 COPY . .
 
-RUN npm run build
+RUN echo "[DEBUG] NEXT_PUBLIC_AUTHENTICATION_URL=$NEXT_PUBLIC_AUTHENTICATION_URL" && \
+    echo "[DEBUG] NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE" && \
+    npm run build
 
 # Production stage
 FROM node:20-alpine AS production
@@ -38,6 +40,5 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/next.config.ts ./
 
-EXPOSE 19293
 
 CMD ["npm", "start"]

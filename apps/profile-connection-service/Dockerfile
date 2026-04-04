@@ -1,13 +1,18 @@
-FROM java:21
-FROM maven:sapmachine
-
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY . /app
+COPY pom.xml .
 
-ADD pom.xml /app
-RUN mvn verify clean --fail-never
+RUN mvn dependency:go-offline
+
+COPY src src
 
 RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java", "-jar", "/app/target/profile-connection-service-1.0.0.jar"]
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

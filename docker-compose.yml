@@ -49,7 +49,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -228,7 +228,7 @@ services:
       PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
 networks:
   microservices-network:
-    name: microservices-network
+    name: hobbithon-network
     driver: bridge
 
 volumes:

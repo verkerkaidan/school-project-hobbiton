@@ -1,0 +1,194 @@
+name: gl_groep-01_hobithon
+
+services:
+  frontend:
+    image: ${CI_REGISTRY_IMAGE}/hobby-frontend:latest
+    restart: always
+    ports:
+      - "19293:19293"
+    environment:
+      - NEXT_PUBLIC_AUTHENTICATION_URL=${NEXT_PUBLIC_AUTHENTICATION_URL}
+      - NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE=${NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE}
+      - NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=${NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}
+      - NEXT_PUBLIC_MEDIA_URL=${NEXT_PUBLIC_MEDIA_URL}
+      - NEXT_PUBLIC_INTERACTION_URL=${NEXT_PUBLIC_INTERACTION_URL}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  post-service:
+    image: ${CI_REGISTRY_IMAGE}/post-service:latest
+    restart: always
+    ports:
+      - "29293:29293"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_POSTS_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_POSTS}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_POSTS}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  profile-connection-service:
+    image: ${CI_REGISTRY_IMAGE}/profile-connection-service:latest
+    restart: always
+    ports:
+      - "29574:29574"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  media-service:
+    image: ${CI_REGISTRY_IMAGE}/media-service:latest
+    restart: always
+    ports:
+      - "27086:27086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  recognition-service:
+    image: ${CI_REGISTRY_IMAGE}/recognition-service:latest
+    restart: always
+    ports:
+      - "27088:27088"
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  authentication-service:
+    image: ${CI_REGISTRY_IMAGE}/authentication-service:latest
+    restart: always
+    ports:
+      - "21525:21525"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_AUTHENTICATION_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_AUTHENTICATION}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_AUTHENTICATION}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_SECRET: ${JWT_SECRET}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      ADMIN_TEST_USER: ${ADMIN_TEST_USER}
+      ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  profile-service:
+    image: ${CI_REGISTRY_IMAGE}/profile-service:latest
+    restart: always
+    ports:
+      - "21526:21526"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_PROFILE_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_PROFILE}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_TEST_USER: ${ADMIN_TEST_USER}
+      ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  library-service:
+    image: ${CI_REGISTRY_IMAGE}/library-service:latest
+    restart: always
+    ports:
+      - "28877:28877"
+    environment:
+      OMDB_API_KEY: ${OMDB_API_KEY}
+      OMDB_API_URL: ${OMDB_API_URL}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  interaction-service:
+    image: ${CI_REGISTRY_IMAGE}/interaction-service:latest
+    restart: always
+    ports:
+      - "27087:27087"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_INTERACTION_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_INTERACTION}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_INTERACTION}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  middleware-service:
+    image: ${CI_REGISTRY_IMAGE}/apigateway:latest
+    restart: always
+    ports:
+      - "23738:23738"
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+    environment:
+      MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
+      POST_SERVICE_URL: ${POST_SERVICE_URL}
+      RECOGNITION_SERVICE_URL: ${RECOGNITION_SERVICE_URL}
+      PROFILE_SERVICE_URL: ${PROFILE_SERVICE_URL}
+      PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
+
+  database:
+    image: postgres:16
+    restart: always
+    ports:
+      - "29496:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_USERNAME_POSTS: ${SPRING_DATASOURCE_USERNAME_POSTS}
+      SPRING_DATASOURCE_PASSWORD_POSTS: ${SPRING_DATASOURCE_PASSWORD_POSTS}
+      SPRING_DATASOURCE_POSTS_DATABASE: ${SPRING_DATASOURCE_POSTS_DATABASE}
+      SPRING_DATASOURCE_USERNAME_MEDIA: ${SPRING_DATASOURCE_USERNAME_MEDIA}
+      SPRING_DATASOURCE_PASSWORD_MEDIA: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      SPRING_DATASOURCE_MEDIA_DATABASE: ${SPRING_DATASOURCE_MEDIA_DATABASE}
+      SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION: ${SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION}
+      SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
+      SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE: ${SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE}
+      SPRING_DATASOURCE_USERNAME_AUTHENTICATION: ${SPRING_DATASOURCE_USERNAME_AUTHENTICATION}
+      SPRING_DATASOURCE_PASSWORD_AUTHENTICATION: ${SPRING_DATASOURCE_PASSWORD_AUTHENTICATION}
+      SPRING_DATASOURCE_AUTHENTICATION_DATABASE: ${SPRING_DATASOURCE_AUTHENTICATION_DATABASE}
+      SPRING_DATASOURCE_USERNAME_PROFILE: ${SPRING_DATASOURCE_USERNAME_PROFILE}
+      SPRING_DATASOURCE_PASSWORD_PROFILE: ${SPRING_DATASOURCE_PASSWORD_PROFILE}
+      SPRING_DATASOURCE_PROFILE_DATABASE: ${SPRING_DATASOURCE_PROFILE_DATABASE}
+      SPRING_DATASOURCE_USERNAME_INTERACTION: ${SPRING_DATASOURCE_USERNAME_INTERACTION}
+      SPRING_DATASOURCE_PASSWORD_INTERACTION: ${SPRING_DATASOURCE_PASSWORD_INTERACTION}
+      SPRING_DATASOURCE_INTERACTION_DATABASE: ${SPRING_DATASOURCE_INTERACTION_DATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+volumes:
+  postgres_data:
+
+networks:
+  hobbithon-network:
+    driver: bridge

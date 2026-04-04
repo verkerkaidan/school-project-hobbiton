@@ -1,5 +1,7 @@
 const GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:23738/api";
+  process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
+
+const API_BASE = `${GATEWAY_URL}/api`;
 
 /**
  * Creates a profile in the profile-service via the API gateway.
@@ -13,7 +15,7 @@ export async function createProfile(
   name: string,
   token: string,
 ): Promise<void> {
-  const res = await fetch(`${GATEWAY_URL}/profile/create`, {
+  const res = await fetch(`${API_BASE}/profile/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
