@@ -118,3 +118,123 @@ docker compose up -d
 ```
 
 Bij problemen met docker, ping Tygo Houweling
+
+---
+
+## Docker Compose (lokaal)
+
+Het bestand `docker-compose.yml` is bedoeld voor lokale development. Het bouwt alle images lokaal vanuit de broncode in de `apps/` map.
+
+### Services en poorten
+
+| Service                    | Poort (host:container) | Beschrijving                          |
+|---------------------------|------------------------|---------------------------------------|
+| frontend                  | 19293:19293            | Next.js frontend                      |
+| pgadmin                   | 8000:80                | PgAdmin webinterface voor de database |
+| database                  | 5432:5432              | PostgreSQL database                   |
+| post-service              | 29293:29293            | Beheert posts                         |
+| profile-connection-service| 29574:29574            | Beheert connecties tussen profielen   |
+| media-service             | 27086:27086            | Beheert media uploads                 |
+| recognition-service       | 27088:27088            | Herkenningsservice                    |
+| authentication-service    | 21525:21525            | Authenticatie en autorisatie          |
+| profile-service           | 21526:21526            | Beheert gebruikersprofielen           |
+| library-service           | 28877:28877            | OMDB-gebaseerde bibliotheekservice    |
+| interaction-service       | 27087:27087            | Beheert interacties (likes, reacties) |
+| middleware-service        | 23738:23738            | API gateway                           |
+
+### Kenmerken
+- Images worden **lokaal gebuild** vanuit de `apps/` map.
+- Bevat PgAdmin voor database-beheer via de browser (`http://localhost:8000`).
+- Elke service heeft `2 CPU` en `2048m` geheugen toegewezen.
+- De database gebruikt een healthcheck; services starten pas als de database gezond is.
+- Omgevingsvariabelen worden geladen vanuit een lokaal `.env` bestand (nooit committen).
+
+---
+
+## Docker Compose (productie)
+
+Het bestand `docker-compose-prod.yml` wordt gebruikt op de productieserver. In tegenstelling tot de lokale versie trekt het kant-en-klare Docker images uit de GitLab Container Registry, in plaats van deze lokaal te builden.
+
+### Services en poorten
+
+| Service                    | Poort (host:container) | Beschrijving                          |
+|---------------------------|------------------------|---------------------------------------|
+| frontend                  | 19293:19293            | Next.js frontend                      |
+| database                  | 29496:5432             | PostgreSQL database                   |
+| post-service              | 29293:29293            | Beheert posts                         |
+| profile-connection-service| 29574:29574            | Beheert connecties tussen profielen   |
+| media-service             | 27086:27086            | Beheert media uploads                 |
+| recognition-service       | 27088:27088            | Herkenningsservice                    |
+| authentication-service    | 21525:21525            | Authenticatie en autorisatie          |
+| profile-service           | 21526:21526            | Beheert gebruikersprofielen           |
+| library-service           | 28877:28877            | OMDB-gebaseerde bibliotheekservice    |
+| interaction-service       | 27087:27087            | Beheert interacties (likes, reacties) |
+| middleware-service        | 23738:23738            | API gateway                           |
+
+### Kenmerken
+- Images worden **gepulld** vanuit de GitLab Container Registry (`$CI_REGISTRY_IMAGE/<service>:latest`).
+- Geen PgAdmin in productie.
+- Elke service heeft `1 CPU` en `1024m` geheugen toegewezen (lager dan lokaal).
+- De database is bereikbaar op poort `29496` op de host (i.p.v. `5432` lokaal).
+- Alle credentials en omgevingsvariabelen worden via de CI/CD pipeline als omgevingsvariabelen meegegeven.
+
+---
+
+## CI/CD Pipeline
+
+De pipeline is geconfigureerd in `.gitlab-ci.yml` en bestaat uit drie stages: **test**, **build** en **deploy**.
+
+### Stage 1 — test
+
+Draait automatisch bij een **merge request** als er wijzigingen zijn in de betreffende service. Elke service heeft een eigen testjob:
+
+| Job                              | Gewijzigde map                        |
+|----------------------------------|---------------------------------------|
+| `test:profile-connection-service`| `apps/profile-connection-service/**`  |
+| `test:post-service`              | `apps/post-service/**`                |
+| `test:media-service`             | `apps/media-service/**`               |
+| `test:interaction-service`       | `apps/interaction-service/**`         |
+| `test:library-service`           | `apps/library-service/**`             |
+| `test:recognition-service`       | `apps/recognition-service/**`         |
+
+Elk testjob:
+- Gebruikt `maven:3.9-eclipse-temurin-21` als image.
+- Voert `mvn clean test` uit.
+- Publiceert JUnit-rapporten en Jacoco coverage als artifacts (30 dagen bewaard).
+
+### Stage 2 — build
+
+Draait alleen op de **`main` branch**. Bouwt Docker images voor alle services en pusht ze naar de GitLab Container Registry:
+
+- `apigateway`, `authentication-service`, `interaction-service`, `library-service`, `media-service`, `post-service`, `profile-connection-service`, `profile-service`, `recognition-service`
+- `hobby-frontend` — wordt gebouwd met `NEXT_PUBLIC_*` build-args vanuit CI/CD variabelen.
+
+Na elke push wordt het lokale image verwijderd om diskruimte te besparen.
+
+### Stage 3 — deploy
+
+Draait alleen op de **`main` branch**. Deployt naar de studentenserver via SSH:
+
+1. Kopieert `docker-compose-prod.yml` en `init-db.sh` naar de server.
+2. Logt in op de GitLab Container Registry op de server.
+3. Exporteert alle benodigde omgevingsvariabelen (database credentials, JWT, OAuth, etc.).
+4. Voert `docker compose pull` uit om de nieuwste images op te halen.
+5. Stopt en verwijdert de oude `frontend` container afzonderlijk (zodat de nieuwe Next.js build direct actief is).
+6. Start alle services opnieuw op met `docker compose up -d --remove-orphans`.
+
+### Benodigde CI/CD variabelen
+
+De volgende variabelen moeten zijn ingesteld in de GitLab project settings onder **Settings → CI/CD → Variables**:
+
+| Variabele                                  | Gebruik                              |
+|--------------------------------------------|--------------------------------------|
+| `SSH_PRIVATE_KEY`                          | SSH-sleutel voor toegang tot de server|
+| `POSTGRES_USER` / `POSTGRES_PASSWORD`      | Hoofd Postgres credentials           |
+| `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` | PgAdmin login               |
+| `SPRING_DATASOURCE_*`                      | Per-service database credentials     |
+| `JWT_ISSUER` / `JWT_SECRET`                | JWT configuratie                     |
+| `OAUTH_CLIENT_ID` / `OAUTH_CLIENT_SECRET`  | OAuth configuratie                   |
+| `ADMIN_TEST_USER` / `ADMIN_TEST_PASSWORD`  | Testgebruiker voor seeding           |
+| `OMDB_API_KEY` / `OMDB_API_URL`            | OMDB API voor de library-service     |
+| `NEXT_PUBLIC_*`                            | Frontend build-time variabelen       |
+| `MEDIA_SERVICE_URL` / `POST_SERVICE_URL` / etc. | API gateway routering          |
