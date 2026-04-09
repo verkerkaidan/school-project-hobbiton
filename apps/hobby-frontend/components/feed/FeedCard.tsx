@@ -1,10 +1,10 @@
 "use client";
-import {motion} from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { Post } from "@/types/posts";
 import { useRouter } from "next/navigation";
-import {ImageMenu} from "@/components/ui/ImageMenu";
-import {useState} from "react";
+import { ImageMenu } from "@/components/ui/ImageMenu";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import LikeButton from "@/components/interaction/LikeButton";
 
@@ -16,19 +16,19 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
     medium: "aspect-square",
     tall: "aspect-[3/4]",
   };
-    const router = useRouter();
+  const router = useRouter();
 
-    const media = item.mediaSet?.[0];
-    const imageSrc = media
-        ? `data:${media.contentType};base64,${media.fileData}` : "";
+  const media = item.mediaSet?.[0];
+  const imageSrc = media
+    ? `data:${media.contentType};base64,${media.fileData}` : "";
 
   const showOverlay = media?.contentFlag === "RISK" && !revealed;
 
-    const [aspectRatio] = useState(() => {
-        const values = Object.values(aspectRatios);
-        const randomIndex = Math.floor(Math.random() * values.length);
-        return values[randomIndex];
-    })
+  const [aspectRatio] = useState(() => {
+    const values = Object.values(aspectRatios);
+    const randomIndex = Math.floor(Math.random() * values.length);
+    return values[randomIndex];
+  })
 
   return (
     <motion.div
@@ -38,17 +38,17 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
       transition={{ duration: 0.5, delay: index * 0.05 }}
       className="break-inside-avoid group mb-6"
       onClick={() => router.push(`/posts/${item.id}`)}
-      >
+    >
 
       {/* Image Container */}
       {media && (
         <div
           className={`relative w-full overflow-hidden ${aspectRatio}`}
         >
-            {/* 3-dot menu (top-right) */}
-            <div className="absolute top-2 right-2 z-20">
-                <ImageMenu relevantId={media.relevantId} userId={Cookies.get("userId")!} />
-            </div>
+          {/* 3-dot menu (top-right) */}
+          <div className="absolute top-2 right-2 z-20">
+            <ImageMenu relevantId={media.relevantId} userId={Cookies.get("userId")!} />
+          </div>
           <Image
             src={imageSrc}
             alt={item.title}
@@ -59,25 +59,25 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
           {/* 🚨 Content Warning Overlay */}
           {showOverlay && (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4">
 
-                <div className="max-w-xs">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Content Warning
-                  </h3>
-                  <p className="text-sm opacity-80 mb-4">
-                    This image may contain sensitive or disturbing content.
-                  </p>
+              <div className="max-w-xs">
+                <h3 className="text-lg font-semibold mb-2">
+                  Content Warning
+                </h3>
+                <p className="text-sm opacity-80 mb-4">
+                  This image may contain sensitive or disturbing content.
+                </p>
 
-                  <button
-                      onClick={() => setRevealed(true)}
-                      className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
-                  >
-                    View Image
-                  </button>
-                </div>
-
+                <button
+                  onClick={() => setRevealed(true)}
+                  className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                >
+                  View Image
+                </button>
               </div>
+
+            </div>
           )}
         </div>
       )}
@@ -96,7 +96,9 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
           {item.title}
         </h2>
         <p className="text-accent text-sm leading-relaxed">
-          {item.description}
+          {item.description.length > 100
+            ? item.description.slice(0, 100) + "..."
+            : item.description}
         </p>
       </div>
 
@@ -105,7 +107,7 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
         <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
           View Post
         </span>
-          <LikeButton itemId={item.id} initialLikes={initialLikes}/>
+        <LikeButton itemId={item.id} initialLikes={initialLikes} />
       </div>
     </motion.div>
   );
