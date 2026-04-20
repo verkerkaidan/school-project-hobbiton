@@ -76,7 +76,6 @@ public class BookService implements SearchableService {
 
     private BookResponse toResponse(Book book) {
         BookResponse response = new BookResponse();
-        // ... (je bestaande mapping logica)
         response.setTitle(book.getTitle());
         response.setAuthors(book.getAuthors());
         response.setDescription(book.getDescription());
