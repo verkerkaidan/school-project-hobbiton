@@ -33,6 +33,20 @@ public class ProfileAggregationService {
         this.postClient = postClient;
     }
 
+    public UserProfile getProfileByUsername(String username) {
+        ProfileResponse profileResponse = profileClient.getProfileByUsername(username);
+        UUID userId = profileResponse.getUserId();
+        Set<UUID> followers = profileConnectionClient.getFollowerIds(userId);
+        Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
+        return new UserProfile(
+                profileResponse.getUserId(),
+                profileResponse.getUsername(),
+                profileResponse.getBiography() != null ? profileResponse.getBiography() : "",
+                profileResponse.getMediaPointer() != null ? profileResponse.getMediaPointer() : "/jpeg.png",
+                followers.size(),
+                following.size());
+    }
+
     public UserProfile getProfile(UUID userId) {
         logger.info("[getProfile] Starting profile fetch for userId: {}", userId);
         try {

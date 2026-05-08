@@ -19,6 +19,10 @@ public interface ProfileClient {
     @GetMapping("/profile/{userId}")
     ProfileResponse getProfile(@PathVariable UUID userId);
 
+    // Fetches the full profile for a given username from the profile-service
+    @GetMapping("/profile/by-username/{username}")
+    ProfileResponse getProfileByUsername(@PathVariable String username);
+
     // Creates a new profile in the profile-service; the Bearer token is forwarded
     // so the
     // profile-service can extract the userId from the JWT claims

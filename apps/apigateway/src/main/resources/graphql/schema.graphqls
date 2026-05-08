@@ -16,6 +16,7 @@ type Query {
   getPostById(id: ID): Post
   getPosts: [Post]
   getProfile(userId: ID!): UserProfile
+  getProfileByUsername(username: String!): UserProfile
   getUserPosts(userId: ID!): [Post]
   getFollowers(userId: ID!): [User]
   getFollowing(userId: ID!): [User]
