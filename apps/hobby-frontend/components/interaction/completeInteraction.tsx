@@ -96,7 +96,7 @@ const CompleteInteraction: React.FC<CompleteInteractionProps> = ({
               <div key={i} className="border border-gray rounded p-4 space-y-2">
                 <p className="text-sm">{item.commentData.comment}</p>
                 <Link
-                  href={`/profile/${item.userData.id}`}
+                  href={`/profile/${item.userData.username}`}
                   className="text-xs text-accent hover:underline"
                 >
                   {item.userData.username}

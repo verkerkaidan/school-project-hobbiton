@@ -6,13 +6,15 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function OtherProfilePage() {
   const params = useParams();
-  const userId = params?.userId as string;
+  const username = params?.username as string;
   const currentUser = useCurrentUser();
-  const currentUserId = currentUser?.id ?? "";
 
   return (
     <div className="mx-auto px-6 pt-16 pb-20 max-w-7xl">
-      <ProfileView userId={userId} isOwnProfile={userId === currentUserId} />
+      <ProfileView
+        username={username}
+        isOwnProfile={!!currentUser && currentUser.username === username}
+      />
     </div>
   );
 }
