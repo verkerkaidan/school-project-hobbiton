@@ -9,6 +9,7 @@ services:
         NEXT_PUBLIC_LIBRARY_SERVICE_URL: ${NEXT_PUBLIC_LIBRARY_SERVICE_URL}
         NEXT_PUBLIC_MEDIA_URL: ${NEXT_PUBLIC_MEDIA_URL}
         NEXT_PUBLIC_INTERACTION_URL: ${NEXT_PUBLIC_INTERACTION_URL}
+        NEXT_PUBLIC_NOTIFICATION_URL: ${NEXT_PUBLIC_NOTIFICATION_URL}
     container_name: frontend
     restart: always
     ports:
@@ -85,6 +86,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_PROFILE_CONNECTION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_PROFILE_CONNECTION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+      PROFILE_SERVICE_URL: http://profile-service:21526
     cpus: 2
     mem_limit: 2048m
     networks:
@@ -209,6 +212,31 @@ services:
       database:
         condition: service_healthy
 
+  notification-service:
+    build:
+      context: ./apps/notification-service
+    container_name: notification-service
+    restart: always
+    ports:
+      - "29555:29555"
+    environment:
+      PORT: 29555
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: ${DB_NOTIFICATION_USER}
+      DB_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
+      DB_NAME: ${DB_NOTIFICATION_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+    cpus: 1
+    mem_limit: 512m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
   middleware-service:
     build:
       context: ./apps/apigateway
@@ -226,6 +254,7 @@ services:
       RECOGNITION_SERVICE_URL: ${RECOGNITION_SERVICE_URL}
       PROFILE_SERVICE_URL: ${PROFILE_SERVICE_URL}
       PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
 networks:
   microservices-network:
     name: hobbithon-network
