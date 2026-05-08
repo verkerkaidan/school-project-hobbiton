@@ -65,4 +65,14 @@ public class ProfileController {
         return ResponseEntity.ok(profile.get());
     }
 
+    ///  This endpoint("api/profile/by-username/{username}") will return a user's profile by username
+    @GetMapping("by-username/{username}")
+    public ResponseEntity<Profile> getProfileByUsername(@PathVariable("username") String username){
+        Optional<Profile> profile = profileRepository.findByUsername(username);
+        if(profile.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
+        }
+        return ResponseEntity.ok(profile.get());
+    }
+
 }
