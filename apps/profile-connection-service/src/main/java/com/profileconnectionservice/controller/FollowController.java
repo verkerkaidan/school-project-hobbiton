@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.profileconnectionservice.model.AuditLog;
 import com.profileconnectionservice.service.AuditLogService;
 import com.profileconnectionservice.service.FollowService;
-import com.profileconnectionservice.service.NotificationClient;
 
 @Slf4j
 
@@ -27,9 +26,6 @@ public class FollowController {
 
     @Autowired
     private AuditLogService auditLogService;
-
-    @Autowired
-    private NotificationClient notificationClient;
 
     /**
      * Toggle follow/unfollow relationship.
@@ -50,11 +46,6 @@ public class FollowController {
             boolean isNowFollowing = followService.toggleFollow(currentProfileId,
                     targetProfileId);
             log.debug("toggleFollow completed: isNowFollowing={}", isNowFollowing);
-
-            // Notify the target user about the new follower (fire-and-forget)
-            if (isNowFollowing) {
-                notificationClient.sendFollowNotification(targetProfileId, currentProfileId);
-            }
 
             return ResponseEntity.ok(isNowFollowing);
         } catch (Exception e) {

@@ -1,8 +1,9 @@
 package com.apigateway.apigateway.service;
 
+import com.apigateway.apigateway.clients.NotificationClient;
+import com.apigateway.apigateway.clients.PostClient;
 import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.clients.ProfileConnectionClient;
-import com.apigateway.apigateway.clients.PostClient;
 import com.apigateway.apigateway.models.CreateReportRequest;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.UserProfile;
@@ -12,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,12 +28,14 @@ public class ProfileAggregationService {
     private final ProfileClient profileClient;
     private final ProfileConnectionClient profileConnectionClient;
     private final PostClient postClient;
+    private final NotificationClient notificationClient;
 
     public ProfileAggregationService(ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
-            PostClient postClient) {
+            PostClient postClient, NotificationClient notificationClient) {
         this.profileClient = profileClient;
         this.profileConnectionClient = profileConnectionClient;
         this.postClient = postClient;
+        this.notificationClient = notificationClient;
     }
 
     public UserProfile getProfileByUsername(String username) {
@@ -127,11 +132,43 @@ public class ProfileAggregationService {
         try {
             Boolean isNowFollowing = profileConnectionClient.toggleFollow(targetUserId, currentUserId);
             logger.info("[toggleFollow] Result: isNowFollowing={}", isNowFollowing);
+            if (Boolean.TRUE.equals(isNowFollowing)) {
+                sendFollowNotification(targetUserId, currentUserId);
+            }
             return isNowFollowing;
         } catch (Exception e) {
             logger.error("[toggleFollow] FAILED for currentUserId={}, targetUserId={} - {}", currentUserId,
                     targetUserId, e.getMessage(), e);
             throw new RuntimeException("Failed to toggle follow", e);
+        }
+    }
+
+    private void sendFollowNotification(UUID targetUserId, UUID actorUserId) {
+        try {
+            String username = null;
+            try {
+                ProfileResponse actorProfile = profileClient.getProfile(actorUserId);
+                if (actorProfile != null) {
+                    username = actorProfile.getUsername();
+                }
+            } catch (Exception e) {
+                logger.warn("[sendFollowNotification] Could not fetch username for actor {}: {}", actorUserId, e.getMessage());
+            }
+            String message = (username != null)
+                    ? "@" + username + " started following you"
+                    : "Someone started following you";
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("userId", targetUserId.toString());
+            payload.put("actorId", actorUserId.toString());
+            payload.put("type", "FOLLOW");
+            payload.put("message", message);
+
+            notificationClient.createNotification(payload);
+            logger.debug("[sendFollowNotification] Follow notification sent: actor={} -> target={}", actorUserId, targetUserId);
+        } catch (Exception e) {
+            logger.warn("[sendFollowNotification] Failed to send follow notification (actor={}, target={}): {}",
+                    actorUserId, targetUserId, e.getMessage());
         }
     }
 
