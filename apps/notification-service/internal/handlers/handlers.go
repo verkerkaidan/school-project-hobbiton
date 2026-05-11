@@ -3,6 +3,8 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"notification-service/internal/auth"
 	"notification-service/internal/config"
@@ -47,9 +49,20 @@ func (h *Handler) Register(mux *http.ServeMux) {
 }
 
 // withCORS wraps a handler to add CORS headers on every response.
+// AllowedOrigins is a comma-separated list of exact origins or regex patterns.
 func withCORS(cfg *config.Config, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", cfg.AllowedOrigins)
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			for _, pattern := range strings.Split(cfg.AllowedOrigins, ",") {
+				pattern = strings.TrimSpace(pattern)
+				matched, err := regexp.MatchString("^"+pattern+"$", origin)
+				if err == nil && matched {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		if r.Method == http.MethodOptions {
