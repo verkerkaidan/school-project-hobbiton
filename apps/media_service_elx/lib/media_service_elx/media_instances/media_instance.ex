@@ -7,6 +7,7 @@ defmodule MediaServiceElx.MediaInstances.MediaInstance do
   schema "media_instances" do
     field :file_id, :binary
     field :owner_id, :binary
+    belongs_to :mediaFile, MediaServiceElx.MediaFiles.MediaFile
 
     timestamps(type: :utc_datetime)
   end

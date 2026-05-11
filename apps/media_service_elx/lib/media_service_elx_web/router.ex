@@ -1,12 +1,31 @@
 defmodule MediaServiceElxWeb.Router do
   use MediaServiceElxWeb, :router
+  alias MediaServiceElx.MediaController
+  alias MediaServiceElx.ReportController
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api", MediaServiceElxWeb do
+  scope "/api/media", MediaServiceElxWeb do
     pipe_through :api
+
+    post "/:ownerId", MediaController, :upload_media
+    get "/file/:instanceId", MediaController, :retrieve_media
+    get "/owner/:ownerId", MediaController, :retrieve_media_by_owner
+    delete "/file/:instanceId", MediaController, :delete_instance
+    delete "/owner/:ownerId", MediaController, :delete_owner
+    patch "", MediaController, :update_content_flag
+    get "", MediaController, :get_unassigned_media_files
+    get "/admin/:instanceId", MediaController, :get_complete_media_file
+    delete "admin/:fileId", MediaController, :delete_media_file
+  end
+
+  scope "/api/report", MediaServiceElx do
+    pipe_through :api
+
+    post "/:userId/:instanceId", ReportController, :create_file_report
+    get "", ReportController, :get_all_reported_files
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

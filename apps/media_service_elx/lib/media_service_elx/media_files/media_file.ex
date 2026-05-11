@@ -10,6 +10,7 @@ defmodule MediaServiceElx.MediaFiles.MediaFile do
     field :hash, :binary
     field :original, :binary
     field :thumbnail, :binary
+    has_many :mediaInstances, MediaServiceElx.MediaInstances.MediaInstance
 
     timestamps(type: :utc_datetime)
   end
@@ -18,7 +19,7 @@ defmodule MediaServiceElx.MediaFiles.MediaFile do
   def changeset(media_file, attrs) do
     media_file
     |> cast(attrs, [:content_flag, :content_type, :hash, :original, :thumbnail])
-    |> validate_required([:content_flag, :content_type, :hash, :original, :thumbnail])
+    |> validate_required([:content_flag, :content_type, :hash, :original])
     |> unique_constraint(:hash)
   end
 end
