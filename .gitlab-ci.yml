@@ -132,6 +132,23 @@ test:recognition-service:
       - apps/recognition-service/target/site/jacoco/
     expire_in: 30 days
 
+# Test notification-service
+test:notification-service:
+  stage: test
+  image: golang:1.23
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/notification-service/**/*
+  script:
+    - cd apps/notification-service
+    - go test ./...
+  artifacts:
+    when: always
+    paths:
+      - apps/notification-service/
+    expire_in: 30 days
+
 # Build all services and push to GitLab registry
 build:
   stage: build
@@ -153,7 +170,7 @@ build:
   script:
     - |
       set -e
-      for SERVICE_NAME in apigateway authentication-service interaction-service library-service media-service post-service profile-connection-service profile-service recognition-service; do
+      for SERVICE_NAME in apigateway authentication-service interaction-service library-service media-service notification-service post-service profile-connection-service profile-service recognition-service; do
         echo "Building $SERVICE_NAME..."
         docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
         echo "Pushing $SERVICE_NAME..."
