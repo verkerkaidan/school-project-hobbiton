@@ -1,5 +1,19 @@
 import Config
+import Dotenvy
 
+env_dir_prefix = System.get_env("RELEASE_ROOT") || File.cwd!()
+source!([
+  Path.absname(".env", env_dir_prefix),
+  System.get_env()
+])
+
+config :media_service_elx, MediaServiceElx.Repo,
+       hostname: env!("DB_HOST", :string!),
+       port: env!("DB_PORT", :integer!),
+       database: env!("DB_NAME", :string!),
+       username: env!("DB_USERNAME", :string!),
+       password: env!("DB_PASSWORD", :string!),
+       pool_size: 10
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -21,7 +35,7 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :media_service_elx, MediaServiceElxWeb.Endpoint,
-  http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+  http: [port: String.to_integer(System.get_env("PORT", "27089"))]
 
 if config_env() == :prod do
   database_url =
