@@ -11,8 +11,6 @@ defmodule MediaServiceElx.MediaFiles.MediaFile do
     field :original, :binary
     field :thumbnail, :binary
     has_many :mediaInstances, MediaServiceElx.MediaInstances.MediaInstance
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false

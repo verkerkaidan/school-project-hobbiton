@@ -8,8 +8,6 @@ defmodule MediaServiceElx.MediaInstances.MediaInstance do
     field :file_id, :binary
     field :owner_id, :binary
     belongs_to :mediaFile, MediaServiceElx.MediaFiles.MediaFile
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false

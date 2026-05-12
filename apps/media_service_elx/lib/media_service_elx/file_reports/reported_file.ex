@@ -6,8 +6,6 @@ defmodule MediaServiceElx.FileReports.ReportedFile do
   @foreign_key_type :binary_id
   schema "reported_file" do
     field :hash, :binary
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false

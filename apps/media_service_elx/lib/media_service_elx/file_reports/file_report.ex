@@ -7,8 +7,6 @@ defmodule MediaServiceElx.FileReports.FileReport do
   schema "file_report" do
     field :file_id, :binary
     field :user_id, :binary
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false
