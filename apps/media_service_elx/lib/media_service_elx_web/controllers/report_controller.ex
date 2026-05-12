@@ -5,7 +5,8 @@ defmodule MediaServiceElxWeb.ReportController do
   alias MediaServiceElx.FileReports.FileReport
   alias MediaServiceElx.FileReports.ReportedFile
 
-  def create_file_report(conn, %{"userId" => user_id, "instanceId" => instance_id} = params) do
+  ## TODO: Now creates a report using the instance_id and not the file_id
+  def create_file_report(conn, %{"user_id" => user_id, "instance_id" => instance_id} = params) do
     report_params = %{
       "user_id" => user_id,
       "file_id" => instance_id

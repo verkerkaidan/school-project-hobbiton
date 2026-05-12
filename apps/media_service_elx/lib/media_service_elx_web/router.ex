@@ -8,21 +8,21 @@ defmodule MediaServiceElxWeb.Router do
   scope "/api/media", MediaServiceElxWeb do
     pipe_through :api
 
-    post "/:ownerId", MediaController, :upload_media
-    get "/file/:instanceId", MediaController, :retrieve_media
-    get "/owner/:ownerId", MediaController, :retrieve_media_by_owner
-    delete "/file/:instanceId", MediaController, :delete_instance
-    delete "/owner/:ownerId", MediaController, :delete_owner
+    post "/:owner_id", MediaController, :upload_media
+    get "/file/:instance_id", MediaController, :retrieve_media
+    get "/owner/:owner_id", MediaController, :retrieve_media_by_owner
+    delete "/file/:instance_id", MediaController, :delete_instance
+    delete "/owner/:owner_id", MediaController, :delete_owner
     patch "/", MediaController, :update_content_flag
     get "/", MediaController, :get_unassigned_media_files
-    get "/admin/:instanceId", MediaController, :get_complete_media_file
-    delete "/admin/:fileId", MediaController, :delete_media_file
+    get "/admin/:instance_id", MediaController, :get_complete_media_file
+    delete "/admin/:file_id", MediaController, :delete_media_file
   end
 
   scope "/api/report", MediaServiceElxWeb do
     pipe_through :api
 
-    post "/:userId/:instanceId", ReportController, :create_file_report
+    post "/:user_id/:instance_id", ReportController, :create_file_report
     get "/", ReportController, :get_all_reported_files
   end
 
