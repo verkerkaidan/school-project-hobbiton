@@ -1,5 +1,5 @@
-defmodule MediaServiceElx.MediaController do
-  use MediaServiceElx, :controller
+defmodule MediaServiceElxWeb.MediaController do
+  use MediaServiceElxWeb, :controller
 
   def upload_media(conn, _params) do
 

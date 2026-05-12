@@ -1,7 +1,5 @@
 defmodule MediaServiceElxWeb.Router do
   use MediaServiceElxWeb, :router
-  alias MediaServiceElx.MediaController
-  alias MediaServiceElx.ReportController
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -21,7 +19,7 @@ defmodule MediaServiceElxWeb.Router do
     delete "admin/:fileId", MediaController, :delete_media_file
   end
 
-  scope "/api/report", MediaServiceElx do
+  scope "/api/report", MediaServiceElxWeb do
     pipe_through :api
 
     post "/:userId/:instanceId", ReportController, :create_file_report
