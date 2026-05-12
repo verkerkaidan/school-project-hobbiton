@@ -1,8 +1,22 @@
 defmodule MediaServiceElxWeb.MediaController do
   use MediaServiceElxWeb, :controller
 
-  def upload_media(conn, _params) do
+  alias MediaServiceElx.MediaService
 
+
+  def upload_media(conn, %{"owner_id" => owner_id, "file" => upload}) do
+    case MediaService.upload_media_file(upload, owner_id) do
+      {:ok, instance_id} ->
+        json(conn, %{id: instance_id})
+      {:error, :banned} ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "This file was banned from this platform"})
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Invalid file"})
+    end
   end
 
   def retrieve_media(conn, _params) do
