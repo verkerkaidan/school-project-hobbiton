@@ -3,16 +3,23 @@
 To start your Phoenix server:
 
 * Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+* Start Phoenix endpoint with `mix phx.server`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Now you can visit [`localhost:27089`] from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## Endpoints
+Endpoints can be found in `lib/media_service_elx_web/router.ex`
+* Media related endpoints are found by 
+  * `scope "/api/media"`
+* Report related endpoints are found by 
+  * `scope "/api/report"`
 
-## Learn more
+## Documentation
+Inline documentation is available. Alternatively, in the terminal (in `..\apps\media_service_elx`) 
+you can run `mix docs`.
+Then go to `doc/index.html` for a complete overview of documentation. 
+This is a combination of my own and automatically generated documentation, so not everything will be useful.
 
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix
+## Testing
+To run tests, in the terminal (in `..\apps\media_service_elx`)
+you can run `mix test`.
