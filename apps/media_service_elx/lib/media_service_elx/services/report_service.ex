@@ -32,11 +32,11 @@ defmodule MediaServiceElx.ReportService do
     end
   end
 
-  @doc """
-  Generates a ReportedFile
-  @params: MediaFile object
-  @returns: {:ok, ReportedFile}
-  """
+#  @doc """
+#  Generates a ReportedFile
+#  @params: MediaFile object
+#  @returns: {:ok, ReportedFile}
+#  """
   defp create_reported_file(%MediaFile{} = media_file) do
     %ReportedFile{}
     |> ReportedFile.changeset(%{

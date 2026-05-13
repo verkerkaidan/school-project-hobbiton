@@ -85,22 +85,22 @@ Handles most logic regarding actions with media files and media instances
     end
   end
 
-  @doc """
-    Generates a hash from a given file
-    @params: tempPath from %Plug.Upload{}
-    @returns: binary
-  """
+#  @doc """
+#    Generates a hash from a given file
+#    @params: tempPath from %Plug.Upload{}
+#    @returns: binary
+#  """
   defp compute_hash(path) do
     File.stream!(path, [], 2048)
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
   end
 
-  @doc """
-    Generates a MediaFile and saves to db
-    @params: form-data file, binary hash
-    @returns: {:ok, MediaFile}
-  """
+#  @doc """
+#    Generates a MediaFile and saves to db
+#    @params: form-data file, binary hash
+#    @returns: {:ok, MediaFile}
+#  """
   defp create_media_file(upload, hash) do
     binary = File.read!(upload.path)
 
@@ -114,11 +114,11 @@ Handles most logic regarding actions with media files and media instances
     |> Repo.insert()
   end
 
-  @doc """
-    Generates a MediaInstance and saves to db
-    @params: uuid file_id, uuid owner_id
-    @returns: {:ok, MediaInstance}
-  """
+#  @doc """
+#    Generates a MediaInstance and saves to db
+#    @params: uuid file_id, uuid owner_id
+#    @returns: {:ok, MediaInstance}
+#  """
   defp create_media_instance(media_file_id, owner_id) do
     %MediaInstance{}
     |> MediaInstance.changeset(%{
