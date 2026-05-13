@@ -8,7 +8,7 @@ defmodule MediaServiceElxWeb.Router do
   scope "/api/media", MediaServiceElxWeb do
     pipe_through :api
 
-    post "/:owner_id", MediaController, :upload_media
+    post "/", MediaController, :upload_media
     get "/file/:instance_id", MediaController, :retrieve_media
     get "/owner/:owner_id", MediaController, :retrieve_media_by_owner
     delete "/file/:instance_id", MediaController, :delete_instance

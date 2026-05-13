@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.FileReports.ReportedFile do
+  @moduledoc """
+Model for when a file was banned
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 

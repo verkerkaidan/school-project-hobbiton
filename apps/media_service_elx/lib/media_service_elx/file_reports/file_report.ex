@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.FileReports.FileReport do
+  @moduledoc """
+Model for when a user has reported a file
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 

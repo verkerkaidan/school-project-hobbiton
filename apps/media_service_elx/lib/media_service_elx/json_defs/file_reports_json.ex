@@ -1,4 +1,9 @@
 defmodule MediaServiceElxWeb.ReportJSON do
+  @moduledoc """
+This file handles how the data is shown to the user
+e.g. what fields are shows when an database entry is returned from a request
+"""
+
   alias MediaServiceElx.FileReports.FileReport
 
   def index(%{reports: reports}) do

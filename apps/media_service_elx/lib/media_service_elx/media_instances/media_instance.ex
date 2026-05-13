@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.MediaInstances.MediaInstance do
+  @moduledoc """
+Model for an instance referencing a media file
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 

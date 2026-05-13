@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.MediaFiles.MediaFile do
+  @moduledoc """
+Model for an uploaded media file
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 
