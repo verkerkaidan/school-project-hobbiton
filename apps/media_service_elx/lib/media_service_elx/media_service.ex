@@ -31,7 +31,10 @@ defmodule MediaServiceElx.MediaService do
   end
 
   defp banned?(hash) do
-    Repo.exists?(ReportedFile, where: hash == hash)
+    case Repo.get_by(ReportedFile, hash: hash) do
+      nil -> false
+      reported_file -> true
+    end
   end
 
   defp find_media_file_by_hash(hash) do
