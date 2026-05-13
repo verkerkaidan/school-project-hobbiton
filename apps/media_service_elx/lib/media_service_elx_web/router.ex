@@ -1,0 +1,45 @@
+defmodule MediaServiceElxWeb.Router do
+  use MediaServiceElxWeb, :router
+
+  pipeline :api do
+    plug :accepts, ["json"]
+  end
+
+  scope "/api/media", MediaServiceElxWeb do
+    pipe_through :api
+
+    post "/:owner_id", MediaController, :upload_media
+    get "/file/:instance_id", MediaController, :retrieve_media
+    get "/owner/:owner_id", MediaController, :retrieve_media_by_owner
+    delete "/file/:instance_id", MediaController, :delete_instance
+    delete "/owner/:owner_id", MediaController, :delete_owner
+    patch "/", MediaController, :update_content_flag
+    get "/", MediaController, :get_unassigned_media_files
+    get "/admin/:instance_id", MediaController, :get_complete_media_file
+    delete "/admin/:file_id", MediaController, :delete_media_file
+  end
+
+  scope "/api/report", MediaServiceElxWeb do
+    pipe_through :api
+
+    post "/:user_id/:instance_id", ReportController, :create_file_report
+    get "/", ReportController, :get_all_reported_files
+  end
+
+  # Enable LiveDashboard and Swoosh mailbox preview in development
+  if Application.compile_env(:media_service_elx, :dev_routes) do
+    # If you want to use the LiveDashboard in production, you should put
+    # it behind authentication and allow only admins to access it.
+    # If your application does not have an admins-only section yet,
+    # you can use Plug.BasicAuth to set up some basic authentication
+    # as long as you are also using SSL (which you should anyway).
+    import Phoenix.LiveDashboard.Router
+
+    scope "/dev" do
+      pipe_through [:fetch_session, :protect_from_forgery]
+
+      live_dashboard "/dashboard", metrics: MediaServiceElxWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+end
