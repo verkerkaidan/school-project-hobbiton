@@ -18,7 +18,6 @@ defmodule MediaServiceElx.MediaFiles.MediaFile do
     field :hash, :binary
     field :original, :binary
     field :thumbnail, :binary
-    has_many :mediaInstances, MediaServiceElx.MediaInstances.MediaInstance
   end
 
   @doc false

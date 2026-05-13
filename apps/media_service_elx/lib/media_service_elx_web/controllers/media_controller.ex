@@ -2,7 +2,7 @@ defmodule MediaServiceElxWeb.MediaController do
   use MediaServiceElxWeb, :controller
 
   alias MediaServiceElx.MediaService
-
+  alias MediaServiceElx.ReportService
 
   def upload_media(conn, %{"owner_id" => owner_id, "file" => upload}) do
     case MediaService.upload_media_file(upload, owner_id) do
@@ -47,7 +47,14 @@ defmodule MediaServiceElxWeb.MediaController do
 
   end
 
-  def delete_media_file(conn, _params) do
-
+  def delete_media_file(conn, %{"file_id" => file_id}) do
+    case ReportService.ban_file(file_id) do
+      {:ok, file_id} ->
+        json(conn, %{id: file_id})
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Invalid id"})
+    end
   end
 end

@@ -10,7 +10,7 @@ defmodule MediaServiceElx.MediaService do
     if banned?(hash) do
       {:error, :banned}
     else
-      case find_media_file_by_hash(hash) do
+      case Repo.get_by(MediaFile, hash: hash) do
         nil ->
           Repo.transaction(fn ->
             {:ok, media_file} = create_media_file(upload, hash)
@@ -24,21 +24,32 @@ defmodule MediaServiceElx.MediaService do
     end
   end
 
+  def delete_file(%MediaFile{} = media_file) do
+    instances_list = Repo.all_by(MediaInstance, file_id: media_file.id)
+    for(%MediaInstance{} = instance <- instances_list,
+      do: delete_single_instance(instance)
+    )
+    case Repo.delete(media_file) do
+      {:ok, _} -> {:ok, media_file.id}
+      {:error, _} = err -> err
+    end
+  end
+
+  def delete_single_instance(%MediaInstance{} = media_instance) do
+    Repo.delete(media_instance)
+  end
+
+  def banned?(hash) do
+    case Repo.get_by(ReportedFile, hash: hash) do
+      nil -> false
+      %ReportedFile{} -> true
+    end
+  end
+
   defp compute_hash(path) do
     File.stream!(path, [], 2048)
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
-  end
-
-  defp banned?(hash) do
-    case Repo.get_by(ReportedFile, hash: hash) do
-      nil -> false
-      reported_file -> true
-    end
-  end
-
-  defp find_media_file_by_hash(hash) do
-    Repo.get_by(MediaFile, hash: hash)
   end
 
   defp create_media_file(upload, hash) do
