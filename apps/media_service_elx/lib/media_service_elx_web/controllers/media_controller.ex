@@ -30,7 +30,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def retrieve_media(conn, _params) do
+  def retrieve_media(_conn, _params) do
 
   end
 
@@ -39,7 +39,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def retrieve_media_by_owner(conn, _params) do
+  def retrieve_media_by_owner(_conn, _params) do
 
   end
 
@@ -65,7 +65,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def delete_owner(conn, _params) do
+  def delete_owner(_conn, _params) do
 
   end
 
@@ -74,7 +74,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def update_content_flag(conn, _params) do
+  def update_content_flag(_conn, _params) do
 
   end
 
@@ -83,7 +83,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def get_unassigned_media_files(conn, _params) do
+  def get_unassigned_media_files(_conn, _params) do
 
   end
 
@@ -92,7 +92,7 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def get_complete_media_file(conn, _params) do
+  def get_complete_media_file(_conn, _params) do
 
   end
 
@@ -105,7 +105,7 @@ Home of the first functions that are called when a request is coming in from api
     case ReportService.ban_file(file_id) do
       {:ok, file_id} ->
         json(conn, %{id: file_id})
-      {:error, reason} ->
+      {:error, _reason} ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: "Invalid id"})

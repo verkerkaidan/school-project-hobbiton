@@ -5,7 +5,6 @@ defmodule MediaServiceElx.ReportService do
 
   alias MediaServiceElx.Repo
   alias MediaServiceElx.FileReports.ReportedFile
-  alias MediaServiceElx.FileReports.FileReport
   alias MediaServiceElx.MediaFiles.MediaFile
   alias MediaServiceElx.MediaService
 
