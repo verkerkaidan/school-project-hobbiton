@@ -21,18 +21,6 @@ defmodule MediaServiceElx.ReportService do
       nil ->
         {:error, :unprocessable_entity}
     end
-
-#    %MediaFile{} = media_file = Repo.get_by(MediaFile, id: file_id)
-#    if MediaService.banned?(media_file.hash) do
-#      {:ok, media_file.id}
-#    else
-#      case create_reported_file(media_file) do
-#        {:error, _reason} ->
-#          {:error, :unprocessable_entity}
-#        {:ok, %ReportedFile{} = _reported_file} ->
-#          MediaService.delete_file(media_file)
-#      end
-#    end
   end
 
   defp create_reported_file(%MediaFile{} = media_file) do

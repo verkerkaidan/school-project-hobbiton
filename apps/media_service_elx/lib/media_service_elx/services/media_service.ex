@@ -27,7 +27,7 @@ defmodule MediaServiceElx.MediaService do
   def delete_file(%MediaFile{} = media_file) do
     instances_list = Repo.all_by(MediaInstance, file_id: media_file.id)
     for(%MediaInstance{} = instance <- instances_list,
-      do: delete_single_instance(instance)
+      do: Repo.delete(instance)
     )
     case Repo.delete(media_file) do
       {:ok, _} -> {:ok, media_file.id}
@@ -35,8 +35,23 @@ defmodule MediaServiceElx.MediaService do
     end
   end
 
-  def delete_single_instance(%MediaInstance{} = media_instance) do
-    Repo.delete(media_instance)
+  def delete_single_instance(instance_id) do
+    case Repo.get_by(MediaInstance, id: instance_id) do
+      %MediaInstance{} = media_instance ->
+        case Repo.delete(media_instance) do
+          {:ok, _} ->
+            if Repo.exists?(MediaInstance, file_id: media_instance.file_id) do
+              {:ok, media_instance.id}
+            else
+              Repo.get_by(MediaFile, id: media_instance.file_id)
+              |> delete_file
+            end
+          {:error, _} = err ->
+            err
+        end
+      nil ->
+        {:error, "MediaInstance not found"}
+    end
   end
 
   def banned?(hash) do

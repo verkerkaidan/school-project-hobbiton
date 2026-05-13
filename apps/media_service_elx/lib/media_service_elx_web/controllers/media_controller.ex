@@ -27,8 +27,15 @@ defmodule MediaServiceElxWeb.MediaController do
 
   end
 
-  def delete_instance(conn, _params) do
-
+  def delete_instance(conn, %{"instance_id" => instance_id}) do
+    case MediaService.delete_single_instance(instance_id) do
+      {:ok, _id} ->
+        json(conn, %{id: instance_id})
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: reason})
+    end
   end
 
   def delete_owner(conn, _params) do
