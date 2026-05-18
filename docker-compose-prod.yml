@@ -179,12 +179,14 @@ services:
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
 
   chat-service:
-    build:
-      context: ./apps/chat-service
-    container_name: chat-service
+    image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always
     ports:
       - "29294:29294"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_CHAT_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_CHAT}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_CHAT}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -219,6 +221,9 @@ services:
       DB_NOTIFICATION_USER: ${DB_NOTIFICATION_USER}
       DB_NOTIFICATION_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
       DB_NOTIFICATION_NAME: ${DB_NOTIFICATION_NAME}
+      SPRING_DATASOURCE_USERNAME_CHAT: ${SPRING_DATASOURCE_USERNAME_CHAT}
+      SPRING_DATASOURCE_PASSWORD_CHAT: ${SPRING_DATASOURCE_PASSWORD_CHAT}
+      SPRING_DATASOURCE_CHAT_DATABASE: ${SPRING_DATASOURCE_CHAT_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
