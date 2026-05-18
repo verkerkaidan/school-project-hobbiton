@@ -12,6 +12,8 @@ services:
       - NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=${NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}
       - NEXT_PUBLIC_MEDIA_URL=${NEXT_PUBLIC_MEDIA_URL}
       - NEXT_PUBLIC_INTERACTION_URL=${NEXT_PUBLIC_INTERACTION_URL}
+      - NEXT_PUBLIC_WS_CHAT_SERVICE_URL= ${NEXT_PUBLIC_WS_CHAT_SERVICE_URL}
+      - NEXT_PUBLIC_CHAT_SERVICE_URL= ${NEXT_PUBLIC_CHAT_SERVICE_URL}
       - NEXT_PUBLIC_NOTIFICATION_URL=${NEXT_PUBLIC_NOTIFICATION_URL}
     cpus: 1
     mem_limit: 1024m
@@ -175,6 +177,18 @@ services:
       PROFILE_SERVICE_URL: ${PROFILE_SERVICE_URL}
       PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+
+  chat-service:
+    build:
+      context: ./apps/chat-service
+    container_name: chat-service
+    restart: always
+    ports:
+      - "29294:29294"
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
 
   database:
     image: postgres:16
