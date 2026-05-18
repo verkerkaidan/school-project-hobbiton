@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.MediaInstances.MediaInstance do
+  @moduledoc """
+Model for an instance referencing a media file
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,9 +11,6 @@ defmodule MediaServiceElx.MediaInstances.MediaInstance do
   schema "media_instances" do
     field :file_id, :binary
     field :owner_id, :binary
-    belongs_to :mediaFile, MediaServiceElx.MediaFiles.MediaFile
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false

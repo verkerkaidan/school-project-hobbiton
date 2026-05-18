@@ -2,10 +2,14 @@ import Config
 
 # Configure your database
 config :media_service_elx, MediaServiceElx.Repo,
-   hostname: "localhost",  # safe to hardcode as a fallback
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+       hostname: System.get_env("DB_HOST") || "localhost",
+       port: System.get_env("DB_PORT") || "5432" |> String.to_integer(),
+       database: System.get_env("DB_NAME") || "media_database",
+       username: System.get_env("DB_USERNAME") || "postgres",
+       password: System.get_env("DB_PASSWORD") || "postgres",
+       stacktrace: true,
+       show_sensitive_data_on_connection_error: true,
+       pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

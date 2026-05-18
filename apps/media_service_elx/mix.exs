@@ -52,7 +52,7 @@ defmodule MediaServiceElx.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:dotenvy, "~> 1.0.0"}
+      {:ex_doc, "~>0.12"}
     ]
   end
 

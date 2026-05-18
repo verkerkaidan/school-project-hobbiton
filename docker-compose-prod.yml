@@ -64,6 +64,23 @@ services:
     networks:
       - hobbithon-network
 
+  media-service-elx:
+    image: ${CI_REGISTRY_IMAGE}/media_service_elx:latest
+    restart: always
+    ports:
+      - "27089:27089"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}
+      DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
+      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      SECRET_KEY_BASE: XZWm7Xx0Qo+2qqha+uhLYQXlqMVNV6vy+6VCsCB4Ot4Ekv9n1/47gipDu08ufQ9Q
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
   recognition-service:
     image: ${CI_REGISTRY_IMAGE}/recognition-service:latest
     restart: always

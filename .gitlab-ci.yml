@@ -72,7 +72,7 @@ test:media-service:
       - apps/media-service/target/site/jacoco/
     expire_in: 30 days
 
-# Test media-service
+# Test interaction-service
 test:interaction-service:
   <<: *maven_test_template
   rules:
