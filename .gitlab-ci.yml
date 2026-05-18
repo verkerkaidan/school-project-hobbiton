@@ -188,6 +188,7 @@ build:
         --build-arg NEXT_PUBLIC_MEDIA_URL="$NEXT_PUBLIC_MEDIA_URL" \
         --build-arg NEXT_PUBLIC_INTERACTION_URL="$NEXT_PUBLIC_INTERACTION_URL" \
         --build-arg NEXT_PUBLIC_LIBRARY_SERVICE_URL="$NEXT_PUBLIC_LIBRARY_SERVICE_URL" \
+        --build-arg NEXT_PUBLIC_NOTIFICATION_URL="$NEXT_PUBLIC_NOTIFICATION_URL" \
         -t "$CI_REGISTRY_IMAGE/hobby-frontend:latest" apps/hobby-frontend
       docker push "$CI_REGISTRY_IMAGE/hobby-frontend:latest"
       docker rmi "$CI_REGISTRY_IMAGE/hobby-frontend:latest"
