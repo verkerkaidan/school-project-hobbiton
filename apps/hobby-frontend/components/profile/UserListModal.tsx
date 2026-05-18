@@ -142,7 +142,7 @@ export const UserListModal = ({
                         className="p-4 flex items-center gap-3 hover:bg-white/5 transition-colors"
                       >
                         <Link
-                          href={`/profile/${user.id}`}
+                          href={`/profile/${user.username}`}
                           onClick={onClose}
                           className="relative w-10 h-10 rounded-full overflow-hidden border border-brand/20 shrink-0 hover:border-brand/60 transition-colors"
                         >
@@ -154,7 +154,7 @@ export const UserListModal = ({
                           />
                         </Link>
                         <Link
-                          href={`/profile/${user.id}`}
+                          href={`/profile/${user.username}`}
                           onClick={onClose}
                           className="text-sm font-medium text-white flex-1 hover:text-brand transition-colors"
                         >

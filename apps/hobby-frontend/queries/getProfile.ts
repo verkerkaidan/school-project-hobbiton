@@ -50,6 +50,19 @@ const GET_PROFILE_QUERY = `
   }
 `;
 
+const GET_PROFILE_BY_USERNAME_QUERY = `
+  query GetProfileByUsername($username: String!) {
+    getProfileByUsername(username: $username) {
+      id
+      username
+      bio
+      profilePictureUrl
+      followerCount
+      followingCount
+    }
+  }
+`;
+
 const GET_USER_POSTS_QUERY = `
   query GetUserPosts($userId: ID!) {
     getUserPosts(userId: $userId) {
@@ -112,6 +125,14 @@ export async function getProfile(userId: string): Promise<UserProfile> {
     { userId },
   );
   return data.getProfile;
+}
+
+export async function getProfileByUsername(username: string): Promise<UserProfile> {
+  const data = await gqlRequest<{ getProfileByUsername: UserProfile }>(
+    GET_PROFILE_BY_USERNAME_QUERY,
+    { username },
+  );
+  return data.getProfileByUsername;
 }
 
 export async function getUserPosts(userId: string): Promise<Post[]> {

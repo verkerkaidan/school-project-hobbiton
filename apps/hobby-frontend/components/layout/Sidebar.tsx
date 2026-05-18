@@ -7,10 +7,12 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useNavigation } from "../navigation/useNavigation";
 import { motion } from "framer-motion";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useNotifications } from "@/components/notifications/NotificationProvider";
 
 export const Sidebar = () => {
   const { isActive, navigate } = useNavigation();
   const currentUser = useCurrentUser();
+  const { unreadCount } = useNotifications();
   const [, setHasAnimated] = useState(false);
   const firstRender = useRef(true);
 
@@ -73,6 +75,12 @@ export const Sidebar = () => {
                 {item.badge && (
                   <span className="absolute top-2 right-2 md:static md:top-auto md:right-auto ml-auto bg-rose-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
                     {item.badge}
+                  </span>
+                )}
+
+                {item.href === "/notifications" && unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 md:static md:top-auto md:right-auto ml-auto bg-rose-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
 
