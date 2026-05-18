@@ -3,14 +3,14 @@ package config
 import "os"
 
 type Config struct {
-	Port      string
-	DBHost    string
-	DBPort    string
-	DBUser    string
-	DBPassword string
-	DBName    string
-	JWTSecret string
-	JWTIssuer string
+	Port           string
+	DBHost         string
+	DBPort         string
+	DBUser         string
+	DBPassword     string
+	DBName         string
+	JWTSecret      string
+	JWTIssuer      string
 	AllowedOrigins string
 }
 
@@ -24,7 +24,7 @@ func Load() *Config {
 		DBName:         getEnv("DB_NAME", "notifications"),
 		JWTSecret:      getEnv("JWT_SECRET", ""),
 		JWTIssuer:      getEnv("JWT_ISSUER", ""),
-		AllowedOrigins: getEnv("ALLOWED_ORIGINS", "*"),
+		AllowedOrigins: getEnv("NOTIFICATION_ALLOWED_ORIGINS", "*"),
 	}
 }
 
