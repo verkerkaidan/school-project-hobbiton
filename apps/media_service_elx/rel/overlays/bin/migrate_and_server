@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+echo "Running migrations"
+./bin/media_service_elx eval "MediaServiceElx.Release.migrate()"
+
+echo "Starting server"
+exec ./bin/media_service_elx start

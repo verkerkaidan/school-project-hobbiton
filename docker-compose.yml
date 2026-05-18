@@ -118,6 +118,28 @@ services:
       database:
         condition: service_healthy
 
+  media-service-elx:
+    build:
+      context: ./apps/media_service_elx
+    container_name: media-service-elx
+    restart: always
+    ports:
+      - "27089:27089"
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}
+      DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
+      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    cpus: 2
+    mem_limit: 2048m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
   recognition-service:
     build:
       context: ./apps/recognition-service

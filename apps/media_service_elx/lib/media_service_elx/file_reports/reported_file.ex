@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.FileReports.ReportedFile do
+  @moduledoc """
+Model for when a file was banned
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -6,8 +10,6 @@ defmodule MediaServiceElx.FileReports.ReportedFile do
   @foreign_key_type :binary_id
   schema "reported_file" do
     field :hash, :binary
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false

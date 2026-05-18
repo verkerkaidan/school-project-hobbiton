@@ -1,4 +1,8 @@
 defmodule MediaServiceElx.FileReports.FileReport do
+  @moduledoc """
+Model for when a user has reported a file
+"""
+
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,8 +11,6 @@ defmodule MediaServiceElx.FileReports.FileReport do
   schema "file_report" do
     field :file_id, :binary
     field :user_id, :binary
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false
