@@ -97,7 +97,7 @@ export function BlockedUsersSection() {
                   className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/3 transition-colors"
                 >
                   <Link
-                    href={`/profile/${user.id}`}
+                    href={`/profile/${user.username}`}
                     className="flex items-center gap-3 flex-1 min-w-0"
                   >
                     <Image

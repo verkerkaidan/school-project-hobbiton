@@ -1,8 +1,9 @@
 "use client";
 
-import { User, Bell, Lock, Shield } from "lucide-react";
+import { User, Lock, Shield } from "lucide-react";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { BlockedUsersSection } from "@/components/settings/BlockedUsersSection";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
 
 export default function SettingsPage() {
   return (
@@ -22,11 +23,7 @@ export default function SettingsPage() {
           description="Control who can see your posts and profile"
         />
 
-        <SettingsSection
-          icon={<Bell size={20} />}
-          title="[Placeholder] Notifications"
-          description="Choose what you get notified about"
-        />
+        <NotificationSettings />
 
         <BlockedUsersSection />
 

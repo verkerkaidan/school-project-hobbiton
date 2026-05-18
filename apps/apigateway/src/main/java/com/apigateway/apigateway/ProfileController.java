@@ -24,6 +24,12 @@ public class ProfileController {
         this.profileAggregationService = profileAggregationService;
     }
 
+    // GraphQL query: resolves a profile by username
+    @QueryMapping
+    public UserProfile getProfileByUsername(@Argument String username) {
+        return profileAggregationService.getProfileByUsername(username);
+    }
+
     // GraphQL query: resolves a single user's aggregated profile (bio, picture,
     // counts, etc.)
     @QueryMapping
