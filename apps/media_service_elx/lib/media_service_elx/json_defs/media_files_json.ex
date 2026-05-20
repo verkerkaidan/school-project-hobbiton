@@ -25,12 +25,29 @@ defmodule MediaServiceElxWeb.MediaFilesJSON do
     %{data: for(file <- files, do: partial_file_data(file))}
   end
 
+  def full_file_index(%{files: files}) do
+    %{data: for(file <- files, do: full_file_data(file))}
+  end
+
   def partial_file_show(%{file: file}) do
     %{data: partial_file_data(file)}
   end
 
+  def full_file_show(%{file: file}) do
+    %{data: full_file_data(file)}
+  end
+
   defp partial_file_data(%MediaFile{} = file) do
     %{
+      content_flag: file.content_flag,
+      file: Base.encode64(file.original),
+      content_type: file.content_type
+    }
+  end
+
+  defp full_file_data(%MediaFile{} = file) do
+    %{
+      id: file.id,
       content_flag: file.content_flag,
       file: Base.encode64(file.original),
       content_type: file.content_type

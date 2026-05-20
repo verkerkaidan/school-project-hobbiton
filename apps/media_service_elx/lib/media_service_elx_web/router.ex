@@ -10,9 +10,7 @@ defmodule MediaServiceElxWeb.Router do
 
     post "/", MediaController, :upload_media
     get "/file", MediaController, :retrieve_media
-    get "/owner/:owner_id", MediaController, :retrieve_media_by_owner
     delete "/file/:instance_id", MediaController, :delete_instance
-    delete "/owner/:owner_id", MediaController, :delete_owner
     patch "/", MediaController, :update_content_flag
     get "/", MediaController, :get_unassigned_media_files
     get "/admin/:instance_id", MediaController, :get_complete_media_file
@@ -23,7 +21,16 @@ defmodule MediaServiceElxWeb.Router do
     pipe_through :api
 
     post "/:user_id/:instance_id", ReportController, :create_file_report
+    delete "/:report_id", ReportController, :delete_single_report
     get "/", ReportController, :get_all_reported_files
+  end
+
+  scope "/api/user", MediaServiceElxWeb do
+    pipe_through :api
+
+    delete "/:owner_id", UserController, :delete_owner
+    get "/:owner_id", UserController, :retrieve_media_by_owner
+    get "/reports/:owner_id", UserController, :retrieve_reports_by_owner
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

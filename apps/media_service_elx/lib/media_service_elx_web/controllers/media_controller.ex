@@ -7,9 +7,8 @@ Home of the first functions that are called when a request is coming in from api
 
   alias MediaServiceElx.MediaService
   alias MediaServiceElx.ReportService
-  alias MediaServiceElxWeb.MediaFilesJSON
   alias MediaServiceElx.MediaFiles.MediaFile
-  alias MediaServiceElx.MediaInstances.MediaInstance
+  alias MediaServiceElxWeb.MediaFilesJSON
 
   @doc """
   Handles the uploading of one or multiple media files by the same owner
@@ -47,26 +46,6 @@ Home of the first functions that are called when a request is coming in from api
   end
 
   @doc """
-  Retrieves all media files from an owner_id
-  @params:
-  @returns:
-  """
-  def retrieve_media_by_owner(conn, %{"owner_id" => owner_id}) do
-    instance_ids = MediaService.retrieve_instances_by_owner(owner_id)
-
-    results = Enum.map(instance_ids, fn %MediaInstance{} = instance ->
-      case MediaService.retrieve_media_file(instance.id) do
-        {:ok, %MediaFile{} = media_file} ->
-          %{instance_id: instance.id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
-        {:error, reason} ->
-          %{status: "error", reason: reason}
-      end
-    end)
-
-    json(conn, %{results: results})
-  end
-
-  @doc """
   Deletes a single instance from an instance_id
   @params: connection, uuid
   @returns: {id: uuid} or {error: :error}
@@ -83,18 +62,9 @@ Home of the first functions that are called when a request is coming in from api
   end
 
   @doc """
-  Deletes all MediaInstance from the same owner
-  @params:
-  @returns:
-  """
-  def delete_owner(_conn, _params) do
-
-  end
-
-  @doc """
   Updates the content_flag of MediaFile for each of the ids
-  @params:
-  @returns:
+  @params: [{fileId: uuid, contentFlag: @contentFlag}]
+  @returns: {results: {:ok, uuid}}
   """
   def update_content_flag(conn, %{"_json" => updates}) when is_list(updates) do
     results = Enum.map(updates, fn %{"contentFlag" => content_flag, "fileId" => file_id} ->
@@ -110,8 +80,8 @@ Home of the first functions that are called when a request is coming in from api
 
   @doc """
   Retrieves all MediaFile where content_flag == unassigned
-  @params:
-  @returns:
+  @params: --
+  @returns: [{id: uuid, file: base64}]
   """
   def get_unassigned_media_files(conn, _params) do
     result = MediaService.retrieve_unassigned()
