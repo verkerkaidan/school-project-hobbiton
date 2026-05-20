@@ -170,7 +170,7 @@ build:
   script:
     - |
       set -e
-      for SERVICE_NAME in apigateway authentication-service chat-service interaction-service library-service media-service notification-service post-service profile-connection-service profile-service recognition-service; do
+      for SERVICE_NAME in apigateway authentication-service chat-service interaction-service library-service media-service media-service-elx notification-service post-service profile-connection-service profile-service recognition-service; do
         echo "Building $SERVICE_NAME..."
         docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
         echo "Pushing $SERVICE_NAME..."
@@ -279,7 +279,5 @@ deploy:
       export NEXT_PUBLIC_CHAT_SERVICE_URL='$NEXT_PUBLIC_CHAT_SERVICE_URL'
       export NEXT_PUBLIC_WS_CHAT_SERVICE_URL='$NEXT_PUBLIC_WS_CHAT_SERVICE_URL'
       docker compose -f docker-compose-prod.yml pull
-      docker compose -f docker-compose-prod.yml stop frontend
-      docker compose -f docker-compose-prod.yml rm -f frontend
       docker compose -f docker-compose-prod.yml up -d --remove-orphans
       EOF
