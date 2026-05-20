@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Bell, BellOff } from "lucide-react";
 import Image from "next/image";
 
 interface ProfileHeaderProps {
@@ -16,8 +17,11 @@ interface ProfileHeaderProps {
   isOwnProfile?: boolean;
   isFollowing?: boolean;
   isBlocked?: boolean;
+  isSubscribed?: boolean;
+  showPreferenceWarning?: boolean;
   onFollow?: () => Promise<void>;
   onBlock?: () => Promise<void>;
+  onSubscriptionToggle?: () => Promise<void>;
   onReport?: () => void;
 }
 
@@ -32,12 +36,16 @@ export const ProfileHeader = ({
   isOwnProfile = true,
   isFollowing = false,
   isBlocked = false,
+  isSubscribed = false,
+  showPreferenceWarning = false,
   onFollow,
   onBlock,
+  onSubscriptionToggle,
   onReport,
 }: ProfileHeaderProps) => {
   const [followPending, setFollowPending] = useState(false);
   const [blockPending, setBlockPending] = useState(false);
+  const [subscriptionPending, setSubscriptionPending] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +81,16 @@ export const ProfileHeader = ({
       await onBlock();
     } finally {
       setBlockPending(false);
+    }
+  };
+
+  const handleSubscriptionToggle = async () => {
+    if (!onSubscriptionToggle || subscriptionPending) return;
+    setSubscriptionPending(true);
+    try {
+      await onSubscriptionToggle();
+    } finally {
+      setSubscriptionPending(false);
     }
   };
 
@@ -121,109 +139,157 @@ export const ProfileHeader = ({
 
               {/* Follow / Settings buttons for other-user profile */}
               {!isOwnProfile && (
-                <div className="flex items-center gap-2 mt-2">
-                  <motion.button
-                    whileHover={!isBlocked ? { scale: 1.03 } : {}}
-                    whileTap={!isBlocked ? { scale: 0.97 } : {}}
-                    onClick={isBlocked ? undefined : handleFollow}
-                    disabled={followPending || isBlocked}
-                    className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                      isBlocked
-                        ? "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed"
-                        : isFollowing
-                          ? "bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400"
-                          : "bg-brand/20 border border-brand/30 text-brand hover:bg-brand/30"
-                    }`}
-                  >
-                    {isBlocked
-                      ? "User blocked"
-                      : followPending
-                        ? "..."
-                        : isFollowing
-                          ? "Unfollow"
-                          : "Follow"}
-                  </motion.button>
-
-                  {/* Settings dropdown */}
-                  <div className="relative" ref={settingsRef}>
+                <div className="flex flex-col gap-1 mt-2">
+                  <div className="flex items-center gap-2">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSettingsOpen((v) => !v)}
-                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-accent hover:text-white hover:border-white/20 transition-colors"
+                      whileHover={!isBlocked ? { scale: 1.03 } : {}}
+                      whileTap={!isBlocked ? { scale: 0.97 } : {}}
+                      onClick={isBlocked ? undefined : handleFollow}
+                      disabled={followPending || isBlocked}
+                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                        isBlocked
+                          ? "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed"
+                          : isFollowing
+                            ? "bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400"
+                            : "bg-brand/20 border border-brand/30 text-brand hover:bg-brand/30"
+                      }`}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <circle cx="5" cy="12" r="2" />
-                        <circle cx="12" cy="12" r="2" />
-                        <circle cx="19" cy="12" r="2" />
-                      </svg>
+                      {isBlocked
+                        ? "User blocked"
+                        : followPending
+                          ? "..."
+                          : isFollowing
+                            ? "Unfollow"
+                            : "Follow"}
                     </motion.button>
 
-                    <AnimatePresence>
-                      {settingsOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                          transition={{ duration: 0.12 }}
-                          className="absolute right-0 mt-2 w-44 rounded-2xl overflow-hidden z-20 border border-white/20 bg-[#1a1a2e] shadow-xl shadow-black/60"
+                    {/* Post notification bell — shown only while following */}
+                    {isFollowing && !isBlocked && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleSubscriptionToggle}
+                        disabled={subscriptionPending}
+                        title={
+                          isSubscribed
+                            ? "Turn off post notifications"
+                            : "Turn on post notifications"
+                        }
+                        className={`p-2 rounded-xl border transition-colors ${
+                          isSubscribed
+                            ? "bg-brand/20 border-brand/30 text-brand hover:bg-brand/10"
+                            : "bg-white/5 border-white/10 text-accent hover:text-white hover:border-white/20"
+                        } disabled:opacity-50`}
+                      >
+                        {isSubscribed ? (
+                          <Bell size={16} />
+                        ) : (
+                          <BellOff size={16} />
+                        )}
+                      </motion.button>
+                    )}
+
+                    {/* Settings dropdown */}
+                    <div className="relative" ref={settingsRef}>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSettingsOpen((v) => !v)}
+                        className="p-2 rounded-xl bg-white/5 border border-white/10 text-accent hover:text-white hover:border-white/20 transition-colors"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
                         >
-                          <button
-                            onClick={handleBlock}
-                            disabled={blockPending}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                          <circle cx="5" cy="12" r="2" />
+                          <circle cx="12" cy="12" r="2" />
+                          <circle cx="19" cy="12" r="2" />
+                        </svg>
+                      </motion.button>
+
+                      <AnimatePresence>
+                        {settingsOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                            transition={{ duration: 0.12 }}
+                            className="absolute right-0 mt-2 w-44 rounded-2xl overflow-hidden z-20 border border-white/20 bg-[#1a1a2e] shadow-xl shadow-black/60"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                            <button
+                              onClick={handleBlock}
+                              disabled={blockPending}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
                             >
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                            </svg>
-                            {blockPending
-                              ? "..."
-                              : isBlocked
-                                ? "Unblock"
-                                : "Block"}
-                          </button>
-                          <div className="border-t border-white/10" />
-                          <button
-                            onClick={handleReport}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <line
+                                  x1="4.93"
+                                  y1="4.93"
+                                  x2="19.07"
+                                  y2="19.07"
+                                />
+                              </svg>
+                              {blockPending
+                                ? "..."
+                                : isBlocked
+                                  ? "Unblock"
+                                  : "Block"}
+                            </button>
+                            <div className="border-t border-white/10" />
+                            <button
+                              onClick={handleReport}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
                             >
-                              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                              <line x1="4" y1="22" x2="4" y2="15" />
-                            </svg>
-                            Report
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                                <line x1="4" y1="22" x2="4" y2="15" />
+                              </svg>
+                              Report
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
+
+                  {/* Global preference warning */}
+                  {showPreferenceWarning && isSubscribed && isFollowing && (
+                    <p className="text-xs text-amber-400">
+                      Also enable{" "}
+                      <a
+                        href="/settings"
+                        className="underline hover:text-amber-300"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        &ldquo;Posts from followed users&rdquo; in Settings
+                      </a>{" "}
+                      to receive these notifications.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

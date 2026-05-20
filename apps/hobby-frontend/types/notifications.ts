@@ -6,6 +6,7 @@ export interface Notification {
   actorId: string | null;
   type: NotificationType;
   message: string;
+  referenceId: string | null; // e.g. post UUID for USER_POST notifications
   readAt: string | null;
   createdAt: string;
 }

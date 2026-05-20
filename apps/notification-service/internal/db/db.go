@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/lib/pq"
 	"notification-service/internal/config"
+
+	_ "github.com/lib/pq"
 )
 
 // Connect opens a PostgreSQL connection and verifies connectivity.
@@ -65,6 +66,23 @@ func RunMigrations(database *sql.DB) {
 			enabled           BOOLEAN     NOT NULL DEFAULT TRUE,
 			PRIMARY KEY (user_id, notification_type)
 		)`,
+
+		// Per-user opt-in subscriptions for new-post notifications from a specific author.
+		// A row here means the subscriber wants notifications when the author posts.
+		// Absence means no notification (opt-in, off by default).
+		`CREATE TABLE IF NOT EXISTS user_post_subscriptions (
+			subscriber_id UUID NOT NULL,
+			author_id     UUID NOT NULL,
+			PRIMARY KEY (subscriber_id, author_id)
+		)`,
+
+		`CREATE INDEX IF NOT EXISTS idx_user_post_subscriptions_author
+		 ON user_post_subscriptions (author_id)`,
+
+		// Add reference_id to support linking a notification back to a specific
+		// resource (e.g. a post UUID for USER_POST notifications).
+		// Uses ADD COLUMN IF NOT EXISTS so it is safe to re-run on an existing DB.
+		`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS reference_id UUID`,
 	}
 
 	for _, q := range migrations {

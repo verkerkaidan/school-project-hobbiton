@@ -8,6 +8,8 @@ export interface UseNotificationSocketOptions {
   onNotification?: (notification: Notification) => void;
   /** Called whenever a new notification arrives so the consumer can increment its count. */
   onUnreadCountChange?: () => void;
+  /** Called when the WebSocket connection is (re-)established. Use to re-sync state. */
+  onOpen?: () => void;
   enabled?: boolean;
 }
 
@@ -18,6 +20,7 @@ export interface UseNotificationSocketOptions {
 export function useNotificationSocket({
   onNotification,
   onUnreadCountChange,
+  onOpen,
   enabled = true,
 }: UseNotificationSocketOptions = {}) {
   const wsRef = useRef<WebSocket | null>(null);
@@ -27,12 +30,16 @@ export function useNotificationSocket({
   // Keep callback refs up-to-date without destabilising the socket connection
   const onNotificationRef = useRef(onNotification);
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
+  const onOpenRef = useRef(onOpen);
   useEffect(() => {
     onNotificationRef.current = onNotification;
   }, [onNotification]);
   useEffect(() => {
     onUnreadCountChangeRef.current = onUnreadCountChange;
   }, [onUnreadCountChange]);
+  useEffect(() => {
+    onOpenRef.current = onOpen;
+  }, [onOpen]);
 
   const connect = useCallback(() => {
     if (!isMounted.current || !enabled) return;
@@ -46,6 +53,9 @@ export function useNotificationSocket({
 
       ws.onopen = () => {
         reconnectDelay.current = 1000; // reset backoff on successful connect
+        // Re-sync unread count: catch any notifications that arrived during the
+        // connection handshake window (typically 100-500 ms on first load).
+        onOpenRef.current?.();
       };
 
       ws.onmessage = (event) => {
