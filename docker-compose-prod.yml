@@ -139,6 +139,8 @@ services:
     environment:
       OMDB_API_KEY: ${OMDB_API_KEY}
       OMDB_API_URL: ${OMDB_API_URL}
+      # explicit internal Redis URL for containers
+      REDIS_URL: "redis://redis:6379"
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -249,8 +251,25 @@ services:
     networks:
       - hobbithon-network
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    # Redis is only accessible internally within the Docker network
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    networks:
+      - hobbithon-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   hobbithon-network:

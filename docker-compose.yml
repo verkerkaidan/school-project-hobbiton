@@ -202,7 +202,7 @@ services:
 
   library-service:
     build:
-      context: ./apps/library-service
+      context: ./apps/library-service-rust
     container_name: library-service
     restart: no
     ports:
@@ -210,12 +210,16 @@ services:
     environment:
       OMDB_API_KEY: ${OMDB_API_KEY}
       OMDB_API_URL: ${OMDB_API_URL}
+      # Ensure containers use the internal redis service when running via docker-compose
+      REDIS_URL: "redis://redis:6379"
     cpus: 2
     mem_limit: 2048m
     networks:
       - microservices-network
     depends_on:
       database:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   interaction-service:
@@ -294,6 +298,27 @@ services:
     depends_on:
       database:
         condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: library_redis
+    restart: unless-stopped
+    # Expose port on host for local development. In production you can remove the ports mapping
+    # if you don't want Redis reachable from the host.
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    networks:
+      - microservices-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 networks:
   microservices-network:
     name: hobbithon-network
@@ -301,3 +326,4 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:
