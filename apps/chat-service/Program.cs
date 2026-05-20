@@ -8,7 +8,18 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:19293", "http://localhost:3000")
+        policy.SetIsOriginAllowed(origin =>
+        {
+            var uri = new Uri(origin);
+
+            // localhost (any port)
+            if (uri.Host == "localhost")
+                return true;
+
+            // allow all student subdomains
+            return uri.Host == "student.inf.st.hsleiden.nl" ||
+                   uri.Host.EndsWith(".student.inf.st.hsleiden.nl");
+        })
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
