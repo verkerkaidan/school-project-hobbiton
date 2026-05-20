@@ -33,6 +33,38 @@ Handles most logic regarding actions with media files and media instances
     end
   end
 
+  def retrieve_unassigned() do
+    Repo.all_by(MediaFile, content_flag: 2)
+  end
+
+  @doc """
+    Retrieves all mediaInstances connected to the owner_id
+    @params: owner_id uuid
+    @returns: list of MediaInstances
+  """
+  def retrieve_instances_by_owner(owner_id) do
+    Repo.all_by(MediaInstance, owner_id: owner_id)
+  end
+
+  @doc """
+    Retrieves a mediaFile from a mediaInstance
+    @params: media_instance uuid
+    @returns: {:ok, %MediaFile{}}
+  """
+  def retrieve_media_file(instance_id) do
+    case Repo.get_by(MediaInstance, id: instance_id) do
+      %MediaInstance{} = media_instance ->
+        case Repo.get_by(MediaFile, id: media_instance.file_id) do
+          %MediaFile{} = media_file ->
+            {:ok, media_file}
+          nil ->
+            {:error, "MediaFile not found"}
+        end
+      nil ->
+        {:error, "MediaInstance not found"}
+    end
+  end
+
   @doc """
     Handles the deletion of media files after a ban
     @params: media_file object
@@ -85,6 +117,21 @@ Handles most logic regarding actions with media files and media instances
     end
   end
 
+  @doc """
+    Patches all MediaFiles from given id's with the according content_flag
+    @params:
+    @returns
+  """
+  def update_content_flag(content_flag, file_id) do
+    file = Repo.get_by(MediaFile, id: file_id)
+    |> Ecto.Changeset.change(content_flag: content_flag)
+
+    case Repo.update(file) do
+         {:ok, _} -> {:ok, file_id}
+         {:error, reason} -> {:error, reason}
+    end
+  end
+
 #  @doc """
 #    Generates a hash from a given file
 #    @params: tempPath from %Plug.Upload{}
@@ -109,7 +156,7 @@ Handles most logic regarding actions with media files and media instances
       content_type: upload.content_type,
       hash: hash,
       original: binary,
-      content_flag: MediaFile.content_flag(:unassigned)
+      content_flag: MediaFile.content_flag("UNASSIGNED")
     })
     |> Repo.insert()
   end

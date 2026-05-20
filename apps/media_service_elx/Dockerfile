@@ -32,10 +32,11 @@ WORKDIR /app
 RUN apk add --no-cache libstdc++ openssl ncurses-libs
 
 COPY --from=build --chown=nobody:root /app/_build/prod/rel/media_service_elx ./
-COPY ./rel/overlays/bin/migrate_and_server ./bin/
+COPY --chown=nobody:root ./rel/overlays/bin/migrate_and_server ./bin/
+RUN sed -i 's/\r//' ./bin/migrate_and_server && chmod +x ./bin/migrate_and_server
 
 USER nobody
 
 ENV PHX_SERVER=true
 
-ENTRYPOINT ["bin/migrate_and_server"]
+ENTRYPOINT ["./bin/migrate_and_server"]
