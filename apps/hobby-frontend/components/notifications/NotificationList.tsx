@@ -33,12 +33,49 @@ function NotificationIcon({ type }: { type: Notification["type"] }) {
   }
 }
 
-/** Renders a notification message, turning a leading "@username" into a profile link. */
-function NotificationMessage({ message }: { message: string }) {
-  const match = message.match(/^(@\S+)(.*)/);
-  if (!match) return <>{message}</>;
-  const [, handle, rest] = match;
+/** Renders a notification message with smart linking.
+ *  - A leading @username is always linked to the author's profile.
+ *  - For USER_POST notifications the quoted post title (e.g. "My Title") is
+ *    also linked to the author's profile until a dedicated post page exists.
+ */
+function NotificationMessage({ notification }: { notification: Notification }) {
+  const { message, type, referenceId } = notification;
+  const atMatch = message.match(/^(@\S+)(.*)/);
+  if (!atMatch) return <>{message}</>;
+
+  const [, handle, rest] = atMatch;
   const username = handle.slice(1); // strip the @
+
+  // For USER_POST with a referenceId, make the quoted title a second link
+  if (type === "USER_POST" && referenceId) {
+    const titleMatch = rest.match(/^( published ")(.*?)(")/);
+    if (titleMatch) {
+      const [, prefix, title, suffix] = titleMatch;
+      const trailing = rest.slice(prefix.length + title.length + suffix.length);
+      return (
+        <>
+          <Link
+            href={`/profile/${username}`}
+            className="text-brand hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {handle}
+          </Link>
+          {prefix}
+          <Link
+            href={`/posts/${referenceId}`}
+            className="text-brand/80 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {title}
+          </Link>
+          {suffix}
+          {trailing}
+        </>
+      );
+    }
+  }
+
   return (
     <>
       <Link
@@ -89,7 +126,7 @@ export function NotificationItem({
         <p
           className={`text-sm ${isUnread ? "text-white font-medium" : "text-accent"}`}
         >
-          <NotificationMessage message={notification.message} />
+          <NotificationMessage notification={notification} />
         </p>
         <p className="text-xs text-accent/60 mt-1">
           {timeAgo(notification.createdAt)}

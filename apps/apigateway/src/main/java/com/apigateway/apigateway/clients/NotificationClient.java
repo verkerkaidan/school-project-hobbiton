@@ -11,4 +11,7 @@ public interface NotificationClient {
 
     @PostMapping("/notifications")
     void createNotification(@RequestBody Map<String, Object> payload);
+
+    @PostMapping("/notifications/batch")
+    void batchCreateNotifications(@RequestBody Map<String, Object> payload);
 }
