@@ -7,6 +7,9 @@ Home of the first functions that are called when a request is coming in from api
 
   alias MediaServiceElx.MediaService
   alias MediaServiceElx.ReportService
+  alias MediaServiceElxWeb.MediaFilesJSON
+  alias MediaServiceElx.MediaFiles.MediaFile
+  alias MediaServiceElx.MediaInstances.MediaInstance
 
   @doc """
   Handles the uploading of one or multiple media files by the same owner
@@ -27,11 +30,20 @@ Home of the first functions that are called when a request is coming in from api
 
   @doc """
   Retrieves media files from an instance_id
-  @params:
-  @returns:
+  @params: List of instance_id's
+  @returns: List of partial MediaFile's
   """
-  def retrieve_media(_conn, _params) do
+  def retrieve_media(conn, %{"instances" => instance_ids}) when is_list(instance_ids) do
+    results = Enum.map(instance_ids, fn instance_id ->
+      case MediaService.retrieve_media_file(instance_id) do
+        {:ok, %MediaFile{} = media_file} ->
+          %{instance_id: instance_id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
+        {:error, reason} ->
+          %{status: "error", reason: reason}
+      end
+    end)
 
+    json(conn, %{results: results})
   end
 
   @doc """
@@ -39,10 +51,20 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def retrieve_media_by_owner(_conn, _params) do
+  def retrieve_media_by_owner(conn, %{"owner_id" => owner_id}) do
+    instance_ids = MediaService.retrieve_instances_by_owner(owner_id)
 
+    results = Enum.map(instance_ids, fn %MediaInstance{} = instance ->
+      case MediaService.retrieve_media_file(instance.id) do
+        {:ok, %MediaFile{} = media_file} ->
+          %{instance_id: instance.id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
+        {:error, reason} ->
+          %{status: "error", reason: reason}
+      end
+    end)
+
+    json(conn, %{results: results})
   end
-
 
   @doc """
   Deletes a single instance from an instance_id
@@ -74,8 +96,16 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def update_content_flag(_conn, _params) do
+  def update_content_flag(conn, %{"_json" => updates}) when is_list(updates) do
+    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "fileId" => file_id} ->
+      flag = MediaFile.content_flag(content_flag)
+      case MediaService.update_content_flag(flag, file_id) do
+        {:ok, id} -> %{file_id: id, status: "ok"}
+        {:error, reason} -> %{status: "error", reason: reason}
+      end
+    end)
 
+    json(conn, %{results: results})
   end
 
   @doc """
@@ -83,12 +113,17 @@ Home of the first functions that are called when a request is coming in from api
   @params:
   @returns:
   """
-  def get_unassigned_media_files(_conn, _params) do
+  def get_unassigned_media_files(conn, _params) do
+    result = MediaService.retrieve_unassigned()
+    |> Enum.map(fn %MediaFile{} = media_file ->
+      %{file: Base.encode64(media_file.original), id: media_file.id}
+    end)
 
+    json(conn, result)
   end
 
   @doc """
-  Retrieves complete MediaFile from an instance_id
+  Retrieves complete MediaFile from an instance_id for admin inspection
   @params:
   @returns:
   """

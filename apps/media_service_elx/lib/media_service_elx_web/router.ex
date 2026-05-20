@@ -9,7 +9,7 @@ defmodule MediaServiceElxWeb.Router do
     pipe_through :api
 
     post "/", MediaController, :upload_media
-    get "/file/:instance_id", MediaController, :retrieve_media
+    get "/file", MediaController, :retrieve_media
     get "/owner/:owner_id", MediaController, :retrieve_media_by_owner
     delete "/file/:instance_id", MediaController, :delete_instance
     delete "/owner/:owner_id", MediaController, :delete_owner

@@ -9,9 +9,9 @@ Model for an uploaded media file
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   @content_flags %{
-    safe: 0,
-    risk: 1,
-    unassigned: 2
+    "SAFE" => 0,
+    "RISK" => 1,
+    "UNASSIGNED" => 2
   }
 
   def content_flag(key), do: @content_flags[key]
