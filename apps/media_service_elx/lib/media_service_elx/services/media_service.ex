@@ -7,6 +7,7 @@ Handles most logic regarding actions with media files and media instances
   alias MediaServiceElx.MediaFiles.MediaFile
   alias MediaServiceElx.MediaInstances.MediaInstance
   alias MediaServiceElx.FileReports.ReportedFile
+  alias MediaServiceElx.ReportService
 
   @doc """
   Handles the upload of media files and thus the creation of MediaInstance and MediaFile when necessary
@@ -106,6 +107,22 @@ Handles most logic regarding actions with media files and media instances
   end
 
   @doc """
+    Maps the deletion of all given instances
+    @params: [%MediaInstance{}]
+    @returns: [{status: "ok", instance_id} || {status: "error", reason: reason}]
+  """
+  def delete_all_instances(instances) do
+    Enum.map(instances, fn %MediaInstance{} = instance ->
+      case delete_single_instance(instance.id) do
+        {:ok, instance_id} ->
+          %{instance_id: instance_id, status: "ok"}
+        {:error, reason} ->
+          %{status: "error", reason: reason}
+      end
+    end)
+  end
+
+  @doc """
     Checks if a file is banned
     @params: binary hash
     @returns: boolean
@@ -118,16 +135,34 @@ Handles most logic regarding actions with media files and media instances
   end
 
   @doc """
+    Retrieves all mediaFiles from a list of file_id's
+    @params: [file_id uuid]
+    @returns: [%MediaFile{}]
+  """
+  def retrieve_media_files_from_file_id(file_ids) do
+    files = Enum.reduce(file_ids, [], fn id, acc ->
+      case Repo.get_by(MediaFile, id: id) do
+        %MediaFile{} = media_file ->
+          [media_file | acc]
+        nil -> {:error, "MediaFile not found"}
+      end
+    end)
+    %{files: files}
+  end
+
+  @doc """
     Patches all MediaFiles from given id's with the according content_flag
-    @params:
-    @returns
+    @params: content_flag @contentFlag, file_id uuid
+    @returns: {file_id: uuid, status: "ok"} || {status: "error", reason: reason}
   """
   def update_content_flag(content_flag, file_id) do
     file = Repo.get_by(MediaFile, id: file_id)
     |> Ecto.Changeset.change(content_flag: content_flag)
 
     case Repo.update(file) do
-         {:ok, _} -> {:ok, file_id}
+         {:ok, _} ->
+           ReportService.update_reports(file_id)
+           {:ok, file_id}
          {:error, reason} -> {:error, reason}
     end
   end
