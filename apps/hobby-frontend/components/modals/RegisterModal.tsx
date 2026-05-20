@@ -7,6 +7,17 @@ import { useRouter } from "next/navigation";
 import { ModalProps, RegisterForm } from "@/types/interfaces";
 import Cookies from "js-cookie";
 
+type FieldErrors = Partial<Record<keyof RegisterForm, string>>;
+
+const passwordRules = [
+  { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+  {
+    label: "One special character",
+    test: (p: string) => /[^A-Za-z0-9]/.test(p),
+  },
+];
+
 export function RegisterModal({ isOpen, onClose }: ModalProps) {
   const [form, setForm] = useState<RegisterForm>({
     email: "",
@@ -15,41 +26,43 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
     username: "",
     name: "",
   });
-  const [error, setError] = useState<string>("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [showPasswordRules, setShowPasswordRules] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setError("");
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    setSubmitError("");
   };
 
-  /**
-   * Once user pushes register, it first checks if fields are filled, then tries register user, if not possible goes to the catch and finally sets loading back to false so user can try again.
-   * @param e Event that triggers when submitted
-   * @returns
-   */
+  const validate = (): boolean => {
+    const errors: FieldErrors = {};
+    if (!form.username) errors.username = "Username is required.";
+    if (!form.email) errors.email = "Email is required.";
+    if (!form.password) {
+      errors.password = "Password is required.";
+    } else {
+      const failedRules = passwordRules.filter((r) => !r.test(form.password));
+      if (failedRules.length > 0) {
+        errors.password = `Password must have: ${failedRules.map((r) => r.label.toLowerCase()).join(", ")}.`;
+      }
+    }
+    if (!form.confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+    } else if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (
-      !form.email ||
-      !form.password ||
-      !form.confirmPassword ||
-      !form.username
-    ) {
-      setError("All fields are required.");
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
+    if (!validate()) return;
     try {
       setLoading(true);
       await register(form.email, form.password);
@@ -59,7 +72,11 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
       router.refresh();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed.");
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -69,53 +86,138 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-xl font-bold mb-4">Register</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          name="username"
-          type="text"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        />
-        <input
-          name="name"
-          type="text"
-          placeholder="Display name (optional)"
-          value={form.name}
-          onChange={handleChange}
-          className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        />
-        <input
-          name="confirmPassword"
-          type="password"
-          placeholder="Confirm Password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-        />
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="register-username"
+            className="text-sm font-medium text-white"
+          >
+            Username
+          </label>
+          <input
+            id="register-username"
+            name="username"
+            type="text"
+            placeholder="e.g. johndoe"
+            value={form.username}
+            onChange={handleChange}
+            className={`border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand ${fieldErrors.username ? "border-red-400" : ""}`}
+          />
+          {fieldErrors.username && (
+            <p className="text-red-500 text-xs">{fieldErrors.username}</p>
+          )}
+        </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="register-name"
+            className="text-sm font-medium text-white"
+          >
+            Display name{" "}
+            <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            id="register-name"
+            name="name"
+            type="text"
+            placeholder="e.g. John Doe"
+            value={form.name}
+            onChange={handleChange}
+            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="register-email"
+            className="text-sm font-medium text-white"
+          >
+            Email
+          </label>
+          <input
+            id="register-email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            value={form.email}
+            onChange={handleChange}
+            className={`border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand ${fieldErrors.email ? "border-red-400" : ""}`}
+          />
+          {fieldErrors.email && (
+            <p className="text-red-500 text-xs">{fieldErrors.email}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="register-password"
+            className="text-sm font-medium text-white"
+          >
+            Password
+          </label>
+          <input
+            id="register-password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            onFocus={() => setShowPasswordRules(true)}
+            className={`border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand ${fieldErrors.password ? "border-red-400" : ""}`}
+          />
+          {showPasswordRules && (
+            <ul className="text-xs mt-1 flex flex-col gap-0.5">
+              {passwordRules.map((rule) => (
+                <li
+                  key={rule.label}
+                  className={
+                    rule.test(form.password)
+                      ? "text-green-600"
+                      : "text-gray-400"
+                  }
+                >
+                  {rule.test(form.password) ? "✓" : "○"} {rule.label}
+                </li>
+              ))}
+            </ul>
+          )}
+          {fieldErrors.password && (
+            <p className="text-red-500 text-xs">{fieldErrors.password}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="register-confirm-password"
+            className="text-sm font-medium text-white"
+          >
+            Confirm password
+          </label>
+          <input
+            id="register-confirm-password"
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            className={`border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand ${fieldErrors.confirmPassword ? "border-red-400" : ""}`}
+          />
+          {fieldErrors.confirmPassword && (
+            <p className="text-red-500 text-xs">
+              {fieldErrors.confirmPassword}
+            </p>
+          )}
+        </div>
+
+        {submitError && (
+          <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+            {submitError}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-brand text-white py-2 rounded hover:opacity-90 transition-opacity duration-200"
+          className="bg-brand text-white py-2 rounded hover:opacity-90 transition-opacity duration-200 disabled:opacity-60"
         >
           {loading ? "Registering..." : "Register"}
         </button>

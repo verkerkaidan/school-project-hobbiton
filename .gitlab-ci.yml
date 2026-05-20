@@ -279,5 +279,7 @@ deploy:
       export NEXT_PUBLIC_CHAT_SERVICE_URL='$NEXT_PUBLIC_CHAT_SERVICE_URL'
       export NEXT_PUBLIC_WS_CHAT_SERVICE_URL='$NEXT_PUBLIC_WS_CHAT_SERVICE_URL'
       docker compose -f docker-compose-prod.yml pull
+      docker compose -f docker-compose-prod.yml stop frontend || true
+      docker compose -f docker-compose-prod.yml rm -f frontend || true
       docker compose -f docker-compose-prod.yml up -d --remove-orphans
       EOF
