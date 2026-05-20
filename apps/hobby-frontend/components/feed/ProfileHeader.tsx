@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, BellOff } from "lucide-react";
 import Image from "next/image";
+import { EditProfilePictureModal } from "@/components/profile/EditProfilePictureModal";
 
 interface ProfileHeaderProps {
   username: string;
@@ -23,6 +24,8 @@ interface ProfileHeaderProps {
   onBlock?: () => Promise<void>;
   onSubscriptionToggle?: () => Promise<void>;
   onReport?: () => void;
+  /** Called with the selected File when the user confirms the new picture. Integration TBD. */
+  onEditPicture?: (file: File) => Promise<void>;
 }
 
 export const ProfileHeader = ({
@@ -42,7 +45,9 @@ export const ProfileHeader = ({
   onBlock,
   onSubscriptionToggle,
   onReport,
+  onEditPicture,
 }: ProfileHeaderProps) => {
+  const [editPictureOpen, setEditPictureOpen] = useState(false);
   const [followPending, setFollowPending] = useState(false);
   const [blockPending, setBlockPending] = useState(false);
   const [subscriptionPending, setSubscriptionPending] = useState(false);
@@ -112,16 +117,57 @@ export const ProfileHeader = ({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-brand/30 shrink-0 shadow-xl"
+          className="relative w-32 h-32 md:w-48 md:h-48 shrink-0"
         >
-          <Image
-            src={profilePictureUrl}
-            alt={username}
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+          <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand/30 shadow-xl">
+            <Image
+              src={profilePictureUrl}
+              alt={username}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+          </div>
+
+          {isOwnProfile && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setEditPictureOpen(true)}
+              title="Edit profile picture"
+              className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-8 h-8 md:w-9 md:h-9 rounded-full
+                         bg-[#0f0f1a] border border-white/20 flex items-center justify-center
+                         text-accent hover:text-brand-light hover:border-brand/40 transition-colors shadow-lg"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </motion.button>
+          )}
         </motion.div>
+
+        {isOwnProfile && (
+          <EditProfilePictureModal
+            isOpen={editPictureOpen}
+            currentImageUrl={profilePictureUrl}
+            username={username}
+            onClose={() => setEditPictureOpen(false)}
+            onSave={async (file) => {
+              await onEditPicture?.(file);
+            }}
+          />
+        )}
 
         {/* Profile Info */}
         <div className="flex-1">
