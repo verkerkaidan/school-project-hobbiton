@@ -17,6 +17,8 @@ services:
     restart: always
     ports:
       - "19293:19293"
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
 
@@ -24,7 +26,7 @@ services:
     image: dpage/pgadmin4:latest
     restart: always
     cpus: 0.5
-    mem_limit: 1024m
+    mem_limit: 256m
     env_file:
       - .env
     ports:
@@ -45,8 +47,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
-    cpus: 1
-    mem_limit: 1024m
+    cpus: 0.5
+    mem_limit: 256m
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
@@ -70,8 +72,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_POSTS_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_POSTS}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_POSTS}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -91,8 +93,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
       PROFILE_SERVICE_URL: http://profile-service:21526
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -110,8 +112,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -132,8 +134,8 @@ services:
       DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
       DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 256m
     networks:
       - microservices-network
     depends_on:
@@ -147,8 +149,8 @@ services:
     restart: always
     ports:
       - "27088:27088"
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
 
@@ -168,8 +170,8 @@ services:
       OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
       ADMIN_TEST_USER: ${ADMIN_TEST_USER}
       ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -192,8 +194,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_TEST_USER: ${ADMIN_TEST_USER}
       ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -212,8 +214,8 @@ services:
       OMDB_API_URL: ${OMDB_API_URL}
       # Ensure containers use the internal redis service when running via docker-compose
       REDIS_URL: "redis://redis:6379"
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 128m
     networks:
       - microservices-network
     depends_on:
@@ -233,8 +235,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_INTERACTION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_INTERACTION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_INTERACTION}
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     depends_on:
@@ -258,8 +260,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
       NOTIFICATION_ALLOWED_ORIGINS: ${NOTIFICATION_ALLOWED_ORIGINS}
-    cpus: 1
-    mem_limit: 512m
+    cpus: 0.5
+    mem_limit: 128m
     networks:
       - microservices-network
     depends_on:
@@ -273,8 +275,8 @@ services:
     restart: always
     ports:
       - "23738:23738"
-    cpus: 2
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 512m
     networks:
       - microservices-network
     environment:
@@ -292,7 +294,8 @@ services:
     restart: always
     ports:
       - "29294:29294"
-    mem_limit: 2048m
+    cpus: 0.5
+    mem_limit: 256m
     networks:
       - microservices-network
     depends_on:
@@ -310,7 +313,9 @@ services:
     volumes:
       - redis_data:/data
       - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    cpus: 0.5
+    mem_limit: 64m
     networks:
       - microservices-network
     healthcheck:
