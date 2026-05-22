@@ -1,6 +1,5 @@
 stages:
   - test
-  - tag
   - build
   - deploy
 
@@ -21,29 +20,6 @@ check:changelog:
         exit 1
       fi
       echo "CHANGELOG.md check passed."
-
-# Auto-tag on merge to main — triggers build + deploy pipeline
-tag:release:
-  stage: tag
-  image: alpine:latest
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-  before_script:
-    - apk add --no-cache git nodejs
-  script:
-    - VERSION=$(node -p "require('./package.json').version")
-    - TAG="v$VERSION"
-    - git config user.email "ci@gitlab.com"
-    - git config user.name "GitLab CI"
-    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
-    - |
-      if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
-        echo "Tag $TAG already exists — no new release, skipping build and deploy."
-      else
-        git tag "$TAG"
-        git push origin "$TAG"
-        echo "Pushed tag $TAG — build and deploy pipeline triggered."
-      fi
 
 # Template for Maven test jobs
 .maven_test_template: &maven_test_template

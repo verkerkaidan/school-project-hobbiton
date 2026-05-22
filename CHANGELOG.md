@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-05-22
+
+### Fixed
+- **hotfix**: deployment remove tags for real
+
 ## [1.1.2] - 2026-05-22
 
 ### Fixed
