@@ -1,7 +1,9 @@
 package com.apigateway.apigateway.clients;
 
 import com.apigateway.apigateway.models.CreateReportRequest;
+import com.apigateway.apigateway.models.ReportDTO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,4 +46,16 @@ public interface ProfileConnectionClient {
     // Submits a new abuse report to the profile-connection-service
     @PostMapping("/reports")
     void createReport(@RequestBody CreateReportRequest request);
+
+    // Admin: fetch all reports with a given status
+    @GetMapping("/reports/status/{status}")
+    List<ReportDTO> getReportsByStatus(@PathVariable String status);
+
+    // Admin: update the status of a report
+    @PutMapping("/reports/{reportId}/status")
+    ReportDTO updateReportStatus(@PathVariable UUID reportId, @RequestBody Map<String, String> body);
+
+    // Admin: hard-delete a single report record
+    @DeleteMapping("/reports/{reportId}")
+    void deleteReport(@PathVariable UUID reportId);
 }
