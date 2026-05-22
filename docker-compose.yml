@@ -302,6 +302,18 @@ services:
       database:
         condition: service_healthy
 
+  docs:
+    build:
+      context: ./apps/docs
+    container_name: docs
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    cpus: 0.25
+    mem_limit: 128m
+    networks:
+      - microservices-network
+
   redis:
     image: redis:7-alpine
     container_name: library_redis
@@ -319,7 +331,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
