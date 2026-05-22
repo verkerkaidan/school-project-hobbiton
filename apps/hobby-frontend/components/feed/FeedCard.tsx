@@ -8,7 +8,15 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import LikeButton from "@/components/interaction/LikeButton";
 
-export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLikes: number; index: number }) => {
+export const FeedCard = ({
+  item,
+  initialLikes,
+  index,
+}: {
+  item: Post;
+  initialLikes: number;
+  index: number;
+}) => {
   const [revealed, setRevealed] = useState(false);
 
   const aspectRatios = {
@@ -20,7 +28,8 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
 
   const media = item.mediaSet?.[0];
   const imageSrc = media
-    ? `data:${media.contentType};base64,${media.fileData}` : "";
+    ? `data:${media.contentType};base64,${media.fileData}`
+    : "";
 
   const showOverlay = media?.contentFlag === "RISK" && !revealed;
 
@@ -28,7 +37,7 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
     const values = Object.values(aspectRatios);
     const randomIndex = Math.floor(Math.random() * values.length);
     return values[randomIndex];
-  })
+  });
 
   return (
     <motion.div
@@ -39,15 +48,15 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
       className="break-inside-avoid group mb-6"
       onClick={() => router.push(`/posts/${item.id}`)}
     >
-
       {/* Image Container */}
       {media && (
-        <div
-          className={`relative w-full overflow-hidden ${aspectRatio}`}
-        >
+        <div className={`relative w-full overflow-hidden ${aspectRatio}`}>
           {/* 3-dot menu (top-right) */}
           <div className="absolute top-2 right-2 z-20">
-            <ImageMenu relevantId={media.relevantId} userId={Cookies.get("userId")!} />
+            <ImageMenu
+              relevantId={media.relevantId}
+              userId={Cookies.get("userId")!}
+            />
           </div>
           <Image
             src={imageSrc}
@@ -59,12 +68,12 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
           {/* 🚨 Content Warning Overlay */}
           {showOverlay && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4">
-
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4"
+            >
               <div className="max-w-xs">
-                <h3 className="text-lg font-semibold mb-2">
-                  Content Warning
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
                 <p className="text-sm opacity-80 mb-4">
                   This image may contain sensitive or disturbing content.
                 </p>
@@ -76,7 +85,6 @@ export const FeedCard = ({ item, initialLikes, index }: { item: Post; initialLik
                   View Image
                 </button>
               </div>
-
             </div>
           )}
         </div>
