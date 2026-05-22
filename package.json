@@ -3,5 +3,10 @@
   "version": "0.1.0",
   "description": "BPSEE Proof of Concept - 10 week project",
   "private": true,
-  "packageManager": "npm@10.9.0"
+  "packageManager": "npm@10.9.0",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1"
+  },
+  "scripts": {}
 }
