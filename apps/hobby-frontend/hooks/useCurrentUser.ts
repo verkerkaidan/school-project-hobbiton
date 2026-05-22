@@ -3,11 +3,17 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
+import { isAdminToken } from "@/lib/jwt";
 
 interface CurrentUser {
   id: string;
   username: string;
   profilePictureUrl: string;
+  /**
+   * Derived from the `roles` claim in the JWT.
+   * Always false until the auth service adds the claim to the token.
+   */
+  isAdmin: boolean;
 }
 
 // Module-level cache so the profile is only fetched once per session
@@ -26,10 +32,12 @@ export function useCurrentUser(): CurrentUser | null {
     if (cachedUser) return;
     getProfile(userId)
       .then((profile) => {
+        const token = Cookies.get("token") ?? "";
         cachedUser = {
           id: profile.id,
           username: profile.username,
           profilePictureUrl: profile.profilePictureUrl,
+          isAdmin: isAdminToken(token),
         };
         setUser(cachedUser);
       })

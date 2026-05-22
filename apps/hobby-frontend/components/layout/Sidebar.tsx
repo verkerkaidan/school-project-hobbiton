@@ -16,6 +16,12 @@ export const Sidebar = () => {
   const [, setHasAnimated] = useState(false);
   const firstRender = useRef(true);
 
+  const isAdmin = currentUser?.isAdmin ?? false;
+
+  const visibleNavItems = SIDEBAR_NAV_ITEMS.filter(
+    (item) => !item.adminOnly || isAdmin,
+  );
+
   useEffect(() => {
     if (firstRender.current) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -40,7 +46,7 @@ export const Sidebar = () => {
 
       {/* Navigatie Links */}
       <nav className="flex-1 w-full space-y-3">
-        {SIDEBAR_NAV_ITEMS.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
 
