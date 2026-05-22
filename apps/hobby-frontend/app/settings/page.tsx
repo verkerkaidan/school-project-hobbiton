@@ -33,6 +33,10 @@ export default function SettingsPage() {
           description="Password, two-factor authentication, and sessions"
         />
       </div>
+
+      <p className="mt-12 text-xs text-white/20 font-mono text-center">
+        {process.env.NEXT_PUBLIC_APP_VERSION || "dev"}
+      </p>
     </div>
   );
 }
