@@ -16,7 +16,13 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y curl
+
 COPY --from=build /app/target/*.jar app.jar
+COPY entrypoint.sh /entrypoint.sh
 
+RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+RUN mkdir -p /app/models
+
+ENTRYPOINT ["/entrypoint.sh"]

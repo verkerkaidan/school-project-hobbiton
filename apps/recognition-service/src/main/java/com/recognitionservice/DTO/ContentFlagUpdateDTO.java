@@ -6,18 +6,18 @@ import java.util.UUID;
 
 public class ContentFlagUpdateDTO {
     public ContentFlag contentFlag;
-    public UUID fileId;
+    public UUID id;
     public byte[] file;
     public String note;
 
-    public ContentFlagUpdateDTO(UUID fileId, ContentFlag contentFlag, String note) {
+    public ContentFlagUpdateDTO(UUID id, ContentFlag contentFlag, String note) {
         this.contentFlag = contentFlag;
-        this.fileId = fileId;
+        this.id = id;
         this.note = note;
     }
 
-    public ContentFlagUpdateDTO(UUID fileId, byte[] file) {
-        this.fileId = fileId;
+    public ContentFlagUpdateDTO(UUID id, byte[] file) {
+        this.id = id;
         this.file = file;
     }
 
