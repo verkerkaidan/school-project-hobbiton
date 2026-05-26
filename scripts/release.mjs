@@ -9,7 +9,7 @@ const CHANGELOG = resolve(__dirname, "../CHANGELOG.md");
 const PKG = resolve(__dirname, "../package.json");
 
 // --- Parse current version from CHANGELOG.md ---
-const content = readFileSync(CHANGELOG, "utf8");
+const content = readFileSync(CHANGELOG, "utf8").replace(/\r\n/g, "\n");
 const versionMatch = content.match(/^## \[(\d+)\.(\d+)\.(\d+)\]/m);
 
 if (!versionMatch) {

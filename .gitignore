@@ -48,3 +48,7 @@ pgadmin-data
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# AI-models
+*.pt
+*.pth

@@ -63,7 +63,7 @@ if (!description.trim()) {
 const changeType = chosen.section;
 
 // Insert into CHANGELOG.md
-const content = readFileSync(CHANGELOG, "utf8");
+const content = readFileSync(CHANGELOG, "utf8").replace(/\r\n/g, "\n");
 const unreleasedHeader = "## [Unreleased]";
 const sectionHeader = `### ${changeType}`;
 const entry = `- **${chosen.label}**: ${description.trim()}`;
@@ -111,9 +111,9 @@ if (doRelease.trim().toLowerCase() !== "y") {
   process.exit(0);
 }
 
-const versionMatch = readFileSync(CHANGELOG, "utf8").match(
-  /^## \[(\d+)\.(\d+)\.(\d+)\]/m,
-);
+const versionMatch = readFileSync(CHANGELOG, "utf8")
+  .replace(/\r\n/g, "\n")
+  .match(/^## \[(\d+)\.(\d+)\.(\d+)\]/m);
 if (!versionMatch) {
   console.error("Could not find an existing version in CHANGELOG.md.");
   rl.close();

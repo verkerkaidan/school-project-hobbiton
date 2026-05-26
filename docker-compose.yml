@@ -146,6 +146,8 @@ services:
     build:
       context: ./apps/recognition-service
     container_name: recognition-service
+    environment:
+      MODEL_NAME: "car_classifier_v2.pt"
     restart: always
     ports:
       - "27088:27088"

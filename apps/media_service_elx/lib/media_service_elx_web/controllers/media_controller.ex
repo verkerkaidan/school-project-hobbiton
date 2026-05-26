@@ -67,7 +67,7 @@ Home of the first functions that are called when a request is coming in from api
   @returns: {results: {:ok, uuid}}
   """
   def update_content_flag(conn, %{"_json" => updates}) when is_list(updates) do
-    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "fileId" => file_id} ->
+    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "id" => file_id} ->
       flag = MediaFile.content_flag(content_flag)
       case MediaService.update_content_flag(flag, file_id) do
         {:ok, id} -> %{file_id: id, status: "ok"}
