@@ -75,7 +75,6 @@ type GymExercise {
 type Media {
   relevantId: ID
   fileData: String
-  fileThumb: String
   contentType: String
   contentFlag: ContentFlag
 }

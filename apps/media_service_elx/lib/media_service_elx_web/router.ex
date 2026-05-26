@@ -11,7 +11,7 @@ defmodule MediaServiceElxWeb.Router do
     post "/", MediaController, :upload_media
     get "/file", MediaController, :retrieve_media
     delete "/file/:instance_id", MediaController, :delete_instance
-    patch "/", MediaController, :update_content_flag
+    put "/", MediaController, :update_content_flag
     get "/", MediaController, :get_unassigned_media_files
     get "/admin/:instance_id", MediaController, :get_complete_media_file
     delete "/admin/:file_id", MediaController, :delete_media_file

@@ -1,8 +1,11 @@
 package com.apigateway.apigateway.modelDtos.posts;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +20,7 @@ public abstract class PostDTO {
     public String title;
     public UUID userId;
     public String hobbyType;
-    public Set<String> mediaInstanceDTOSet;
     public Set<UUID> mediaInstanceSet;
+    @JsonIgnore
+    public List<MultipartFile> mediaInstanceDTOSet;
 }

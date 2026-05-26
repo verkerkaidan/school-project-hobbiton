@@ -1,6 +1,7 @@
 package com.apigateway.apigateway.service;
 
 import com.apigateway.apigateway.modelDtos.media.MediaEntryDTO;
+import com.apigateway.apigateway.modelDtos.media.MediaUploadResponse;
 import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.clients.MediaClient;
 import com.apigateway.apigateway.clients.NotificationClient;
@@ -14,7 +15,14 @@ import com.apigateway.apigateway.models.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
@@ -60,14 +68,12 @@ public class PostAggregationService {
      * Retrieves the same file multiple times, if the instances refer to the same
      * file
      */
-    public List<MediaDTO> getMedia(List<MediaInstance> instanceIds) {
-        List<MediaDTO> mediaDTOList = new ArrayList<>();
-        for (MediaInstance instance : instanceIds) {
-            System.out.println(instance.instanceId);
-            MediaDTO dto = mediaClient.getMediaByInstanceId(instance.instanceId);
-            dto.setRelevantId(instance.instanceId);
-            mediaDTOList.add(dto);
-        }
+    public List<MediaDTO> getMedia(List<MediaInstance> instances) {
+        List<UUID> instanceIds = instances.stream().map((MediaInstance instance) -> {
+            return instance.instanceId;
+        }).toList();
+        List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
+        System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
 
         return mediaDTOList;
     }
@@ -81,13 +87,7 @@ public class PostAggregationService {
      * @return Post with a list of instance uuids for media
      */
     public Object forwardCreatePost(PostDTO dto) {
-        Set<UUID> mediaInstanceSet = new HashSet<>();
-        dto.mediaInstanceDTOSet.forEach((instance) -> mediaInstanceSet.add(webClient.post()
-                .uri(mediaServiceUrl + "/media/" + dto.userId)
-                .bodyValue(new MediaEntryDTO(instance))
-                .retrieve()
-                .bodyToMono(UUID.class)
-                .block()));
+        Set<UUID> mediaInstanceSet = uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
 
         dto.mediaInstanceSet = mediaInstanceSet;
         Object savedPost = webClient.post()
@@ -135,6 +135,42 @@ public class PostAggregationService {
         }
 
         return savedPost;
+    }
+
+    /**
+     * Handles the uploading of media and returns the list of instances Id's
+     */
+    private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
+        Set<UUID> mediaInstanceSet = new HashSet<>();
+
+        MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
+
+        files.forEach((file) -> {
+            HttpHeaders fileHeaders = new HttpHeaders();
+            fileHeaders.setContentType(MediaType.parseMediaType(file.getContentType()));
+            multipartBody.add("files[]", new HttpEntity<>(file.getResource(), fileHeaders));
+        });
+
+        multipartBody.add("owner_id", new HttpEntity<>(owner_id.toString()));
+
+        MediaUploadResponse response = webClient.post()
+                .uri(mediaServiceUrl + "/media/")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .bodyValue(multipartBody)
+                .retrieve()
+                .bodyToMono(MediaUploadResponse.class)
+                .block();
+
+        if (response != null) {
+            response.results.stream()
+                    .filter(r -> "ok".equals(r.status))
+                    .map(r -> r.id)
+                    .forEach(mediaInstanceSet::add);
+        }
+        for (UUID id : mediaInstanceSet) {
+            System.out.println("Retrieved instanceId: " + id);
+        }
+        return mediaInstanceSet;
     }
 
     /**

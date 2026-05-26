@@ -39,9 +39,9 @@ defmodule MediaServiceElxWeb.MediaFilesJSON do
 
   defp partial_file_data(%MediaFile{} = file) do
     %{
-      content_flag: file.content_flag,
-      file: Base.encode64(file.original),
-      content_type: file.content_type
+      contentFlag: file.content_flag,
+      fileData: Base.encode64(file.original),
+      contentType: file.content_type
     }
   end
 

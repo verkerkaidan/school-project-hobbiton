@@ -10,12 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +55,13 @@ public class PostsController {
         return service.getPostById(id);
     }
 
-    @PostMapping("/create-post")
-    public ResponseEntity<Object> createPost(@RequestBody PostDTO dto) {
+    @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> createPost(
+            @RequestPart("data") PostDTO dto,
+            @RequestPart("files[]") List<MultipartFile> files
+    ) {
+        dto.mediaInstanceDTOSet = files;
+        System.out.println("Length of the files list that was sent: " + files.size());
         Object response = service.forwardCreatePost(dto);
         return ResponseEntity.ok(response);
     }

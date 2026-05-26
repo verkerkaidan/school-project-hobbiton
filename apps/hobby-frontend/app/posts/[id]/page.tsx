@@ -35,7 +35,6 @@ const GET_POST_BY_ID_QUERY = `
             mediaSet {
               relevantId
               fileData
-              fileThumb
               contentType
               contentFlag
             }

@@ -33,7 +33,6 @@ query {
     mediaSet {
       relevantId
       fileData
-      fileThumb
       contentType
       contentFlag
     }
