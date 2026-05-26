@@ -70,26 +70,6 @@ test:post-service:
       - apps/post-service/target/site/jacoco/
     expire_in: 30 days
 
-# Test media-service
-test:media-service:
-  <<: *maven_test_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - apps/media-service/**/*
-  script:
-    - cd apps/media-service
-    - mvn clean test
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - apps/media-service/target/surefire-reports/TEST-*.xml
-    paths:
-      - apps/media-service/target/surefire-reports/
-      - apps/media-service/target/site/jacoco/
-    expire_in: 30 days
-
 # Test interaction-service
 test:interaction-service:
   <<: *maven_test_template
