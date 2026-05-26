@@ -50,26 +50,14 @@ services:
     networks:
       - hobbithon-network
 
-  media-service:
-    image: ${CI_REGISTRY_IMAGE}/media-service:latest
-    restart: always
-    ports:
-      - "27086:27086"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
-    cpus: 1
-    mem_limit: 1024m
-    networks:
-      - hobbithon-network
-
   media-service-elx:
     image: ${CI_REGISTRY_IMAGE}/media_service_elx:latest
     restart: always
+    container_name: media-service
     ports:
-      - "27089:27089"
+      - "27086:27086"
     environment:
+      PORT: "27086"
       DB_HOST: database
       DB_PORT: 5432
       DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}

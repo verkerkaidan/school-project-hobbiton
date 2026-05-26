@@ -1,10 +1,12 @@
 package com.apigateway.apigateway.modelDtos.media;
 
-public class MediaEntryDTO {
-    public String fileUri;
+import io.netty.handler.codec.http.multipart.FileUpload;
 
-    public MediaEntryDTO(String fileUri) {
-        this.fileUri = fileUri;
+public class MediaEntryDTO {
+    public FileUpload fileData;
+
+    public MediaEntryDTO(FileUpload fileData) {
+        this.fileData = fileData;
     }
 
     public MediaEntryDTO() {

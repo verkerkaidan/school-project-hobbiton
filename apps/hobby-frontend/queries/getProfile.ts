@@ -91,7 +91,6 @@ const GET_USER_POSTS_QUERY = `
       }
       mediaSet {
         fileData
-        fileThumb
         contentType
         contentFlag
       }

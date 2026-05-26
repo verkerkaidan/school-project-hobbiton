@@ -172,19 +172,10 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
             setError("You can upload up to 3 images.");
             return;
         }
-
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-            const dataUrl = reader.result as string;
-
-            setForm((prev) => ({
-                ...prev,
-                mediaInstanceDTOSet: [...prev.mediaInstanceDTOSet, dataUrl],
-            }));
-        };
-
-        reader.readAsDataURL(file);
+        setForm((prev) => ({
+            ...prev,
+            mediaInstanceDTOSet: [...prev.mediaInstanceDTOSet, file],
+        }));
     };
 
     return (

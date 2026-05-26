@@ -8,7 +8,6 @@ Home of the first functions that are called when a request is coming in from api
   alias MediaServiceElx.MediaService
   alias MediaServiceElx.ReportService
   alias MediaServiceElx.MediaFiles.MediaFile
-  alias MediaServiceElxWeb.MediaFilesJSON
 
   @doc """
   Handles the uploading of one or multiple media files by the same owner
@@ -33,16 +32,18 @@ Home of the first functions that are called when a request is coming in from api
   @returns: List of partial MediaFile's
   """
   def retrieve_media(conn, %{"instances" => instance_ids}) when is_list(instance_ids) do
+    IO.inspect(instance_ids, LABEL: "params")
+
     results = Enum.map(instance_ids, fn instance_id ->
       case MediaService.retrieve_media_file(instance_id) do
         {:ok, %MediaFile{} = media_file} ->
-          %{instance_id: instance_id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
+          %{relevantId: instance_id, fileData: Base.encode64(media_file.original), contentType: media_file.content_type, contentFlag: media_file.content_flag}
         {:error, reason} ->
           %{status: "error", reason: reason}
       end
     end)
 
-    json(conn, %{results: results})
+    json(conn, results)
   end
 
   @doc """

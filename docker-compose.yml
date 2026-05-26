@@ -101,33 +101,15 @@ services:
       database:
         condition: service_healthy
 
-  media-service:
+  media-service-elx:
     build:
-      context: ./apps/media-service
+      context: ./apps/media_service_elx
     container_name: media-service
     restart: always
     ports:
       - "27086:27086"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
-    cpus: 0.5
-    mem_limit: 512m
-    networks:
-      - microservices-network
-    depends_on:
-      database:
-        condition: service_healthy
-
-  media-service-elx:
-    build:
-      context: ./apps/media_service_elx
-    container_name: media-service-elx
-    restart: always
-    ports:
-      - "27089:27089"
-    environment:
+      PORT: "27086"
       DB_HOST: database
       DB_PORT: 5432
       DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}
