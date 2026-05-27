@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { clearCurrentUser } from "@/hooks/useCurrentUser";
 
 interface UserAvatarProps {
   name: string;
@@ -23,6 +24,7 @@ export const UserAvatar = ({
   const handleLogout = () => {
     Cookies.remove("token");
     Cookies.remove("userId");
+    clearCurrentUser();
     router.push("/authentication");
   };
 

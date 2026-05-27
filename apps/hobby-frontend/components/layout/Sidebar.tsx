@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { useNavigation } from "../navigation/useNavigation";
@@ -14,21 +15,25 @@ export const Sidebar = () => {
   const currentUser = useCurrentUser();
   const { unreadCount } = useNotifications();
   const [, setHasAnimated] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
   const firstRender = useRef(true);
 
-  const isAdmin = currentUser?.isAdmin ?? false;
-
-  const visibleNavItems = SIDEBAR_NAV_ITEMS.filter(
-    (item) => !item.adminOnly || isAdmin,
-  );
-
   useEffect(() => {
+    setHasSession(!!Cookies.get("userId"));
     if (firstRender.current) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasAnimated(true);
       firstRender.current = false;
     }
   }, []);
+
+  if (!currentUser && !hasSession) return null;
+
+  const isAdmin = currentUser?.isAdmin ?? false;
+
+  const visibleNavItems = SIDEBAR_NAV_ITEMS.filter(
+    (item) => !item.adminOnly || isAdmin,
+  );
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-20 md:w-64 bg-black/20 backdrop-blur-xl border-r border-white/5 flex flex-col items-center md:items-start py-8 px-4 z-50">
