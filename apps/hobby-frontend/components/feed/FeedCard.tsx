@@ -9,10 +9,10 @@ import Cookies from "js-cookie";
 import LikeButton from "@/components/interaction/LikeButton";
 
 export const FeedCard = ({
-                             item,
-                             initialLikes,
-                             index,
-                         }: {
+     item,
+     initialLikes,
+     index,
+ }: {
     item: Post;
     initialLikes: number;
     index: number;
@@ -115,7 +115,7 @@ export const FeedCard = ({
         <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
           View Post
         </span>
-                <LikeButton itemId={item.id} initialLikes={initialLikes} />
+                <LikeButton itemId={item.id} initialLikes={item.interaction.likes} />
             </div>
         </motion.div>
     );

@@ -3,7 +3,7 @@
 import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import {doesLikeExist, getInteraction, toggleLike} from "@/lib/interactionClient";
+import {doesLikeExist, toggleLike} from "@/lib/interactionClient";
 
 interface LikeButtonProps {
     itemId: string; // The id of the item to like/unlike
@@ -23,12 +23,11 @@ const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
             setLiked(exists);
         }
         fetchLike();
-        getInteraction(itemId)
-            .then(
-                (data) => {
-                    setLikes(data.likes);
-                }).catch(console.error);
     }, [itemId]);
+
+    useEffect(() => {
+        setLikes(initialLikes);
+    }, [initialLikes]);
 
     // Toggle the like status and update likes count
     const onToggleLike = async () => {

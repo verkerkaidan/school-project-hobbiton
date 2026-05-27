@@ -1,5 +1,6 @@
 package com.apigateway.apigateway.models.gym;
 
+import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.MediaInstance;
 import com.apigateway.apigateway.models.Post;
 
@@ -16,8 +17,8 @@ public class Gym extends Post {
 
     }
 
-    public Gym(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, List<GymExcercise> exercises, double totalDuration) {
-        super(id, description, title, userId, createdAt, updatedAt, mediaInstanceSet, hobbyType);
+    public Gym(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, List<GymExcercise> exercises, double totalDuration, Interaction interaction) {
+        super(id, description, title, userId, createdAt, updatedAt, mediaInstanceSet, hobbyType, interaction);
         this.exercises = exercises;
         this.totalDuration = totalDuration;
     }

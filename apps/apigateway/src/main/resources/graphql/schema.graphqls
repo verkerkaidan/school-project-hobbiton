@@ -34,6 +34,7 @@ interface Post {
   updatedAt: String
   mediaSet: [Media]
   hobbyType: String
+  interaction: Interaction
 }
 
 type Gym implements Post {
@@ -47,6 +48,7 @@ type Gym implements Post {
   hobbyType: String
   totalDuration: Float
   exercises: [GymExercise]
+  interaction: Interaction
 }
 
 type Reading implements Post {
@@ -62,6 +64,7 @@ type Reading implements Post {
   pagesRead: String
   totalPagesRead: String
   bookFinished: Boolean
+  interaction: Interaction
 }
 
 type GymExercise {
@@ -77,6 +80,17 @@ type Media {
   fileData: String
   contentType: String
   contentFlag: ContentFlag
+}
+
+type Interaction {
+    likes: Int
+    comments: [Comment]
+}
+type Comment {
+    id: ID
+    referenceId: ID
+    userId: ID
+    comment: String
 }
 
 enum HobbyType {

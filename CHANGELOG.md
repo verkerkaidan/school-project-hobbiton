@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-05-27
+
+### Changed
+- **refactor**: interaction is now handled via middleware instead of frontend<->microservice
+
 ## [1.6.0] - 2026-05-27
 
 ### Added
