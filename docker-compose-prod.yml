@@ -89,6 +89,8 @@ services:
     restart: always
     ports:
       - "27088:27088"
+    environment:
+      MODEL_NAME: ${RECOGNITION_MODEL_NAME}
     cpus: 1
     mem_limit: 1024m
     networks:
