@@ -1,63 +1,108 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
+import Cookies from 'js-cookie';
+import { ImageMenu } from '@/components/ui/ImageMenu';
+import {MediaSet} from "@/types/posts";
 
-const IMAGES = [
-  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80', // gym
-  'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80', // weights
-  'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80', // fitness
-];
+interface ImageSliderProps {
+    media: MediaSet[];
+    aspectRatio?: string;
+}
 
-export default function ImageSlider() {
-  const [current, setCurrent] = useState(0);
-  const total = IMAGES.length;
+export default function ImageSlider({
+                                        media,
+                                        aspectRatio = 'aspect-video',
+                                    }: ImageSliderProps) {
+    const [current, setCurrent] = useState(0);
+    const [revealedSlides, setRevealedSlides] = useState<Set<number>>(new Set());
 
-  const prev = () => setCurrent((c) => (c - 1 + total) % total);
-  const next = () => setCurrent((c) => (c + 1) % total);
+    const total = media.length;
+    const prev = () => setCurrent((c) => (c - 1 + total) % total);
+    const next = () => setCurrent((c) => (c + 1) % total);
+    const revealCurrent = () => setRevealedSlides((s) => new Set(s).add(current));
 
-  return (
-    <div className="relative w-full overflow-hidden rounded-xl aspect-video mb-8 group">
-      {/* Images */}
-      <div
-        className="flex transition-transform duration-500 ease-in-out h-full"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {IMAGES.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt={`Slide ${i + 1}`}
-            className="w-full h-full object-cover shrink-0"
-          />
-        ))}
-      </div>
+    if (!media.length) return null;
 
-      {/* Arrows */}
-      <button
-        onClick={prev}
-        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        ‹
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        ›
-      </button>
+    return (
+        <div className={`relative w-full overflow-hidden rounded-xl ${aspectRatio} mb-8 group`}>
+            <div
+                className="flex h-full transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${current * 100}%)` }}
+            >
+                {media.map((item, i) => {
+                    const showOverlay = !!item.contentFlag && !revealedSlides.has(i);
 
-      {/* Dots */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-        {IMAGES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              i === current ? 'bg-white w-4' : 'bg-white/50'
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
+                    return (
+                        <div key={item.relevantId} className="relative w-full h-full shrink-0">
+                            <div className="absolute top-2 right-2 z-20">
+                                <ImageMenu
+                                    relevantId={item.relevantId}
+                                    userId={Cookies.get('userId')!}
+                                />
+                            </div>
+
+                            <Image
+                                src={`data:${item.contentType};base64,${item.fileData}`}
+                                alt={`Media ${i + 1}`}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover"
+                            />
+
+                            <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
+
+                            {showOverlay && (
+                                <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4"
+                                >
+                                    <div className="max-w-xs">
+                                        <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
+                                        <p className="text-sm opacity-80 mb-4">{item.contentFlag}</p>
+                                        <button
+                                            onClick={revealCurrent}
+                                            className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                                        >
+                                            View Image
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+
+            {total > 1 && (
+                <>
+                    <button
+                        onClick={prev}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    >
+                        ‹
+                    </button>
+                    <button
+                        onClick={next}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    >
+                        ›
+                    </button>
+
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {media.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrent(i)}
+                                className={`h-1.5 rounded-full transition-all ${
+                                    i === current ? 'bg-white w-4' : 'bg-white/50 w-1.5'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
 }

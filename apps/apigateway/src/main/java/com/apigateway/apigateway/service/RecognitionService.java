@@ -23,7 +23,7 @@ public class RecognitionService {
      * Calling media to get unassigned -> call recognition to assign -> call media to save
      * Waits for 5 minutes after request was completed to call again
      */
-    @Scheduled(fixedDelay = 1000 * 60 * 5)
+    @Scheduled(fixedDelay = 100 * 60 * 5)
     public void runRecognitionPipeline() {
         try {
             List<ContentFlagUpdateDTO> withUnassignedFlag = mediaClient.getMediaFilesWithUnassignedFlag();
