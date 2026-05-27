@@ -1,9 +1,11 @@
 package com.apigateway.apigateway.modelDtos.media;
 
 import com.apigateway.apigateway.enums.ContentFlag;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MediaDTO {
     public UUID relevantId;
     public String fileData;

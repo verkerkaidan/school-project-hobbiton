@@ -2,7 +2,7 @@ defmodule MediaServiceElx.Repo.Migrations.CreateMediaFiles do
   use Ecto.Migration
 
   def change do
-    create table(:media_files, primary_key: false) do
+    create_if_not_exists table(:media_files, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :content_flag, :integer
       add :content_type, :string
@@ -13,6 +13,6 @@ defmodule MediaServiceElx.Repo.Migrations.CreateMediaFiles do
       timestamps(type: :utc_datetime)
     end
 
-    create unique_index(:media_files, [:hash])
+    create_if_not_exists unique_index(:media_files, [:hash])
   end
 end

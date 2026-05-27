@@ -1,22 +1,16 @@
 defmodule MediaServiceElx.Repo.Migrations.DropUnusedColumnsRegardingTimestamps do
   use Ecto.Migration
 
-  def change do
-    alter table(:file_report) do
-      remove :inserted_at
-      remove :updated_at
-    end
-    alter table(:media_files) do
-      remove :inserted_at
-      remove :updated_at
-    end
-    alter table(:media_instances) do
-      remove :inserted_at
-      remove :updated_at
-    end
-    alter table(:reported_file) do
-      remove :inserted_at
-      remove :updated_at
-    end
+  def up do
+    execute "ALTER TABLE file_report DROP COLUMN IF EXISTS inserted_at"
+    execute "ALTER TABLE file_report DROP COLUMN IF EXISTS updated_at"
+    execute "ALTER TABLE media_files DROP COLUMN IF EXISTS inserted_at"
+    execute "ALTER TABLE media_files DROP COLUMN IF EXISTS updated_at"
+    execute "ALTER TABLE media_instances DROP COLUMN IF EXISTS inserted_at"
+    execute "ALTER TABLE media_instances DROP COLUMN IF EXISTS updated_at"
+    execute "ALTER TABLE reported_file DROP COLUMN IF EXISTS inserted_at"
+    execute "ALTER TABLE reported_file DROP COLUMN IF EXISTS updated_at"
   end
+
+  def down, do: :ok
 end
