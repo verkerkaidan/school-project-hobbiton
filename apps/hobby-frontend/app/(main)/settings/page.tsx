@@ -1,9 +1,10 @@
 "use client";
 
-import { User, Lock, Shield } from "lucide-react";
-import { SettingsSection } from "@/components/settings/SettingsSection";
 import { BlockedUsersSection } from "@/components/settings/BlockedUsersSection";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { AccountSettings } from "@/components/settings/AccountSettings";
+import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { DeletionSection } from "@/components/settings/DeletionSection";
 
 export default function SettingsPage() {
   return (
@@ -11,27 +12,15 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
       <div className="flex flex-col gap-4">
-        <SettingsSection
-          icon={<User size={20} />}
-          title="[Placeholder] Account"
-          description="Edit your profile, username, and bio"
-        />
-
-        <SettingsSection
-          icon={<Lock size={20} />}
-          title="[Placeholder] Privacy"
-          description="Control who can see your posts and profile"
-        />
+        <AccountSettings />
 
         <NotificationSettings />
 
         <BlockedUsersSection />
 
-        <SettingsSection
-          icon={<Shield size={20} />}
-          title="[Placeholder] Security"
-          description="Password, two-factor authentication, and sessions"
-        />
+        <SecuritySettings />
+
+        <DeletionSection />
       </div>
 
       <p className="mt-12 text-xs text-white/20 font-mono text-center">

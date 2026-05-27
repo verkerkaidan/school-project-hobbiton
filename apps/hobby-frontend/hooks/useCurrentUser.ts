@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
 import { isAdminToken } from "@/lib/jwt";
+import { getCurrentUserEmail } from "@/lib/authenticationClient";
 
 interface CurrentUser {
   id: string;
   username: string;
   profilePictureUrl: string;
+  /** Email address, persisted in a cookie at login/register time. */
+  email: string | null;
   /**
    * Derived from the `roles` claim in the JWT.
    * Always false until the auth service adds the claim to the token.
@@ -41,6 +44,7 @@ export function useCurrentUser(): CurrentUser | null {
           id: profile.id,
           username: profile.username,
           profilePictureUrl: profile.profilePictureUrl,
+          email: getCurrentUserEmail(),
           isAdmin: isAdminToken(token),
         };
         setUser(cachedUser);

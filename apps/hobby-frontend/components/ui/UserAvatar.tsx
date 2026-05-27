@@ -24,6 +24,7 @@ export const UserAvatar = ({
   const handleLogout = () => {
     Cookies.remove("token");
     Cookies.remove("userId");
+    Cookies.remove("email");
     clearCurrentUser();
     router.push("/authentication");
   };
