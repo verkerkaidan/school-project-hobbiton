@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.8.3] - 2026-05-27
+
+### Fixed
+- **fix**: recognition model name is now a cicd
+
 ## [1.8.2] - 2026-05-27
 
 ### Added
