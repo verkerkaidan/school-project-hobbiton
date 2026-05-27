@@ -94,6 +94,15 @@ const GET_USER_POSTS_QUERY = `
         contentType
         contentFlag
       }
+      interaction {
+        likes
+        comments {
+          id
+          referenceId
+          userId
+          comment
+        }
+      }
     }
   }
 `;

@@ -3,6 +3,7 @@ package com.apigateway.apigateway;
 import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.service.PostAggregationService;
 import org.slf4j.Logger;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
 @Controller
 @CrossOrigin(origins = {"http://localhost:3000","http://localhost:19293"})
 public class PostsController {
@@ -35,7 +35,18 @@ public class PostsController {
 
     @SchemaMapping(typeName = "Post", field = "mediaSet")
     public List<MediaDTO> mediaSet(Post post) {
+        if (post.getMediaInstanceSet() == null || post.getMediaInstanceSet().size() == 0) {
+            return new ArrayList<MediaDTO>();
+        }
         return service.getMedia(post.getMediaInstanceSet());
+    }
+    @SchemaMapping(typeName = "Post", field = "interaction")
+    public Interaction interaction(Post post) {
+        if (post.getId() == null) {
+            log.warn("Post has null ID, skipping interaction fetch");
+            return null;
+        }
+        return service.getInteraction(post.getId());
     }
     @QueryMapping
     public List<Post> getPostsByHobbyType(@Argument HobbyType hobbyType) {
@@ -55,13 +66,13 @@ public class PostsController {
         return service.getPostById(id);
     }
 
+    @ResponseBody
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createPost(
             @RequestPart("data") PostDTO dto,
-            @RequestPart("files[]") List<MultipartFile> files
+            @RequestPart(value = "files[]", required = false) List<MultipartFile> files
     ) {
         dto.mediaInstanceDTOSet = files;
-        System.out.println("Length of the files list that was sent: " + files.size());
         Object response = service.forwardCreatePost(dto);
         return ResponseEntity.ok(response);
     }

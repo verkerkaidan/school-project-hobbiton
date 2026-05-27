@@ -36,6 +36,15 @@ query {
       contentType
       contentFlag
     }
+    interaction {
+      likes
+      comments {
+        id
+        referenceId
+        userId
+        comment
+      }
+    }
   }
 }
 `;

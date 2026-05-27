@@ -1,9 +1,10 @@
-import {Interaction} from "@/types/interaction";
+const GATEWAY_URL =
+    process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
 
-const BASE_URL = process.env.NEXT_PUBLIC_INTERACTION_URL;
+const API_BASE = `${GATEWAY_URL}/api`;
 
 export async function toggleLike(userId: string, referenceId: string): Promise<boolean> {
-    const res = await fetch(`${BASE_URL}/api/interaction/${userId}/${referenceId}`, {
+    const res = await fetch(`${API_BASE}/interaction/${userId}/${referenceId}`, {
         method: "PUT",
     });
 
@@ -12,18 +13,8 @@ export async function toggleLike(userId: string, referenceId: string): Promise<b
     return await res.json();
 }
 
-export async function getInteraction(referenceId: string): Promise<Interaction> {
-    const res = await fetch(`${BASE_URL}/api/interaction/${referenceId}`, {
-        method: "GET",
-    });
-
-    if (!res.ok) throw new Error("Failed to report");
-
-    return await res.json();
-}
-
 export async function doesLikeExist(userId:string, referenceId: string): Promise<boolean> {
-    const res = await fetch(`${BASE_URL}/api/interaction/${userId}/${referenceId}`, {
+    const res = await fetch(`${API_BASE}/interaction/${userId}/${referenceId}`, {
         method: "GET",
     });
 
@@ -33,7 +24,7 @@ export async function doesLikeExist(userId:string, referenceId: string): Promise
 }
 
 export async function createComment(userId: string, referenceId: string, comment: string): Promise<string> {
-    const res = await fetch(`${BASE_URL}/api/interaction`, {
+    const res = await fetch(`${API_BASE}/interaction`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

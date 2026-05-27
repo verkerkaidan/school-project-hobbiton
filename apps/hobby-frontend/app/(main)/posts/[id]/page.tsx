@@ -2,6 +2,7 @@ import ImageSlider from "@/components/ui/ImageSlider";
 import { gqlRequest } from "@/lib/graphQlClient";
 import {PostResponse, Gym, Reading} from "@/types/posts";
 import CompleteInteraction from "@/components/interaction/completeInteraction";
+// import CompleteInteraction from "@/components/interaction/completeInteraction";
 
 interface PostPageProps {
     params: Promise<{ id: string }>; // ✅ should be a Promise
@@ -91,7 +92,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 </div>
             )}
 
-            <CompleteInteraction postId={post.id}/>
+            <CompleteInteraction post={post}/>
         </main>
     );
 }

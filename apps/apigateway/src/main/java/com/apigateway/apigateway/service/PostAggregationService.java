@@ -1,21 +1,16 @@
 package com.apigateway.apigateway.service;
 
-import com.apigateway.apigateway.modelDtos.media.MediaEntryDTO;
+import com.apigateway.apigateway.clients.*;
 import com.apigateway.apigateway.modelDtos.media.MediaUploadResponse;
 import com.apigateway.apigateway.modelDtos.posts.PostDTO;
-import com.apigateway.apigateway.clients.MediaClient;
-import com.apigateway.apigateway.clients.NotificationClient;
-import com.apigateway.apigateway.clients.PostClient;
-import com.apigateway.apigateway.clients.ProfileClient;
-import com.apigateway.apigateway.clients.ProfileConnectionClient;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.MediaInstance;
 import com.apigateway.apigateway.models.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,6 +26,7 @@ import java.util.*;
 public class PostAggregationService {
 
     private static final Logger logger = LoggerFactory.getLogger(PostAggregationService.class);
+    private final InteractionClient interactionClient;
 
     @Value("${post.service.url}")
     private String postServiceUrl;
@@ -45,14 +41,15 @@ public class PostAggregationService {
     private final NotificationClient notificationClient;
 
     public PostAggregationService(PostClient postClient, MediaClient mediaClient, WebClient webClient,
-            ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
-            NotificationClient notificationClient) {
+                                  ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
+                                  NotificationClient notificationClient, InteractionClient interactionClient) {
         this.postClient = postClient;
         this.mediaClient = mediaClient;
         this.webClient = webClient;
         this.profileClient = profileClient;
         this.profileConnectionClient = profileConnectionClient;
         this.notificationClient = notificationClient;
+        this.interactionClient = interactionClient;
     }
 
     public List<Post> getPostsByHobbyType(HobbyType hobbyType) {
@@ -76,6 +73,12 @@ public class PostAggregationService {
         System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
 
         return mediaDTOList;
+    }
+
+    public Interaction getInteraction(UUID referenceId) {
+        Interaction interaction = interactionClient.getInteraction(referenceId);
+        System.out.println("Fetched interaction for referenceId: " + referenceId);
+        return interaction;
     }
 
     /**
@@ -142,6 +145,9 @@ public class PostAggregationService {
      */
     private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
         Set<UUID> mediaInstanceSet = new HashSet<>();
+        if (files == null) {
+            return mediaInstanceSet;
+        }
 
         MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
 
