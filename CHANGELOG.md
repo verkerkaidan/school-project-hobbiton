@@ -6,34 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-05-27
+
+### Changed
+
+- **chore**: add docker login to ci/cd
+
+## [1.4.0] - 2026-05-27
+
+### Changed
+
+- **refactor**: Separate auth and main logic to hide sidebar
+
 ## [1.3.3] - 2026-05-27
 
 ### Fixed
+
 - **hotfix**: Tailwind and other vulnerabilities
 
 ## [1.3.2] - 2026-05-27
 
 ### Removed
+
 - **remove**: Remove remnants of feed service
-
-## [1.4.0] - 2026-05-27
-
-### Changed
-- **refactor**: Separate auth and main logic to hide sidebar
 
 ## [1.3.1] - 2026-05-26
 
 ### Fixed
+
 - **hotfix**: Feedcard component restored after mysterious deletion
 
 ## [1.3.0] - 2026-05-26
 
 ### Changed
+
 - **refactor**: Media-service has been replaced with media-service-elx with all existing functionalities
 
 ## [1.2.0] - 2026-05-26
 
 ### Added
+
 - **feat**: Content flag is now assigned on an image classification model instead of fully random
 
 ## [1.1.3] - 2026-05-22
