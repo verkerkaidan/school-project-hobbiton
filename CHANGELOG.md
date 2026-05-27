@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Removed
 - **remove**: Remove remnants of feed service
 
+## [1.4.0] - 2026-05-27
+
+### Changed
+- **refactor**: Separate auth and main logic to hide sidebar
+
 ## [1.3.1] - 2026-05-26
 
 ### Fixed

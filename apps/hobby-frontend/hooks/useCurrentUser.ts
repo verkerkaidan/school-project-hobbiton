@@ -19,6 +19,10 @@ interface CurrentUser {
 // Module-level cache so the profile is only fetched once per session
 let cachedUser: CurrentUser | null = null;
 
+export function clearCurrentUser(): void {
+  cachedUser = null;
+}
+
 export function useCurrentUser(): CurrentUser | null {
   const [user, setUser] = useState<CurrentUser | null>(cachedUser);
 
