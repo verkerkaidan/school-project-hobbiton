@@ -39,6 +39,15 @@ const GET_POST_BY_ID_QUERY = `
               contentType
               contentFlag
             }
+            interaction {
+              likes
+              comments {
+                id
+                referenceId
+                userId
+                comment
+              }
+            }
         }
     }
 `;
@@ -65,7 +74,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
     return (
         <main className="max-w-2xl mx-auto px-4 py-10">
-              <ImageSlider />
+              <ImageSlider media={post.mediaSet}/>
             <span className="text-xs font-mono uppercase tracking-tighter text-accent">
                 {post.hobbyType}
             </span>
