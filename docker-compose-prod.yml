@@ -20,6 +20,21 @@ services:
     networks:
       - hobbithon-network
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - "25050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    cpus: 0.5
+    mem_limit: 256m
+    networks:
+      - hobbithon-network
+
   post-service:
     image: ${CI_REGISTRY_IMAGE}/post-service:latest
     restart: always
@@ -261,6 +276,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:
 
 networks:
   hobbithon-network:
