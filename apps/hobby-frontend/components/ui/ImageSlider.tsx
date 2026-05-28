@@ -32,10 +32,10 @@ export default function ImageSlider({
                 style={{ transform: `translateX(-${current * 100}%)` }}
             >
                 {media.map((item, i) => {
-                    const showOverlay = !!item.contentFlag && !revealedSlides.has(i);
+                    const showOverlay = item.contentFlag === "RISK" && !revealedSlides.has(i);
 
                     return (
-                        <div key={item.relevantId} className="relative w-full h-full shrink-0">
+                        <div key={item.relevantId} className="relative w-full h-full shrink-0 overflow-hidden flex items-center justify-center">
                             <div className="absolute top-2 right-2 z-20">
                                 <ImageMenu
                                     relevantId={item.relevantId}
@@ -46,9 +46,10 @@ export default function ImageSlider({
                             <Image
                                 src={`data:${item.contentType};base64,${item.fileData}`}
                                 alt={`Media ${i + 1}`}
-                                fill
+                                width={0}
+                                height={0}
                                 sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-cover"
+                                className="w-full h-auto max-w-full max-h-full object-contain"
                             />
 
                             <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
@@ -56,11 +57,15 @@ export default function ImageSlider({
                             {showOverlay && (
                                 <div
                                     onClick={(e) => e.stopPropagation()}
-                                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4"
+                                    className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center p-4"
                                 >
-                                    <div className="max-w-xs">
+                                    <div className="absolute inset-0 backdrop-blur-3xl" />
+
+                                    <div className="relative z-10 max-w-xs">
                                         <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
-                                        <p className="text-sm opacity-80 mb-4">{item.contentFlag}</p>
+                                        <p className="text-sm opacity-80 mb-4">
+                                            This image may contain sensitive or disturbing content.
+                                        </p>
                                         <button
                                             onClick={revealCurrent}
                                             className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"

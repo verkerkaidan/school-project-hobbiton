@@ -70,7 +70,7 @@ export const FeedCard = ({
                     {showOverlay && (
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4"
+                            className="absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-3xl text-white text-center p-4"
                         >
                             <div className="max-w-xs">
                                 <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
