@@ -61,7 +61,7 @@ export const FeedCard = ({
                         alt={item.title}
                         fill
                         sizes={"(max-width: 768px) 100vw, 50vw"}
-                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""}`}
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
                     {/* 🚨 Content Warning Overlay */}
