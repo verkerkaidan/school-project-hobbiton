@@ -20,11 +20,9 @@ const CompleteInteraction: React.FC<CompleteInteractionProps> = ({
   const [likes, setLikes] = useState<number>(0);
   const [comments, setComments] = useState<CompleteComment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
-  const [currentPost, setCurrentPost] = useState<Post>(post);
 
     async function syncInteraction() {
         const freshPost = await getPostById(post.id);
-        setCurrentPost(freshPost);
 
         const completeComments: CompleteComment[] = await Promise.all(
             freshPost.interaction.comments.map(async (comment: Comment) => {

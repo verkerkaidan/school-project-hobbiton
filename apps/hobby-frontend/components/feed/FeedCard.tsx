@@ -10,11 +10,9 @@ import LikeButton from "@/components/interaction/LikeButton";
 
 export const FeedCard = ({
      item,
-     initialLikes,
      index,
  }: {
     item: Post;
-    initialLikes: number;
     index: number;
 }) => {
     const [revealed, setRevealed] = useState(false);
