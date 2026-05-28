@@ -23,7 +23,7 @@ public class RecognitionService {
      * Calling media to get unassigned -> call recognition to assign -> call media to save
      * Waits for 5 minutes after request was completed to call again
      */
-    @Scheduled(fixedDelay = 100 * 60 * 5)
+    @Scheduled(fixedDelay = 1000 * 60 * 5)
     public void runRecognitionPipeline() {
         try {
             List<ContentFlagUpdateDTO> withUnassignedFlag = mediaClient.getMediaFilesWithUnassignedFlag();
@@ -31,10 +31,18 @@ public class RecognitionService {
                 System.out.println("Scheduled job didn't receive urgent files");
                 return;
             }
-            List<ContentFlagUpdateDTO> results = recognitionClient.assignContentFlags(withUnassignedFlag);
-            mediaClient.assignContentFlags(results);
+            assignContentFlags(withUnassignedFlag);
         } catch (Exception e) {
             System.err.println("Scheduled job failed: " + e.getMessage());
         }
+    }
+
+    public void assignContentFlags(List<ContentFlagUpdateDTO> files) {
+        Thread assignationThread = new Thread(() -> {
+            List<ContentFlagUpdateDTO> results = recognitionClient.assignContentFlags(files);
+            mediaClient.assignContentFlags(results);
+            System.out.println("Updated ContentFlags via mediaService");
+        });
+        assignationThread.start();
     }
 }
