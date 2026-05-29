@@ -162,7 +162,12 @@ Handles most logic regarding actions with media files and media instances
       nil ->
         {:error, :not_found}
 
-      media_file ->
+      %MediaFile{} = media_file ->
+        if media_file.admin_approved do
+          IO.inspect("MediaFile for hash: #{inspect(file_hash)} already approved by admin", LABEL: "contentFlagUpdate");
+          {:ok, media_file.id}
+        end
+
         media_file
         |> Ecto.Changeset.change(content_flag: content_flag)
         |> Repo.update()
