@@ -4,8 +4,11 @@ import Link from "next/link";
 
 export default function ChatCard({
   chatId,
+  title
 }: {
   chatId: string;
+  title: string;
+
 }) {
   return (
     <Link
@@ -15,9 +18,8 @@ export default function ChatCard({
       <p className="text-sm text-zinc-500">
         Chat
       </p>
-
       <h2 className="mt-2 break-all text-lg font-semibold text-white">
-        {chatId}
+        {title.length > 2 ? title : chatId}
       </h2>
     </Link>
   );

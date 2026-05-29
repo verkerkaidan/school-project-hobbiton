@@ -19,30 +19,37 @@ export default function NewChatModal({
     const [selectedUsers, setSelectedUsers] =
         useState<string[]>([]);
     const [users, setUsers] = useState<User[]>([]);
-
+    const [title, setTitle] = useState<string>("");
     const router = useRouter();
+    const [selectedUsersError, setSelectedUsersError] = useState(false);
+    const [titleError, setTitleError] = useState(false);
 
     useEffect(() => {
         getFollowers(Cookies.get("userId")!).then(setUsers);
     }, []);
-    const TEST_USERS = [
-        { id: "00000000-0000-0000-0000-000000000001", name: "Alice" },
-        { id: "00000000-0000-0000-0000-000000000002", name: "Bob" },
-        { id: "00000000-0000-0000-0000-000000000003", name: "Charlie" },
-        { id: "00000000-0000-0000-0000-000000000004", name: "Diana" },
-        { id: "00000000-0000-0000-0000-000000000005", name: "Eve" },
-        { id: "00000000-0000-0000-0000-000000000006", name: "Frank" },
-    ];
 
     async function handleCreate() {
+
+        if (title.length < 5 || title.length > 50) {
+            setTitleError(true);
+            return;
+        }
+        if (selectedUsers.length == 0) {
+            setSelectedUsersError(true);
+            return;
+        }
+
         const ownId = Cookies.get("userId");
 
         if (!ownId) return;
 
-        const res = await createChat([
-            ownId,
-            ...selectedUsers,
-        ]);
+        const res = await createChat({
+            "userIds": [
+                ownId,
+                ...selectedUsers,
+            ],
+            "title": title
+        });
 
         router.push(`/chats/${res.chatId}`);
     }
@@ -59,7 +66,7 @@ export default function NewChatModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-xl rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+            <div className="w-full max-w-xl rounded-3xl border border-zinc-800 bg-zinc-950 p-6 gap-5 flex flex-col">
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                         New Chat
@@ -72,26 +79,59 @@ export default function NewChatModal({
                         Close
                     </button>
                 </div>
+                <div className="flex flex-col gap-1">
+                    <label
+                        htmlFor="create-chat-title"
+                        className="text-sm font-medium text-white"
+                    >
+                        Chat title
+                    </label>
+                    <p className="text-xs font-small text-brand">Required</p>
+                    <input
+                        id="create-chat-title"
+                        name="title"
+                        type="text"
+                        placeholder=""
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className={`rounded-xl px-3 py-2 text-sm focus:border-brand focus:border focus:ring-2 focus:ring-brand w-full bg-zinc-900`}
+                    />
+                    {titleError && (
+                        <p className="text-red-500 font-bold italic text-xs">Title of chat is required</p>
+                    )}
 
-                <div className="grid gap-3">
-                    {users.map((user) => {
-                        const selected = selectedUsers.includes(user.id);
-                        return (
-                            <button
-                                key={user.id}
-                                onClick={() => toggle(user.id)}
-                                className={`rounded-2xl border p-4 text-left ${selected ? "border-blue-500 bg-blue-500/20" : "border-zinc-700 bg-zinc-900"
-                                    }`}
-                            >
-                                {user.username}
-                            </button>
-                        );
-                    })}
                 </div>
+                <div className="flex flex-col gap-1">
+                    <label
+                        htmlFor="select-users-title"
+                        className="text-sm font-medium text-white"
+                    >
+                        Select users
+                    </label>
+                    <p className="text-xs font-small text-brand">Required</p>
+                    <div className="grid gap-3">
+                        {users.map((user) => {
+                            const selected = selectedUsers.includes(user.id);
+                            return (
+                                <button
+                                    key={user.id}
+                                    onClick={() => toggle(user.id)}
+                                    className={`rounded-2xl border p-4 text-left ${selected ? "border-brand bg-brand/20" : "border-zinc-700 bg-zinc-900"
+                                        }`}
+                                >
+                                    {user.username}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {selectedUsersError && (
+                        <p className="text-red-500 font-bold italic text-xs">At least 1 other user is required</p>
+                    )}
 
+                </div>
                 <button
                     onClick={handleCreate}
-                    className="mt-6 w-full rounded-2xl bg-blue-500 px-5 py-4 font-semibold text-white"
+                    className="mt-6 w-full rounded-2xl  hover:bg-brand/80 px-5 bg-brand py-4 font-semibold text-white"
                 >
                     Start Chatting
                 </button>
