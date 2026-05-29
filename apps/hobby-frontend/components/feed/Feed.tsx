@@ -20,7 +20,7 @@ export const Feed = () => {
   return (
     <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
       {posts.map((post, index) => (
-        <FeedCard key={index} item={post} initialLikes={post.interaction.likes} index={index} />
+        <FeedCard key={index} item={post} index={index} />
       ))}
     </div>
   );

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.9.3] - 2026-05-28
+
+### Fixed
+- **fix**: Content labels are improved: stylewise, when they show, and processing power wise
+
 ## [1.9.2] - 2026-05-27
 
 ### Fixed

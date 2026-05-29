@@ -10,11 +10,9 @@ import LikeButton from "@/components/interaction/LikeButton";
 
 export const FeedCard = ({
      item,
-     initialLikes,
      index,
  }: {
     item: Post;
-    initialLikes: number;
     index: number;
 }) => {
     const [revealed, setRevealed] = useState(false);
@@ -63,14 +61,14 @@ export const FeedCard = ({
                         alt={item.title}
                         fill
                         sizes={"(max-width: 768px) 100vw, 50vw"}
-                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""}`}
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
                     {/* 🚨 Content Warning Overlay */}
                     {showOverlay && (
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-white text-center p-4"
+                            className="absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-3xl text-white text-center p-4"
                         >
                             <div className="max-w-xs">
                                 <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
