@@ -9,7 +9,7 @@ export default function MessageBubble({
 
   return (
     <div className={`max-w-[75%] rounded-3xl px-4 py-3 ${
-      own ? "ml-auto bg-blue-500 text-white" : "mr-auto bg-zinc-800 text-zinc-100"
+      own ? "ml-auto bg-brand text-white" : "mr-auto bg-zinc-800 text-zinc-100"
     }`}>
       {!own && (
         <p className="mb-1 text-xs text-zinc-400">{message.userId}</p>

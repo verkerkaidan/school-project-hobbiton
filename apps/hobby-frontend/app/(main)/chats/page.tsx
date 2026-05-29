@@ -8,9 +8,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 
 export default function ChatsPage() {
-  const [chats, setChats] = useState<string[]>(
-    []
-  );
+  const [chats, setChats] = useState<{ chatId: string; title: string }[]>([]);
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -23,6 +21,7 @@ export default function ChatsPage() {
 
       const data = await getChats(userId);
 
+      console.log(data)
       setChats(data);
     }
 
@@ -30,11 +29,11 @@ export default function ChatsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-zinc-950 p-6">
+    <div className="mx-auto px-4 pt-16 pb-20 max-w-3xl">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold">
+            <h1 className="text-2xl font-bold">
               Chats
             </h1>
 
@@ -47,17 +46,18 @@ export default function ChatsPage() {
             onClick={() =>
               setModalOpen(true)
             }
-            className="rounded-2xl bg-blue-500 px-6 py-4 font-semibold text-white"
+            className="px-6 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:opacity-90 transition-opacity duration-200"
           >
             New Chat
           </button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {chats.map((chatId) => (
+          {chats.map((chat) => (
             <ChatCard
-              key={chatId}
-              chatId={chatId}
+              key={chat.chatId}
+              chatId={chat.chatId}
+              title={chat.title}
             />
           ))}
         </div>
@@ -69,6 +69,6 @@ export default function ChatsPage() {
           setModalOpen(false)
         }
       />
-    </main>
+    </div>
   );
 }
