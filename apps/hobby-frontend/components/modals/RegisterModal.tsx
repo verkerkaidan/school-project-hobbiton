@@ -1,11 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Modal } from "./Modal";
-import { register } from "@/lib/authenticationClient";
-import { createProfile } from "@/lib/profileClient";
 import { useRouter } from "next/navigation";
 import { ModalProps, RegisterForm } from "@/types/interfaces";
 import Cookies from "js-cookie";
+import { registerProfile } from "@/lib/profileClient";
 
 export function RegisterModal({ isOpen, onClose }: ModalProps) {
   const [form, setForm] = useState<RegisterForm>({
@@ -52,9 +51,12 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
 
     try {
       setLoading(true);
-      await register(form.email, form.password);
+      await registerProfile(form.email, form.password, form.username, form.name)
+
+      // await register(form.email, form.password);
       const token = Cookies.get("token") ?? "";
-      await createProfile(form.username, form.name, token);
+      // await createProfile(form.username, form.name, token);
+
       router.push("/");
       router.refresh();
       onClose();
