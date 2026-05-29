@@ -39,7 +39,7 @@ func RunMigrations(database *sql.DB) {
 		)`,
 
 		`INSERT INTO notification_types (name)
-		 VALUES ('FOLLOW'), ('USER_POST'), ('RECOMMENDED_POST')
+		 VALUES ('FOLLOW'), ('USER_POST'), ('RECOMMENDED_POST'), ('LIKE'), ('COMMENT')
 		 ON CONFLICT DO NOTHING`,
 
 		// Core notifications table — extensible via the type column
@@ -83,6 +83,10 @@ func RunMigrations(database *sql.DB) {
 		// resource (e.g. a post UUID for USER_POST notifications).
 		// Uses ADD COLUMN IF NOT EXISTS so it is safe to re-run on an existing DB.
 		`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS reference_id UUID`,
+
+		// Add content to carry optional extra text (e.g. the comment body for
+		// COMMENT notifications). Nullable so existing rows are unaffected.
+		`ALTER TABLE notifications ADD COLUMN IF NOT EXISTS content TEXT`,
 	}
 
 	for _, q := range migrations {

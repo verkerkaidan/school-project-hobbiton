@@ -116,15 +116,16 @@ func (h *Handler) createNotification(w http.ResponseWriter, r *http.Request) {
 		UserID:      req.UserID,
 		ActorID:     req.ActorID,
 		ReferenceID: req.ReferenceID,
+		Content:     req.Content,
 		Type:        req.Type,
 		Message:     req.Message,
 		CreatedAt:   time.Now().UTC(),
 	}
 
 	_, err := h.db.Exec(
-		`INSERT INTO notifications (id, user_id, actor_id, type, message, reference_id, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		notif.ID, notif.UserID, notif.ActorID, string(notif.Type), notif.Message, notif.ReferenceID, notif.CreatedAt,
+		`INSERT INTO notifications (id, user_id, actor_id, type, message, content, reference_id, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		notif.ID, notif.UserID, notif.ActorID, string(notif.Type), notif.Message, notif.Content, notif.ReferenceID, notif.CreatedAt,
 	)
 	if err != nil {
 		http.Error(w, "failed to persist notification", http.StatusInternalServerError)
@@ -157,7 +158,7 @@ func (h *Handler) listNotifications(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := h.db.Query(
-		`SELECT id, user_id, actor_id, type, message, reference_id, read_at, created_at
+		`SELECT id, user_id, actor_id, type, message, content, reference_id, read_at, created_at
 		 FROM notifications
 		 WHERE user_id = $1
 		 ORDER BY created_at DESC
@@ -174,7 +175,7 @@ func (h *Handler) listNotifications(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var n models.Notification
 		var notifType string
-		if err := rows.Scan(&n.ID, &n.UserID, &n.ActorID, &notifType, &n.Message, &n.ReferenceID, &n.ReadAt, &n.CreatedAt); err != nil {
+		if err := rows.Scan(&n.ID, &n.UserID, &n.ActorID, &notifType, &n.Message, &n.Content, &n.ReferenceID, &n.ReadAt, &n.CreatedAt); err != nil {
 			continue
 		}
 		n.Type = models.NotificationTypeValue(notifType)
