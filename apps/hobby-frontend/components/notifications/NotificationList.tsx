@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Notification } from "@/types/notifications";
 import { markNotificationRead } from "@/lib/notificationClient";
-import { Bell, UserPlus } from "lucide-react";
+import { Bell, UserPlus, Heart, MessageCircle } from "lucide-react";
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -28,6 +28,10 @@ function NotificationIcon({ type }: { type: Notification["type"] }) {
   switch (type) {
     case "FOLLOW":
       return <UserPlus className="w-4 h-4 text-brand" />;
+    case "LIKE":
+      return <Heart className="w-4 h-4 text-brand" />;
+    case "COMMENT":
+      return <MessageCircle className="w-4 h-4 text-brand" />;
     default:
       return <Bell className="w-4 h-4 text-brand" />;
   }
@@ -95,7 +99,14 @@ export function NotificationItem({
   onRead,
 }: NotificationItemProps) {
   const isUnread = !notification.readAt;
+  const commentPreview =
+    notification.type === "COMMENT" && notification.content
+      ? notification.content.length > 60
+        ? notification.content.slice(0, 60) + "…"
+        : notification.content
+      : null;
 
+  console.log(commentPreview);
   const handleClick = async () => {
     if (isUnread) {
       try {
@@ -128,6 +139,11 @@ export function NotificationItem({
         >
           <NotificationMessage notification={notification} />
         </p>
+        {commentPreview && (
+          <p className="text-xs text-accent/70 mt-0.5 italic">
+            &ldquo;{commentPreview}&rdquo;
+          </p>
+        )}
         <p className="text-xs text-accent/60 mt-1">
           {timeAgo(notification.createdAt)}
         </p>
