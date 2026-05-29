@@ -14,6 +14,8 @@ const (
 	NotificationTypeFollow          NotificationTypeValue = "FOLLOW"
 	NotificationTypeUserPost        NotificationTypeValue = "USER_POST"
 	NotificationTypeRecommendedPost NotificationTypeValue = "RECOMMENDED_POST"
+	NotificationTypeLike            NotificationTypeValue = "LIKE"
+	NotificationTypeComment         NotificationTypeValue = "COMMENT"
 )
 
 // Notification represents a persisted notification record.
@@ -23,6 +25,7 @@ type Notification struct {
 	ActorID     *uuid.UUID            `json:"actorId"` // who triggered it (null for system notifications)
 	Type        NotificationTypeValue `json:"type"`
 	Message     string                `json:"message"`
+	Content     *string               `json:"content"`     // optional extra body (e.g. comment text)
 	ReferenceID *uuid.UUID            `json:"referenceId"` // optional link target (e.g. post UUID)
 	ReadAt      *time.Time            `json:"readAt"`
 	CreatedAt   time.Time             `json:"createdAt"`
@@ -41,6 +44,7 @@ type CreateNotificationRequest struct {
 	ActorID     *uuid.UUID            `json:"actorId"`
 	Type        NotificationTypeValue `json:"type"`
 	Message     string                `json:"message"`
+	Content     *string               `json:"content"`     // optional extra body
 	ReferenceID *uuid.UUID            `json:"referenceId"` // optional link target
 }
 

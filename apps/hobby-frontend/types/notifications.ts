@@ -1,4 +1,9 @@
-export type NotificationType = "FOLLOW" | "USER_POST" | "RECOMMENDED_POST";
+export type NotificationType =
+  | "FOLLOW"
+  | "USER_POST"
+  | "RECOMMENDED_POST"
+  | "LIKE"
+  | "COMMENT";
 
 export interface Notification {
   id: string;
@@ -6,6 +11,7 @@ export interface Notification {
   actorId: string | null;
   type: NotificationType;
   message: string;
+  content: string | null; // extra body text (e.g. comment text for COMMENT notifications)
   referenceId: string | null; // e.g. post UUID for USER_POST notifications
   readAt: string | null;
   createdAt: string;
