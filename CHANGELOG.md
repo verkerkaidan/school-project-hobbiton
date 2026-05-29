@@ -6,10 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.12.2] - 2026-05-29
+
+### Fixed
+- **hotfix**: Double variables with space in gitlab-ci.yml error in merge
+
+## [1.12.1] - 2026-05-29
+
+### Fixed
+- **hotfix**: Added environment variables to the docker-compose-prod, chat_http_url & chat_ws-url
+
 ## [1.12.0] - 2026-05-29
 
 ### Changed
 - **refactor**: ContentFlag assigning happens at upload and every 24h, instead of every 5mins
+
+## [1.11.2] - 2026-05-29
+
+### Fixed
+- **hotfix**: Space in .gitlab-ci.yml caused error at chat_http_url and chat_ws_url
 
 ## [1.11.1] - 2026-05-29
 
