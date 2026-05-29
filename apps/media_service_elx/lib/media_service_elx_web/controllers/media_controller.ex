@@ -68,9 +68,9 @@ Home of the first functions that are called when a request is coming in from api
   @returns: {results: {:ok, uuid}}
   """
   def update_content_flag(conn, %{"_json" => updates}) when is_list(updates) do
-    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "id" => file_id} ->
+    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "hash" => file_hash} ->
       flag = MediaFile.content_flag(content_flag)
-      case MediaService.update_content_flag(flag, file_id) do
+      case MediaService.update_content_flag(flag, file_hash) do
         {:ok, id} -> %{file_id: id, status: "ok"}
         {:error, reason} -> %{status: "error", reason: reason}
       end
@@ -87,7 +87,7 @@ Home of the first functions that are called when a request is coming in from api
   def get_unassigned_media_files(conn, _params) do
     result = MediaService.retrieve_unassigned()
     |> Enum.map(fn %MediaFile{} = media_file ->
-      %{file: Base.encode64(media_file.original), id: media_file.id}
+      %{file: Base.encode64(media_file.original), hash: Base.encode64(media_file.hash)}
     end)
 
     json(conn, result)
