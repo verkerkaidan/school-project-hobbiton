@@ -288,6 +288,8 @@ deploy:
       export NEXT_PUBLIC_WS_CHAT_SERVICE_URL='$NEXT_PUBLIC_WS_CHAT_SERVICE_URL'
       export PGADMIN_DEFAULT_EMAIL='$PGADMIN_DEFAULT_EMAIL'
       export PGADMIN_DEFAULT_PASSWORD='$PGADMIN_DEFAULT_PASSWORD'
+      export CHAT_HTTP_URL= '$CHAT_HTTP_URL'
+      export CHAT_WS_URL= '$CHAT_WS_URL'
       docker compose -f docker-compose-prod.yml pull
       docker compose -f docker-compose-prod.yml stop frontend || true
       docker compose -f docker-compose-prod.yml rm -f frontend || true
