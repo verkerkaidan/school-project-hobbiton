@@ -152,18 +152,30 @@ Handles most logic regarding actions with media files and media instances
 
   @doc """
     Patches all MediaFiles from given id's with the according content_flag
-    @params: content_flag @contentFlag, file_id uuid
+    @params: content_flag @contentFlag, file_hash binary
     @returns: {file_id: uuid, status: "ok"} || {status: "error", reason: reason}
   """
-  def update_content_flag(content_flag, file_id) do
-    file = Repo.get_by(MediaFile, id: file_id)
-    |> Ecto.Changeset.change(content_flag: content_flag)
+  def update_content_flag(content_flag, file_hash) do
+    binary_hash = Base.decode64!(file_hash)
 
-    case Repo.update(file) do
-         {:ok, _} ->
-           ReportService.update_reports(file_id)
-           {:ok, file_id}
-         {:error, reason} -> {:error, reason}
+    case Repo.get_by(MediaFile, hash: binary_hash) do
+      nil ->
+        {:error, :not_found}
+
+      media_file ->
+        media_file
+        |> Ecto.Changeset.change(content_flag: content_flag)
+        |> Repo.update()
+        |> case do
+             {:ok, updated_file} ->
+               ReportService.update_reports(updated_file.id)
+               IO.inspect("MediaFile with hash: #{inspect(file_hash)} updated", LABEL: "contentFlagUpdate");
+               {:ok, updated_file.id}
+
+             {:error, reason} ->
+             IO.inspect("No MediaFile found for hash: #{inspect(file_hash)}", LABEL: "contentFlagUpdate");
+               {:error, reason}
+           end
     end
   end
 

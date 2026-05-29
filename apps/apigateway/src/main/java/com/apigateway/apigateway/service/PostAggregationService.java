@@ -39,10 +39,12 @@ public class PostAggregationService {
     private final ProfileClient profileClient;
     private final ProfileConnectionClient profileConnectionClient;
     private final NotificationClient notificationClient;
+    private final RecognitionService recognitionService;
 
     public PostAggregationService(PostClient postClient, MediaClient mediaClient, WebClient webClient,
                                   ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
-                                  NotificationClient notificationClient, InteractionClient interactionClient) {
+                                  NotificationClient notificationClient, InteractionClient interactionClient,
+                                  RecognitionService recognitionService) {
         this.postClient = postClient;
         this.mediaClient = mediaClient;
         this.webClient = webClient;
@@ -50,6 +52,7 @@ public class PostAggregationService {
         this.profileConnectionClient = profileConnectionClient;
         this.notificationClient = notificationClient;
         this.interactionClient = interactionClient;
+        this.recognitionService = recognitionService;
     }
 
     public List<Post> getPostsByHobbyType(HobbyType hobbyType) {
@@ -90,7 +93,13 @@ public class PostAggregationService {
      * @return Post with a list of instance uuids for media
      */
     public Object forwardCreatePost(PostDTO dto) {
-        Set<UUID> mediaInstanceSet = uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
+        Set<UUID> mediaInstanceSet = new HashSet<>();
+        if (dto.mediaInstanceDTOSet != null && !dto.mediaInstanceDTOSet.isEmpty()) {
+            mediaInstanceSet = uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
+            recognitionService.startRecognitionPipeline(dto.mediaInstanceDTOSet);
+        } else {
+            dto.mediaInstanceDTOSet = new ArrayList<>();
+        }
 
         dto.mediaInstanceSet = mediaInstanceSet;
         Object savedPost = webClient.post()
@@ -145,11 +154,8 @@ public class PostAggregationService {
      */
     private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
         Set<UUID> mediaInstanceSet = new HashSet<>();
-        if (files == null) {
-            return mediaInstanceSet;
-        }
 
-        MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
+       MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
 
         files.forEach((file) -> {
             HttpHeaders fileHeaders = new HttpHeaders();
