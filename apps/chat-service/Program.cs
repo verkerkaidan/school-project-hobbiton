@@ -59,7 +59,6 @@ app.Map("/ws/{chatId}", async context =>
 
     Console.WriteLine("instating websocket");
     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
     
     var sockets = lobbies.GetOrAdd(chatId, _ => new List<WebSocket>());
     lock (sockets) sockets.Add(webSocket);

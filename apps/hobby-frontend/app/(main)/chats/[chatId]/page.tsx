@@ -11,7 +11,7 @@ import { use, useEffect, useState } from "react";
 export default function ChatPage({ params }: { params: Promise<{ chatId: string }> }) {
   const { chatId } = use(params);
   const currentUser = useCurrentUser()!;
-  const { messages, send, isConnected } = useWebSocket(chatId);
+  const { messages, send, isConnected, chatUsersList } = useWebSocket(chatId);
   const [input, setInput] = useState("");
   const [title, setTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -75,8 +75,12 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
 
       <div className="flex-1 space-y-4 overflow-y-auto py-6">
         {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} ownId={currentUser.id} />
-        ))}
+          <MessageBubble
+            key={i}
+            message={msg}
+            own={msg.userId === currentUser.id}
+            username={chatUsersList[msg.userId]?.username ?? ""}
+          />))}
       </div>
 
       <div className="border-t border-zinc-800 bg-zinc-900 p-4">
