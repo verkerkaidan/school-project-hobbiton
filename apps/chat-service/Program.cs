@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
             var uri = new Uri(origin);
 
             // localhost (any port)
-            if (uri.Host == "localhost")
+            if (uri.Host == "localhost" || uri.Host == "apigateway-service")
                 return true;
 
             // allow all student subdomains
@@ -32,7 +32,6 @@ var lobbies = new ConcurrentDictionary<string, List<WebSocket>>();
 var db = new DatabaseConnection();
 
 app.UseWebSockets();
-
 // URL: /ws/{chatId}?userId={userId}
 app.Map("/ws/{chatId}", async context =>
 {
@@ -79,11 +78,11 @@ app.Map("/ws/{chatId}", async context =>
     await HandleWebSocket(webSocket, sockets, chatId, userId, db);
 });
 
-app.MapPost("/create-chat", (List<string> userIds) =>
+app.MapPost("/create-chat", (ChatModel chatModel) =>
 {
     var chatId = Guid.NewGuid();
-    db.createChat(chatId);
-    db.AllowUsers(chatId.ToString(), userIds);
+    db.createChat(chatId, chatModel.title);
+    db.AllowUsers(chatId.ToString(), chatModel.userIds);
     return Results.Ok(new { chatId });
 });
 
@@ -91,6 +90,17 @@ app.MapGet("/get-chats/{userId}", (string userId) =>
 {
     var chats = db.getAllChatsFromUser(userId);
     return Results.Ok(chats);
+});
+
+app.MapGet("/get-chat-title/{chatId}", (string chatId) =>
+{
+    var title = db.getTitleFromChatId(chatId);
+    return Results.Ok(title);
+});
+
+app.MapPut("/update-title", (TitleModel titleModel) =>
+{
+    return db.alterTitleFromChatId(titleModel);
 });
 
 async Task HandleWebSocket(

@@ -93,25 +93,28 @@ class DatabaseConnection
 
         cmd.ExecuteNonQuery();
     }
-    public void createChat(Guid chatId)
+    public void createChat(Guid chatId, string title)
     {
         const string sql = """
-    INSERT INTO chat (chat_id)
-    VALUES (@chatId)
+    INSERT INTO chat (chat_id, title)
+    VALUES (@chatId, @title)
     """;
 
         using var conn = CreateConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", chatId);
+        cmd.Parameters.AddWithValue("@title", title);
 
         cmd.ExecuteNonQuery();
     }
 
-    public List<string> getAllChatsFromUser(string userId)
+    public List<object> getAllChatsFromUser(string userId)
     {
         const string sql = """
-    SELECT chat_id FROM allowed_users
+    SELECT allowed_users.chat_id, chat.title 
+    FROM allowed_users
+    LEFT JOIN chat ON chat.chat_id = allowed_users.chat_id
     WHERE user_id = @userId
     """;
 
@@ -120,12 +123,53 @@ class DatabaseConnection
 
         cmd.Parameters.AddWithValue("@userId", Guid.Parse(userId));
 
-        var chatIds = new List<string>();
+        var chats = new List<object>();
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
-            chatIds.Add(reader["chat_id"].ToString()!);
+            chats.Add(new
+            {
+                chatId = reader["chat_id"].ToString()!,
+                title = reader["title"].ToString()!
+            });
 
-        return chatIds;
+        return chats;
+    }
+    public string getTitleFromChatId(string chatId)
+    {
+        const string sql = """
+    SELECT title 
+    FROM chat
+    WHERE chat_id = @chatId
+    """;
+
+        using var conn = CreateConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            return reader["title"].ToString()!;
+
+        return "";
+    }
+
+    public string alterTitleFromChatId(TitleModel titleModel)
+    {
+        const string sql = """
+    UPDATE chat
+    SET title = @title
+    WHERE chat_id = @chatId
+    """;
+
+        using var conn = CreateConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@title", titleModel.title);
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(titleModel.chatId));
+
+        cmd.ExecuteNonQuery();
+        return titleModel.title;
     }
 }

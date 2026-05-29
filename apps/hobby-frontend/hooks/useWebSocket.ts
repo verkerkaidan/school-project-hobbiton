@@ -25,7 +25,6 @@ export function useWebSocket(chatId: string | null) {
       // ← Also guard inside reconnect logic
       if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
 
-      console.log("Connecting with websocket");
       ws.current = new WebSocket(`${API_URL}/ws/${chatId}?userId=${userId}`);
       ws.current.binaryType = "arraybuffer";
 
