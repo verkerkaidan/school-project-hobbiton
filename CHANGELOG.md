@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-05-29
+
+### Fixed
+- **hotfix**: Added environment variables to the docker-compose-prod, chat_http_url & chat_ws-url
+
 ## [1.12.0] - 2026-05-29
 
 ### Changed
