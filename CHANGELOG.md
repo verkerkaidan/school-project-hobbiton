@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.12.2] - 2026-05-29
+
+### Fixed
+- **hotfix**: Double variables with space in gitlab-ci.yml error in merge
+
 ## [1.12.1] - 2026-05-29
 
 ### Fixed
