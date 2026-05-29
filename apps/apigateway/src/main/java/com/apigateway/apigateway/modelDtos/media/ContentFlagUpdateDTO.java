@@ -9,7 +9,7 @@ public class ContentFlagUpdateDTO {
     public String file;
     public String note;
 
-    public ContentFlagUpdateDTO(ContentFlag contentFlag, String hash, String note) {
+    public ContentFlagUpdateDTO(String hash, ContentFlag contentFlag, String note) {
         this.contentFlag = contentFlag;
         this.hash = hash;
         this.note = note;

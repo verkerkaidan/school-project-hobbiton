@@ -152,10 +152,10 @@ Handles most logic regarding actions with media files and media instances
 
   @doc """
     Patches all MediaFiles from given id's with the according content_flag
-    @params: content_flag @contentFlag, file_hash binary
+    @params: content_flag @contentFlag, file_hash binary note String
     @returns: {file_id: uuid, status: "ok"} || {status: "error", reason: reason}
   """
-  def update_content_flag(content_flag, file_hash) do
+  def update_content_flag(content_flag, file_hash, note) do
     binary_hash = Base.decode64!(file_hash)
 
     case Repo.get_by(MediaFile, hash: binary_hash) do
@@ -163,24 +163,42 @@ Handles most logic regarding actions with media files and media instances
         {:error, :not_found}
 
       %MediaFile{} = media_file ->
-        if media_file.admin_approved do
-          IO.inspect("MediaFile for hash: #{inspect(file_hash)} already approved by admin", LABEL: "contentFlagUpdate");
+        # Normalise: apply admin approval before the update
+        media_file =
+          if note == "Admin driven change" do
+            %{media_file | admin_approved: true}
+          else
+            media_file
+          end
+
+        # Short-circuit: skip update if already admin-approved and this is an AI change
+        if media_file.admin_approved && note == "AI driven change" do
+          IO.inspect(
+            "MediaFile for hash: #{media_file.id} already approved by admin",
+            label: "contentFlagUpdate"
+          )
           {:ok, media_file.id}
+        else
+          media_file
+          |> Ecto.Changeset.change(content_flag: content_flag)
+          |> Repo.update()
+          |> case do
+               {:ok, updated_file} ->
+                 ReportService.update_reports(updated_file.id)
+                 IO.inspect(
+                   "MediaFile with id: #{updated_file.id} updated",
+                   label: "contentFlagUpdate"
+                 )
+                 {:ok, updated_file.id}
+
+               {:error, reason} ->
+                 IO.inspect(
+                   "MediaFile update didn't succeed for id: #{media_file.id}",
+                   label: "contentFlagUpdate"
+                 )
+                 {:error, reason}
+             end
         end
-
-        media_file
-        |> Ecto.Changeset.change(content_flag: content_flag)
-        |> Repo.update()
-        |> case do
-             {:ok, updated_file} ->
-               ReportService.update_reports(updated_file.id)
-               IO.inspect("MediaFile with hash: #{inspect(file_hash)} updated", LABEL: "contentFlagUpdate");
-               {:ok, updated_file.id}
-
-             {:error, reason} ->
-             IO.inspect("No MediaFile found for hash: #{inspect(file_hash)}", LABEL: "contentFlagUpdate");
-               {:error, reason}
-           end
     end
   end
 
