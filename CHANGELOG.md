@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-05-29
+
+### Fixed
+- **hotfix**: added cicd variables to gitlab-ci.yml
+
 ## [1.11.0] - 2026-05-29
 
 ### Added
