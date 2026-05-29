@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - **refactor**: ContentFlag assigning happens at upload and every 24h, instead of every 5mins
 
+## [1.11.2] - 2026-05-29
+
+### Fixed
+- **hotfix**: Space in .gitlab-ci.yml caused error at chat_http_url and chat_ws_url
+
 ## [1.11.1] - 2026-05-29
 
 ### Fixed
