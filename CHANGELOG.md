@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.14.0] - 2026-05-29
 
 ### Added
-- **feat**: Admin approved label prevents the ai model from changing contentflag of reviewed files
+- **feat**: Added usernames to chats in stead of UUIDS for security reasons
 
 ## [1.13.0] - 2026-05-29
 
