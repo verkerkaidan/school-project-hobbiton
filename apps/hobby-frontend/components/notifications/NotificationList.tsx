@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Notification } from "@/types/notifications";
 import { markNotificationRead } from "@/lib/notificationClient";
 import { Bell, UserPlus, Heart, MessageCircle } from "lucide-react";
@@ -99,6 +100,7 @@ export function NotificationItem({
   onRead,
 }: NotificationItemProps) {
   const isUnread = !notification.readAt;
+  const router = useRouter();
   const commentPreview =
     notification.type === "COMMENT" && notification.content
       ? notification.content.length > 60
@@ -106,7 +108,12 @@ export function NotificationItem({
         : notification.content
       : null;
 
-  console.log(commentPreview);
+  const postHref =
+    (notification.type === "COMMENT" || notification.type === "LIKE") &&
+    notification.referenceId
+      ? `/posts/${notification.referenceId}`
+      : null;
+
   const handleClick = async () => {
     if (isUnread) {
       try {
@@ -116,18 +123,20 @@ export function NotificationItem({
         // silently ignore
       }
     }
+    if (postHref) {
+      router.push(postHref);
+    }
   };
 
-  return (
-    <button
-      onClick={handleClick}
-      className={`w-full text-left flex items-start gap-4 p-4 rounded-xl border transition-all duration-200
+  const sharedClassName = `w-full text-left flex items-start gap-4 p-4 rounded-xl border transition-all duration-200
                 ${
                   isUnread
                     ? "bg-brand-muted/40 border-brand/20 hover:bg-brand-muted/60"
                     : "bg-white/5 border-white/5 hover:bg-white/10"
-                }`}
-    >
+                }`;
+
+  const inner = (
+    <>
       <div
         className={`shrink-0 mt-1 p-2 rounded-full ${isUnread ? "bg-brand/20" : "bg-white/10"}`}
       >
@@ -154,6 +163,20 @@ export function NotificationItem({
           aria-label="Unread"
         />
       )}
+    </>
+  );
+
+  if (postHref) {
+    return (
+      <button onClick={handleClick} className={sharedClassName}>
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <button onClick={handleClick} className={sharedClassName}>
+      {inner}
     </button>
   );
 }
