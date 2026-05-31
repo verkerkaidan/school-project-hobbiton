@@ -21,6 +21,7 @@ Model for an uploaded media file
     field :content_type, :string
     field :hash, :binary
     field :original, :binary
+    field :admin_approved, :boolean
   end
 
   @doc false

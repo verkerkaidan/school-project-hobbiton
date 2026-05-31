@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-05-30
+
+### Added
+- **feat**: Admin approved label prevents the ai model from changing contentflag of reviewed files
+
 ## [1.14.1] - 2026-05-29
 
 ### Added

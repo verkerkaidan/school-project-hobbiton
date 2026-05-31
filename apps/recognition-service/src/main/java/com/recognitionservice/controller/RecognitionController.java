@@ -15,8 +15,11 @@ import java.util.concurrent.CompletableFuture;
 @CrossOrigin(origins = {"*"})
 @RequestMapping("/recognition")
 public class RecognitionController {
-    @Autowired
-    private RecognitionService recognitionService;
+    private final RecognitionService recognitionService;
+
+    public RecognitionController(RecognitionService recognitionService) {
+        this.recognitionService = recognitionService;
+    }
 
     /**
      * Generates a content risk assessment for each of the given files

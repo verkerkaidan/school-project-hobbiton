@@ -11,7 +11,7 @@ mkdir -p $MODEL_DIR
 MODEL_NAME="${MODEL_NAME:-car_classifier_v2.pt}"
 echo "MODEL_NAME is: ${MODEL_NAME}"
 
-MODEL_URL="https://gitlab.inf-hsleiden.nl/s1147087/my-model-artifacts/-/raw/8e0367231b8ea4b166447b55d3ee3fc949b3ea52/Hobbithon/${MODEL_NAME}"
+MODEL_URL="https://gitlab.inf-hsleiden.nl/s1147087/my-model-artifacts/-/raw/c2eb35b3759f28216fd97f0c39e25cfabbebc67e/Hobbithon/${MODEL_NAME}"
 echo "Downloading model ${MODEL_NAME}..."
 
 curl -L "$MODEL_URL" -o "$MODEL_DIR/${MODEL_NAME}"

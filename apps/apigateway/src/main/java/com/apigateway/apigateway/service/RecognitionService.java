@@ -72,9 +72,12 @@ public class RecognitionService {
     private void assignContentFlags(List<ContentFlagUpdateDTO> files) {
         CompletableFuture.runAsync(() -> {
             List<ContentFlagUpdateDTO> results = recognitionClient.assignContentFlags(files);
+            results.forEach((ContentFlagUpdateDTO dto) -> {
+                System.out.println("[RECOGNITION SERVICE assignContentFlags] note: " + dto.note + " -- hash: " + dto.hash);
+            });
             mediaClient.assignContentFlags(results);
         }).exceptionally(ex -> {
-            System.err.println("assignContentFlags failed: " + ex.getMessage());
+            System.err.println("assignContentFlags failed: " + ex);
             return null;
         });
     }
