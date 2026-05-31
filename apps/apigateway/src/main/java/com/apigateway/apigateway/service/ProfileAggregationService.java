@@ -6,7 +6,7 @@ import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.clients.ProfileConnectionClient;
 import com.apigateway.apigateway.models.CreateReportRequest;
 import com.apigateway.apigateway.models.User;
-import com.apigateway.apigateway.models.UserProfile;
+import com.apigateway.apigateway.modelDtos.UserProfile;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.models.ProfileResponse;
 import org.slf4j.Logger;

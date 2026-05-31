@@ -1,7 +1,7 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.clients.ProfileClient;
-import com.apigateway.apigateway.models.CreateProfileRequest;
+import com.apigateway.apigateway.modelDtos.CreateProfileRequest;
 import com.apigateway.apigateway.models.ProfileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +30,13 @@ public class ProfileManagementController {
     public ResponseEntity<ProfileResponse> createProfile(
             @RequestBody CreateProfileRequest request,
             @RequestHeader("Authorization") String authorization) {
-        logger.info("[createProfile] Creating profile for username: {}", request.getUsername());
+        logger.info("[createProfile] Creating profile for username: {}", request.username);
         try {
             ProfileResponse profile = profileClient.createProfile(request, authorization);
-            logger.info("[createProfile] Profile created successfully for username: {}", request.getUsername());
+            logger.info("[createProfile] Profile created successfully for username: {}", request.username);
             return ResponseEntity.ok(profile);
         } catch (Exception e) {
-            logger.error("[createProfile] Failed to create profile for username: {} - {}", request.getUsername(),
+            logger.error("[createProfile] Failed to create profile for username: {} - {}", request.username,
                     e.getMessage(), e);
             throw e;
         }

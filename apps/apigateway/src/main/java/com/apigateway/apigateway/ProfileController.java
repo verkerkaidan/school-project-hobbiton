@@ -1,7 +1,7 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.models.User;
-import com.apigateway.apigateway.models.UserProfile;
+import com.apigateway.apigateway.modelDtos.UserProfile;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.service.ProfileAggregationService;
 import org.slf4j.Logger;

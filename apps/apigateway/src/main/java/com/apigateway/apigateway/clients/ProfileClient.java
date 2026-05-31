@@ -1,6 +1,6 @@
 package com.apigateway.apigateway.clients;
 
-import com.apigateway.apigateway.models.CreateProfileRequest;
+import com.apigateway.apigateway.modelDtos.CreateProfileRequest;
 import com.apigateway.apigateway.models.ProfileResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
