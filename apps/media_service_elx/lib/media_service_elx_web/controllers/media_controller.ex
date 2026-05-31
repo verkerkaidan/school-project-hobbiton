@@ -32,7 +32,7 @@ Home of the first functions that are called when a request is coming in from api
   @returns: List of partial MediaFile's
   """
   def retrieve_media(conn, %{"instances" => instance_ids}) when is_list(instance_ids) do
-    IO.inspect(instance_ids, LABEL: "params")
+    IO.inspect(instance_ids, label: "instance ids at upload")
 
     results = Enum.map(instance_ids, fn instance_id ->
       case MediaService.retrieve_media_file(instance_id) do
@@ -64,15 +64,20 @@ Home of the first functions that are called when a request is coming in from api
 
   @doc """
   Updates the content_flag of MediaFile for each of the ids
-  @params: [{fileId: uuid, contentFlag: @contentFlag}]
-  @returns: {results: {:ok, uuid}}
+  @params: [{fileId: uuid, contentFlag: @contentFlag, note: String}]
+  @returns: {results: [{:ok, uuid}]}
   """
   def update_content_flag(conn, %{"_json" => updates}) when is_list(updates) do
-    results = Enum.map(updates, fn %{"contentFlag" => content_flag, "hash" => file_hash} ->
+    IO.inspect(updates, label: "incoming update")
+    results = Enum.map(updates, fn update ->
+      content_flag = Map.fetch!(update, "contentFlag")
+      file_hash    = Map.fetch!(update, "hash")
+      note         = Map.get(update, "note", "")
+
       flag = MediaFile.content_flag(content_flag)
-      case MediaService.update_content_flag(flag, file_hash) do
-        {:ok, id} -> %{file_id: id, status: "ok"}
-        {:error, reason} -> %{status: "error", reason: reason}
+      case MediaService.update_content_flag(flag, file_hash, note) do
+        {:ok, id}         -> %{file_id: id, status: "ok"}
+        {:error, reason}  -> %{status: "error", reason: reason}
       end
     end)
 
