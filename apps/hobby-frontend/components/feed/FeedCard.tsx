@@ -38,13 +38,13 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="break-inside-avoid group mb-6 rounded-xl ring-1 ring-brand/30 shadow-[0_0_20px_rgba(236,72,153,0.12)]"
+      className="break-inside-avoid group mb-6 rounded-xl overflow-hidden ring-1 ring-brand/30 shadow-[0_0_20px_rgba(236,72,153,0.12)]"
       onClick={() => router.push(`/posts/${item.id}`)}
     >
       {/* Image Container */}
       {media && (
         <div
-          className={`relative w-full overflow-hidden rounded-t-xl ${aspectRatio}`}
+          className={`relative w-full rounded-t-xl transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""} ${aspectRatio}`}
         >
           {/* 3-dot menu (top-right) */}
           <div className="absolute top-2 right-2 z-20">
@@ -58,7 +58,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
             alt={item.title}
             fill
             sizes={"(max-width: 768px) 100vw, 50vw"}
-            className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""}`}
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
           {/* 🚨 Content Warning Overlay */}
