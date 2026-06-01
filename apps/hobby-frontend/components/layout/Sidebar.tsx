@@ -42,9 +42,7 @@ export const Sidebar = () => {
         href="/"
         className="mb-16 p-3 bg-brand-muted rounded-2xl border border-brand/20 group"
       >
-        <motion.div
-          animate={{ rotate: [0, 360, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        <div
           className="w-8 h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors"
         />
       </Link>
