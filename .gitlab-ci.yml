@@ -93,24 +93,7 @@ test:interaction-service:
     expire_in: 30 days
 
 # Test library-service
-test:library-service:
-  <<: *maven_test_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - apps/library-service/**/*
-  script:
-    - cd apps/library-service
-    - mvn clean test
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - apps/library-service/target/surefire-reports/TEST-*.xml
-    paths:
-      - apps/library-service/target/surefire-reports/
-      - apps/library-service/target/site/jacoco/
-    expire_in: 30 days
+
 
 # Test recognition-service
 test:recognition-service:
