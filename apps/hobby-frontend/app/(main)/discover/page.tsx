@@ -59,7 +59,7 @@ export default function DiscoverPage() {
         try {
             // Adjust port if needed; default Spring Boot is 8080
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_LIBRARY_SERVICE_URL}/api/v1/library/search`,
+                `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
                 {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},

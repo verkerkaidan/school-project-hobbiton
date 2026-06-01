@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CHANGELOG = resolve(__dirname, "../CHANGELOG.md");
 const PKG = resolve(__dirname, "../package.json");
+const PKG_LOCK = resolve(__dirname, "../package-lock.json");
 
 // Conventional commit type → Keep a Changelog section
 const TYPES = [
@@ -162,9 +163,14 @@ const pkg = JSON.parse(readFileSync(PKG, "utf8"));
 pkg.version = newVersion;
 writeFileSync(PKG, JSON.stringify(pkg, null, 2) + "\n", "utf8");
 
+const lock = JSON.parse(readFileSync(PKG_LOCK, "utf8"));
+lock.version = newVersion;
+if (lock.packages?.[""]) lock.packages[""].version = newVersion;
+writeFileSync(PKG_LOCK, JSON.stringify(lock, null, 2) + "\n", "utf8");
+
 console.log(`\nReleased ${currentVersion} → ${newVersion}`);
 console.log("Updated CHANGELOG.md and package.json\n");
 console.log("Next steps:");
-console.log(`  git add CHANGELOG.md package.json`);
+console.log(`  git add CHANGELOG.md package.json package-lock.json`);
 console.log(`  git commit -m "chore: release ${newVersion}"`);
 console.log(`  git tag v${newVersion}\n`);
