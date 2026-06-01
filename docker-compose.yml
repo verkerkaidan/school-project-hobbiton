@@ -188,7 +188,7 @@ services:
 
   library-service:
     build:
-      context: ./apps/library-service-rust
+      context: ./apps/library-service
     container_name: library-service
     restart: no
     ports:

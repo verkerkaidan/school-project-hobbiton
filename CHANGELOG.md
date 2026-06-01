@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-06-01
+
+### Changed
+- **refactor**: Delete old java library server and refactor the rust server to be called "library-service"
+
 ## [1.16.4] - 2026-06-01
 
 ### Added
