@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-06-01
+
+### Added
+- **feat**: Add author to feedcard, fix rounded corners on images
+
 ## [1.17.2] - 2026-06-01
 
 ### Changed

@@ -7,6 +7,7 @@ import { ImageMenu } from "@/components/ui/ImageMenu";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import LikeButton from "@/components/interaction/LikeButton";
+import { FeedCardAuthor } from "@/components/feed/FeedCardAuthor";
 
 export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
   const [revealed, setRevealed] = useState(false);
@@ -42,7 +43,9 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
     >
       {/* Image Container */}
       {media && (
-        <div className={`relative w-full overflow-hidden ${aspectRatio}`}>
+        <div
+          className={`relative w-full overflow-hidden rounded-t-xl ${aspectRatio}`}
+        >
           {/* 3-dot menu (top-right) */}
           <div className="absolute top-2 right-2 z-20">
             <ImageMenu
@@ -84,6 +87,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
 
       {/* Content Area */}
       <div className="p-6 space-y-3">
+        <FeedCardAuthor userId={item.userId} />
         <div className="flex items-center gap-3">
           <span
             className={`w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-current/50`}
