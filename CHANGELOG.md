@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.18.1] - 2026-06-01
+
+### Fixed
+- **fix**: Circle logo randomly spinning for no reason really
+
 ## [1.18.0] - 2026-06-01
 
 ### Added
