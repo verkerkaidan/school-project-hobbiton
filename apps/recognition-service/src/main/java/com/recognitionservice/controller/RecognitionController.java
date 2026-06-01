@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,8 +15,11 @@ import java.util.concurrent.CompletableFuture;
 @CrossOrigin(origins = {"*"})
 @RequestMapping("/recognition")
 public class RecognitionController {
-    @Autowired
-    private RecognitionService recognitionService;
+    private final RecognitionService recognitionService;
+
+    public RecognitionController(RecognitionService recognitionService) {
+        this.recognitionService = recognitionService;
+    }
 
     /**
      * Generates a content risk assessment for each of the given files
@@ -29,8 +33,11 @@ public class RecognitionController {
     ) {
         List<CompletableFuture<ContentFlagUpdateDTO>> futures = DTOToBeUpdatedList.stream()
                 .map(dto -> CompletableFuture.supplyAsync(() -> {
-                    ContentFlag contentFlag = recognitionService.flagFile(dto.file);
-                    return new ContentFlagUpdateDTO(dto.fileId, contentFlag, "AI driven change");
+                    byte[] file = Base64.getDecoder().decode(dto.file);
+
+                    ContentFlag contentFlag = recognitionService.flagFile(file);
+                    System.out.println("Assigned content flag: " + contentFlag.toString() + " to file: " + dto.hash);
+                    return new ContentFlagUpdateDTO(dto.hash, contentFlag, "AI driven change");
                 }))
                 .toList();
 

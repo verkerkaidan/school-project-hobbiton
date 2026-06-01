@@ -40,6 +40,8 @@ func (h *Handler) getPreferences(w http.ResponseWriter, r *http.Request) {
 		models.NotificationTypeFollow,
 		models.NotificationTypeUserPost,
 		models.NotificationTypeRecommendedPost,
+		models.NotificationTypeLike,
+		models.NotificationTypeComment,
 	} {
 		if _, ok := prefs[string(t)]; !ok {
 			prefs[string(t)] = true
@@ -61,7 +63,9 @@ func (h *Handler) updatePreference(w http.ResponseWriter, r *http.Request) {
 	switch notifType {
 	case models.NotificationTypeFollow,
 		models.NotificationTypeUserPost,
-		models.NotificationTypeRecommendedPost:
+		models.NotificationTypeRecommendedPost,
+		models.NotificationTypeLike,
+		models.NotificationTypeComment:
 		// valid type
 	default:
 		http.Error(w, "invalid notification type", http.StatusBadRequest)

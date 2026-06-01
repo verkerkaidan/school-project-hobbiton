@@ -17,6 +17,11 @@ import {
   checkIsFollowing,
   checkIsBlocking,
 } from "@/queries/getProfile";
+import {
+  getPostSubscription,
+  togglePostSubscription,
+  fetchNotificationPreferences,
+} from "@/lib/notificationClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { UserProfile, User } from "@/types/profile";
 
@@ -26,7 +31,15 @@ interface ProfileViewProps {
   isOwnProfile: boolean;
 }
 
+<<<<<<< HEAD
 export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps) {
+=======
+export function ProfileView({
+  userId,
+  username,
+  isOwnProfile,
+}: ProfileViewProps) {
+>>>>>>> origin/main
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id ?? "";
   // Resolved after the initial profile load when navigating by username
@@ -46,6 +59,8 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showPreferenceWarning, setShowPreferenceWarning] = useState(false);
   // Whether the profile being viewed follows the current user back
   const [targetFollowsCurrentUser, setTargetFollowsCurrentUser] =
     useState(false);
@@ -70,6 +85,8 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
     setFollowingCountOffset(0);
     setIsFollowing(false);
     setIsBlocked(false);
+    setIsSubscribed(false);
+    setShowPreferenceWarning(false);
     setTargetFollowsCurrentUser(false);
 
     const load = async () => {
@@ -87,15 +104,28 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
             : await getProfile(userId!);
           const targetId = profileData.id;
           setResolvedUserId(targetId);
+<<<<<<< HEAD
           const [following, blocking, followsBack] = await Promise.all([
             checkIsFollowing(currentUserId, targetId),
             checkIsBlocking(currentUserId, targetId),
             checkIsFollowing(targetId, currentUserId),
           ]);
+=======
+          const [following, blocking, followsBack, subscription] =
+            await Promise.all([
+              checkIsFollowing(currentUserId, targetId),
+              checkIsBlocking(currentUserId, targetId),
+              checkIsFollowing(targetId, currentUserId),
+              getPostSubscription(targetId).catch(() => ({
+                subscribed: false,
+              })),
+            ]);
+>>>>>>> origin/main
           setProfile(profileData);
           setIsFollowing(following);
           setIsBlocked(blocking);
           setTargetFollowsCurrentUser(followsBack);
+          setIsSubscribed(subscription.subscribed);
         }
       } catch (error) {
         console.error("[ProfileView] Failed to load profile:", error);
@@ -140,7 +170,13 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
     setShowFollowingModal(true);
     const fetchTargetFollowing =
       !isOwnProfile && targetFollowing.length === 0
+<<<<<<< HEAD
         ? getFollowing(resolvedUserId).then(setTargetFollowing).catch(console.error)
+=======
+        ? getFollowing(resolvedUserId)
+            .then(setTargetFollowing)
+            .catch(console.error)
+>>>>>>> origin/main
         : Promise.resolve();
     setLoadingFollowing(true);
     await Promise.all([fetchTargetFollowing, ensureCurrentUserFollowing()]);
@@ -159,10 +195,28 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
       ? targetFollowing.length // use the live list length when available
       : (profile?.followingCount ?? 0)) + followingCountOffset;
 
+  const handleSubscriptionToggle = async () => {
+    const result = await togglePostSubscription(resolvedUserId);
+    setIsSubscribed(result.subscribed);
+    if (result.subscribed) {
+      // Check whether the user's global USER_POST preference is enabled.
+      // If it is off, the subscription row alone won't deliver notifications.
+      try {
+        const prefs = await fetchNotificationPreferences();
+        setShowPreferenceWarning(prefs["USER_POST"] === false);
+      } catch {
+        // Ignore — warning is non-critical
+      }
+    } else {
+      setShowPreferenceWarning(false);
+    }
+  };
+
   // Toggles follow state and updates the follower count + cached followers list optimistically
   const handleFollow = async () => {
     const nowFollowing = await toggleFollow(currentUserId, resolvedUserId);
     setIsFollowing(nowFollowing);
+    if (!nowFollowing) setIsSubscribed(false);
     setFollowerCountOffset((prev) => prev + (nowFollowing ? 1 : -1));
     if (followers.length > 0) {
       if (nowFollowing) {
@@ -260,8 +314,11 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
         isOwnProfile={isOwnProfile}
         isFollowing={isFollowing}
         isBlocked={isBlocked}
+        isSubscribed={isSubscribed}
+        showPreferenceWarning={showPreferenceWarning}
         onFollow={handleFollow}
         onBlock={handleBlock}
+        onSubscriptionToggle={handleSubscriptionToggle}
         onReport={() => setShowReportModal(true)}
       />
 
@@ -322,7 +379,16 @@ export function ProfileView({ userId, username, isOwnProfile }: ProfileViewProps
           isOpen={showReportModal}
           targetUsername={profile.username}
           onConfirm={async (reason, description) => {
+<<<<<<< HEAD
             await createReport(currentUserId, resolvedUserId, reason, description);
+=======
+            await createReport(
+              currentUserId,
+              resolvedUserId,
+              reason,
+              description,
+            );
+>>>>>>> origin/main
           }}
           onClose={() => setShowReportModal(false)}
         />

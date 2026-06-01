@@ -39,7 +39,7 @@ export async function login(email: string, password: string): Promise<void> {
 
   if (res.status == 200) {
     const data = await handleResponse<AuthResponse>(res);
-    saveSession(data);
+    saveSession(data, email);
   } else {
     // Parse the error body if your API returns one, fallback to a generic message
     const errorData = await res.json().catch(() => null);
@@ -47,12 +47,50 @@ export async function login(email: string, password: string): Promise<void> {
     throw new Error(message);
   }
 }
+<<<<<<< HEAD
+=======
+/**
+ * Tries to register user by fetching with post, if return is 200 goes to handleResponse and saves into cookies with savesSession()
+ * If register fails, throws error
+ * @param email User email for login
+ * @param password User password for login
+ */
+export async function register(email: string, password: string): Promise<void> {
+  console.log("BASE URL: " + BASE_URL);
+  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (res.status == 200) {
+    const data = await handleResponse<AuthResponse>(res);
+    saveSession(data, email);
+  } else {
+    // Parse the error body if your API returns one, fallback to a generic message
+    const errorData = await res.json().catch(() => null);
+    const message = errorData?.message ?? `Login failed (${res.status})`;
+    throw new Error(message);
+  }
+}
+>>>>>>> origin/main
 
 /**
- * Saves token and userId into cookies for 2 days
- * @param res total result of auth requests
+ * Returns the email address of the currently authenticated user.
+ * The email is persisted in a cookie at login/register time since the JWT
+ * does not carry an email claim.
  */
-function saveSession(res: AuthResponse) {
+export function getCurrentUserEmail(): string | null {
+  return Cookies.get("email") ?? null;
+}
+
+/**
+ * Saves token, userId, and email into cookies for 2 days
+ * @param res total result of auth requests
+ * @param email the email used to authenticate
+ */
+function saveSession(res: AuthResponse, email: string) {
   Cookies.set("token", res.token, { expires: 2 });
   Cookies.set("userId", res.userId, { expires: 2 });
+  Cookies.set("email", email, { expires: 2 });
 }

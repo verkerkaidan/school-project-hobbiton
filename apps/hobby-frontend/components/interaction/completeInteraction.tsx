@@ -2,76 +2,51 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createComment, getInteraction } from "@/lib/interactionClient";
+import { createComment } from "@/lib/interactionClient";
 import LikeButton from "@/components/interaction/LikeButton";
-import { CompleteComment } from "@/types/interaction";
+import { CompleteComment, Comment, Interaction } from "@/types/interaction";
 import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
+import {Post} from "@/types/posts";
+import {getPostById} from "@/queries/getPostById";
 
 interface CompleteInteractionProps {
-  postId: string;
+  post: Post;
 }
 
 const CompleteInteraction: React.FC<CompleteInteractionProps> = ({
-  postId,
+  post,
 }) => {
   const [likes, setLikes] = useState<number>(0);
   const [comments, setComments] = useState<CompleteComment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
 
-  // async function syncInteraction() {
-  //     const partialInteraction = await getInteraction(postId);
-  //     const completeComments: CompleteComment[] = []; // Initialize a new array to store the complete comments
-  //
-  //     setLikes(partialInteraction.likes);
-  //
-  //     // Use Promise.all to wait for all profiles to be fetched before updating the state
-  //     await Promise.all(partialInteraction.comments.map(async (comment) => {
-  //         const profile = await getProfile(comment.userId);
-  //         const completeComment: CompleteComment = {
-  //             userData: profile,
-  //             commentData: comment
-  //         };
-  //         completeComments.push(completeComment);
-  //     }));
-  //
-  //     setComments(completeComments); // Now update the comments state after all profiles are fetched
-  // }
-  function syncInteraction() {
-    getInteraction(postId).then(async (partialInteraction) => {
-      const completeComments: CompleteComment[] = []; // Initialize a new array to store the complete comments
+    async function syncInteraction() {
+        const freshPost = await getPostById(post.id);
 
-      setLikes(partialInteraction.likes);
+        const completeComments: CompleteComment[] = await Promise.all(
+            freshPost.interaction.comments.map(async (comment: Comment) => {
+                const profile = await getProfile(comment.userId);
+                return { userData: profile, commentData: comment } as CompleteComment;
+            })
+        );
 
-      // Use Promise.all to wait for all profiles to be fetched before updating the state
-      await Promise.all(
-        partialInteraction.comments.map(async (comment) => {
-          const profile = await getProfile(comment.userId);
-          const completeComment: CompleteComment = {
-            userData: profile,
-            commentData: comment,
-          };
-          completeComments.push(completeComment);
-        }),
-      );
-
-      setComments(completeComments); // Now update the comments state after all profiles are fetched
-    });
+        setComments(completeComments);
+        setLikes(freshPost.interaction.likes);
   }
 
   // // Fetch likes and comments
   useEffect(() => {
     syncInteraction();
-  }, [postId]);
+  }, [post]);
 
   // Handle adding a new comment
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
 
-    await createComment(Cookies.get("userId")!, postId, newComment);
+    await createComment(Cookies.get("userId")!, post.id, newComment);
     setNewComment("");
     syncInteraction();
-    console.log("comments length:" + comments.length);
   };
 
   return (
@@ -80,7 +55,7 @@ const CompleteInteraction: React.FC<CompleteInteractionProps> = ({
       {/* extra top margin and vertical spacing */}
       {/* Like Button */}
       <div className="mt-4">
-        <LikeButton itemId={postId} initialLikes={likes} />
+        <LikeButton itemId={post.id} initialLikes={likes} />
       </div>
       {/* Comments Section */}
       <div className="space-y-4">

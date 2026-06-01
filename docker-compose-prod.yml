@@ -12,9 +12,26 @@ services:
       - NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=${NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}
       - NEXT_PUBLIC_MEDIA_URL=${NEXT_PUBLIC_MEDIA_URL}
       - NEXT_PUBLIC_INTERACTION_URL=${NEXT_PUBLIC_INTERACTION_URL}
+      - NEXT_PUBLIC_WS_CHAT_SERVICE_URL= ${NEXT_PUBLIC_WS_CHAT_SERVICE_URL}
+      - NEXT_PUBLIC_CHAT_SERVICE_URL= ${NEXT_PUBLIC_CHAT_SERVICE_URL}
       - NEXT_PUBLIC_NOTIFICATION_URL=${NEXT_PUBLIC_NOTIFICATION_URL}
     cpus: 1
     mem_limit: 1024m
+    networks:
+      - hobbithon-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - "15050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    cpus: 0.5
+    mem_limit: 256m
     networks:
       - hobbithon-network
 
@@ -48,15 +65,20 @@ services:
     networks:
       - hobbithon-network
 
-  media-service:
-    image: ${CI_REGISTRY_IMAGE}/media-service:latest
+  media-service-elx:
+    image: ${CI_REGISTRY_IMAGE}/media_service_elx:latest
     restart: always
+    container_name: media-service
     ports:
       - "27086:27086"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_MEDIA_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      PORT: "27086"
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}
+      DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
+      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      SECRET_KEY_BASE: XZWm7Xx0Qo+2qqha+uhLYQXlqMVNV6vy+6VCsCB4Ot4Ekv9n1/47gipDu08ufQ9Q
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -67,6 +89,8 @@ services:
     restart: always
     ports:
       - "27088:27088"
+    environment:
+      MODEL_NAME: ${RECOGNITION_MODEL_NAME}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -120,6 +144,8 @@ services:
     environment:
       OMDB_API_KEY: ${OMDB_API_KEY}
       OMDB_API_URL: ${OMDB_API_URL}
+      # explicit internal Redis URL for containers
+      REDIS_URL: "redis://redis:6379"
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -153,7 +179,7 @@ services:
       DB_NAME: ${DB_NOTIFICATION_NAME}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      NOTIFICATION_ALLOWED_ORIGINS: ${NOTIFICATION_ALLOWED_ORIGINS}
     cpus: 1
     mem_limit: 512m
     networks:
@@ -175,6 +201,22 @@ services:
       PROFILE_SERVICE_URL: ${PROFILE_SERVICE_URL}
       PROFILE_CONNECTION_SERVICE_URL: ${PROFILE_CONNECTION_SERVICE_URL}
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+      INTERACTION_SERVICE_URL: ${INTERACTION_SERVICE_URL}
+      CHAT_HTTP_URL: ${CHAT_HTTP_URL}
+      CHAT_WS_URL: ${CHAT_WS_URL}
+  chat-service:
+    image: ${CI_REGISTRY_IMAGE}/chat-service:latest
+    restart: always
+    ports:
+      - "29294:29294"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_CHAT_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_CHAT}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_CHAT}
+    cpus: 1
+    mem_limit: 1024m
+    networks:
+      - hobbithon-network
 
   database:
     image: postgres:16
@@ -205,6 +247,9 @@ services:
       DB_NOTIFICATION_USER: ${DB_NOTIFICATION_USER}
       DB_NOTIFICATION_PASSWORD: ${DB_NOTIFICATION_PASSWORD}
       DB_NOTIFICATION_NAME: ${DB_NOTIFICATION_NAME}
+      SPRING_DATASOURCE_USERNAME_CHAT: ${SPRING_DATASOURCE_USERNAME_CHAT}
+      SPRING_DATASOURCE_PASSWORD_CHAT: ${SPRING_DATASOURCE_PASSWORD_CHAT}
+      SPRING_DATASOURCE_CHAT_DATABASE: ${SPRING_DATASOURCE_CHAT_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
@@ -213,8 +258,28 @@ services:
     networks:
       - hobbithon-network
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    # Redis is only accessible internally within the Docker network
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    cpus: 1
+    mem_limit: 512m
+    networks:
+      - hobbithon-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   postgres_data:
+  redis_data:
+  pgadmin_data:
 
 networks:
   hobbithon-network:

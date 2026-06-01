@@ -33,9 +33,17 @@ query {
     mediaSet {
       relevantId
       fileData
-      fileThumb
       contentType
       contentFlag
+    }
+    interaction {
+      likes
+      comments {
+        id
+        referenceId
+        userId
+        comment
+      }
     }
   }
 }

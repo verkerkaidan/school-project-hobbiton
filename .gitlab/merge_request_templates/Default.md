@@ -7,6 +7,7 @@
 - [ ] 'User Feed'
 - [ ] 'Authentication/Authorisation'
 - [ ] 'Content warning ai'
+- [ ] 'Chat service'
 - [ ] Anders, namelijk:
 
 ## Beschrijving

@@ -54,6 +54,7 @@ public class InteractionController {
         int likes = likeService.countLikesOfReference(referenceId);
         List<Comment> commentList = commentService.getAllComments(referenceId);
         InteractionReturnDTO dto = new InteractionReturnDTO(likes, commentList);
+        System.out.println("Interaction was fetched for reference: " + referenceId);
         return ResponseEntity.ok(dto);
     }
 

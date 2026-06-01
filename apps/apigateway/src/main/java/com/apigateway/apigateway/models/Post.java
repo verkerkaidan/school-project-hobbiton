@@ -40,10 +40,12 @@ public abstract class Post {
 
     private List<MediaDTO> mediaDTOSet;
 
+    private Interaction interaction;
+
     public Post() {
     }
 
-    public Post(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType) {
+    public Post(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, Interaction interaction) {
         this.id = id;
         this.description = description;
         this.title = title;
@@ -52,6 +54,7 @@ public abstract class Post {
         this.updatedAt = updatedAt;
         this.mediaInstanceSet = mediaInstanceSet;
         this.hobbyType = hobbyType;
+        this.interaction = interaction;
     }
 
     public String getDescription() {
@@ -112,5 +115,13 @@ public abstract class Post {
 
     public void setMediaSet(List<MediaDTO> mediaDTOSet) {
         this.mediaDTOSet = mediaDTOSet;
+    }
+
+    public Interaction getInteraction() {
+        return interaction;
+    }
+
+    public void setInteraction(Interaction interaction) {
+        this.interaction = interaction;
     }
 }

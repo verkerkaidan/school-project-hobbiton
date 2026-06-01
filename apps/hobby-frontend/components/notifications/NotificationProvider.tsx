@@ -65,6 +65,13 @@ export function NotificationProvider({
       setUnreadCount((c) => c + 1);
       subscribers.current.forEach((cb) => cb(notif));
     },
+<<<<<<< HEAD
+=======
+    // Re-fetch the accurate count from the DB whenever the socket (re-)connects.
+    // This closes the gap where a notification arrives during the ~500 ms WS
+    // handshake window and would otherwise be missed until the next page load.
+    onOpen: refresh,
+>>>>>>> origin/main
   });
 
   return (

@@ -73,5 +73,29 @@ export function buildWebSocketUrl(): string {
   return `${wsBase}/ws${token ? `?token=${token}` : ""}`;
 }
 
+<<<<<<< HEAD
+=======
+export async function getPostSubscription(
+  authorId: string,
+): Promise<{ subscribed: boolean }> {
+  const res = await fetch(`${BASE_URL}/user-post-subscriptions/${authorId}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to fetch post subscription status");
+  return res.json();
+}
+
+export async function togglePostSubscription(
+  authorId: string,
+): Promise<{ subscribed: boolean }> {
+  const res = await fetch(`${BASE_URL}/user-post-subscriptions/${authorId}`, {
+    method: "PUT",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to toggle post subscription");
+  return res.json();
+}
+
+>>>>>>> origin/main
 // Re-export types for convenience
 export type { Notification, NotificationsResponse, NotificationPreferences };

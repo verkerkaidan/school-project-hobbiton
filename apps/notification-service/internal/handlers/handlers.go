@@ -33,6 +33,10 @@ func (h *Handler) Register(mux *http.ServeMux) {
 
 	// Notification CRUD — JWT via Authorization header
 	mux.HandleFunc("POST /notifications", withCORS(h.cfg, h.createNotification))
+<<<<<<< HEAD
+=======
+	mux.HandleFunc("POST /notifications/batch", withCORS(h.cfg, h.batchCreateNotifications))
+>>>>>>> origin/main
 	mux.HandleFunc("GET /notifications", withCORS(h.cfg, h.listNotifications))
 	mux.HandleFunc("PATCH /notifications/{id}/read", withCORS(h.cfg, h.markAsRead))
 	mux.HandleFunc("POST /notifications/read-all", withCORS(h.cfg, h.markAllRead))
@@ -42,6 +46,13 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /notification-preferences", withCORS(h.cfg, h.getPreferences))
 	mux.HandleFunc("PUT /notification-preferences/{type}", withCORS(h.cfg, h.updatePreference))
 
+<<<<<<< HEAD
+=======
+	// Per-user post subscription toggle — JWT via Authorization header
+	mux.HandleFunc("GET /user-post-subscriptions/{authorId}", withCORS(h.cfg, h.getPostSubscription))
+	mux.HandleFunc("PUT /user-post-subscriptions/{authorId}", withCORS(h.cfg, h.togglePostSubscription))
+
+>>>>>>> origin/main
 	// Handle OPTIONS pre-flight for all paths
 	mux.HandleFunc("OPTIONS /", withCORS(h.cfg, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)

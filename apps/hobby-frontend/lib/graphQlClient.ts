@@ -12,18 +12,28 @@ export async function gqlRequest<T>(query: string, variables?: Record<string, un
     body: JSON.stringify({ query, variables }),
   });
 
-  const { data, errors } = await res.json();
-  if (errors?.length) throw new Error(errors[0].message);
+  const json = await res.json();
+
+  const { data, errors } = json;
+  if (errors?.length) {
+    console.error("GraphQL errors:", JSON.stringify(errors, null, 2));
+    throw new Error(errors[0].message);
+  }
 
   return data as T;
 }
 
 export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
   const endpoint: string = typeof window === 'undefined' ? MIDDLEWARE_ENDPOINT_SERVERSIDE! : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
+  const formData = new FormData();
+
+  const { mediaInstanceDTOSet, ...rest } = post;
+  formData.append("data", new Blob([JSON.stringify(rest)], { type: "application/json" }));
+  mediaInstanceDTOSet.forEach((file) => formData.append("files[]", file));
+
   const res = await fetch(endpoint + "/api/create-post", {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(post),
+    body: formData,
   });
 
   const { data, errors } = await res.json();

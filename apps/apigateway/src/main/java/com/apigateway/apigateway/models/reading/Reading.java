@@ -1,5 +1,6 @@
 package com.apigateway.apigateway.models.reading;
 
+import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.models.MediaInstance;
 
@@ -18,8 +19,8 @@ public class Reading extends Post {
 
     }
 
-    public Reading(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, String bookTitle, String pagesRead, String totalPagesRead, boolean bookFinished) {
-        super(id, description, title, userId, createdAt, updatedAt, mediaInstanceSet, hobbyType);
+    public Reading(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, String bookTitle, String pagesRead, String totalPagesRead, boolean bookFinished, Interaction interaction) {
+        super(id, description, title, userId, createdAt, updatedAt, mediaInstanceSet, hobbyType, interaction);
         this.bookTitle = bookTitle;
         this.pagesRead = pagesRead;
         this.totalPagesRead = totalPagesRead;

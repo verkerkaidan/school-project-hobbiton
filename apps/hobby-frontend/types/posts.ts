@@ -1,4 +1,4 @@
-import {Comment} from "@/types/interaction";
+import {Comment, Interaction} from "@/types/interaction";
 
 export interface Exercise {
   title: string;
@@ -10,7 +10,6 @@ export interface Exercise {
 export interface MediaSet {
   relevantId: string;
   fileData: string;
-  fileThumb: string;
   contentType: string;
   contentFlag: string;
 }
@@ -30,6 +29,7 @@ export interface Post {
   updatedAt: string;
   hobbyType: string;
   mediaSet: MediaSet[];
+  interaction: Interaction;
 }
 
 export interface Gym extends Post {

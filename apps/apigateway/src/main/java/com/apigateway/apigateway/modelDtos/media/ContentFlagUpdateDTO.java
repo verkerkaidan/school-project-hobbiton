@@ -3,26 +3,24 @@ package com.apigateway.apigateway.modelDtos.media;
 
 import com.apigateway.apigateway.enums.ContentFlag;
 
-import java.util.UUID;
-
 public class ContentFlagUpdateDTO {
     public ContentFlag contentFlag;
-    public UUID fileId;
-    public byte[] file;
+    public String hash;
+    public String file;
     public String note;
 
-    public ContentFlagUpdateDTO(UUID fileId, ContentFlag contentFlag, String note) {
+    public ContentFlagUpdateDTO(ContentFlag contentFlag, String hash, String note) {
         this.contentFlag = contentFlag;
-        this.fileId = fileId;
+        this.hash = hash;
         this.note = note;
     }
 
-    public ContentFlagUpdateDTO(UUID fileId, byte[] file) {
-        this.fileId = fileId;
-        this.file = file;
+    public ContentFlagUpdateDTO() {
     }
 
-    public ContentFlagUpdateDTO() {
+    public ContentFlagUpdateDTO(String file, String hash) {
+        this.file = file;
+        this.hash = hash;
     }
 }
 

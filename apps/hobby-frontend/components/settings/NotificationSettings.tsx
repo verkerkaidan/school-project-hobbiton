@@ -15,6 +15,11 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   FOLLOW: "Follows",
   USER_POST: "Posts from followed users",
   RECOMMENDED_POST: "Recommended posts",
+<<<<<<< HEAD
+=======
+  LIKE: "Likes on your posts",
+  COMMENT: "Comments on your posts",
+>>>>>>> origin/main
 };
 
 export function NotificationSettings() {
@@ -68,7 +73,13 @@ export function NotificationSettings() {
         </div>
         <div className="flex-1">
           <h2 className="font-semibold text-base">Notifications</h2>
+<<<<<<< HEAD
           <p className="text-accent text-sm">Choose what you get notified about</p>
+=======
+          <p className="text-accent text-sm">
+            Choose what you get notified about
+          </p>
+>>>>>>> origin/main
         </div>
         {isOpen ? (
           <ChevronDown className="text-accent" size={18} />
@@ -85,13 +96,25 @@ export function NotificationSettings() {
             </div>
           )}
           {!loading && !prefs && (
+<<<<<<< HEAD
             <p className="text-sm text-accent">Could not load notification preferences.</p>
+=======
+            <p className="text-sm text-accent">
+              Could not load notification preferences.
+            </p>
+>>>>>>> origin/main
           )}
           {!loading && prefs && (
             <div className="flex flex-col gap-3 mt-1">
               {(Object.keys(TYPE_LABELS) as NotificationType[]).map((type) => (
                 <div key={type} className="flex items-center justify-between">
+<<<<<<< HEAD
                   <span className="text-sm text-accent">{TYPE_LABELS[type]}</span>
+=======
+                  <span className="text-sm text-accent">
+                    {TYPE_LABELS[type]}
+                  </span>
+>>>>>>> origin/main
                   <button
                     onClick={() => handlePrefToggle(type, !prefs[type])}
                     disabled={saving === type}
