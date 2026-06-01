@@ -1,0 +1,45 @@
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use crate::dto::request::SearchType;
+use crate::error::AppError;
+use crate::strategy::book_strategy::OpenLibraryStrategy;
+use crate::strategy::SearchStrategy;
+
+/// **Factory Pattern**
+///
+/// `ServiceFactory` owns all `SearchStrategy` implementations.
+/// On startup it registers every strategy in a HashMap keyed by `SearchType`.
+///
+/// The controller calls `factory.get(search_type)` and gets back the right
+/// strategy — no if/else chains needed anywhere.
+///
+/// Adding a new API = implement `SearchStrategy` + register here.
+pub struct ServiceFactory {
+    strategies: HashMap<SearchType, Arc<dyn SearchStrategy>>,
+}
+
+impl ServiceFactory {
+    /// Build the factory and register all strategies.
+    pub fn new() -> Self {
+        let mut strategies: HashMap<SearchType, Arc<dyn SearchStrategy>> = HashMap::new();
+
+        strategies.insert(
+            SearchType::Book,
+            Arc::new(OpenLibraryStrategy::new()),
+        );
+
+        ServiceFactory { strategies }
+    }
+
+    /// Resolve the strategy for the given `SearchType`.
+    ///
+    /// Returns `AppError::UnknownSearchType` if no strategy is registered,
+    /// which results in a 400 Bad Request response.
+    pub fn get(&self, search_type: SearchType) -> Result<Arc<dyn SearchStrategy>, AppError> {
+        self.strategies
+            .get(&search_type)
+            .cloned()
+            .ok_or_else(|| AppError::UnknownSearchType(search_type.to_string()))
+    }
+}

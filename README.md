@@ -67,6 +67,23 @@ Voor het runnen van elke microservice *die is opgenomen in de docker-compose.yml
 ```powershell
 docker compose up -d
 ```
+ 
+## Redis (caching)
+We added a Redis service to the compose files for caching. The Redis configuration file lives at `./docker/redis/redis.conf` and is mounted into the containers.
+
+To start only Redis locally:
+```powershell
+docker compose up -d redis
+```
+
+To start Redis together with all services:
+```powershell
+docker compose up -d
+```
+
+Notes:
+- The compose files expose Redis on port 6379 for convenience in local development. In production you can remove the port mapping if you don't want Redis reachable from the host.
+- For production passwords/secrets, do not commit credentials to git. Instead set a strong password and enable `requirepass` in the redis.conf or inject via a secrets manager.
 ## Microservice opnemen in docker-compose.yml
 1. Zet een `dockerfile` op in lokale microservice folder structuur. Voor java is dit de algemene Dockerfile setup, enkel de **{snapshot_name}** is per project verschillend. Voor talen buiten JAVA is de dockerfile even zelf uitzoeken.
 ```dockerfile
