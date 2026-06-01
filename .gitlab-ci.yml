@@ -94,7 +94,6 @@ test:interaction-service:
 
 # Test library-service
 
-
 # Test recognition-service
 test:recognition-service:
   <<: *maven_test_template
@@ -146,8 +145,9 @@ build:
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
+    GIT_DEPTH: "2"
   before_script:
-    - apk add --no-cache jq
+    - apk add --no-cache jq git
     - |
       until docker info > /dev/null 2>&1; do
         echo "Waiting for Docker daemon..."
@@ -159,16 +159,17 @@ build:
     - |
       set -e
       for SERVICE_NAME in apigateway authentication-service chat-service interaction-service library-service media_service_elx notification-service post-service profile-connection-service profile-service recognition-service; do
-        echo "Building $SERVICE_NAME..."
-        docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
-        echo "Pushing $SERVICE_NAME..."
-        docker push "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
-        docker rmi "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
+        if git diff --name-only HEAD~1 HEAD | grep -q "^apps/$SERVICE_NAME/"; then
+          echo "Changes detected in $SERVICE_NAME, building service from scratch..."
+          docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
+          echo "Pushing $SERVICE_NAME..."
+          docker push "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
+          docker rmi "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest"
+        else
+          echo "No changes in $SERVICE_NAME, skipping build step."
+        fi
       done
-      echo "Building hobby-frontend with env vars..."
-      echo "NEXT_PUBLIC_AUTHENTICATION_URL=$NEXT_PUBLIC_AUTHENTICATION_URL"
-      echo "NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE=$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE"
-      echo "NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE=$NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE"
+      echo "Building hobby-frontend..."
       docker build --no-cache \
         --build-arg NEXT_PUBLIC_AUTHENTICATION_URL="$NEXT_PUBLIC_AUTHENTICATION_URL" \
         --build-arg NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE="$NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE" \
