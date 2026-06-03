@@ -71,7 +71,7 @@ impl CacheService {
         match serde_json::to_string(value) {
             Ok(json) => {
                 let result: redis::RedisResult<()> =
-                    conn.set_ex(key, json, CACHE_TTL_SECONDS).await;
+                    conn.set_ex(key, json, CACHE_TTL_SECONDS as u64).await;
                 match result {
                     Ok(_) => debug!("Cache SET: {} (TTL={}s)", key, CACHE_TTL_SECONDS),
                     Err(e) => warn!("Redis SET error for key {}: {}", key, e),

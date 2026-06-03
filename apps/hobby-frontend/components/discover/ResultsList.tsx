@@ -1,14 +1,14 @@
 import {motion} from "framer-motion";
 
 type BookResult = {
+    id?: string;
     title: string;
-    description?: string;
     authors?: string[];
-    publisher?: string[];
+    publishers?: string[];
     publishedDate?: string;
     isbn?: string[];
-    pageCount?: string;
-    language?: string[];
+    pageCount?: number;
+    languages?: string[];
     coverId?: string;
     thumbnailUrl?: string;
     resultType: "book";
@@ -16,17 +16,32 @@ type BookResult = {
 type ExerciseResult = {
     exerciseId: string;
     name: string;
-    overview?: string;
     instructions?: string[];
     gifUrl?: string;
+    bodyParts?: string[];
+    targetMuscles?: string[];
+    secondaryMuscles?: string[];
+    equipments?: string[];
     resultType: "exercise";
 };
 type MovieResult = {
-    movieId: string;
+    id: string;
     title: string;
-    description?: string;
-    poster?: string;
     year?: string;
+    rated?: string;
+    released?: string;
+    runtime?: string;
+    genre?: string;
+    director?: string;
+    writer?: string;
+    actors?: string;
+    plot?: string;
+    language?: string;
+    country?: string;
+    awards?: string;
+    poster?: string;
+    imdbRating?: string;
+    mediaType: string;
     resultType: "movie";
 };
 type ResultItem = BookResult | ExerciseResult | MovieResult;
@@ -87,8 +102,8 @@ export default function ResultsList({
                                     <div className="font-semibold text-lg">{item.title}</div>
                                     {item.authors &&
                                         <div className="text-sm text-gray-500">{item.authors.join(", ")}</div>}
-                                    {item.description &&
-                                        <div className="text-sm text-gray-500 mt-1">{item.description}</div>}
+                                    {item.publishedDate &&
+                                        <div className="text-sm text-gray-500 mt-1">Published: {item.publishedDate}</div>}
                                 </div>
                             </li>
                         );
@@ -111,14 +126,14 @@ export default function ResultsList({
                                 )}
                                 <div>
                                     <div className="font-semibold text-lg">{item.name}</div>
-                                    {item.overview && <div className="text-sm text-gray-500 mt-1">{item.overview}</div>}
+                                    {item.targetMuscles && <div className="text-sm text-gray-500 mt-1">Target: {item.targetMuscles.join(", ")}</div>}
                                 </div>
                             </li>
                         );
                     } else if (item.resultType === "movie") {
                         return (
                             <li
-                                key={item.movieId}
+                                key={item.id}
                                 className="glass-card px-6 py-4 rounded-xl mb-4 shadow-md flex gap-4 items-center cursor-pointer hover:border-[2px] hover:border-brand-muted hover:shadow-pink-100 transition"
                                 onClick={() => onSelect && onSelect(item)}
                             >
@@ -134,8 +149,9 @@ export default function ResultsList({
                                 )}
                                 <div>
                                     <div className="font-semibold text-lg">{item.title}</div>
-                                    {item.description &&
-                                        <div className="text-sm text-gray-500 mt-1">{item.description}</div>}
+                                    {item.year && <div className="text-sm text-gray-500">{item.year}</div>}
+                                    {item.plot &&
+                                        <div className="text-sm text-gray-500 mt-1 line-clamp-2">{item.plot}</div>}
                                 </div>
                             </li>
                         );

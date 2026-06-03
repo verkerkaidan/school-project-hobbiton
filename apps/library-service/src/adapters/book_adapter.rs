@@ -1,6 +1,7 @@
 use serde_json::Value;
 use crate::models::book::Book;
 use crate::dto::response::{BookResponse, SearchResult};
+use tracing::debug;
 
 /// **Adapter Pattern**
 ///
@@ -11,21 +12,46 @@ use crate::dto::response::{BookResponse, SearchResult};
 
 /// Adapt a single Open Library "search doc" JSON object → `Book`.
 pub fn adapt_search_doc(raw: &Value) -> Book {
+    debug!("Adapting OpenLibrary search doc: {}", raw);
+
     Book {
         id: raw["key"].as_str().map(str::to_owned),
         title: raw["title"].as_str().map(str::to_owned),
-        authors: json_str_array(&raw["authors"]),
-        publishers: json_str_array(&raw["publishers"]),
+        authors: json_str_array(&raw["author_name"]),
+        publishers: json_str_array(&raw["publisher"]),
         isbn: json_str_array(&raw["isbn"]),
-        languages: json_str_array(&raw["languages"]),
-        published_date: raw["first_published_year"]
+        languages: json_str_array(&raw["language"]),
+        published_date: raw["first_publish_year"]
             .as_i64()
             .map(|t|t.to_string())
-            .or_else(|| raw["first_published_year"].as_str().map(str::to_owned)),
+            .or_else(|| raw["first_publish_year"].as_str().map(str::to_owned)),
         page_count: raw["number_of_pages_median"].as_u64().map(|n| n as u32),
         cover_id: raw["cover_i"].as_i64().map(|id| id.to_string()),
         thumbnail_url: raw["cover_i"].as_i64().map(|id| format!("https://covers.openlibrary.org/b/id/{}-M.jpg", id)),
     }
+}
+
+/// Adapt a full OpenLibrary work/book details JSON → `Book`.
+pub fn adapt_work_doc(raw: &Value) -> Book {
+    debug!("Adapting OpenLibrary work doc: {}", raw);
+
+    let mut book = Book::default();
+    book.id = raw["key"].as_str().map(str::to_owned);
+    book.title = raw["title"].as_str().map(str::to_owned);
+    book.published_date = raw["first_publish_date"].as_str().map(str::to_owned);
+
+    // Extract authors
+    if let Some(authors) = raw["authors"].as_array() {
+        book.authors = authors
+            .iter()
+            .filter_map(|a| {
+                a["name"].as_str().map(str::to_owned)
+                    .or_else(|| a.as_str().map(str::to_owned))
+            })
+            .collect();
+    }
+
+    book
 }
 
 pub fn book_to_search_result(book: Book) -> SearchResult {
