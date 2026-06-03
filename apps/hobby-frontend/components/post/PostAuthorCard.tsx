@@ -100,7 +100,7 @@ export function PostAuthorCard({
               className="object-cover"
             />
           </div>
-          <span className="text-sm font-medium group-hover:text-brand-light transition-colors duration-200">
+          <span className="text-sm font-medium group-hover:text-brand-light transition-colors duration-200 light-mode-text">
             {username}
           </span>
         </Link>

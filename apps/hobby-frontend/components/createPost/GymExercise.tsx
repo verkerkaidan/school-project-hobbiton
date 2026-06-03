@@ -9,7 +9,7 @@ interface GymExerciseProps {
 
 export const GymExercise = ({ ex, index, onRemove, onChange }: GymExerciseProps) => {
     return (
-        <div className="border rounded p-3 flex flex-col gap-2 bg-gray-50">
+        <div className="border rounded-xl p-3 flex flex-col gap-2 bg-background border-2 border-brand">
             <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Exercise {index + 1}</span>
                 <button

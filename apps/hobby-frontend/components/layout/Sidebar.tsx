@@ -9,6 +9,7 @@ import { useNavigation } from "../navigation/useNavigation";
 import { motion } from "framer-motion";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useNotifications } from "@/components/notifications/NotificationProvider";
+import Image from "next/image";
 
 export const Sidebar = () => {
   const { isActive, navigate } = useNavigation();
@@ -16,6 +17,7 @@ export const Sidebar = () => {
   const { unreadCount } = useNotifications();
   const [, setHasAnimated] = useState(false);
   const [hasSession, setHasSession] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const firstRender = useRef(true);
 
   useEffect(() => {
@@ -24,8 +26,31 @@ export const Sidebar = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasAnimated(true);
       firstRender.current = false;
+
+      // Load theme preference from localStorage
+      const savedTheme = localStorage.getItem("theme");
+      const isDark = savedTheme ? savedTheme === "dark" : true;
+      setIsDarkMode(isDark);
+      applyTheme(isDark);
     }
   }, []);
+
+  const applyTheme = (isDark: boolean) => {
+    const htmlElement = document.documentElement;
+    if (isDark) {
+      htmlElement.classList.remove("light-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      htmlElement.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
+  const toggleTheme = () => {
+    const newIsDarkMode = !isDarkMode;
+    setIsDarkMode(newIsDarkMode);
+    applyTheme(newIsDarkMode);
+  };
 
   if (!currentUser && !hasSession) return null;
 
@@ -36,16 +61,49 @@ export const Sidebar = () => {
   );
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-20 md:w-64 bg-black/20 backdrop-blur-xl border-r border-white/5 flex flex-col items-center md:items-start py-8 px-4 z-50">
+    <aside className="fixed top-0 left-0 h-screen w-20 md:w-64 bg-background-secondary backdrop-blur-xl border-r border-white/5 flex flex-col items-center md:items-start py-8 px-4 z-50">
       {/* Logo */}
-      <Link
-        href="/"
-        className="mb-16 p-3 bg-brand-muted rounded-2xl border border-brand/20 group"
-      >
-        <div
-          className="w-8 h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors"
-        />
-      </Link>
+      <div className="flex justify-between w-full">
+        <Link
+          href="/"
+          className="mb-16 p-3 bg-brand-muted rounded-2xl border border-brand/20 group"
+        >
+          <div
+            className="w-8 h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors"
+          />
+        </Link>
+
+        {/* Theme Toggle Buttons */}
+        <div className="flex flex-col gap-2 mt-4">
+          <button
+            onClick={() => toggleTheme()}
+            className={`px-2 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-brand-muted`}
+          >
+            {isDarkMode ?
+              <div className="flex">
+                <Image
+                  src="/svgs/moon.svg"
+                  alt="Edit title"
+                  width={25}
+                  height={25}
+                  className=""
+                />
+                <p>dark</p>
+              </div> :
+                            <div className="flex">
+                <Image
+                  src="/svgs/sun.svg"
+                  alt="Edit title"
+                  width={25}
+                  height={25}
+                  className=""
+                />
+                <p>Light</p>
+              </div>
+            }
+          </button>
+        </div>
+      </div>
 
       {/* Navigatie Links */}
       <nav className="flex-1 w-full space-y-3">
@@ -65,11 +123,10 @@ export const Sidebar = () => {
             >
               <motion.div
                 className={`relative flex items-center gap-4 p-4 rounded-xl transition-all duration-300
-                                ${
-                                  active
-                                    ? "bg-brand-muted text-brand-light border border-brand/20"
-                                    : "hover:bg-white/5 text-accent hover:text-white border border-transparent"
-                                }`}
+                                ${active
+                    ? "bg-brand-muted text-brand-light border border-brand/20"
+                    : "hover:bg-white/5 text-accent hover:text-white border border-transparent"
+                  }`}
                 whileHover={{ x: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
@@ -112,6 +169,8 @@ export const Sidebar = () => {
         imageUrl={currentUser?.profilePictureUrl ?? "/jpeg.png"}
         isOnline={true}
       />
+
+
     </aside>
   );
 };

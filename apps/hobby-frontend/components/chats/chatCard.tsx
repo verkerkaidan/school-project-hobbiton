@@ -13,7 +13,7 @@ export default function ChatCard({
   return (
     <Link
       href={`/chats/${chatId}`}
-      className="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 transition hover:border-blue-500 hover:bg-zinc-800"
+      className="rounded-3xl border bg-background p-5 transition hover:bg-brand"
     >
       <p className="text-sm text-zinc-500">
         Chat

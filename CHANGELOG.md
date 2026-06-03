@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-06-03
+
+### Changed
+- **refactor**: Light mode added to the frontend of application
+
 ## [1.19.1] - 2026-06-03
 
 ### Changed

@@ -93,10 +93,10 @@ const CompleteInteraction: React.FC<CompleteInteractionProps> = ({
           <button
             onClick={handleCommentSubmit}
             disabled={!newComment.trim()} // Disable button if comment is empty
-            className={`self-end px-4 py-2 rounded hover:bg-blue-600 transition ${
+            className={`self-end px-4 py-2 rounded-xl transition ${
               !newComment.trim()
                 ? "bg-gray-300 cursor-not-allowed"
-                : "bg-blue-500 text-white"
+                : "bg-brand text-white hover:bg-brand-light cursor-pointer"
             }`}
           >
             Submit
