@@ -1,5 +1,5 @@
 defmodule MediaServiceElxWeb.ReportControllerTest do
-  use MediaServiceElxWeb.ConnCase, async: true
+  use MediaServiceElxWeb.ConnCase, async: false
 
   import Mox
 

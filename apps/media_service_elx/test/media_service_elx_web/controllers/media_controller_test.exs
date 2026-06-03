@@ -1,5 +1,5 @@
 defmodule MediaServiceElxWeb.MediaControllerTest do
-  use MediaServiceElxWeb.ConnCase, async: true
+  use MediaServiceElxWeb.ConnCase, async: false
 
   import Mox
 
@@ -7,6 +7,11 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
 
   # Ensure mocks are verified after each test
   setup :verify_on_exit!
+  setup do
+    IO.inspect(Application.get_env(:media_service_elx, :media_service), label: "media_service module")
+    IO.inspect(Application.get_env(:media_service_elx, :report_service), label: "report_service module")
+    :ok
+  end
 
   # ---------------------------------------------------------------------------
   # Helpers

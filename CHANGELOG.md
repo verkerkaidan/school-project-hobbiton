@@ -6,15 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [1.21.0] - 2026-06-03
+## [1.19.3] - 2026-06-03
 
-### Added
-- **feat**: Gave users the ability to leave chats.
-
-## [1.20.0] - 2026-06-03
-
-### Changed
-- **refactor**: Styling of frontend is now both in light & dark mode
+### Fixed
+- **hotfix**: Mock.env() call is removed as that isnt available in release
 
 ## [1.19.2] - 2026-06-03
 
