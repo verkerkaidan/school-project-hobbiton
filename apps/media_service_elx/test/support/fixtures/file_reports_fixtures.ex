@@ -4,31 +4,37 @@ defmodule MediaServiceElx.FileReportsFixtures do
   entities via the `MediaServiceElx.FileReports` context.
   """
 
-  @doc """
-  Generate a file_report.
-  """
-  def file_report_fixture(attrs \\ %{}) do
+  alias MediaServiceElx.FileReports
+
+  # ---------------------------------------------------------------------------
+  # Test helpers / fixtures
+  # ---------------------------------------------------------------------------
+
+  def valid_file_report_attrs do
+    %{
+      file_id: Ecto.UUID.generate(),
+      user_id: Ecto.UUID.generate()
+    }
+  end
+
+  def valid_reported_file_attrs do
+    %{hash: :crypto.strong_rand_bytes(32)}
+  end
+
+  def insert_file_report(attrs \\ %{}) do
     {:ok, file_report} =
-      attrs
-      |> Enum.into(%{
-        file_id: "some file_id",
-        user_id: "some user_id"
-      })
-      |> MediaServiceElx.FileReports.create_file_report()
+      valid_file_report_attrs()
+      |> Map.merge(attrs)
+      |> then(&FileReports.create_file_report/1)
 
     file_report
   end
 
-  @doc """
-  Generate a reported_file.
-  """
-  def reported_file_fixture(attrs \\ %{}) do
+  def insert_reported_file(attrs \\ %{}) do
     {:ok, reported_file} =
-      attrs
-      |> Enum.into(%{
-        hash: "some hash"
-      })
-      |> MediaServiceElx.FileReports.create_reported_file()
+      valid_reported_file_attrs()
+      |> Map.merge(attrs)
+      |> then(&FileReports.create_reported_file/1)
 
     reported_file
   end

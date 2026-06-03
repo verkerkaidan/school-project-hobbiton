@@ -4,27 +4,23 @@ defmodule MediaServiceElx.MediaFilesFixtures do
   entities via the `MediaServiceElx.MediaFiles` context.
   """
 
-  @doc """
-  Generate a unique media_file hash.
-  """
-  def unique_media_file_hash do
-    raise "implement the logic to generate a unique media_file hash"
+  alias MediaServiceElx.MediaFiles
+  alias MediaServiceElx.MediaFiles.MediaFile
+
+  def valid_attrs do
+    %{
+      content_flag: MediaFile.content_flag("UNASSIGNED"),
+      content_type: "image/png",
+      hash: :crypto.strong_rand_bytes(32),
+      original: :crypto.strong_rand_bytes(128)
+    }
   end
 
-  @doc """
-  Generate a media_file.
-  """
-  def media_file_fixture(attrs \\ %{}) do
+  def insert_media_file(attrs \\ %{}) do
     {:ok, media_file} =
-      attrs
-      |> Enum.into(%{
-        content_flag: 42,
-        content_type: "some content_type",
-        hash: unique_media_file_hash(),
-        original: "some original",
-        thumbnail: "some thumbnail"
-      })
-      |> MediaServiceElx.MediaFiles.create_media_file()
+      valid_attrs()
+      |> Map.merge(attrs)
+      |> then(&MediaFiles.create_media_file/1)
 
     media_file
   end

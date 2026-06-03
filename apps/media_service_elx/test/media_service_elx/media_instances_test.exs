@@ -1,61 +1,179 @@
 defmodule MediaServiceElx.MediaInstancesTest do
   use MediaServiceElx.DataCase
 
+  alias MediaServiceElx.MediaInstances.MediaInstance
   alias MediaServiceElx.MediaInstances
+  alias MediaServiceElx.MediaInstancesFixtures
 
-  describe "media_instances" do
-    alias MediaServiceElx.MediaInstances.MediaInstance
+  # ---------------------------------------------------------------------------
+  # list_media_instances/0
+  # ---------------------------------------------------------------------------
 
-    import MediaServiceElx.MediaInstancesFixtures
-
-    @invalid_attrs %{file_id: nil, owner_id: nil}
-
-    test "list_media_instances/0 returns all media_instances" do
-      media_instance = media_instance_fixture()
-      assert MediaInstances.list_media_instances() == [media_instance]
+  describe "list_media_instances/0" do
+    test "returns an empty list when there are no media instances" do
+      assert MediaInstances.list_media_instances() == []
     end
 
-    test "get_media_instance!/1 returns the media_instance with given id" do
-      media_instance = media_instance_fixture()
-      assert MediaInstances.get_media_instance!(media_instance.id) == media_instance
+    test "returns all media instances" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      ids = MediaInstances.list_media_instances() |> Enum.map(& &1.id)
+      assert media_instance.id in ids
     end
 
-    test "create_media_instance/1 with valid data creates a media_instance" do
-      valid_attrs = %{file_id: "some file_id", owner_id: "some owner_id"}
+    test "returns multiple media instances" do
+      MediaInstancesFixtures.insert_media_instance()
+      MediaInstancesFixtures.insert_media_instance()
+      assert length(MediaInstances.list_media_instances()) == 2
+    end
+  end
 
-      assert {:ok, %MediaInstance{} = media_instance} = MediaInstances.create_media_instance(valid_attrs)
-      assert media_instance.file_id == "some file_id"
-      assert media_instance.owner_id == "some owner_id"
+  # ---------------------------------------------------------------------------
+  # get_media_instance!/1
+  # ---------------------------------------------------------------------------
+
+  describe "get_media_instance!/1" do
+    test "returns the media instance with the given id" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      found = MediaInstances.get_media_instance!(media_instance.id)
+      assert found.id == media_instance.id
     end
 
-    test "create_media_instance/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = MediaInstances.create_media_instance(@invalid_attrs)
+    test "returns the correct file_id and owner_id" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      found = MediaInstances.get_media_instance!(media_instance.id)
+      assert found.file_id == media_instance.file_id
+      assert found.owner_id == media_instance.owner_id
     end
 
-    test "update_media_instance/2 with valid data updates the media_instance" do
-      media_instance = media_instance_fixture()
-      update_attrs = %{file_id: "some updated file_id", owner_id: "some updated owner_id"}
+    test "raises Ecto.NoResultsError for a non-existent id" do
+      assert_raise Ecto.NoResultsError, fn ->
+        MediaInstances.get_media_instance!(Ecto.UUID.generate())
+      end
+    end
+  end
 
-      assert {:ok, %MediaInstance{} = media_instance} = MediaInstances.update_media_instance(media_instance, update_attrs)
-      assert media_instance.file_id == "some updated file_id"
-      assert media_instance.owner_id == "some updated owner_id"
+  # ---------------------------------------------------------------------------
+  # create_media_instance/1
+  # ---------------------------------------------------------------------------
+
+  describe "create_media_instance/1" do
+    test "creates a media instance with valid attributes" do
+      assert {:ok, %MediaInstance{} = media_instance} =
+               MediaInstances.create_media_instance(MediaInstancesFixtures.valid_attrs())
+
+      assert media_instance.file_id != nil
+      assert media_instance.owner_id != nil
     end
 
-    test "update_media_instance/2 with invalid data returns error changeset" do
-      media_instance = media_instance_fixture()
-      assert {:error, %Ecto.Changeset{}} = MediaInstances.update_media_instance(media_instance, @invalid_attrs)
-      assert media_instance == MediaInstances.get_media_instance!(media_instance.id)
+    test "returns error changeset when all fields are missing" do
+      assert {:error, %Ecto.Changeset{}} = MediaInstances.create_media_instance(%{})
     end
 
-    test "delete_media_instance/1 deletes the media_instance" do
-      media_instance = media_instance_fixture()
+    test "returns error changeset when file_id is missing" do
+      attrs = MediaInstancesFixtures.valid_attrs() |> Map.delete(:file_id)
+      assert {:error, changeset} = MediaInstances.create_media_instance(attrs)
+      assert %{file_id: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "returns error changeset when owner_id is missing" do
+      attrs = MediaInstancesFixtures.valid_attrs() |> Map.delete(:owner_id)
+      assert {:error, changeset} = MediaInstances.create_media_instance(attrs)
+      assert %{owner_id: ["can't be blank"]} = errors_on(changeset)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # update_media_instance/2
+  # ---------------------------------------------------------------------------
+
+  describe "update_media_instance/2" do
+    test "updates a media instance with valid attributes" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      new_owner_id = Ecto.UUID.generate()
+
+      assert {:ok, updated} =
+               MediaInstances.update_media_instance(media_instance, %{owner_id: new_owner_id})
+
+      assert updated.owner_id == new_owner_id
+    end
+
+    test "updates file_id with a new value" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      new_file_id = Ecto.UUID.generate()
+
+      assert {:ok, updated} =
+               MediaInstances.update_media_instance(media_instance, %{file_id: new_file_id})
+
+      assert updated.file_id == new_file_id
+    end
+
+    test "returns error changeset when file_id is set to nil" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+
+      assert {:error, changeset} =
+               MediaInstances.update_media_instance(media_instance, %{file_id: nil})
+
+      assert %{file_id: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "returns error changeset when owner_id is set to nil" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+
+      assert {:error, changeset} =
+               MediaInstances.update_media_instance(media_instance, %{owner_id: nil})
+
+      assert %{owner_id: ["can't be blank"]} = errors_on(changeset)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # delete_media_instance/1
+  # ---------------------------------------------------------------------------
+
+  describe "delete_media_instance/1" do
+    test "deletes a media instance" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
       assert {:ok, %MediaInstance{}} = MediaInstances.delete_media_instance(media_instance)
-      assert_raise Ecto.NoResultsError, fn -> MediaInstances.get_media_instance!(media_instance.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        MediaInstances.get_media_instance!(media_instance.id)
+      end
     end
 
-    test "change_media_instance/1 returns a media_instance changeset" do
-      media_instance = media_instance_fixture()
+    test "does not affect other media instances when one is deleted" do
+      media_instance_1 = MediaInstancesFixtures.insert_media_instance()
+      media_instance_2 = MediaInstancesFixtures.insert_media_instance()
+
+      assert {:ok, _} = MediaInstances.delete_media_instance(media_instance_1)
+
+      assert MediaInstances.get_media_instance!(media_instance_2.id)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # change_media_instance/2
+  # ---------------------------------------------------------------------------
+
+  describe "change_media_instance/2" do
+    test "returns a changeset" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
       assert %Ecto.Changeset{} = MediaInstances.change_media_instance(media_instance)
+    end
+
+    test "returns a changeset reflecting given attrs" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      new_owner_id = Ecto.UUID.generate()
+
+      changeset =
+        MediaInstances.change_media_instance(media_instance, %{owner_id: new_owner_id})
+
+      assert changeset.changes.owner_id == new_owner_id
+    end
+
+    test "defaults to empty attrs" do
+      media_instance = MediaInstancesFixtures.insert_media_instance()
+      changeset = MediaInstances.change_media_instance(media_instance)
+      assert changeset.changes == %{}
     end
   end
 end

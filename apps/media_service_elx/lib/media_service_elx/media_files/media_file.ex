@@ -21,13 +21,13 @@ Model for an uploaded media file
     field :content_type, :string
     field :hash, :binary
     field :original, :binary
-    field :admin_approved, :boolean
+    field :admin_approved, :boolean, default: false
   end
 
   @doc false
   def changeset(media_file, attrs) do
     media_file
-    |> cast(attrs, [:content_flag, :content_type, :hash, :original])
+    |> cast(attrs, [:content_flag, :content_type, :hash, :original, :admin_approved])
     |> validate_required([:content_flag, :content_type, :hash, :original])
     |> unique_constraint(:hash)
     |> validate_inclusion(:content_flag, Map.values(@content_flags))

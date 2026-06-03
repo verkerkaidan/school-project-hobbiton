@@ -4,18 +4,22 @@ defmodule MediaServiceElx.MediaInstancesFixtures do
   entities via the `MediaServiceElx.MediaInstances` context.
   """
 
-  @doc """
-  Generate a media_instance.
-  """
-  def media_instance_fixture(attrs \\ %{}) do
+  alias MediaServiceElx.MediaInstances
+
+  def valid_attrs do
+    %{
+      file_id: Ecto.UUID.generate(),
+      owner_id: Ecto.UUID.generate()
+    }
+  end
+
+  def insert_media_instance(attrs \\ %{}) do
     {:ok, media_instance} =
-      attrs
-      |> Enum.into(%{
-        file_id: "some file_id",
-        owner_id: "some owner_id"
-      })
-      |> MediaServiceElx.MediaInstances.create_media_instance()
+      valid_attrs()
+      |> Map.merge(attrs)
+      |> then(&MediaInstances.create_media_instance/1)
 
     media_instance
   end
+
 end
