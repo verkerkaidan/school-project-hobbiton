@@ -56,6 +56,26 @@ class DatabaseConnection
         }
     }
 
+    public List<String> chatUserList(string chatId)
+    {
+        const string sql = """
+        SELECT user_id
+        FROM allowed_users
+        WHERE chat_id = @chatId
+        """;
+
+        using var conn = CreateConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
+
+        var allowedUsers = new List<string>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            allowedUsers.Add(reader["user_id"].ToString()!);
+
+        return allowedUsers;
+    }
     public List<byte[]> GetChatHistory(string chatId)
     {
         const string sql = """
@@ -171,5 +191,41 @@ class DatabaseConnection
 
         cmd.ExecuteNonQuery();
         return titleModel.title;
+    }
+
+    public bool removeUserFromChat(AlterUserModel alterUserModel)
+    {
+        const string sql = """
+        DELETE FROM allowed_users
+        WHERE user_id = @userId AND chat_id = @chatId
+        """;
+
+        using var conn = CreateConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@userId", Guid.Parse(alterUserModel.userId));
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(alterUserModel.chatId));
+
+        var rowsAffected = cmd.ExecuteNonQuery();
+        return rowsAffected > 0;
+    }
+
+    public bool addUserToChat(AlterUserModel alterUserModel)
+    {
+        const string sql = """
+        INSERT INTO allowed_users (allowed_user_id, chat_id, user_id)
+        VALUES (@id, @chatId, @userId)
+        ON CONFLICT (chat_id, user_id) DO NOTHING
+        """;
+
+        using var conn = CreateConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(alterUserModel.chatId));
+        cmd.Parameters.AddWithValue("@userId", Guid.Parse(alterUserModel.userId));
+
+        var rowsAffected = cmd.ExecuteNonQuery();
+        return rowsAffected > 0;
     }
 }
