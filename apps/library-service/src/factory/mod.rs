@@ -4,6 +4,8 @@ use std::sync::Arc;
 use crate::dto::request::SearchType;
 use crate::error::AppError;
 use crate::strategy::book_strategy::OpenLibraryStrategy;
+use crate::strategy::exercise_strategy::ExerciseDBStrategy;
+use crate::strategy::movie_strategy::OmdbStrategy;
 use crate::strategy::SearchStrategy;
 
 /// **Factory Pattern**
@@ -27,6 +29,16 @@ impl ServiceFactory {
         strategies.insert(
             SearchType::Book,
             Arc::new(OpenLibraryStrategy::new()),
+        );
+
+        strategies.insert(
+            SearchType::Exercise,
+            Arc::new(ExerciseDBStrategy::new()),
+        );
+
+        strategies.insert(
+            SearchType::Movie,
+            Arc::new(OmdbStrategy::new()),
         );
 
         ServiceFactory { strategies }

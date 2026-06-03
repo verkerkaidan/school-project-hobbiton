@@ -22,7 +22,7 @@ pub fn library_routes() -> Router<AppState> {
     Router::new()
         .route("/search", post(search_post))
         .route("/search", get(search_get))
-        .route("/:type/:id", get(find_by_id))
+        .route("/{type}/{id}", get(find_by_id))
         .route("/health", get(health))
 }
 

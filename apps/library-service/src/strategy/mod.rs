@@ -1,5 +1,8 @@
 pub mod book_strategy;
+pub mod movie_strategy;
+pub mod exercise_strategy;
 
+use std::format;
 use async_trait::async_trait;
 use crate::dto::request::SearchType;
 use crate::dto::response::SearchResult;

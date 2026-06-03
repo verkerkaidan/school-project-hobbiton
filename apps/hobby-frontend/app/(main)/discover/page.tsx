@@ -7,14 +7,14 @@ import ResultDetailModal from "@/components/discover/ResultDetailModal";
 import Loading from "../loading";
 
 type BookResult = {
+    id?: string;
     title: string;
-    description?: string;
     authors?: string[];
-    publisher?: string[];
+    publishers?: string[];
     publishedDate?: string;
     isbn?: string[];
-    pageCount?: string;
-    language?: string[];
+    pageCount?: number;
+    languages?: string[];
     coverId?: string;
     thumbnailUrl?: string;
     resultType: "book";
@@ -22,17 +22,32 @@ type BookResult = {
 type ExerciseResult = {
     exerciseId: string;
     name: string;
-    overview?: string;
     instructions?: string[];
     gifUrl?: string;
+    bodyParts?: string[];
+    targetMuscles?: string[];
+    secondaryMuscles?: string[];
+    equipments?: string[];
     resultType: "exercise";
 };
 type MovieResult = {
-    movieId: string;
+    id: string;
     title: string;
-    description?: string;
-    poster?: string;
     year?: string;
+    rated?: string;
+    released?: string;
+    runtime?: string;
+    genre?: string;
+    director?: string;
+    writer?: string;
+    actors?: string;
+    plot?: string;
+    language?: string;
+    country?: string;
+    awards?: string;
+    poster?: string;
+    imdbRating?: string;
+    mediaType: string;
     resultType: "movie";
 };
 type ResultItem = BookResult | ExerciseResult | MovieResult;

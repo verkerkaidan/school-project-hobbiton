@@ -1,0 +1,20 @@
+#[derive(Debug, Clone, Default)]
+pub struct Movie {
+    pub id: Option<String>,
+    pub title: Option<String>,
+    pub year: Option<String>,
+    pub rated: Option<String>,
+    pub released: Option<String>,
+    pub runtime: Option<String>,
+    pub genre: Option<String>,
+    pub director: Option<String>,
+    pub writer: Option<String>,
+    pub actors: Option<String>,
+    pub plot: Option<String>,
+    pub language: Option<String>,
+    pub country: Option<String>,
+    pub awards: Option<String>,
+    pub poster: Option<String>,
+    pub imdb_rating: Option<String>,
+    pub media_type: Option<String>,
+}
