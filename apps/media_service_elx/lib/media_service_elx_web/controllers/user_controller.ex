@@ -2,11 +2,24 @@ defmodule MediaServiceElxWeb.UserController do
   @moduledoc """
   Home of the first functions that are called when a request is coming in from api/user
   """
+  @compile {:no_warn_undefined, [
+    MediaServiceElx.MediaServiceMock,
+    MediaServiceElx.ReportServiceMock
+  ]}
 
   use MediaServiceElxWeb, :controller
 
-  alias MediaServiceElx.ReportService
-  alias MediaServiceElx.MediaService
+  defp media_service do
+    if Mix.env() == :test,
+       do: MediaServiceElx.MediaServiceMock,
+       else: MediaServiceElx.MediaService
+  end
+  defp report_service do
+    if Mix.env() == :test,
+       do: MediaServiceElx.ReportServiceMock,
+       else: MediaServiceElx.ReportService
+  end
+
   alias MediaServiceElx.MediaInstances.MediaInstance
   alias MediaServiceElx.MediaFiles.MediaFile
   alias MediaServiceElxWeb.MediaFilesJSON
@@ -17,10 +30,10 @@ defmodule MediaServiceElxWeb.UserController do
   @returns: {results: [%PartialMediaFile{}]}
   """
   def retrieve_media_by_owner(conn, %{"owner_id" => owner_id}) do
-    instances = MediaService.retrieve_instances_by_owner(owner_id)
+    instances = media_service().retrieve_instances_by_owner(owner_id)
 
     results = Enum.map(instances, fn %MediaInstance{} = instance ->
-      case MediaService.retrieve_media_file(instance.id) do
+      case media_service().retrieve_media_file(instance.id) do
         {:ok, %MediaFile{} = media_file} ->
           %{instance_id: instance.id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
         {:error, reason} ->
@@ -37,12 +50,19 @@ defmodule MediaServiceElxWeb.UserController do
   @returns: {results: {instances: [{:ok, uuid}], reports: [{:ok, uuid}]}}
   """
   def delete_owner(conn, %{"owner_id" => owner_id}) do
-    instances = MediaService.retrieve_instances_by_owner(owner_id)
-    instance_results = MediaService.delete_all_instances(instances)
+    instances = media_service().retrieve_instances_by_owner(owner_id)
+    instance_results = media_service().delete_all_instances(instances)
 
-    reports = ReportService.retrieve_reports_by_owner(owner_id)
-    report_results = ReportService.remove_all_reports(reports)
+    reports = report_service().retrieve_reports_by_owner(owner_id)
+    report_results = report_service().remove_all_reports(reports)
 
-    json(conn, %{results: %{instances: instance_results, reports: report_results}})
+    json(conn, %{instances: instance_results, reports: report_results})
+  end
+
+  def retrieve_reports_by_owner(conn, %{"owner_id" => owner_id}) do
+    reports = report_service().retrieve_reports_by_owner(owner_id)
+              |> Enum.map(fn report -> %{id: report.id, file_id: report.file_id, user_id: report.user_id} end)
+
+    json(conn, %{reports: reports})
   end
 end

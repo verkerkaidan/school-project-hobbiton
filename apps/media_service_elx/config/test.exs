@@ -6,12 +6,12 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :media_service_elx, MediaServiceElx.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "media_service_elx_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+       username: System.get_env("POSTGRES_TEST_USER", "postgres"),
+       password: System.get_env("POSTGRES_TEST_PASSWORD", "postgres"),
+       hostname: System.get_env("POSTGRES_TEST_HOST", "localhost"),
+       database: System.get_env("POSTGRES_TEST_DB", "media_service_test"),
+       pool: Ecto.Adapters.SQL.Sandbox,
+       pool_size: System.schedulers_online() * 2
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
@@ -35,3 +35,8 @@ config :phoenix, :plug_init_mode, :runtime
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+config :media_service_elx, :media_service, MediaServiceMock
+config :media_service_elx, :report_service, ReportServiceMock
+
+
