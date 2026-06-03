@@ -65,14 +65,6 @@ public class ChatController {
                 .retrieve()
                 .toEntity(String.class);
     }
-    @PutMapping("/update-user-chat-connection")
-    public Mono<ResponseEntity<Boolean>> updateUserChatConnection(@RequestBody AlterUserDTO alterUserDTO) {
-        return http.put()
-                .uri("/update-user-chat-connection")
-                .bodyValue(alterUserDTO)
-                .retrieve()
-                .toEntity(Boolean.class);
-    }
 
     @DeleteMapping("/delete-user-from-chat")
     public Mono<ResponseEntity<Boolean>> deleteUserFromChat(@RequestBody AlterUserDTO alterUserDTO) {
