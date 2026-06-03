@@ -4,12 +4,14 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  largeModal?: boolean;
 }
 
 export function Modal({
   isOpen,
   onClose,
   children,
+  largeModal = false,
 }: ModalProps & { children: React.ReactNode }) {
   const mouseDownTarget = React.useRef<EventTarget | null>(null);
 
@@ -24,7 +26,7 @@ export function Modal({
         if (mouseDownTarget.current === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-zinc-900 border border-white/10 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+      <div className={`${largeModal?"w-[60vw]": "w-[30vw]"} bg-zinc-900 border border-white/10 rounded-xl p-8 mx-4 shadow-2xl max-h-[80vh] overflow-y-auto`}>
         {children}
       </div>
     </div>

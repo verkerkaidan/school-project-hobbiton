@@ -1,7 +1,11 @@
+import { getProfile } from "@/queries/getProfile";
+import { User } from "@/types/profile";
+
 // const API_URL = "http://localhost:29294";
 const API_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE + "/api";
 
 export async function getChats(userId: string) {
+
   const res = await fetch(
     `${API_URL}/get-chats/${userId}`,
     {
@@ -36,6 +40,33 @@ export async function getChatTitle(chatId: string): Promise<string> {
   );
 
   return res.json();
+}
+
+export async function getAllowedUsersFromChat(chatId: string): Promise<string[]> {
+  const res = await fetch(
+    `${API_URL}/allowed-users/${chatId}`,
+    {
+      cache: "no-store",
+    }
+  )
+
+  return res.json();
+}
+
+export async function fetchUsersFromChat(chatId: string): Promise<User[]> {
+  const usersList: User[] = [];
+  const allowedUserIds = await getAllowedUsersFromChat(chatId);
+  
+  for (const userId of allowedUserIds) {
+    const userProfile = await getProfile(userId);
+    usersList.push({
+      id: userProfile.id,
+      username: userProfile.username,
+      profilePictureUrl: userProfile.profilePictureUrl,
+    });
+  }
+  
+  return usersList;
 }
 
 export async function updateChatTitle(chatId: string, title: string) {

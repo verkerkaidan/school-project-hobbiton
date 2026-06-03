@@ -29,6 +29,7 @@ var app = builder.Build();
 
 app.UseCors();
 var lobbies = new ConcurrentDictionary<string, List<WebSocket>>();
+var userSockets = new ConcurrentDictionary<string, WebSocket>();
 var db = new DatabaseConnection();
 
 app.UseWebSockets();
@@ -59,7 +60,8 @@ app.Map("/ws/{chatId}", async context =>
 
     Console.WriteLine("instating websocket");
     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-    
+    userSockets[$"{userId}:{chatId}"] = webSocket;
+
     var sockets = lobbies.GetOrAdd(chatId, _ => new List<WebSocket>());
     lock (sockets) sockets.Add(webSocket);
 
@@ -74,7 +76,7 @@ app.Map("/ws/{chatId}", async context =>
             CancellationToken.None);
     }
 
-    await HandleWebSocket(webSocket, sockets, chatId, userId, db);
+    await HandleWebSocket(webSocket, sockets, chatId, userId, db, context);
 });
 
 app.MapPost("/create-chat", (ChatModel chatModel) =>
@@ -102,12 +104,46 @@ app.MapPut("/update-title", (TitleModel titleModel) =>
     return db.alterTitleFromChatId(titleModel);
 });
 
+app.MapPut("/add-user-to-chat", (AlterUserModel alterUserModel) =>
+{
+    bool wasAdded = db.addUserToChat(alterUserModel);
+    return Results.Ok(wasAdded);
+});
+
+app.MapPut("/delete-user-from-chat", async (AlterUserModel alterUserModel) =>
+{
+    bool wasRemoved = db.removeUserFromChat(alterUserModel);
+    
+    if (wasRemoved)
+    {
+        // Close the WebSocket connection for the removed user
+        var key = $"{alterUserModel.userId}:{alterUserModel.chatId}";
+        if (userSockets.TryRemove(key, out var webSocket))
+        {
+            await webSocket.CloseAsync(
+                WebSocketCloseStatus.NormalClosure,
+                "Removed from chat",
+                CancellationToken.None);
+        }
+    }
+    
+    return Results.Ok(wasRemoved);
+});
+
+app.MapGet("/allowed-users/{chatId}", (string chatId)=>
+{
+    return db.chatUserList(chatId);
+});
+
+
+
 async Task HandleWebSocket(
     WebSocket webSocket,
     List<WebSocket> sockets,
     string chatId,
     string userId,
-    DatabaseConnection db)
+    DatabaseConnection db,
+    HttpContext context)
 {
     var buffer = new byte[1024 * 4];
 
@@ -115,6 +151,12 @@ async Task HandleWebSocket(
     {
         while (webSocket.State == WebSocketState.Open)
         {
+            // Reject users not in allowed_users for this chat
+            if (!db.isUserAllowed(chatId, userId))
+            {
+                context.Response.StatusCode = 403;
+                return;
+            }
             var result = await webSocket.ReceiveAsync(
                 new ArraySegment<byte>(buffer), CancellationToken.None);
 
@@ -150,6 +192,7 @@ async Task HandleWebSocket(
     finally
     {
         lock (sockets) sockets.Remove(webSocket);
+        userSockets.TryRemove($"{userId}:{chatId}", out _);
     }
 }
 

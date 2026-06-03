@@ -2,6 +2,7 @@ defmodule MediaServiceElx.ReportService do
   @moduledoc """
   Handles most logic regarding actions with file reports and reported files
 """
+  @behaviour MediaServiceElx.ReportServiceBehaviour
 
   import Ecto.Query
 

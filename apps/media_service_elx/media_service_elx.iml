@@ -99,6 +99,7 @@
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/unicode_util_compat" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/websock" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/websock_adapter" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/mox" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="phoenix" level="project" />
@@ -194,5 +195,6 @@
     <orderEntry type="library" name="unicode_set" level="project" />
     <orderEntry type="library" name="benchee_markdown" level="project" />
     <orderEntry type="library" name="docp" level="project" />
+    <orderEntry type="library" name="junit_formatter" level="project" />
   </component>
 </module>

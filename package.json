@@ -1,6 +1,6 @@
 {
   "name": "bpset-monorepo",
-  "version": "1.15.0",
+  "version": "1.19.2",
   "description": "BPSET",
   "private": true,
   "packageManager": "npm@10.9.0",
@@ -11,5 +11,9 @@
   "scripts": {
     "changelog": "node scripts/changelog-entry.mjs",
     "release": "node scripts/release.mjs"
+  },
+  "dependencies": {
+    "framer-motion": "^12.40.0",
+    "react": "^19.2.6"
   }
 }

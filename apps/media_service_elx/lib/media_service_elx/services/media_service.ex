@@ -2,6 +2,7 @@ defmodule MediaServiceElx.MediaService do
   @moduledoc """
 Handles most logic regarding actions with media files and media instances
 """
+  @behaviour MediaServiceElx.MediaServiceBehaviour
 
   alias MediaServiceElx.Repo
   alias MediaServiceElx.MediaFiles.MediaFile
@@ -78,7 +79,7 @@ Handles most logic regarding actions with media files and media instances
     )
     case Repo.delete(media_file) do
       {:ok, _} -> {:ok, media_file.id}
-      {:error, _} = err -> err
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -152,6 +153,7 @@ Handles most logic regarding actions with media files and media instances
 
   @doc """
     Patches all MediaFiles from given id's with the according content_flag
+    ContentFlag isn't changed if an admin has already reviewed (approved) the file
     @params: content_flag @contentFlag, file_hash binary note String
     @returns: {file_id: uuid, status: "ok"} || {status: "error", reason: reason}
   """
@@ -171,7 +173,6 @@ Handles most logic regarding actions with media files and media instances
             media_file
           end
 
-        # Short-circuit: skip update if already admin-approved and this is an AI change
         if media_file.admin_approved && note == "AI driven change" do
           IO.inspect(
             "MediaFile for hash: #{media_file.id} already approved by admin",

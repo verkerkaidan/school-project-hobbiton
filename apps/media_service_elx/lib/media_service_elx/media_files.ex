@@ -35,7 +35,7 @@ defmodule MediaServiceElx.MediaFiles do
       ** (Ecto.NoResultsError)
 
   """
-  def get_media_file!(id), do: Repo.get!(MediaFile, id) |> Repo.preload(:mediaInstances)
+  def get_media_file!(id), do: Repo.get!(MediaFile, id)
 
   @doc """
   Creates a media_file.
@@ -54,7 +54,7 @@ defmodule MediaServiceElx.MediaFiles do
     |> MediaFile.changeset(attrs)
     |> Repo.insert()
     |> case do
-         {:ok, mediaFile} -> {:ok, Repo.preload(mediaFile, :mediaInstances)}
+         {:ok, mediaFile} -> {:ok, mediaFile}
          error -> error
        end
   end

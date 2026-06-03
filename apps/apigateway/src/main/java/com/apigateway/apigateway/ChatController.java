@@ -1,8 +1,11 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.modelDtos.chats.AlterUserDTO;
 import com.apigateway.apigateway.modelDtos.chats.ChatDTO;
 import com.apigateway.apigateway.modelDtos.chats.TitleDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,14 @@ public class ChatController {
 
     public ChatController(@Value("${chat.http-url}") String httpUrl) {
         this.http = WebClient.create(httpUrl);
+    }
+
+    @GetMapping("/allowed-users/{chatId}")
+    public Mono<ResponseEntity<List<String>>> getAllowedUsers(@PathVariable("chatId") String chatId) {
+        return http.get()
+                .uri("/allowed-users/" + chatId)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {});
     }
 
     @GetMapping("/get-chats/{userId}")
@@ -53,5 +64,31 @@ public class ChatController {
                 .bodyValue(titleDTO)
                 .retrieve()
                 .toEntity(String.class);
+    }
+    @PutMapping("/update-user-chat-connection")
+    public Mono<ResponseEntity<Boolean>> updateUserChatConnection(@RequestBody AlterUserDTO alterUserDTO) {
+        return http.put()
+                .uri("/update-user-chat-connection")
+                .bodyValue(alterUserDTO)
+                .retrieve()
+                .toEntity(Boolean.class);
+    }
+
+    @DeleteMapping("/delete-user-from-chat")
+    public Mono<ResponseEntity<Boolean>> deleteUserFromChat(@RequestBody AlterUserDTO alterUserDTO) {
+        return http.put()
+                .uri("/delete-user-from-chat")
+                .bodyValue(alterUserDTO)
+                .retrieve()
+                .toEntity(Boolean.class);
+    }
+
+    @PostMapping("/add-user-to-chat")
+    public Mono<ResponseEntity<Boolean>> addUserToChat(@RequestBody AlterUserDTO alterUserDTO) {
+        return http.put()
+                .uri("/add-user-to-chat")
+                .bodyValue(alterUserDTO)
+                .retrieve()
+                .toEntity(Boolean.class);
     }
 }

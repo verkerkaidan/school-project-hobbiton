@@ -1,22 +1,24 @@
-FROM eclipse-temurin:21-jdk AS build
+# ─── Build stage ──────────────────────────────────────────────────────────────
+FROM rust:1.80-slim as builder
+
 WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+# Cache dependencies by building an empty main first (debug build for faster iteration)
+RUN mkdir src && echo "fn main() {}" > src/main.rs && cargo build && rm -rf src
 
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
+COPY src ./src
+RUN touch src/main.rs && cargo build
 
-RUN chmod +x mvnw
+# ─── Runtime stage ────────────────────────────────────────────────────────────
+FROM debian:bookworm-slim
 
-RUN ./mvnw dependency:go-offline
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY src src
-
-RUN ./mvnw clean package -DskipTests
-
-FROM eclipse-temurin:21-jre
 WORKDIR /app
+COPY --from=builder /app/target/debug/library_service .
 
-COPY --from=build /app/target/*.jar app.jar
+EXPOSE 28877
 
+ENV RUST_LOG="library_service=info,tower_http=info"
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["./library_service"]

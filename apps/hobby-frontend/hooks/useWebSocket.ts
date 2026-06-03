@@ -1,5 +1,6 @@
 "use client";
 const API_URL = process.env.NEXT_PUBLIC_WS_CHAT_SERVICE_URL;
+const MIDDLEWARE_ENDPOINT_SERVERSIDE = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE;
 
 import { decodeMessage, encodeMessage } from "@/lib/chat";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -15,7 +16,6 @@ interface ChatUser {
 export function useWebSocket(chatId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const knownUserIds = useRef<Set<string>>(new Set());
-  const [chatUsersList, setChatUsersList] = useState<Record<string, ChatUser>>({});
   const [isConnected, setIsConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null); // ← moved to ref
@@ -37,24 +37,18 @@ export function useWebSocket(chatId: string | null) {
 
       ws.current.onopen = () => setIsConnected(true);
 
-      ws.current.onclose = () => {
+      ws.current.onclose = (e: CloseEvent) => {
         setIsConnected(false);
+        if (e.code === 1008) return;
         reconnectTimer.current = setTimeout(connect, 3000);
       };
+
 
       ws.current.onmessage = (e: MessageEvent<ArrayBuffer>) => {
         const msg = decodeMessage(e.data);
         setMessages((prev) => [...prev, msg]);
         // if user id = not in
-        if (!knownUserIds.current.has(msg.userId!) && msg.userId != currentUser.id) {
-          knownUserIds.current.add(msg.userId!);
-          getProfile(msg.userId).then((userProfile) =>
-            setChatUsersList((prev) => ({
-              ...prev,
-              [msg.userId]: { username: userProfile.username },
-            }))
-          );
-        }
+
       }
     };
 
@@ -76,5 +70,35 @@ export function useWebSocket(chatId: string | null) {
     setMessages((prev) => [...prev, { text, userId }]);
   }, []);
 
-  return { messages, isConnected, send, chatUsersList };
+  const alterUser = useCallback(async (userId: string) => {
+    if (!chatId) return;
+    await fetch(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/update-user-chat-connection`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, chatId }),
+    });
+
+    knownUserIds.current.delete(userId);
+  }, [chatId]);
+
+  const deleteUser = useCallback(async (userId: string) => {
+    if (!chatId) return;
+    await fetch(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/delete-user-from-chat`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, chatId }),
+    });
+  }, [chatId]);
+
+  const addUser = useCallback(async (userId: string) => {
+    if (!chatId) return;
+    await fetch(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/add-user-to-chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, chatId }),
+    });
+  }, [chatId]);
+
+
+  return { messages, isConnected, send, deleteUser, addUser };
 }
