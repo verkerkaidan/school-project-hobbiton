@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.19.2] - 2026-06-03
+
+### Fixed
+- **fix**: Add RECOGNITION_MODEL_URL variable to exports of CI
+
 ## [1.19.1] - 2026-06-03
 
 ### Changed
