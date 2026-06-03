@@ -2,7 +2,7 @@ defmodule MediaServiceElx.Repo.Migrations.CreateReportedFile do
   use Ecto.Migration
 
   def change do
-    create table(:reported_file, primary_key: false) do
+    create table(:reported_file, primary_key: false, if_not_exists: true) do
       add :id, :binary_id, primary_key: true
       add :hash, :binary
 
