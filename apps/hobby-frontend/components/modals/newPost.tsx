@@ -390,7 +390,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
                                 ${
                                   dragOver
                                     ? "border-brand/60 bg-brand/10"
-                                    : "border-white/15 hover:border-brand/40 hover:bg-white/5"
+                                    : "border-white/15 hover:border-brand/40"
                                 }`}
             >
               <svg

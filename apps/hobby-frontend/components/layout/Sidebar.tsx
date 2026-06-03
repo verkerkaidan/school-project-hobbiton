@@ -125,7 +125,7 @@ export const Sidebar = () => {
                 className={`relative flex items-center gap-4 p-4 rounded-xl transition-all duration-300
                                 ${active
                     ? "bg-brand-muted text-brand-light border border-brand/20"
-                    : "hover:bg-white/5 text-accent hover:text-white border border-transparent"
+                    : "text-accent hover:text-brand border border-transparent"
                   }`}
                 whileHover={{ x: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}

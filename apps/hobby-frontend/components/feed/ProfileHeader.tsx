@@ -364,7 +364,7 @@ export const ProfileHeader = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onFollowersClick}
-              className="flex flex-col items-start gap-2 p-4 rounded-xl hover:bg-white/5 transition-colors"
+              className="flex flex-col items-start gap-2 p-4 rounded-xl transition-colors"
             >
               <span className="text-2xl md:text-3xl font-bold text-brand">
                 {followerCount.toLocaleString()}
@@ -379,7 +379,7 @@ export const ProfileHeader = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onFollowingClick}
-              className="flex flex-col items-start gap-2 p-4 rounded-xl hover:bg-white/5 transition-colors"
+              className="flex flex-col items-start gap-2 p-4 rounded-xl transition-colors"
             >
               <span className="text-2xl md:text-3xl font-bold text-brand">
                 {followingCount.toLocaleString()}
