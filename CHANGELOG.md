@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-06-03
+
+### Added
+- **feat**: Add or delete users from chats && styling of chats
+
 ## [1.18.3] - 2026-06-03
 
 ### Fixed
