@@ -8,7 +8,7 @@ defmodule MediaServiceElx.MediaFilesFixtures do
   Generate a unique media_file hash.
   """
   def unique_media_file_hash do
-    raise "implement the logic to generate a unique media_file hash"
+      :crypto.strong_rand_bytes(32)
   end
 
   @doc """
@@ -18,11 +18,11 @@ defmodule MediaServiceElx.MediaFilesFixtures do
     {:ok, media_file} =
       attrs
       |> Enum.into(%{
-        content_flag: 42,
-        content_type: "some content_type",
+        content_flag: MediaServiceElx.MediaFiles.MediaFile.content_flag("UNASSIGNED"),
+        content_type: "image/png",
         hash: unique_media_file_hash(),
         original: "some original",
-        thumbnail: "some thumbnail"
+        admin_approved: false
       })
       |> MediaServiceElx.MediaFiles.create_media_file()
 

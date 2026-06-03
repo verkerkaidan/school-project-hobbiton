@@ -8,7 +8,7 @@ defmodule MediaServiceElx.MediaFilesTest do
 
     import MediaServiceElx.MediaFilesFixtures
 
-    @invalid_attrs %{original: nil, hash: nil, content_flag: nil, content_type: nil, thumbnail: nil}
+    @invalid_attrs %{original: nil, hash: nil, content_flag: nil, content_type: nil}
 
     test "list_media_files/0 returns all media_files" do
       media_file = media_file_fixture()
@@ -21,14 +21,13 @@ defmodule MediaServiceElx.MediaFilesTest do
     end
 
     test "create_media_file/1 with valid data creates a media_file" do
-      valid_attrs = %{original: "some original", hash: "some hash", content_flag: 42, content_type: "some content_type", thumbnail: "some thumbnail"}
+      valid_attrs = %{original: "some original", hash: "some hash", content_flag: MediaServiceElx.MediaFiles.MediaFile.content_flag("UNASSIGNED"), content_type: "some content_type"}
 
       assert {:ok, %MediaFile{} = media_file} = MediaFiles.create_media_file(valid_attrs)
       assert media_file.original == "some original"
       assert media_file.hash == "some hash"
-      assert media_file.content_flag == 42
+      assert media_file.content_flag == MediaServiceElx.MediaFiles.MediaFile.content_flag("UNASSIGNED")
       assert media_file.content_type == "some content_type"
-      assert media_file.thumbnail == "some thumbnail"
     end
 
     test "create_media_file/1 with invalid data returns error changeset" do
@@ -37,18 +36,18 @@ defmodule MediaServiceElx.MediaFilesTest do
 
     test "update_media_file/2 with valid data updates the media_file" do
       media_file = media_file_fixture()
-      update_attrs = %{original: "some updated original", hash: "some updated hash", content_flag: 43, content_type: "some updated content_type", thumbnail: "some updated thumbnail"}
+      update_attrs = %{original: "some updated original", hash: "some updated hash", content_flag: MediaServiceElx.MediaFiles.MediaFile.content_flag("UNASSIGNED"), content_type: "some updated content_type"}
 
       assert {:ok, %MediaFile{} = media_file} = MediaFiles.update_media_file(media_file, update_attrs)
       assert media_file.original == "some updated original"
       assert media_file.hash == "some updated hash"
-      assert media_file.content_flag == 43
+      assert media_file.content_flag == MediaServiceElx.MediaFiles.MediaFile.content_flag("UNASSIGNED")
       assert media_file.content_type == "some updated content_type"
-      assert media_file.thumbnail == "some updated thumbnail"
     end
 
     test "update_media_file/2 with invalid data returns error changeset" do
       media_file = media_file_fixture()
+
       assert {:error, %Ecto.Changeset{}} = MediaFiles.update_media_file(media_file, @invalid_attrs)
       assert media_file == MediaFiles.get_media_file!(media_file.id)
     end
