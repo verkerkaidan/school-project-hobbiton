@@ -10,14 +10,10 @@ defmodule MediaServiceElxWeb.UserController do
   use MediaServiceElxWeb, :controller
 
   defp media_service do
-    if Mix.env() == :test,
-       do: MediaServiceElx.MediaServiceMock,
-       else: MediaServiceElx.MediaService
+    Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
   end
   defp report_service do
-    if Mix.env() == :test,
-       do: MediaServiceElx.ReportServiceMock,
-       else: MediaServiceElx.ReportService
+    Application.get_env(:media_service_elx, :report_service, MediaServiceElx.ReportService)
   end
 
   alias MediaServiceElx.MediaInstances.MediaInstance

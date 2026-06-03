@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.19.3] - 2026-06-03
+
+### Fixed
+- **hotfix**: Mock.env() call is removed as that isnt available in release
+
 ## [1.19.2] - 2026-06-03
 
 ### Fixed

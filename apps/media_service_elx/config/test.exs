@@ -36,7 +36,7 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix,
   sort_verified_routes_query_params: true
 
-config :media_service_elx, :media_service, MediaServiceMock
-config :media_service_elx, :report_service, ReportServiceMock
+config :media_service_elx, :media_service, MediaServiceElx.MediaServiceMock
+config :media_service_elx, :report_service, MediaServiceElx.ReportServiceMock
 
 
