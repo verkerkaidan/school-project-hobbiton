@@ -26,7 +26,7 @@ export function Modal({
         if (mouseDownTarget.current === e.currentTarget) onClose();
       }}
     >
-      <div className={`${largeModal?"w-[60vw]": "w-[30vw]"} bg-zinc-900 border border-white/10 rounded-xl p-8 mx-4 shadow-2xl max-h-[80vh] overflow-y-auto`}>
+      <div className={`${largeModal?"w-[60vw]": "w-[30vw]"} bg-background border border-white/10 rounded-xl p-8 mx-4 shadow-2xl max-h-[80vh] overflow-y-auto`}>
         {children}
       </div>
     </div>

@@ -2,11 +2,12 @@
 
 @theme {
     --color-background: #050505;
-    --color-accent: #a8a29e;
+    --color-background-secondary: #252325;
+    --color-accent: #ffffff;
 
     --color-brand: #ec4899;
     --color-brand-light: #f472b6;
-    --color-brand-muted: rgba(236, 72, 153, 0.1);
+    --color-brand-muted: #3F3F37;
 
     --radius-post: 1.5rem;
 }
@@ -45,4 +46,15 @@
 ::-webkit-scrollbar-thumb {
     background: #1a1a1a;
     border-radius: 10px;
+}
+
+.light-mode {
+    --color-background: #F7FAF5;
+    --color-background-secondary: #FDF0F5;
+    --color-accent: #141301;
+    --color-brand-muted: #F8F0FB;
+}
+
+h1, h2, h3, h4, h5, h6, #text, label, input, textarea, select, p, .light-mode-text {
+    color: var(--color-accent);
 }

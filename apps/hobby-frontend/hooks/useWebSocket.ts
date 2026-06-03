@@ -9,13 +9,9 @@ import { getProfile } from "@/queries/getProfile";
 import { useCurrentUser } from "./useCurrentUser";
 
 export type ChatMessage = { text: string; userId: string };
-interface ChatUser {
-  username: string;
-}
 
 export function useWebSocket(chatId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const knownUserIds = useRef<Set<string>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null); // ← moved to ref
@@ -69,17 +65,6 @@ export function useWebSocket(chatId: string | null) {
     ws.current.send(bytes as unknown as Blob);
     setMessages((prev) => [...prev, { text, userId }]);
   }, []);
-
-  const alterUser = useCallback(async (userId: string) => {
-    if (!chatId) return;
-    await fetch(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/update-user-chat-connection`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, chatId }),
-    });
-
-    knownUserIds.current.delete(userId);
-  }, [chatId]);
 
   const deleteUser = useCallback(async (userId: string) => {
     if (!chatId) return;

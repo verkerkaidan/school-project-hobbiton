@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-06-03
+
+### Changed
+- **refactor**: Gave the frontend styling to let users be able to change from light to darkmode
+
 ## [1.19.3] - 2026-06-03
 
 ### Fixed
