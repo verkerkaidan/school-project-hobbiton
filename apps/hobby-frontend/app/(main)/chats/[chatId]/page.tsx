@@ -1,7 +1,8 @@
 "use client";
 
 import MessageBubble from "@/components/chats/MessageBubble";
-import { ChatManageUsersModal } from "@/components/modals/ChatManageUsersModel";
+import { ChatManageUsersModal } from "@/components/modals/ChatManageUsersModal";
+import { LeaveChatModal } from "@/components/modals/LeaveChatmodal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { fetchUsersFromChat, getChatTitle, updateChatTitle } from "@/lib/chatClient";
@@ -19,7 +20,8 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
   const [title, setTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(title);
-  const [chatManageUsersModelOpen, setChatManageUsersModelOpen] = useState(false);
+  const [chatManageUsersModalOpen, setChatManageUsersModalOpen] = useState(false);
+  const [leaveChatModalOpen, setLeaveChatModalOpen] = useState(false);
   const [chatUsersList, setChatUsersList] = useState<User[]>([]);
   const [followers, setFollowers] = useState<User[]>([]);
 
@@ -114,17 +116,28 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
             </h1>
           )}
 
-          <div className="flex gap-[1vw] cursor-pointer" onClick={() => { setChatManageUsersModelOpen(true) }}>
-            <p>Manage users</p>
-            <Image
-              src="/svgs/bars.svg"
-              alt="Edit title"
-              width={25}
-              height={25}
-              className=""
-            />
+          <div className="flex flex-col gap-6">
+            <div className="flex gap-[1vw] cursor-pointer" onClick={() => { setLeaveChatModalOpen(true) }}>
+              <p>Leave chat</p>
+              <Image
+                src="/svgs/person-walking-right.svg"
+                alt="Edit title"
+                width={25}
+                height={25}
+                className=""
+              />
+            </div>
+            <div className="flex gap-[1vw] cursor-pointer" onClick={() => { setChatManageUsersModalOpen(true) }}>
+              <p>Manage users</p>
+              <Image
+                src="/svgs/bars.svg"
+                alt="Edit title"
+                width={25}
+                height={25}
+                className=""
+              />
+            </div>
           </div>
-
         </div>
         <p className="mt-2 text-sm">
           {isConnected
@@ -199,8 +212,8 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
 
 
       <ChatManageUsersModal
-        isOpen={chatManageUsersModelOpen}
-        onClose={() => setChatManageUsersModelOpen(false)}
+        isOpen={chatManageUsersModalOpen}
+        onClose={() => setChatManageUsersModalOpen(false)}
         chatUsersList={chatUsersList}
         followers={followers}
         chatId={chatId}
@@ -209,6 +222,8 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
         fetchUsersAndFollowers={fetchUsersAndFollowers}
         selfUser={currentUser}
       />
+      <LeaveChatModal isOpen={leaveChatModalOpen}
+        onClose={() => setLeaveChatModalOpen(false)} deleteUser={deleteUser} user={currentUser} />
     </div>
   );
 }
