@@ -30,7 +30,7 @@ public class SetupDataLoader implements
 
     @Value("${admin.user}")
     private String adminUser;
-    @Value("$admin.password")
+    @Value("${admin.password}")
     private String adminPassword;
 
     @Autowired
@@ -47,7 +47,6 @@ public class SetupDataLoader implements
     @Override
     @Transactional
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-
         if (alreadySetup)
             return;
         Privilege readPrivilege

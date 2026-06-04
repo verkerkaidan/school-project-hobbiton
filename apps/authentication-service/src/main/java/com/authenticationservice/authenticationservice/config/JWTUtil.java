@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 @Component
 public class JWTUtil {
@@ -19,23 +21,28 @@ public class JWTUtil {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    public String generateToken(String userId) throws IllegalArgumentException, JWTCreationException {
+    public String generateToken(String userId, Vector<String> role) throws IllegalArgumentException, JWTCreationException {
         return JWT.create()
                 .withSubject("User Details")
                 .withClaim("userId", userId)
+                .withClaim("role", role)
                 .withIssuedAt(new Date())
                 .withExpiresAt(this.createExpirationDate())
                 .withIssuer(issuer)
                 .sign(Algorithm.HMAC256(secret));
     }
+    public record TokenClaims(String userId, List<String> role) {}
 
-    public String validateTokenAndRetrieveSubject(String token) throws JWTVerificationException {
+    public TokenClaims validateTokenAndRetrieveSubject(String token) throws JWTVerificationException {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
                 .withSubject("User Details")
                 .withIssuer(issuer)
                 .build();
         DecodedJWT jwt = verifier.verify(token);
-        return jwt.getClaim("userId").asString();
+        return new TokenClaims(
+                jwt.getClaim("userId").asString(),
+                jwt.getClaim("role").asList(String.class)
+        );
     }
 
     private Date createExpirationDate(){
