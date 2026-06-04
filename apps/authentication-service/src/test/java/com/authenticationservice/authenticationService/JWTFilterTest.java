@@ -103,7 +103,8 @@ class JWTFilterTest {
     @Test
     void shouldAuthenticateUserWithValidToken() throws Exception {
         UserDetails mockUser = mockUserDetails("user-123", "ROLE_USER");
-        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token")).thenReturn("user-123");
+        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token"))
+                .thenReturn(new JWTUtil.TokenClaims("user-123", List.of("ROLE_USER")));
         when(userService.loadUserByUsername("user-123")).thenReturn(mockUser);
 
         request.addHeader("Authorization", "Bearer valid.jwt.token");
@@ -117,7 +118,8 @@ class JWTFilterTest {
     @Test
     void shouldSetCorrectAuthoritiesFromUserDetails() throws Exception {
         UserDetails mockUser = mockUserDetails("user-123", "ROLE_ADMIN");
-        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token")).thenReturn("user-123");
+        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token"))
+                .thenReturn(new JWTUtil.TokenClaims("user-123", List.of("ROLE_USER")));
         when(userService.loadUserByUsername("user-123")).thenReturn(mockUser);
 
         request.addHeader("Authorization", "Bearer valid.jwt.token");
@@ -131,7 +133,8 @@ class JWTFilterTest {
     @Test
     void shouldReturn200OnValidToken() throws Exception {
         UserDetails mockUser = mockUserDetails("user-123", "ROLE_USER");
-        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token")).thenReturn("user-123");
+        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token"))
+                .thenReturn(new JWTUtil.TokenClaims("user-123", List.of("ROLE_USER")));
         when(userService.loadUserByUsername("user-123")).thenReturn(mockUser);
 
         request.addHeader("Authorization", "Bearer valid.jwt.token");
@@ -188,7 +191,8 @@ class JWTFilterTest {
         SecurityContextHolder.getContext().setAuthentication(existingAuth);
 
         UserDetails mockUser = mockUserDetails("new-user", "ROLE_USER");
-        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token")).thenReturn("new-user");
+        when(jwtUtil.validateTokenAndRetrieveSubject("valid.jwt.token"))
+                .thenReturn(new JWTUtil.TokenClaims("user-123", List.of("ROLE_USER")));
         when(userService.loadUserByUsername("new-user")).thenReturn(mockUser);
 
         request.addHeader("Authorization", "Bearer valid.jwt.token");

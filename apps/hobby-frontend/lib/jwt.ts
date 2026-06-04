@@ -32,7 +32,7 @@ export function decodeJwtPayload(
 export function getJwtRoles(token: string): string[] {
   const payload = decodeJwtPayload(token);
   if (!payload) return [];
-  const roles = payload["roles"];
+  const roles = payload["role"];
   if (Array.isArray(roles)) return roles as string[];
   // Some implementations emit a single string instead of an array
   if (typeof roles === "string") return [roles];

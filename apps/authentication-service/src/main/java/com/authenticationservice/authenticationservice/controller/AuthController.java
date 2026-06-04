@@ -9,8 +9,10 @@ import com.authenticationservice.authenticationservice.models.CustomUser;
 import com.authenticationservice.authenticationservice.models.Role;
 import com.authenticationservice.authenticationservice.services.CredentialValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(originPatterns = { "http://localhost:*",
@@ -70,7 +74,10 @@ public class AuthController {
                 CustomUser registeredUser = new CustomUser(registerRequest.email, encodedPassword, role);
 
                 userRepository.save(registeredUser);
-                String token = jwtUtil.generateToken(String.valueOf(registeredUser.getId()));
+                Vector<String> roles = registeredUser.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toCollection(Vector::new));
+                String token = jwtUtil.generateToken(String.valueOf(registeredUser.getId()), roles);
                 AuthenticationResponse authResponse = new AuthenticationResponse(registeredUser.getId(), token);
                 return ResponseEntity.ok(authResponse);
         }
@@ -95,7 +102,10 @@ public class AuthController {
 
                         authManager.authenticate(authInputToken);
 
-                        String token = jwtUtil.generateToken(String.valueOf(customUser.getId()));
+                        Vector<String> roles = customUser.getRoles().stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toCollection(Vector::new));
+                        String token = jwtUtil.generateToken(String.valueOf(customUser.getId()), roles);
                         AuthenticationResponse loginResponse = new AuthenticationResponse(customUser.getId(), token);
 
                         return ResponseEntity.ok(loginResponse);
@@ -126,15 +136,45 @@ public class AuthController {
         }
 
         @PutMapping("/admin/new/{userId}")
-        public ResponseEntity<String> adminFunctionality(@PathVariable String userId) {
-                Optional<CustomUser> userOptional = userRepository.findById(UUID.fromString(userId));
-                if (userOptional.isEmpty()) {
-                        throw new ResponseStatusException(
-                                        HttpStatus.BAD_REQUEST, "No valid user provided");
+        @PreAuthorize("hasRole('ROLE_ADMIN')")
+        public ResponseEntity<String> adminFunctionality(
+                @RequestBody AuthenticationRequest authenticationRequest,
+                @PathVariable String userId) {
+
+                // Validate UUID format before hitting the DB
+                UUID targetUserId;
+                try {
+                        targetUserId = UUID.fromString(userId);
+                } catch (IllegalArgumentException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format");
                 }
-                CustomUser user = userOptional.get();
-                Role staffRole = roleRepository.findByName("ROLE_ADMIN");
-                user.setRoles(Collections.singletonList(staffRole));
+
+
+                // validate user
+                Optional<CustomUser> authUser = userRepository.findByEmail(authenticationRequest.email);
+                if (authUser.isEmpty()){
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user authenticated");
+                }
+
+                CustomUser currentUser = authUser.get();
+                // Prevent self-role modification (optional but recommended)
+                if (currentUser.getId().equals(UUID.fromString(userId))) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify your own roles");
+                }
+
+                CustomUser user = userRepository.findById(targetUserId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "User not found"));
+
+                Role adminRole = Optional.ofNullable(roleRepository.findByName("ROLE_ADMIN"))
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.INTERNAL_SERVER_ERROR, "Admin role not configured"));
+
+                user.setRoles(new ArrayList<>(Collections.singletonList(adminRole)));
+                userRepository.save(user);
+
+                log.info("Admin '{}' granted ROLE_ADMIN to user '{}'", currentUser.getId(), userId);
+
                 return ResponseEntity.ok("Successfully made user " + userId + " an Administrator");
         }
 
@@ -151,5 +191,4 @@ public class AuthController {
                 userRepository.save(user);
                 return ResponseEntity.ok("Successfully made user " + userId + " a Staff member");
         }
-
 }

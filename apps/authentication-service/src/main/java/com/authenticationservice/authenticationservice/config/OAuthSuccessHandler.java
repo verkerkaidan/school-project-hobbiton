@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Vector;
 
 @Component
 @RequiredArgsConstructor
@@ -33,15 +34,17 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
 
-        List< Role > role = Collections.singletonList(roleRepository.findByName("ROLE_USER"));
+        List<Role> role = Collections.singletonList(roleRepository.findByName("ROLE_USER"));
         CustomUser user = userRepository.findByEmail(email).orElseGet(() ->
-                userRepository.save(new CustomUser(email, role))
+                {
+                    assert email != null;
+                    return userRepository.save(new CustomUser(email, role));
+                }
         );
 
         // Generate JWT with your own user ID
-        String jwt = jwtUtil.generateToken(String.valueOf(user.getId()));
+        String jwt = jwtUtil.generateToken(String.valueOf(user.getId()), new Vector<>(List.of("ROLE_USER")));
 
-        // Option A: set as HttpOnly cookie (recommended for web apps)
         Cookie cookie = new Cookie("jwt", jwt);
         cookie.setHttpOnly(true);
         cookie.setPath("/");

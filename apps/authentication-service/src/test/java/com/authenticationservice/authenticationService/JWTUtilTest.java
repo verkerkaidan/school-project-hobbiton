@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,29 +25,29 @@ class JWTUtilTest {
     // ---- generateToken ----
 
     @Test
-    void shouldGenerateNonNullToken() throws Exception {
-        String token = jwtUtil.generateToken("user-123");
+    void shouldGenerateNonNullToken() {
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
         assertNotNull(token);
     }
 
     @Test
-    void shouldGenerateTokenWithThreeParts() throws Exception {
-        String token = jwtUtil.generateToken("user-123");
+    void shouldGenerateTokenWithThreeParts() {
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
         // JWT format is header.payload.signature
         assertEquals(3, token.split("\\.").length);
     }
 
     @Test
-    void shouldEmbedUserIdInToken() throws Exception {
-        String token = jwtUtil.generateToken("user-123");
-        String userId = jwtUtil.validateTokenAndRetrieveSubject(token);
+    void shouldEmbedUserIdInToken() {
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
+        String userId = String.valueOf(jwtUtil.validateTokenAndRetrieveSubject(token));
         assertEquals("user-123", userId);
     }
 
     @Test
-    void shouldSetExpirationApproximatelySixHoursFromNow() throws Exception {
+    void shouldSetExpirationApproximatelySixHoursFromNow() {
         long beforeMs = System.currentTimeMillis();
-        String token = jwtUtil.generateToken("user-123");
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
 
         DecodedJWT decoded = JWT.decode(token);
         long expiresAt = decoded.getExpiresAt().getTime();
@@ -59,9 +61,9 @@ class JWTUtilTest {
     }
 
     @Test
-    void shouldSetIssuedAtToNow() throws Exception {
+    void shouldSetIssuedAtToNow() {
         long beforeMs = System.currentTimeMillis();
-        String token = jwtUtil.generateToken("user-123");
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
         long afterMs = System.currentTimeMillis();
 
         DecodedJWT decoded = JWT.decode(token);
@@ -74,15 +76,15 @@ class JWTUtilTest {
     // ---- validateTokenAndRetrieveSubject ----
 
     @Test
-    void shouldReturnUserIdFromValidToken() throws Exception {
-        String token = jwtUtil.generateToken("user-456");
-        String result = jwtUtil.validateTokenAndRetrieveSubject(token);
+    void shouldReturnUserIdFromValidToken() {
+        String token = jwtUtil.generateToken("user-456", new Vector<>(List.of("ROLE_USER")));
+        String result = String.valueOf(jwtUtil.validateTokenAndRetrieveSubject(token));
         assertEquals("user-456", result);
     }
 
     @Test
-    void shouldThrowOnTamperedSignature() throws Exception {
-        String token = jwtUtil.generateToken("user-123");
+    void shouldThrowOnTamperedSignature() {
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
         String tampered = token.substring(0, token.lastIndexOf('.') + 1) + "badsignature";
 
         assertThrows(JWTVerificationException.class,
@@ -90,8 +92,8 @@ class JWTUtilTest {
     }
 
     @Test
-    void shouldThrowOnTamperedPayload() throws Exception {
-        String token = jwtUtil.generateToken("user-123");
+    void shouldThrowOnTamperedPayload() {
+        String token = jwtUtil.generateToken("user-123", new Vector<>(List.of("ROLE_USER")));
         String[] parts = token.split("\\.");
 
         // Replace payload with a modified one
@@ -134,17 +136,17 @@ class JWTUtilTest {
     // ---- edge cases ----
 
     @Test
-    void differentUserIdsShouldProduceDifferentTokens() throws Exception {
-        String token1 = jwtUtil.generateToken("user-1");
-        String token2 = jwtUtil.generateToken("user-2");
+    void differentUserIdsShouldProduceDifferentTokens() {
+        String token1 = jwtUtil.generateToken("user-1", new Vector<>(List.of("ROLE_USER")));
+        String token2 = jwtUtil.generateToken("user-2", new Vector<>(List.of("ROLE_USER")));
         assertNotEquals(token1, token2);
     }
 
     @Test
     void sameUserIdShouldProduceDifferentTokensOverTime() throws Exception {
-        String token1 = jwtUtil.generateToken("user-1");
+        String token1 = jwtUtil.generateToken("user-1", new Vector<>(List.of("ROLE_USER")));
         Thread.sleep(1100); // issuedAt has 1s resolution
-        String token2 = jwtUtil.generateToken("user-1");
+        String token2 = jwtUtil.generateToken("user-2", new Vector<>(List.of("ROLE_USER")));
         assertNotEquals(token1, token2);
     }
 }
