@@ -198,6 +198,7 @@ services:
       OMDB_API_URL: ${OMDB_API_URL}
       # Ensure containers use the internal redis service when running via docker-compose
       REDIS_URL: "redis://redis:6379"
+      RUST_LOG: debug
     cpus: 0.5
     mem_limit: 128m
     networks:

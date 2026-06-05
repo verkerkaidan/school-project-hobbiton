@@ -1,7 +1,9 @@
+use std::sync::Arc;
 use redis::{aio::ConnectionManager, AsyncCommands, Client};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use tracing::{debug, warn};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::dto::request::SearchType;
 use crate::error::AppError;
@@ -18,6 +20,7 @@ pub const CACHE_TTL_SECONDS: usize = 30 * 24 * 60 * 60; // 2_592_000
 #[derive(Clone)]
 pub struct CacheService {
     conn: ConnectionManager,
+    cache_enabled: Arc<AtomicBool>,
 }
 
 impl CacheService {
@@ -33,7 +36,11 @@ impl CacheService {
             .map_err(|e| AppError::Cache(format!("Redis connection manager error: {}", e)))?;
 
         tracing::info!("Redis cache connected: {}", redis_url);
-        Ok(CacheService { conn })
+
+        Ok(CacheService {
+            conn,
+            cache_enabled: Arc::new(AtomicBool::new(true)),
+        })
     }
 
     // ─── Public API ─────────────────────────────────────────────────────────
@@ -41,9 +48,14 @@ impl CacheService {
     /// Try to get a cached value. Returns `None` on miss or any Redis error.
     /// A Redis hiccup should never break the user's request.
     pub async fn get<T: DeserializeOwned>(&self, key: &str) -> Option<T> {
+        if !self.is_enabled() {
+            return None;
+        }
+
         let mut conn = self.conn.clone();
-        match conn.get::<_, Option<String>>(key).await {
-            Ok(Some(json)) => match serde_json::from_str::<T>(&json) {
+
+        match conn.get::<_, Option<Vec<u8>>>(key).await {
+            Ok(Some(bytes)) => match bincode::deserialize::<T>(&bytes) {
                 Ok(val) => {
                     debug!("Cache HIT: {}", key);
                     Some(val)
@@ -53,12 +65,10 @@ impl CacheService {
                     None
                 }
             },
-            Ok(None) => {
-                debug!("Cache MISS: {}", key);
-                None
-            }
+            Ok(None) => None,
             Err(e) => {
                 warn!("Redis GET error for key {}: {}", key, e);
+                self.disable_temporarily();
                 None
             }
         }
@@ -67,14 +77,20 @@ impl CacheService {
     /// Store a value in Redis with the configured TTL (30 days).
     /// Errors are logged but not propagated — a write failure is non-fatal.
     pub async fn set<T: Serialize>(&self, key: &str, value: &T) {
+        if !self.is_enabled() {
+            return;
+        }
+
         let mut conn = self.conn.clone();
-        match serde_json::to_string(value) {
-            Ok(json) => {
+
+        match bincode::serialize(value) {
+            Ok(bytes) => {
                 let result: redis::RedisResult<()> =
-                    conn.set_ex(key, json, CACHE_TTL_SECONDS as u64).await;
-                match result {
-                    Ok(_) => debug!("Cache SET: {} (TTL={}s)", key, CACHE_TTL_SECONDS),
-                    Err(e) => warn!("Redis SET error for key {}: {}", key, e),
+                    conn.set_ex(key, bytes, CACHE_TTL_SECONDS as u64).await;
+
+                if let Err(e) = result {
+                    warn!("Redis SET error for key {}: {}", key, e);
+                    self.disable_temporarily();
                 }
             }
             Err(e) => warn!("Cache serialize error for key {}: {}", key, e),
@@ -109,5 +125,23 @@ impl CacheService {
     /// Example: `item:MOVIE:tt0111161`
     pub fn item_key(search_type: SearchType, id: &str) -> String {
         format!("item:{}:{}", search_type, id)
+    }
+
+    fn is_enabled(&self) -> bool {
+        self.cache_enabled.load(Ordering::Relaxed)
+    }
+
+    fn disable_temporarily(&self) {
+        warn!("Redis unhealthy → disabling cache temporarily");
+
+        self.cache_enabled.store(false, Ordering::Relaxed);
+
+        let flag = self.cache_enabled.clone();
+
+        tokio::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+            flag.store(true, Ordering::Relaxed);
+            tracing::info!("Redis cache re-enabled");
+        });
     }
 }

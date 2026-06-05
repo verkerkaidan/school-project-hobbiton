@@ -45,14 +45,22 @@ async fn main() {
     let redis_url = std::env::var("REDIS_URL")
         .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
 
-    let cache = match CacheService::new(&redis_url).await {
-        Ok(c) => {
-            info!("Redis cache ready");
-            Arc::new(c)
-        }
-        Err(e) => {
-            // Hard-fail on startup if Redis is unavailable.
-            panic!("Failed to connect to Redis ({}): {}", redis_url, e);
+    use tokio::time::{sleep, Duration};
+
+    let cache = loop {
+        match CacheService::new(&redis_url).await {
+            Ok(c) => {
+                info!("Redis cache ready");
+                break Arc::new(c);
+            }
+            Err(e) => {
+                tracing::warn!(
+                "Redis not ready yet ({}), retrying in 2s... error: {}",
+                redis_url,
+                e
+            );
+                sleep(Duration::from_secs(2)).await;
+            }
         }
     };
 
