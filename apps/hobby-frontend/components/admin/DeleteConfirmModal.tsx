@@ -120,26 +120,26 @@ export const DeleteConfirmModal = ({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="relative w-full max-w-lg bg-[#0d0d0f] border border-white/10 rounded-2xl shadow-2xl pointer-events-auto flex flex-col max-h-[80vh]"
+              className="relative w-full max-w-lg bg-background-secondary border border-accent/15 rounded-2xl shadow-2xl pointer-events-auto flex flex-col max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 shrink-0">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-accent/15 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-rose-500/15 border border-rose-500/20 flex items-center justify-center">
                     <Trash2 className="w-4 h-4 text-rose-400" />
                   </div>
                   <div>
-                    <h2 className="text-white font-semibold text-sm">
+                    <h2 className="text-accent font-semibold text-sm">
                       Delete Posts
                     </h2>
-                    <p className="text-white/40 text-xs">@{targetUsername}</p>
+                    <p className="text-accent/60 text-xs">@{targetUsername}</p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
                   disabled={deleting}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-accent/60 hover:text-accent hover:bg-accent/10 transition-colors disabled:opacity-40"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -158,11 +158,11 @@ export const DeleteConfirmModal = ({
                       className="p-6 space-y-3"
                     >
                       {loading ? (
-                        <div className="flex items-center justify-center py-10 text-white/30 text-sm">
+                        <div className="flex items-center justify-center py-10 text-accent/60 text-sm">
                           Loading posts…
                         </div>
                       ) : posts.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 gap-2 text-white/30">
+                        <div className="flex flex-col items-center justify-center py-10 gap-2 text-accent/60">
                           <FileText className="w-8 h-8 opacity-40" />
                           <span className="text-sm">No posts found.</span>
                         </div>
@@ -171,20 +171,20 @@ export const DeleteConfirmModal = ({
                           {posts.map((post) => (
                             <div
                               key={post.id}
-                              className="flex items-center gap-3 p-3 rounded-xl bg-white/3 border border-white/5 hover:border-white/10 transition-colors group"
+                              className="flex items-center gap-3 p-3 rounded-xl bg-background border border-accent/10 hover:border-accent/25 transition-colors group"
                             >
-                              <div className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                              <div className="w-7 h-7 rounded-md bg-accent/10 flex items-center justify-center shrink-0">
                                 {post.hobbyType === "GYM" ? (
-                                  <Dumbbell className="w-3.5 h-3.5 text-white/40" />
+                                  <Dumbbell className="w-3.5 h-3.5 text-accent/60" />
                                 ) : (
-                                  <BookOpen className="w-3.5 h-3.5 text-white/40" />
+                                  <BookOpen className="w-3.5 h-3.5 text-accent/60" />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-white text-sm font-medium truncate">
+                                <p className="text-accent text-sm font-medium truncate">
                                   {post.title}
                                 </p>
-                                <p className="text-white/30 text-xs">
+                                <p className="text-accent/60 text-xs">
                                   {post.hobbyType} ·{" "}
                                   {post.createdAt
                                     ? new Date(
@@ -226,21 +226,21 @@ export const DeleteConfirmModal = ({
                         <AlertTriangle className="w-6 h-6 text-rose-400" />
                       </div>
                       <div>
-                        <h3 className="text-white font-semibold text-base">
+                        <h3 className="text-accent font-semibold text-base">
                           Confirm deletion of {confirmCount}{" "}
                           {confirmCount === 1 ? "post" : "posts"}
                         </h3>
-                        <p className="text-white/40 text-sm mt-1">
+                        <p className="text-accent/70 text-sm mt-1">
                           You are about to permanently delete{" "}
-                          <span className="text-white/70">{confirmLabel}</span>.
-                          This action{" "}
+                          <span className="text-accent/85">{confirmLabel}</span>
+                          . This action{" "}
                           <span className="text-rose-400">
                             cannot be undone
                           </span>
                           .
                         </p>
                         {selectedPost && (
-                          <p className="mt-3 text-white/30 text-xs italic">
+                          <p className="mt-3 text-accent/60 text-xs italic">
                             "{selectedPost.title}"
                           </p>
                         )}
@@ -255,12 +255,12 @@ export const DeleteConfirmModal = ({
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-5 border-t border-white/5 shrink-0">
+              <div className="px-6 py-5 border-t border-accent/15 shrink-0">
                 {stage === "list" ? (
                   <div className="flex gap-3">
                     <button
                       onClick={onClose}
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-colors text-sm font-medium"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-accent/20 text-accent/70 hover:text-accent hover:border-accent/35 transition-colors text-sm font-medium"
                     >
                       Cancel
                     </button>
@@ -280,7 +280,7 @@ export const DeleteConfirmModal = ({
                         setError(null);
                       }}
                       disabled={deleting}
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-colors text-sm font-medium disabled:opacity-40"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-accent/20 text-accent/70 hover:text-accent hover:border-accent/35 transition-colors text-sm font-medium disabled:opacity-40"
                     >
                       Back
                     </button>

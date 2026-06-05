@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { UsersOverview } from "@/components/admin/UsersOverview";
 import { ReportsTable } from "@/components/admin/ReportsTable";
 
 export default function AdminReportsPage() {
@@ -31,18 +32,24 @@ export default function AdminReportsPage() {
             <ShieldAlert className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Reports</h1>
-            <p className="text-white/30 text-xs">Admin panel · User reports</p>
+            <h1 className="text-xl font-bold text-accent">Admin</h1>
+            <p className="text-accent/60 text-xs">
+              Admin panel · Users and reports
+            </p>
           </div>
         </div>
-        <p className="text-white/30 text-sm mt-4 max-w-xl">
-          Review and manage reports submitted by users. Update statuses, resolve
-          disputes, or take action by removing a reported user&#39;s content.
+        <p className="text-accent/70 text-sm mt-4 max-w-xl">
+          View all user profiles and moderate reports submitted by users.
         </p>
       </header>
 
+      {/* Users overview */}
+      <UsersOverview />
+
       {/* Reports table */}
-      <ReportsTable />
+      <div className="mt-8">
+        <ReportsTable />
+      </div>
     </div>
   );
 }

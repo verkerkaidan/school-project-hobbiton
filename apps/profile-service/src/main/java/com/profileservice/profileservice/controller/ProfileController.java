@@ -3,6 +3,7 @@ package com.profileservice.profileservice.controller;
 import com.profileservice.profileservice.dao.ProfileDAO;
 import com.profileservice.profileservice.dao.ProfileRepository;
 import com.profileservice.profileservice.dto.ProfileDTO;
+import com.profileservice.profileservice.dto.ProfileSummaryDTO;
 import com.profileservice.profileservice.models.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,58 +23,70 @@ public class ProfileController {
     private final ProfileRepository profileRepository;
     private final ProfileDAO profileDAO;
 
-    ///  This endpoint ("api/profile/create") will help the user create their profile
+    /// This endpoint ("api/profile/create") will help the user create their profile
     /// unprotected endpoint
     @PostMapping("/create")
-    public ResponseEntity<Profile> createProfile(@RequestBody ProfileDTO profileDTO){
+    public ResponseEntity<Profile> createProfile(@RequestBody ProfileDTO profileDTO) {
         UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        if(profileRepository.findById(userId).isPresent()){
+        if (profileRepository.findById(userId).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
         }
         Profile profile = profileDAO.createProfile(userId, profileDTO);
         return ResponseEntity.ok(profile);
     }
 
-    ///  This endpoint("api/profile/update") will enable changing aspects of the user's profile
+    /// This endpoint("api/profile/update") will enable changing aspects of the
+    /// user's profile
     @PutMapping("/update")
-    public ResponseEntity<Profile> updateProfile(@RequestBody ProfileDTO updateProfileDTO){
+    public ResponseEntity<Profile> updateProfile(@RequestBody ProfileDTO updateProfileDTO) {
         UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        if(profileRepository.findById(userId).isEmpty()){
+        if (profileRepository.findById(userId).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User doesn't exists");
         }
         Profile profile = profileDAO.updateProfile(userId, updateProfileDTO);
         return ResponseEntity.ok(profile);
     }
 
-    ///  This endpoint("api/profile/delete") will be able to delete a user's profile
+    /// This endpoint("api/profile/delete") will be able to delete a user's profile
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteProfile(@PathVariable("userId") String userId){
+    public ResponseEntity<String> deleteProfile(@PathVariable("userId") String userId) {
         Optional<Profile> profile = profileRepository.findById(UUID.fromString(userId));
-        if(profile.isEmpty()) {
+        if (profile.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
         }
         profileRepository.delete(profile.get());
         return ResponseEntity.ok("Profile Succesfully deleted");
     }
 
-    ///  This endpoint("api/profile/userId") will return a user's profile information
+    /// This endpoint("api/profile/userId") will return a user's profile information
     @GetMapping("{userId}")
-    public ResponseEntity<Profile> getProfileByID(@PathVariable("userId") String userId){
+    public ResponseEntity<Profile> getProfileByID(@PathVariable("userId") String userId) {
         Optional<Profile> profile = profileRepository.findById(UUID.fromString(userId));
-        if(profile.isEmpty()) {
+        if (profile.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
         }
         return ResponseEntity.ok(profile.get());
     }
 
-    ///  This endpoint("api/profile/by-username/{username}") will return a user's profile by username
+    /// This endpoint("api/profile/by-username/{username}") will return a user's
+    /// profile by username
     @GetMapping("by-username/{username}")
-    public ResponseEntity<Profile> getProfileByUsername(@PathVariable("username") String username){
+    public ResponseEntity<Profile> getProfileByUsername(@PathVariable("username") String username) {
         Optional<Profile> profile = profileRepository.findByUsername(username);
-        if(profile.isEmpty()) {
+        if (profile.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
         }
         return ResponseEntity.ok(profile.get());
+    }
+
+    /// This endpoint ("api/profile/all") returns a lightweight list of all profiles
+    /// with only username and profile picture URL.
+    @GetMapping("/all")
+    public ResponseEntity<List<ProfileSummaryDTO>> getAllProfiles() {
+        List<ProfileSummaryDTO> profiles = profileRepository.findAll().stream()
+                .map(profile -> new ProfileSummaryDTO(profile.getUsername(), profile.getMediaPointer()))
+                .toList();
+        return ResponseEntity.ok(profiles);
     }
 
 }

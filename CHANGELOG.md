@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.23.0] - 2026-06-05
+
+### Added
+- **feat**: Admin can view all profiles in a grid
+
 ## [1.22.3] - 2026-06-05
 
 ### Fixed

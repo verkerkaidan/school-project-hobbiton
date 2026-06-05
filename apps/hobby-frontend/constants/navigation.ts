@@ -27,5 +27,5 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   { icon: Bookmark, label: "Saved", href: "/saved" },
   { icon: User, label: "Profile", href: "/profile" },
   { icon: Cog, label: "Settings", href: "/settings" },
-  { icon: ShieldAlert, label: "Reports", href: "/admin", adminOnly: true },
+  { icon: ShieldAlert, label: "Admin", href: "/admin", adminOnly: true },
 ];
