@@ -1,6 +1,11 @@
 import type { Report, ReportStatus } from "@/types/reports";
 import type { MediaSet } from "@/types/posts";
 
+export interface AdminProfileSummary {
+  username: string;
+  profilePictureUrl: string | null;
+}
+
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
 
@@ -65,3 +70,9 @@ export async function deleteAllUserPosts(userId: string): Promise<void> {
   if (!res.ok) throw new Error("Failed to delete all user posts");
 }
 
+/** Fetch all user profiles (username + profile picture only) in a single call. */
+export async function getAllAdminProfiles(): Promise<AdminProfileSummary[]> {
+  const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`);
+  if (!res.ok) throw new Error("Failed to fetch profiles");
+  return res.json();
+}

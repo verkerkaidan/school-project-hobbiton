@@ -1,16 +1,24 @@
 "use client";
 
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import {AnimatePresence, motion} from "framer-motion";
-import {AlertCircle, ChevronDown, FileImage, InboxIcon, RefreshCw, Trash2, Users,} from "lucide-react";
-import {getReportsByStatus, updateReportStatus} from "@/lib/adminClient";
-import {getReportedFiles} from "@/queries/getReportedFiles";
-import type {Report, ReportedFile, ReportStatus} from "@/types/reports";
-import {ALL_STATUSES, REASON_LABELS, STATUS_CONFIG} from "@/types/reports";
-import {getProfile} from "@/queries/getProfile";
-import {DeleteConfirmModal} from "@/components/admin/DeleteConfirmModal";
-import {ImageReportCard} from "@/components/admin/ImageReportCard";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
+  ChevronDown,
+  FileImage,
+  InboxIcon,
+  RefreshCw,
+  Trash2,
+  Users,
+} from "lucide-react";
+import { getReportsByStatus, updateReportStatus } from "@/lib/adminClient";
+import { getReportedFiles } from "@/queries/getReportedFiles";
+import type { Report, ReportedFile, ReportStatus } from "@/types/reports";
+import { ALL_STATUSES, REASON_LABELS, STATUS_CONFIG } from "@/types/reports";
+import { getProfile } from "@/queries/getProfile";
+import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
+import { ImageReportCard } from "@/components/admin/ImageReportCard";
 
 type ReportTypeTab = "users" | "posts";
 type FilterTab = ReportStatus | "ALL";
@@ -99,15 +107,15 @@ export const ReportsTable = () => {
     if (reportType === "posts" && !postReportsFetched && !postReportsLoading) {
       setPostReportsLoading(true);
       getReportedFiles()
-          .then((files) => setPostReportsFiles(files ?? []))
-          .catch((e) => {
-            console.error("Failed to fetch reported files for posts", e);
-            setPostReportsFiles([]);
-          })
-          .finally(() => {
-            setPostReportsLoading(false);
-            setPostReportsFetched(true); // mark as done regardless of result
-          });
+        .then((files) => setPostReportsFiles(files ?? []))
+        .catch((e) => {
+          console.error("Failed to fetch reported files for posts", e);
+          setPostReportsFiles([]);
+        })
+        .finally(() => {
+          setPostReportsLoading(false);
+          setPostReportsFetched(true); // mark as done regardless of result
+        });
     }
   }, [reportType, postReportsFetched, postReportsLoading]);
 
@@ -148,7 +156,11 @@ export const ReportsTable = () => {
         {(
           [
             { value: "users" as const, label: "User Reports", icon: Users },
-            { value: "posts" as const, label: "Image Reports", icon: FileImage },
+            {
+              value: "posts" as const,
+              label: "Image Reports",
+              icon: FileImage,
+            },
           ] satisfies {
             value: ReportTypeTab;
             label: string;
@@ -161,7 +173,7 @@ export const ReportsTable = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200 ${
               reportType === value
                 ? "bg-brand-muted border-brand/20 text-brand-light"
-                : "bg-white/3 border-white/8 text-white/40 hover:text-white/70 hover:border-white/15"
+                : "bg-background-secondary border-accent/15 text-accent/60 hover:text-accent hover:border-accent/30"
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -183,21 +195,21 @@ export const ReportsTable = () => {
             className="space-y-5"
           >
             {/* Status filter tabs */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/3 border border-white/5 w-fit flex-wrap">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-background-secondary border border-accent/15 w-fit flex-wrap">
               {TABS.map((t) => (
                 <button
                   key={t.value}
                   onClick={() => setTab(t.value)}
                   className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                     tab === t.value
-                      ? "text-white"
-                      : "text-white/40 hover:text-white/70"
+                      ? "text-accent"
+                      : "text-accent/60 hover:text-accent"
                   }`}
                 >
                   {tab === t.value && (
                     <motion.div
                       layoutId="reportTabBg"
-                      className="absolute inset-0 bg-white/8 rounded-lg border border-white/10"
+                      className="absolute inset-0 bg-accent/10 rounded-lg border border-accent/20"
                       transition={{
                         type: "spring",
                         stiffness: 400,
@@ -212,7 +224,7 @@ export const ReportsTable = () => {
               <button
                 onClick={fetchReports}
                 disabled={loading}
-                className="ml-2 w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors disabled:opacity-30"
+                className="ml-2 w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-accent hover:bg-accent/10 transition-colors disabled:opacity-30"
                 title="Refresh"
               >
                 <RefreshCw
@@ -237,8 +249,8 @@ export const ReportsTable = () => {
             </AnimatePresence>
 
             {/* Table */}
-            <div className="rounded-2xl border border-white/8 overflow-hidden">
-              <div className="grid grid-cols-[1.2fr_1.2fr_1fr_2fr_1fr_0.9fr_auto] gap-4 px-5 py-3 bg-white/3 border-b border-white/5 text-xs font-medium text-white/30 uppercase tracking-wider">
+            <div className="rounded-2xl border border-accent/15 bg-background-secondary overflow-hidden">
+              <div className="grid grid-cols-[1.2fr_1.2fr_1fr_2fr_1fr_0.9fr_auto] gap-4 px-5 py-3 bg-background border-b border-accent/15 text-xs font-medium text-accent/65 uppercase tracking-wider">
                 <span>Reporter</span>
                 <span>Reported User</span>
                 <span>Reason</span>
@@ -255,7 +267,7 @@ export const ReportsTable = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="divide-y divide-white/4"
+                    className="divide-y divide-accent/10"
                   >
                     {[...Array(5)].map((_, i) => (
                       <div
@@ -263,9 +275,12 @@ export const ReportsTable = () => {
                         className="grid grid-cols-[1.2fr_1.2fr_1fr_2fr_1fr_0.9fr_auto] gap-4 px-5 py-4 animate-pulse"
                       >
                         {[...Array(6)].map((_, j) => (
-                          <div key={j} className="h-4 rounded-md bg-white/5" />
+                          <div
+                            key={j}
+                            className="h-4 rounded-md bg-accent/10"
+                          />
                         ))}
-                        <div className="w-24 h-4 rounded-md bg-white/5" />
+                        <div className="w-24 h-4 rounded-md bg-accent/10" />
                       </div>
                     ))}
                   </motion.div>
@@ -275,7 +290,7 @@ export const ReportsTable = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center py-16 gap-3 text-white/20"
+                    className="flex flex-col items-center justify-center py-16 gap-3 text-accent/50"
                   >
                     <InboxIcon className="w-10 h-10 opacity-40" />
                     <p className="text-sm">No reports found for this filter.</p>
@@ -286,7 +301,7 @@ export const ReportsTable = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="divide-y divide-white/4"
+                    className="divide-y divide-accent/10"
                   >
                     {reports.map((report) => (
                       <ReportRow
@@ -309,7 +324,7 @@ export const ReportsTable = () => {
             </div>
 
             {!loading && reports.length > 0 && (
-              <p className="text-white/20 text-xs px-1">
+              <p className="text-accent/55 text-xs px-1">
                 {reports.length} report{reports.length !== 1 ? "s" : ""} shown
               </p>
             )}
@@ -329,28 +344,37 @@ export const ReportsTable = () => {
             {postReportsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-video rounded-xl bg-white/5 animate-pulse" />
+                  <div
+                    key={i}
+                    className="aspect-video rounded-xl bg-accent/10 animate-pulse"
+                  />
                 ))}
               </div>
             ) : postReportsFetched && postReportsFiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4 text-white/20 rounded-2xl border border-white/8 border-dashed">
+              <div className="flex flex-col items-center justify-center py-24 gap-4 text-accent/55 rounded-2xl border border-accent/20 border-dashed bg-background-secondary">
                 <FileImage className="w-10 h-10 opacity-30" />
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white/30">No reported files</p>
-                  <p className="text-xs mt-1 text-white/20">Files reported by users will appear here.</p>
+                  <p className="text-sm font-medium text-accent/70">
+                    No reported files
+                  </p>
+                  <p className="text-xs mt-1 text-accent/55">
+                    Files reported by users will appear here.
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {postReportsFiles.map((file, i) => (
-                    <ImageReportCard
-                        key={file.hash}
-                        item={file}
-                        index={i}
-                        onRemove={() =>
-                            setPostReportsFiles((prev) => prev.filter((f) => f.hash !== file.hash))
-                        }
-                    />
+                  <ImageReportCard
+                    key={file.hash}
+                    item={file}
+                    index={i}
+                    onRemove={() =>
+                      setPostReportsFiles((prev) =>
+                        prev.filter((f) => f.hash !== file.hash),
+                      )
+                    }
+                  />
                 ))}
               </div>
             )}
@@ -406,12 +430,12 @@ const ReportRow = ({
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="grid grid-cols-[1.2fr_1.2fr_1fr_2fr_1fr_0.9fr_auto] gap-4 px-5 py-4 hover:bg-white/2 transition-colors group items-center"
+      className="grid grid-cols-[1.2fr_1.2fr_1fr_2fr_1fr_0.9fr_auto] gap-4 px-5 py-4 hover:bg-accent/5 transition-colors group items-center"
     >
       {/* Reporter */}
       <Link
         href={`/profile/${report.initiatorUsername}`}
-        className="text-sm text-white/70 font-medium truncate hover:text-white transition-colors underline-offset-2 hover:underline"
+        className="text-sm text-accent/80 font-medium truncate hover:text-accent transition-colors underline-offset-2 hover:underline"
         title={`View @${report.initiatorUsername}'s profile`}
       >
         @{report.initiatorUsername}
@@ -420,24 +444,24 @@ const ReportRow = ({
       {/* Reported User */}
       <Link
         href={`/profile/${report.targetUsername}`}
-        className="text-sm text-white font-medium truncate hover:text-brand-light transition-colors underline-offset-2 hover:underline"
+        className="text-sm text-accent font-medium truncate hover:text-brand-light transition-colors underline-offset-2 hover:underline"
         title={`View @${report.targetUsername}'s profile`}
       >
         @{report.targetUsername}
       </Link>
 
       {/* Reason */}
-      <span className="text-xs text-white/50 truncate">
+      <span className="text-xs text-accent/70 truncate">
         {REASON_LABELS[report.reason]}
       </span>
 
       {/* Description */}
       <span
-        className="text-xs text-white/40 truncate"
+        className="text-xs text-accent/65 truncate"
         title={report.description}
       >
         {report.description || (
-          <em className="italic text-white/20">No description</em>
+          <em className="italic text-accent/50">No description</em>
         )}
       </span>
 
@@ -451,7 +475,7 @@ const ReportRow = ({
       </div>
 
       {/* Date */}
-      <span className="text-xs text-white/30">{formattedDate}</span>
+      <span className="text-xs text-accent/60">{formattedDate}</span>
 
       {/* Actions */}
       <div className="flex items-center gap-2 w-24 justify-end">
@@ -463,21 +487,25 @@ const ReportRow = ({
             onChange={(e) =>
               onStatusChange(report.id, e.target.value as ReportStatus)
             }
-            className="appearance-none pl-2.5 pr-6 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/60 text-xs focus:outline-none focus:border-brand/40 hover:border-white/20 transition-colors cursor-pointer disabled:opacity-40"
+            className="appearance-none pl-2.5 pr-6 py-1.5 rounded-lg bg-background border border-accent/20 text-accent/80 text-xs focus:outline-none focus:border-brand/40 hover:border-accent/30 transition-colors cursor-pointer disabled:opacity-40"
             title="Change status"
           >
             {ALL_STATUSES.map((s) => (
-              <option key={s} value={s} className="bg-[#0d0d0f]">
+              <option
+                key={s}
+                value={s}
+                className="bg-background-secondary text-accent"
+              >
                 {STATUS_CONFIG[s].label}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 pointer-events-none" />
+          <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-accent/60 pointer-events-none" />
         </div>
 
         <button
           onClick={onViewFiles}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-white/70 hover:bg-white/5 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-accent hover:bg-accent/10 transition-colors"
           title={`View files for report ${report.id}`}
         >
           <InboxIcon className="w-3.5 h-3.5" />
@@ -486,7 +514,7 @@ const ReportRow = ({
         {/* Delete posts button */}
         <button
           onClick={onDeletePosts}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
           title={`Delete posts by @${report.targetUsername}`}
         >
           <Trash2 className="w-3.5 h-3.5" />

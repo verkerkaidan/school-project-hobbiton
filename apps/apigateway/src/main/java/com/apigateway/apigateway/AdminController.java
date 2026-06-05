@@ -1,7 +1,9 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.clients.PostClient;
+import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.clients.ProfileConnectionClient;
+import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
 import com.apigateway.apigateway.models.ReportDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.UUID;
  * PUT /api/admin/reports/{reportId}/status
  * DELETE /api/admin/posts/{postId}
  * DELETE /api/admin/posts/users/{userId}
+ * GET /api/admin/profiles
  */
 @RestController
 @RequestMapping("/admin")
@@ -28,10 +31,13 @@ public class AdminController {
 
     private final ProfileConnectionClient profileConnectionClient;
     private final PostClient postClient;
+    private final ProfileClient profileClient;
 
-    public AdminController(ProfileConnectionClient profileConnectionClient, PostClient postClient) {
+    public AdminController(ProfileConnectionClient profileConnectionClient, PostClient postClient,
+            ProfileClient profileClient) {
         this.profileConnectionClient = profileConnectionClient;
         this.postClient = postClient;
+        this.profileClient = profileClient;
     }
 
     /**
@@ -65,5 +71,12 @@ public class AdminController {
     public ResponseEntity<Void> deleteAllUserPosts(@PathVariable UUID userId) {
         postClient.deleteAllUserPosts(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Fetch all user profiles with lightweight fields for admin viewing. */
+    @GetMapping("/profiles")
+    public ResponseEntity<List<AdminProfileSummaryResponse>> getAllProfiles() {
+        List<AdminProfileSummaryResponse> profiles = profileClient.getAllProfiles();
+        return ResponseEntity.ok(profiles);
     }
 }

@@ -52,13 +52,22 @@ impl LibraryService {
     /// 5. Return result
     pub async fn search(&self, req: &SearchRequest) -> Result<Vec<SearchResult>, AppError> {
         let cache_key = CacheService::search_key(req.search_type, &req.query, req.max_results);
-
         // ── 1. Cache check ────────────────────────────────────────────────
         if let Some(cached) = self.cache.get::<Vec<SearchResult>>(&cache_key).await {
             info!(
                 "[CACHE HIT] search key='{}' type={}",
                 req.query, req.search_type
             );
+
+            if let Some(cached) = self.cache.get::<Vec<SearchResult>>(&cache_key).await {
+                info!(
+                    "[CACHE HIT] search key='{}' type={}",
+                    req.query, req.search_type
+                );
+
+                return Ok(cached);
+            }
+
             return Ok(cached);
         }
 
@@ -71,8 +80,15 @@ impl LibraryService {
         let strategy = self.factory.get(req.search_type)?;
         let results = strategy.search(&req.query, req.max_results).await?;
 
-        // ── 3. Store in Redis (fire-and-forget, non-fatal) ────────────────
         self.cache.set(&cache_key, &results).await;
+
+        // ── 4. 🌟 SEED  ITEMS WITH MISS: Save under own id
+        for item in &results {
+            if let Some(id) = item.id() {
+                let item_cache_key = CacheService::item_key(req.search_type, &id);
+                self.cache.set(&item_cache_key, item).await;
+            }
+        }
 
         Ok(results)
     }
@@ -111,7 +127,10 @@ impl LibraryService {
         if let Some(ref item) = result {
             self.cache.set(&cache_key, item).await;
         } else {
-            warn!("[NOT FOUND] item id='{}' type={} — not caching", id, search_type);
+            warn!(
+                "[NOT FOUND] item id='{}' type={} — not caching",
+                id, search_type
+            );
         }
 
         Ok(result)
