@@ -118,9 +118,8 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
 
       conn = get(conn, ~p"/api/media/file", %{"instances" => ["inst-1", "inst-2"]})
 
-      assert [found, missing] = json_response(conn, 200)
+      assert [found] = json_response(conn, 200)
       assert found["relevantId"] == "inst-1"
-      assert missing == nil
     end
   end
 
