@@ -63,46 +63,13 @@ export const Sidebar = () => {
   return (
     <aside className="fixed top-0 left-0 h-screen w-20 md:w-64 bg-background-secondary backdrop-blur-xl border-r border-white/5 flex flex-col items-center md:items-start py-8 px-4 z-50">
       {/* Logo */}
-      <div className="flex justify-between w-full">
+      <div className="flex w-full justify-center md:justify-start">
         <Link
           href="/"
           className="mb-16 p-3 bg-brand-muted rounded-2xl border border-brand/20 group"
         >
-          <div
-            className="w-8 h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors"
-          />
+          <div className="w-8 h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors" />
         </Link>
-
-        {/* Theme Toggle Buttons */}
-        <div className="flex flex-col gap-2 mt-4">
-          <button
-            onClick={() => toggleTheme()}
-            className={`px-2 py-2 rounded-lg font-medium text-sm transition-all duration-300 bg-brand-muted`}
-          >
-            {isDarkMode ?
-              <div className="flex">
-                <Image
-                  src="/svgs/moon.svg"
-                  alt="Edit title"
-                  width={25}
-                  height={25}
-                  className=""
-                />
-                <p>dark</p>
-              </div> :
-                            <div className="flex">
-                <Image
-                  src="/svgs/sun.svg"
-                  alt="Edit title"
-                  width={25}
-                  height={25}
-                  className=""
-                />
-                <p>Light</p>
-              </div>
-            }
-          </button>
-        </div>
       </div>
 
       {/* Navigatie Links */}
@@ -123,10 +90,11 @@ export const Sidebar = () => {
             >
               <motion.div
                 className={`relative flex items-center gap-4 p-4 rounded-xl transition-all duration-300
-                                ${active
-                    ? "bg-brand-muted text-brand-light border border-brand/20"
-                    : "text-accent hover:text-brand border border-transparent"
-                  }`}
+                                ${
+                                  active
+                                    ? "bg-brand-muted text-brand-light border border-brand/20"
+                                    : "text-accent hover:text-brand border border-transparent"
+                                }`}
                 whileHover={{ x: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
@@ -162,6 +130,28 @@ export const Sidebar = () => {
         })}
       </nav>
 
+      <div className="w-full mb-4">
+        <button
+          onClick={toggleTheme}
+          aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+          className={`w-11 h-11 md:w-full md:h-auto px-0 md:px-3 py-0 md:py-2 rounded-xl font-medium text-sm transition-all duration-300 border flex items-center justify-center md:justify-start gap-2 translate-y-1 ${
+            isDarkMode
+              ? "bg-brand-muted text-accent border-transparent hover:bg-brand/20 hover:border-brand/20"
+              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+          }`}
+        >
+          <Image
+            src={isDarkMode ? "/svgs/moon.svg" : "/svgs/sun.svg"}
+            alt={isDarkMode ? "Dark mode active" : "Light mode active"}
+            width={20}
+            height={20}
+          />
+          <span className="hidden md:inline">
+            {isDarkMode ? "Dark" : "Light"}
+          </span>
+        </button>
+      </div>
+
       {/* De nieuwe, schone User Profile Section via de component */}
       <UserAvatar
         name={currentUser?.username ?? "..."}
@@ -169,8 +159,6 @@ export const Sidebar = () => {
         imageUrl={currentUser?.profilePictureUrl ?? "/jpeg.png"}
         isOnline={true}
       />
-
-
     </aside>
   );
 };
