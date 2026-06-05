@@ -14,7 +14,11 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://*.student.inf.st.hsleiden.nl:*"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://*.student.inf.st.hsleiden.nl:*",
+                "https://hobbiton.student.inf.st.hsleiden.nl",
+                "https://hobbiton.student.inf.st.hsleiden.nl:*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
