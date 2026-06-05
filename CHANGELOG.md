@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.23.3] - 2026-06-05
+
+### Fixed
+- **fix**: Fix responsiveness issue with theme toggle button
+
 ## [1.23.2] - 2026-06-05
 
 ### Fixed
