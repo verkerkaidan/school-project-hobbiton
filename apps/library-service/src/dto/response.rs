@@ -46,6 +46,7 @@ pub enum SearchResult {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct BookResponse {
+    pub id: Option<String>,
     pub title: Option<String>,
     pub authors: Vec<String>,
     pub published_date: Option<String>,
@@ -94,4 +95,14 @@ pub struct ExerciseResponse {
     pub equipments: Option<Vec<String>>,
     pub secondary_muscles: Option<Vec<String>>,
     pub instructions: Option<Vec<String>>,
+}
+
+impl SearchResult {
+    pub fn id(&self) -> Option<String> {
+        match self {
+            SearchResult::Book(b) => b.id.clone(),
+            SearchResult::Exercise(e) => e.exercise_id.clone(),
+            SearchResult::Movie(m) => m.id.clone(),
+        }
+    }
 }

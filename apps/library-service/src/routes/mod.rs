@@ -87,7 +87,7 @@ async fn search_get(
 /// Examples:
 ///   GET /BOOK/9780132350884     (ISBN)
 ///   GET /MOVIE/tt0111161        (IMDb ID)
-///   GET /EXERCISE/42            (wger ID)
+///   GET /EXERCISE/42            (Exercise ID))
 ///
 /// Cache key: `item:{TYPE}:{id}`
 async fn find_by_id(

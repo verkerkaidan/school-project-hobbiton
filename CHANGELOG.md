@@ -6,25 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [1.23.3] - 2026-06-05
+## [1.22.3] - 2026-06-05
 
 ### Fixed
-- **fix**: When one of the mediaFiles in a post was deleted, the feedcard would show empty sometimes and the postDetails couldn't load
+- **fix**: docker exiting with code 0
 
-## [1.23.2] - 2026-06-05
-
-### Fixed
-- **hotfix**: Accidental bool reverse on jwt
-
-## [1.23.1] - 2026-06-05
+## [1.22.2] - 2026-06-05
 
 ### Fixed
-- **hotfix**: added migrations 
+- **fix**: Docker not working on other devices because os musl tools
 
-## [1.23.0] - 2026-06-05
+## [1.22.1] - 2026-06-04
 
-### Added
-- **feat**: Users can report mediaFiles, admin can review those reports to assign a contentFlag, or delete the file
+### Fixed
+- **fix**: Search items now caching individually
 
 ## [1.22.0] - 2026-06-03
 
