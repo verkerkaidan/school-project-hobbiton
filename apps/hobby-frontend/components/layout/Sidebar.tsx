@@ -130,7 +130,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <div className="w-full mb-4">
+      <div className="w-full mb-4 flex justify-center md:justify-start">
         <button
           onClick={toggleTheme}
           aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
