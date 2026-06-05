@@ -41,5 +41,5 @@ export function getJwtRoles(token: string): string[] {
 
 /** True when the JWT contains the ROLE_ADMIN authority. */
 export function isAdminToken(token: string): boolean {
-  return !getJwtRoles(token).includes("ROLE_ADMIN");
+  return getJwtRoles(token).includes("ROLE_ADMIN");
 }
