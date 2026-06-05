@@ -1,13 +1,14 @@
 "use client";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
 import Image from "next/image";
-import { Post } from "@/types/posts";
-import { useRouter } from "next/navigation";
-import { ImageMenu } from "@/components/ui/ImageMenu";
-import { useState } from "react";
+import {Post} from "@/types/posts";
+import {useRouter} from "next/navigation";
+import {ImageMenu} from "@/components/ui/ImageMenu";
+import {useState} from "react";
 import Cookies from "js-cookie";
 import LikeButton from "@/components/interaction/LikeButton";
-import { FeedCardAuthor } from "@/components/feed/FeedCardAuthor";
+import {FeedCardAuthor} from "@/components/feed/FeedCardAuthor";
+import {ContentFlag} from "@/types/enums";
 
 export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
   const [revealed, setRevealed] = useState(false);
@@ -24,7 +25,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
     ? `data:${media.contentType};base64,${media.fileData}`
     : "";
 
-  const showOverlay = media?.contentFlag === "RISK" && !revealed;
+  const showOverlay = media?.contentFlag === ContentFlag.RISK && !revealed;
 
   const [aspectRatio] = useState(() => {
     const values = Object.values(aspectRatios);
@@ -44,13 +45,14 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       {/* Image Container */}
       {media && (
         <div
-          className={`relative w-full rounded-t-xl transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""} ${aspectRatio}`}
+          className={`relative w-full rounded-t-xl overflow-hidden ${aspectRatio}`}
         >
           {/* 3-dot menu (top-right) */}
           <div className="absolute top-2 right-2 z-20">
             <ImageMenu
               relevantId={media.relevantId}
               userId={Cookies.get("userId")!}
+              contentFlag={media.contentFlag}
             />
           </div>
           <Image
@@ -58,7 +60,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
             alt={item.title}
             fill
             sizes={"(max-width: 768px) 100vw, 50vw"}
-            className="object-cover"
+            className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""}`}
           />
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
           {/* 🚨 Content Warning Overlay */}

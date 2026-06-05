@@ -27,6 +27,9 @@ defmodule MediaServiceElxWeb.ReportController do
       {:ok, %MediaFile{} = media_file} ->
         case report_service().create_file_report(user_id, media_file) do
           {:ok, %FileReport{} = file_report} ->
+
+            IO.inspect(file_report, label: "Report created")
+
             json(conn, %{report_id: file_report.id, status: "ok"})
           {:error, reason} ->
             json(conn, %{status: "error", reason: reason})
@@ -58,6 +61,8 @@ defmodule MediaServiceElxWeb.ReportController do
     |> media_service().retrieve_media_files_from_file_id
     |> MediaFilesJSON.full_file_index
 
-    json(conn, result)
+    IO.inspect(result.data, label: "Reported files retrieved")
+
+    json(conn, result.data)
   end
 end

@@ -28,11 +28,13 @@ defmodule MediaServiceElx.ReportService do
 
   @doc """
   Handles the banning of media files
-  @params: uuid
+  @params: hash of the media file to be banned
   @returns: {:error, :unprocessable_entity} or {:ok, uuid}
   """
-  def ban_file(file_id) do
-    case Repo.get_by(MediaFile, id: file_id) do
+  def ban_file(hash) do
+    binary_hash = Base.decode64!(hash)
+
+    case Repo.get_by(MediaFile, hash: binary_hash) do
       %MediaFile{} = media_file ->
         if MediaService.banned?(media_file.hash) do
           {:ok, media_file.id}

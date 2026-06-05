@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import {useState} from 'react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
-import { ImageMenu } from '@/components/ui/ImageMenu';
+import {ImageMenu} from '@/components/ui/ImageMenu';
 import {MediaSet} from "@/types/posts";
+import {ContentFlag} from "@/types/enums";
 
 interface ImageSliderProps {
     media: MediaSet[];
@@ -32,7 +33,7 @@ export default function ImageSlider({
                 style={{ transform: `translateX(-${current * 100}%)` }}
             >
                 {media.map((item, i) => {
-                    const showOverlay = item.contentFlag === "RISK" && !revealedSlides.has(i);
+                    const showOverlay = item.contentFlag === ContentFlag.RISK && !revealedSlides.has(i);
 
                     return (
                         <div key={item.relevantId} className="relative w-full h-full shrink-0 overflow-hidden flex items-center justify-center">
@@ -40,6 +41,7 @@ export default function ImageSlider({
                                 <ImageMenu
                                     relevantId={item.relevantId}
                                     userId={Cookies.get('userId')!}
+                                    contentFlag={item.contentFlag}
                                 />
                             </div>
 

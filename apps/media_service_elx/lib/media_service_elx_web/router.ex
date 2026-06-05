@@ -14,7 +14,7 @@ defmodule MediaServiceElxWeb.Router do
     put "/", MediaController, :update_content_flag
     get "/", MediaController, :get_unassigned_media_files
     get "/admin/:instance_id", MediaController, :get_complete_media_file
-    delete "/admin/:file_id", MediaController, :delete_media_file
+    delete "/admin", MediaController, :delete_media_file
   end
 
   scope "/api/report", MediaServiceElxWeb do

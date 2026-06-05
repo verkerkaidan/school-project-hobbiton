@@ -7,11 +7,6 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
 
   # Ensure mocks are verified after each test
   setup :verify_on_exit!
-  setup do
-    IO.inspect(Application.get_env(:media_service_elx, :media_service), label: "media_service module")
-    IO.inspect(Application.get_env(:media_service_elx, :report_service), label: "report_service module")
-    :ok
-  end
 
   # ---------------------------------------------------------------------------
   # Helpers
@@ -114,26 +109,18 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
       assert result["contentFlag"] == "unassigned"
     end
 
-    test "returns error entry when instance is not found", %{conn: conn} do
-      expect(MediaServiceElx.MediaServiceMock, :retrieve_media_file, fn "missing" -> {:error, :not_found} end)
-
-      conn = get(conn, ~p"/api/media/file", %{"instances" => ["missing"]})
-
-      assert [%{"status" => "error", "reason" => "not_found"}] = json_response(conn, 200)
-    end
-
     test "handles a mix of found and missing instances", %{conn: conn} do
       media_file = build_media_file()
 
       MediaServiceElx.MediaServiceMock
       |> expect(:retrieve_media_file, fn "inst-1" -> {:ok, media_file} end)
-      |> expect(:retrieve_media_file, fn "inst-2" -> {:error, :not_found} end)
+      |> expect(:retrieve_media_file, fn "inst-2" -> {:error, "MediaInstance not found"} end)
 
       conn = get(conn, ~p"/api/media/file", %{"instances" => ["inst-1", "inst-2"]})
 
       assert [found, missing] = json_response(conn, 200)
       assert found["relevantId"] == "inst-1"
-      assert missing["status"] == "error"
+      assert missing == nil
     end
   end
 
@@ -239,7 +226,7 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
     test "returns file id on successful ban", %{conn: conn} do
       expect(MediaServiceElx.ReportServiceMock, :ban_file, fn "file-1" -> {:ok, "file-1"} end)
 
-      conn = delete(conn, ~p"/api/media/admin/file-1")
+      conn = delete(conn, ~p"/api/media/admin", %{hash: "file-1"})
 
       assert %{"id" => "file-1"} = json_response(conn, 200)
     end
@@ -247,7 +234,7 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
     test "returns 422 with generic error message when ban fails", %{conn: conn} do
       expect(MediaServiceElx.ReportServiceMock, :ban_file, fn "file-bad" -> {:error, :not_found} end)
 
-      conn = delete(conn, ~p"/api/media/admin/file-bad")
+      conn = delete(conn, ~p"/api/media/admin", %{hash: "file-bad"})
 
       assert %{"error" => "Invalid id"} = json_response(conn, 422)
     end

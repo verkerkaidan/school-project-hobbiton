@@ -1,4 +1,5 @@
 import type { Report, ReportStatus } from "@/types/reports";
+import type { MediaSet } from "@/types/posts";
 
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
@@ -63,3 +64,4 @@ export async function deleteAllUserPosts(userId: string): Promise<void> {
   });
   if (!res.ok) throw new Error("Failed to delete all user posts");
 }
+

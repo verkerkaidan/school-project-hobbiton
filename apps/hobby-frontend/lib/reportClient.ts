@@ -1,11 +1,44 @@
-const BASE_URL = process.env.NEXT_PUBLIC_MEDIA_URL;
+import {ContentFlag} from "@/types/enums";
+import {FileReport} from "@/types/reports";
 
+const GATEWAY_URL =
+    process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
+
+const API_BASE = `${GATEWAY_URL}/api`;
 export async function reportFile(userId: string, instanceId: string): Promise<string> {
-    const res = await fetch(`${BASE_URL}/api/media/report/${userId}/${instanceId}`, {
+    const res = await fetch(`${API_BASE}/media/report/${userId}/${instanceId}`, {
         method: "POST",
     });
 
     if (!res.ok) throw new Error("Failed to report");
 
     return await res.json();
+}
+
+export async function updateContentFlag(report: FileReport) {
+    const res = await fetch(`${API_BASE}/media/report`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(report)
+    });
+
+    if (!res.ok) throw new Error("Failed to update content flag");
+
+    return;
+}
+
+export async function deleteMediaFile(hash: string) {
+    const res = await fetch(`${API_BASE}/media`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ "hash": hash })
+    });
+
+    if (!res.ok) throw new Error("Failed to delete media file");
+
+    return;
 }

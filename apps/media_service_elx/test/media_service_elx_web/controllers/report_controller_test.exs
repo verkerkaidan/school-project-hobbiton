@@ -103,11 +103,17 @@ defmodule MediaServiceElxWeb.ReportControllerTest do
       expect(MediaServiceElx.MediaServiceMock, :retrieve_media_files_from_file_id, fn ["file-uuid-1"] -> %{files: [media_file]} end)
 
       conn = get(conn, ~p"/api/report")
+      [%{
+        "contentFlag" => content_flag,
+        "contentType" => content_type,
+        "file" => encoded_file,
+        "hash" => hash
+      }] = json_response(conn, 200)
 
-      assert %{"data" => [file]} = json_response(conn, 200)
-      assert file["id"] == "file-uuid-1"
-      assert file["content_type"] == "image/png"
-      assert file["file"] == Base.encode64(media_file.original)
+      assert content_flag == 2
+      assert hash == "YWJjMTIz"
+      assert content_type == "image/png"
+      assert encoded_file == Base.encode64(media_file.original)
     end
 
     test "returns empty data when no files are reported", %{conn: conn} do
@@ -116,7 +122,7 @@ defmodule MediaServiceElxWeb.ReportControllerTest do
 
       conn = get(conn, ~p"/api/report")
 
-      assert %{"data" => []} = json_response(conn, 200)
+      assert [] = json_response(conn, 200)
     end
   end
 end

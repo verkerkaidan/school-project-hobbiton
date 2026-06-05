@@ -1,9 +1,14 @@
-import { useState, useRef, useEffect } from "react";
-import { reportFile } from "@/lib/reportClient";
+"use client";
 
-export function ImageMenu({ userId, relevantId }: { userId: string, relevantId: string }) {
+import React, {useEffect, useRef, useState} from "react";
+import {reportFile} from "@/lib/reportClient";
+import {ContentFlag} from "@/types/enums";
+
+export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string, relevantId: string, contentFlag: ContentFlag }) {
     const [open, setOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     // close on outside click
     useEffect(() => {
@@ -18,12 +23,14 @@ export function ImageMenu({ userId, relevantId }: { userId: string, relevantId: 
 
     const handleReport = async () => {
         try {
+            setSubmitting(true);
             await reportFile(userId, relevantId);
-            alert("Reported");
-        } catch {
-            alert("Failed");
-        } finally {
             setOpen(false);
+            setToast({ message: "Report submitted", type: "success" });
+        } catch {
+            setToast({ message: "Failed to submit report", type: "error" });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -31,24 +38,99 @@ export function ImageMenu({ userId, relevantId }: { userId: string, relevantId: 
         <div ref={ref} className="relative">
             {/* 3 dots button */}
             <button
-                onClick={() => setOpen((prev) => !prev)}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    setOpen((prev) => !prev)
+                }}
                 className="bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-full hover:bg-black/80 transition"
             >
                 ⋯
             </button>
 
-            {/* popup */}
             {open && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-neutral-900 text-white shadow-lg border border-white/10 backdrop-blur-md p-2 animate-in fade-in zoom-in-95">
+                <div className="
+                    absolute top-full right-0 mt-2 w-44
+                    rounded-xl
+                    bg-neutral-900
+                    border border-white/10
+                    shadow-lg
+                    p-1
+                    z-30
+                ">
                     <button
-                        onClick={handleReport}
-                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleReport().then(() => setOpen(false))
+                        }}
+                        disabled={submitting}
+                        className="
+                            w-full flex items-center gap-3
+                            px-4 py-3
+                            text-sm text-red-400
+                            rounded-lg
+                            transition-colors
+                            hover:bg-red-500/10
+                            hover:text-red-300
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed
+                        "
                     >
-                        Report
-                    </button>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4 shrink-0"
+                        >
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                            <line x1="4" y1="22" x2="4" y2="15" />
+                        </svg>
 
+                        <span>
+                            {submitting
+                                ? "Reporting..."
+                                : contentFlag === ContentFlag.RISK
+                                    ? "Request review"
+                                    : "Report"}
+                        </span>
+                    </button>
                 </div>
             )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onDone={() => setToast(null)}
+                />
+            )}
+        </div>
+    );
+}
+
+function Toast({ message, type, onDone }: { message: string; type: "success" | "error"; onDone: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(onDone, 3000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const isSuccess = type === "success";
+
+    return (
+        <div className={`
+            fixed bottom-6 left-1/2 -translate-x-1/2
+            px-9 py-2 rounded-xl text-sm font-semibold
+            border transition-colors animate-fade-in-up
+            ${isSuccess
+            ? "bg-brand/30 border-brand/20 text-brand"
+            : "bg-red-500/30 border-red-500/30 text-red-400"
+        }
+        `}>
+            {message}
         </div>
     );
 }

@@ -47,10 +47,10 @@ defmodule MediaServiceElxWeb.MediaFilesJSON do
 
   defp full_file_data(%MediaFile{} = file) do
     %{
-      id: file.id,
-      content_flag: file.content_flag,
+      hash: Base.encode64(file.hash),
+      contentFlag: file.content_flag,
       file: Base.encode64(file.original),
-      content_type: file.content_type
+      contentType: file.content_type
     }
   end
 end
