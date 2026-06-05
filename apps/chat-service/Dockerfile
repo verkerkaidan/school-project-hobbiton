@@ -9,7 +9,7 @@ COPY . .
 RUN dotnet restore webApplication.sln
 
 # Publish
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish webApplication.csproj -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
@@ -19,5 +19,6 @@ EXPOSE 29294
 ENV ASPNETCORE_URLS=http://+:29294
 
 COPY --from=build /app/publish .
+COPY --from=build /src/migrations ./migrations
 
 ENTRYPOINT ["dotnet", "webApplication.dll"]

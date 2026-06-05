@@ -6,15 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.23.1] - 2026-06-05
+
+### Fixed
+- **hotfix**: added migrations 
+
 ## [1.23.0] - 2026-06-05
 
 ### Added
 - **feat**: Users can report mediaFiles, admin can review those reports to assign a contentFlag, or delete the file
-
-## [1.22.1] - 2026-06-05
-
-### Fixed
-- **hotfix**: Environment connection of chatservice to database was in code and not in .env
 
 ## [1.22.0] - 2026-06-03
 
