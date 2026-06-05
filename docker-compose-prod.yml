@@ -211,14 +211,12 @@ services:
     restart: always
     ports:
       - "29294:29294"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_CHAT_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_CHAT}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_CHAT}
     cpus: 1
     mem_limit: 1024m
     networks:
       - hobbithon-network
+    environment:
+      - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
 
   database:
     image: postgres:16

@@ -289,6 +289,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    environment:
+      - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
 
   docs:
     build:
