@@ -1,7 +1,7 @@
 // queries/getProfile.ts
 import { gqlRequest } from "@/lib/graphQlClient";
 import { Post, Gym, Reading } from "@/types/posts";
-import { UserProfile, User } from "@/types/profile";
+import { User } from "@/types/profile";
 
 const IS_FOLLOWING_QUERY = `
   query IsFollowing($currentUserId: ID!, $targetUserId: ID!) {
@@ -128,16 +128,15 @@ const GET_FOLLOWING_QUERY = `
   }
 `;
 
-export async function getProfile(userId: string): Promise<UserProfile> {
-  const data = await gqlRequest<{ getProfile: UserProfile }>(
-    GET_PROFILE_QUERY,
-    { userId },
-  );
+export async function getProfile(userId: string): Promise<User> {
+  const data = await gqlRequest<{ getProfile: User }>(GET_PROFILE_QUERY, {
+    userId,
+  });
   return data.getProfile;
 }
 
-export async function getProfileByUsername(username: string): Promise<UserProfile> {
-  const data = await gqlRequest<{ getProfileByUsername: UserProfile }>(
+export async function getProfileByUsername(username: string): Promise<User> {
+  const data = await gqlRequest<{ getProfileByUsername: User }>(
     GET_PROFILE_BY_USERNAME_QUERY,
     { username },
   );

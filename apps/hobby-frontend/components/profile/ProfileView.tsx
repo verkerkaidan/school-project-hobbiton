@@ -23,7 +23,7 @@ import {
   fetchNotificationPreferences,
 } from "@/lib/notificationClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { UserProfile, User } from "@/types/profile";
+import { User } from "@/types/profile";
 
 interface ProfileViewProps {
   userId?: string;
@@ -41,7 +41,7 @@ export function ProfileView({
   // Resolved after the initial profile load when navigating by username
   const [resolvedUserId, setResolvedUserId] = useState(userId ?? "");
 
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Cached follower/following lists — loaded lazily when the modal is opened
@@ -289,7 +289,7 @@ export function ProfileView({
     <>
       <ProfileHeader
         username={profile.username}
-        bio={profile.bio}
+        bio={profile.bio ?? ""}
         profilePictureUrl={profile.profilePictureUrl}
         followerCount={followerCount}
         followingCount={followingCount}

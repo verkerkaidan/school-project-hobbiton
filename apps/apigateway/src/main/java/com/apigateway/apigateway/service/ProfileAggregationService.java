@@ -6,7 +6,6 @@ import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.clients.ProfileConnectionClient;
 import com.apigateway.apigateway.models.CreateReportRequest;
 import com.apigateway.apigateway.models.User;
-import com.apigateway.apigateway.models.UserProfile;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.models.ProfileResponse;
 import org.slf4j.Logger;
@@ -38,12 +37,12 @@ public class ProfileAggregationService {
         this.notificationClient = notificationClient;
     }
 
-    public UserProfile getProfileByUsername(String username) {
+    public User getProfileByUsername(String username) {
         ProfileResponse profileResponse = profileClient.getProfileByUsername(username);
         UUID userId = profileResponse.getUserId();
         Set<UUID> followers = profileConnectionClient.getFollowerIds(userId);
         Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
-        return new UserProfile(
+        return new User(
                 profileResponse.getUserId(),
                 profileResponse.getUsername(),
                 profileResponse.getBiography() != null ? profileResponse.getBiography() : "",
@@ -52,7 +51,7 @@ public class ProfileAggregationService {
                 following.size());
     }
 
-    public UserProfile getProfile(UUID userId) {
+    public User getProfile(UUID userId) {
         logger.info("[getProfile] Starting profile fetch for userId: {}", userId);
         try {
             logger.debug("[getProfile] Calling ProfileClient.getProfile()");
@@ -65,8 +64,8 @@ public class ProfileAggregationService {
             Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
             logger.debug("[getProfile] Follower count: {}, Following count: {}", followers.size(), following.size());
 
-            // Map ProfileResponse to UserProfile
-            UserProfile profile = new UserProfile(
+            // Map ProfileResponse to User
+            User profile = new User(
                     profileResponse.getUserId(),
                     profileResponse.getUsername(),
                     profileResponse.getBiography() != null ? profileResponse.getBiography() : "",
@@ -74,7 +73,7 @@ public class ProfileAggregationService {
                     followers.size(),
                     following.size());
 
-            logger.info("[getProfile] Successfully created UserProfile for userId: {}", userId);
+            logger.info("[getProfile] Successfully created User for userId: {}", userId);
             return profile;
         } catch (Exception e) {
             logger.error("[getProfile] FAILED to fetch profile for userId: {} - Exception: {}", userId,
@@ -152,7 +151,8 @@ public class ProfileAggregationService {
                     username = actorProfile.getUsername();
                 }
             } catch (Exception e) {
-                logger.warn("[sendFollowNotification] Could not fetch username for actor {}: {}", actorUserId, e.getMessage());
+                logger.warn("[sendFollowNotification] Could not fetch username for actor {}: {}", actorUserId,
+                        e.getMessage());
             }
             String message = (username != null)
                     ? "@" + username + " started following you"
@@ -165,7 +165,8 @@ public class ProfileAggregationService {
             payload.put("message", message);
 
             notificationClient.createNotification(payload);
-            logger.debug("[sendFollowNotification] Follow notification sent: actor={} -> target={}", actorUserId, targetUserId);
+            logger.debug("[sendFollowNotification] Follow notification sent: actor={} -> target={}", actorUserId,
+                    targetUserId);
         } catch (Exception e) {
             logger.warn("[sendFollowNotification] Failed to send follow notification (actor={}, target={}): {}",
                     actorUserId, targetUserId, e.getMessage());

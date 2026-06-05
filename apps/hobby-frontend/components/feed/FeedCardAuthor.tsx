@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getProfile } from "@/queries/getProfile";
-import { UserProfile } from "@/types/profile";
+import { User } from "@/types/profile";
 
 interface FeedCardAuthorProps {
   userId: string;
 }
 
 export function FeedCardAuthor({ userId }: FeedCardAuthorProps) {
-  const [author, setAuthor] = useState<UserProfile | null>(null);
+  const [author, setAuthor] = useState<User | null>(null);
 
   useEffect(() => {
     getProfile(userId)
