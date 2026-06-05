@@ -6,10 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [1.23.3] - 2026-06-05
+## [1.23.4] - 2026-06-05
 
 ### Fixed
 - **fix**: Fix responsiveness issue with theme toggle button
+
+## [1.23.3] - 2026-06-05
+
+### Fixed
+- **fix**: When one of the mediaFiles in a post was deleted, the feedcard would show empty sometimes and the postDetails couldn't load
 
 ## [1.23.2] - 2026-06-05
 

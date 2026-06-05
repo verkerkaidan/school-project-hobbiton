@@ -51,6 +51,7 @@ Home of the first functions that are called when a request is coming in from api
           nil
       end
     end)
+    |> Enum.reject(&is_nil/1)
 
     json(conn, results)
   end
