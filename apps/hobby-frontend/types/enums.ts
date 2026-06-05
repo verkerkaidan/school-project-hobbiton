@@ -4,7 +4,7 @@ export enum HobbyType {
 }
 
 export enum ContentFlag {
-    SAFE,
-    RISK,
-    UNASSIGNED
+    SAFE = "SAFE",
+    RISK = "RISK",
+    UNASSIGNED = "UNASSIGNED"
 }

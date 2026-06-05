@@ -145,7 +145,7 @@ Handles most logic regarding actions with media files and media instances
       case Repo.get_by(MediaFile, id: id) do
         %MediaFile{} = media_file ->
           [media_file | acc]
-        nil -> {:error, "MediaFile not found"}
+        nil -> acc
       end
     end)
     %{files: files}

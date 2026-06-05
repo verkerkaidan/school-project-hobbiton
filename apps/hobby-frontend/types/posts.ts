@@ -1,4 +1,5 @@
 import {Comment, Interaction} from "@/types/interaction";
+import {ContentFlag} from "@/types/enums";
 
 export interface Exercise {
   title: string;
@@ -11,7 +12,7 @@ export interface MediaSet {
   relevantId: string;
   fileData: string;
   contentType: string;
-  contentFlag: string;
+  contentFlag: ContentFlag;
 }
 
 export interface CompletePost {

@@ -23,6 +23,7 @@ type Query {
   isFollowing(currentUserId: ID!, targetUserId: ID!): Boolean
   isBlocking(currentUserId: ID!, targetUserId: ID!): Boolean
   getBlockedUsers(userId: ID!): [User]
+  getReportedFiles: [ReportedFile]
 }
 
 interface Post {
@@ -117,4 +118,11 @@ type User {
   id: ID
   username: String
   profilePictureUrl: String
+}
+
+type ReportedFile {
+  hash: String
+  file: String
+  contentType: String
+  contentFlag: ContentFlag
 }

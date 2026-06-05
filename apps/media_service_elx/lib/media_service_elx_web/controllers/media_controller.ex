@@ -47,8 +47,8 @@ Home of the first functions that are called when a request is coming in from api
       case media_service().retrieve_media_file(instance_id) do
         {:ok, %MediaFile{} = media_file} ->
           %{relevantId: instance_id, fileData: Base.encode64(media_file.original), contentType: media_file.content_type, contentFlag: media_file.content_flag}
-        {:error, reason} ->
-          %{status: "error", reason: reason}
+        {:error, _} ->
+          nil
       end
     end)
 
@@ -121,8 +121,8 @@ Home of the first functions that are called when a request is coming in from api
   @params: connection, uuid
   @returns: {id: uuid}
   """
-  def delete_media_file(conn, %{"file_id" => file_id}) do
-    case report_service().ban_file(file_id) do
+  def delete_media_file(conn, %{"hash" => hash}) do
+    case report_service().ban_file(hash) do
       {:ok, file_id} ->
         json(conn, %{id: file_id})
       {:error, _reason} ->

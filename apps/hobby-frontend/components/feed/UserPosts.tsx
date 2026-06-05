@@ -57,7 +57,7 @@ export const UserPosts = ({ userId, getPosts }: UserPostsProps) => {
           animate={{ opacity: 1 }}
           transition={{ delay: index * 0.05 }}
         >
-          <FeedCard item={post} index={index} />
+          <FeedCard key={index} item={post} index={index} />
         </motion.div>
       ))}
     </div>

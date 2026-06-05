@@ -90,6 +90,7 @@ const GET_USER_POSTS_QUERY = `
         bookFinished
       }
       mediaSet {
+        relevantId
         fileData
         contentType
         contentFlag

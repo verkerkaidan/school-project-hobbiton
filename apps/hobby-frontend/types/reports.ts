@@ -1,3 +1,5 @@
+import {ContentFlag} from "@/types/enums";
+
 export type ReportReason =
   | "HARASSMENT"
   | "HATE_SPEECH"
@@ -27,6 +29,19 @@ export interface Report {
   description: string;
   status: ReportStatus;
   createdAt?: string;
+}
+
+export interface ReportedFile {
+  hash: string;
+  file: string;
+  contentFlag: ContentFlag;
+  contentType: string;
+}
+
+export interface FileReport {
+  hash: string;
+  contentFlag: ContentFlag;
+  note: string;
 }
 
 export const REASON_LABELS: Record<ReportReason, string> = {

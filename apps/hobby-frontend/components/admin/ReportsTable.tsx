@@ -1,22 +1,16 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  RefreshCw,
-  Trash2,
-  ChevronDown,
-  AlertCircle,
-  InboxIcon,
-  Users,
-  FileText,
-} from "lucide-react";
-import { getReportsByStatus, updateReportStatus } from "@/lib/adminClient";
-import { getProfile } from "@/queries/getProfile";
-import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
-import type { Report, ReportStatus } from "@/types/reports";
-import { REASON_LABELS, STATUS_CONFIG, ALL_STATUSES } from "@/types/reports";
+import {AnimatePresence, motion} from "framer-motion";
+import {AlertCircle, ChevronDown, FileImage, InboxIcon, RefreshCw, Trash2, Users,} from "lucide-react";
+import {getReportsByStatus, updateReportStatus} from "@/lib/adminClient";
+import {getReportedFiles} from "@/queries/getReportedFiles";
+import type {Report, ReportedFile, ReportStatus} from "@/types/reports";
+import {ALL_STATUSES, REASON_LABELS, STATUS_CONFIG} from "@/types/reports";
+import {getProfile} from "@/queries/getProfile";
+import {DeleteConfirmModal} from "@/components/admin/DeleteConfirmModal";
+import {ImageReportCard} from "@/components/admin/ImageReportCard";
 
 type ReportTypeTab = "users" | "posts";
 type FilterTab = ReportStatus | "ALL";
@@ -66,11 +60,21 @@ export const ReportsTable = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  // View media modal state
+  const [viewMediaOpen, setViewMediaOpen] = useState(false);
+  const [viewMediaItems, setViewMediaItems] = useState<ReportedFile[]>([]);
+  const [viewMediaLoading, setViewMediaLoading] = useState(false);
+
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<{
     userId: string;
     username: string;
   } | null>(null);
+
+  // Post reports (files) state
+  const [postReportsFiles, setPostReportsFiles] = useState<ReportedFile[]>([]);
+  const [postReportsLoading, setPostReportsLoading] = useState(false);
+  const [postReportsFetched, setPostReportsFetched] = useState(false);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -90,6 +94,23 @@ export const ReportsTable = () => {
     fetchReports();
   }, [fetchReports]);
 
+  // Fetch files for post reports when tab changes
+  useEffect(() => {
+    if (reportType === "posts" && !postReportsFetched && !postReportsLoading) {
+      setPostReportsLoading(true);
+      getReportedFiles()
+          .then((files) => setPostReportsFiles(files ?? []))
+          .catch((e) => {
+            console.error("Failed to fetch reported files for posts", e);
+            setPostReportsFiles([]);
+          })
+          .finally(() => {
+            setPostReportsLoading(false);
+            setPostReportsFetched(true); // mark as done regardless of result
+          });
+    }
+  }, [reportType, postReportsFetched, postReportsLoading]);
+
   const handleStatusChange = async (reportId: string, status: ReportStatus) => {
     setUpdatingId(reportId);
     try {
@@ -104,6 +125,22 @@ export const ReportsTable = () => {
     }
   };
 
+  const handleViewFiles = async () => {
+    setViewMediaLoading(true);
+    setViewMediaItems([]);
+    try {
+      const media = await getReportedFiles();
+      setViewMediaItems(media ?? []);
+      setViewMediaOpen(true);
+    } catch (e) {
+      console.error("Failed to fetch reported media", e);
+      setViewMediaItems([]);
+      setViewMediaOpen(true);
+    } finally {
+      setViewMediaLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* ─── Report Type Tabs (User / Post) ─── */}
@@ -111,7 +148,7 @@ export const ReportsTable = () => {
         {(
           [
             { value: "users" as const, label: "User Reports", icon: Users },
-            { value: "posts" as const, label: "Post Reports", icon: FileText },
+            { value: "posts" as const, label: "Image Reports", icon: FileImage },
           ] satisfies {
             value: ReportTypeTab;
             label: string;
@@ -263,6 +300,7 @@ export const ReportsTable = () => {
                             username: report.targetUsername ?? report.target,
                           })
                         }
+                        onViewFiles={handleViewFiles}
                       />
                     ))}
                   </motion.div>
@@ -279,7 +317,7 @@ export const ReportsTable = () => {
         )}
 
         {/* ═══════════════════════════════════════════
-            POST REPORTS — coming soon
+            POST REPORTS — Files as cards
         ═══════════════════════════════════════════ */}
         {reportType === "posts" && (
           <motion.div
@@ -287,17 +325,35 @@ export const ReportsTable = () => {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }}
-            className="flex flex-col items-center justify-center py-24 gap-4 text-white/20 rounded-2xl border border-white/8 border-dashed"
           >
-            <FileText className="w-10 h-10 opacity-30" />
-            <div className="text-center">
-              <p className="text-sm font-medium text-white/30">
-                Post reporting coming soon
-              </p>
-              <p className="text-xs mt-1 text-white/20">
-                Post-level reports will appear here once the feature is enabled.
-              </p>
-            </div>
+            {postReportsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="aspect-video rounded-xl bg-white/5 animate-pulse" />
+                ))}
+              </div>
+            ) : postReportsFetched && postReportsFiles.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 gap-4 text-white/20 rounded-2xl border border-white/8 border-dashed">
+                <FileImage className="w-10 h-10 opacity-30" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-white/30">No reported files</p>
+                  <p className="text-xs mt-1 text-white/20">Files reported by users will appear here.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {postReportsFiles.map((file, i) => (
+                    <ImageReportCard
+                        key={file.hash}
+                        item={file}
+                        index={i}
+                        onRemove={() =>
+                            setPostReportsFiles((prev) => prev.filter((f) => f.hash !== file.hash))
+                        }
+                    />
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -326,6 +382,7 @@ interface ReportRowProps {
   isUpdating: boolean;
   onStatusChange: (id: string, status: ReportStatus) => void;
   onDeletePosts: () => void;
+  onViewFiles: () => void;
 }
 
 const ReportRow = ({
@@ -333,6 +390,7 @@ const ReportRow = ({
   isUpdating,
   onStatusChange,
   onDeletePosts,
+  onViewFiles,
 }: ReportRowProps) => {
   const statusCfg = STATUS_CONFIG[report.status];
   const formattedDate = report.createdAt
@@ -416,6 +474,14 @@ const ReportRow = ({
           </select>
           <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 pointer-events-none" />
         </div>
+
+        <button
+          onClick={onViewFiles}
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-white/70 hover:bg-white/5 transition-colors"
+          title={`View files for report ${report.id}`}
+        >
+          <InboxIcon className="w-3.5 h-3.5" />
+        </button>
 
         {/* Delete posts button */}
         <button
