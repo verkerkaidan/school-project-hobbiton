@@ -15,8 +15,8 @@ type Query {
   getPostsByHobbyType(hobbyType: HobbyType): [Post]
   getPostById(id: ID): Post
   getPosts: [Post]
-  getProfile(userId: ID!): UserProfile
-  getProfileByUsername(username: String!): UserProfile
+  getProfile(userId: ID!): User
+  getProfileByUsername(username: String!): User
   getUserPosts(userId: ID!): [Post]
   getFollowers(userId: ID!): [User]
   getFollowing(userId: ID!): [User]
@@ -84,14 +84,14 @@ type Media {
 }
 
 type Interaction {
-    likes: Int
-    comments: [Comment]
+  likes: Int
+  comments: [Comment]
 }
 type Comment {
-    id: ID
-    referenceId: ID
-    userId: ID
-    comment: String
+  id: ID
+  referenceId: ID
+  userId: ID
+  comment: String
 }
 
 enum HobbyType {
@@ -105,19 +105,13 @@ enum ContentFlag {
   UNASSIGNED
 }
 
-type UserProfile {
+type User {
   id: ID
   username: String
   bio: String
   profilePictureUrl: String
   followerCount: Int
   followingCount: Int
-}
-
-type User {
-  id: ID
-  username: String
-  profilePictureUrl: String
 }
 
 type ReportedFile {

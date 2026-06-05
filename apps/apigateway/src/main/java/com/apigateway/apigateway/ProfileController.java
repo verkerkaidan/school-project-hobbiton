@@ -1,7 +1,6 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.models.User;
-import com.apigateway.apigateway.models.UserProfile;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.service.ProfileAggregationService;
 import org.slf4j.Logger;
@@ -26,17 +25,17 @@ public class ProfileController {
 
     // GraphQL query: resolves a profile by username
     @QueryMapping
-    public UserProfile getProfileByUsername(@Argument String username) {
+    public User getProfileByUsername(@Argument String username) {
         return profileAggregationService.getProfileByUsername(username);
     }
 
     // GraphQL query: resolves a single user's aggregated profile (bio, picture,
     // counts, etc.)
     @QueryMapping
-    public UserProfile getProfile(@Argument String userId) {
+    public User getProfile(@Argument String userId) {
         logger.info("[getProfile] Received request for userId: {}", userId);
         try {
-            UserProfile profile = profileAggregationService.getProfile(UUID.fromString(userId));
+            User profile = profileAggregationService.getProfile(UUID.fromString(userId));
             logger.info("[getProfile] Successfully retrieved profile for userId: {}", userId);
             return profile;
         } catch (Exception e) {
