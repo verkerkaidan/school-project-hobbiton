@@ -1,6 +1,13 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 
+var migrationRunner = new MigrationRunner(
+    Environment.GetEnvironmentVariable("CHAT_DB_CONNECTION_STRING")
+    ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set")
+);
+migrationRunner.Run();
+
+// ... rest of your app startup
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi(); // add this
 

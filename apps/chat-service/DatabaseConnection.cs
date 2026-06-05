@@ -5,10 +5,10 @@ class DatabaseConnection
 {
     private NpgsqlConnection CreateConnection()
     {
-        var conn = new NpgsqlConnection(
-            "Host=database;Port=5432;Username=chat_database_user;Password=KDImmI!k;Database=chat_service"
-        );
+        var connectionString = Environment.GetEnvironmentVariable("CHAT_DB_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set");
 
+        var conn = new NpgsqlConnection(connectionString);
         conn.Open();
         return conn;
     }

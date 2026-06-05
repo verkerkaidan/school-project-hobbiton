@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.22.1] - 2026-06-05
+
+### Fixed
+- **hotfix**: Environment connection of chatservice to database was in code and not in .env
+
 ## [1.22.0] - 2026-06-03
 
 ### Added
