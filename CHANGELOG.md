@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.23.1] - 2026-06-05
+
+### Fixed
+- **fix**: Recognition service can now also handle webp and jp(e)g instead of just png
+
 ## [1.23.0] - 2026-06-05
 
 ### Added
