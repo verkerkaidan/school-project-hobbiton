@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.25.0] - 2026-06-07
+
+### Added
+- **feat**: User can now report bugs to the admins.
+
 ## [1.24.1] - 2026-06-07
 
 ### Fixed

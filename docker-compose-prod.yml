@@ -186,6 +186,28 @@ services:
     networks:
       - hobbithon-network
 
+  bug-report-service:
+    image: ${CI_REGISTRY_IMAGE}/bug-report-service:latest
+    restart: always
+    ports:
+      - "29556:29556"
+    environment:
+      PORT: 29556
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: ${DB_BUGREPORT_USER}
+      DB_PASSWORD: ${DB_BUGREPORT_PASSWORD}
+      DB_NAME: ${DB_BUGREPORT_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      BUG_REPORT_ALLOWED_ORIGINS: ${BUG_REPORT_ALLOWED_ORIGINS}
+    cpus: 1
+    mem_limit: 256m
+    networks:
+      - hobbithon-network
+
   middleware-service:
     image: ${CI_REGISTRY_IMAGE}/apigateway:latest
     restart: always
@@ -207,6 +229,7 @@ services:
       LIBRARY_SERVICE_URL: ${LIBRARY_SERVICE_URL}
       CHAT_HTTP_URL: ${CHAT_HTTP_URL}
       CHAT_WS_URL: ${CHAT_WS_URL}
+      BUG_REPORT_SERVICE_URL: ${BUG_REPORT_SERVICE_URL}
   chat-service:
     image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always

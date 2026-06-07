@@ -1,9 +1,11 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.clients.BugReportClient;
 import com.apigateway.apigateway.clients.PostClient;
 import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.clients.ProfileConnectionClient;
 import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
+import com.apigateway.apigateway.models.BugReportDTO;
 import com.apigateway.apigateway.models.ReportDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +34,14 @@ public class AdminController {
     private final ProfileConnectionClient profileConnectionClient;
     private final PostClient postClient;
     private final ProfileClient profileClient;
+    private final BugReportClient bugReportClient;
 
     public AdminController(ProfileConnectionClient profileConnectionClient, PostClient postClient,
-            ProfileClient profileClient) {
+            ProfileClient profileClient, BugReportClient bugReportClient) {
         this.profileConnectionClient = profileConnectionClient;
         this.postClient = postClient;
         this.profileClient = profileClient;
+        this.bugReportClient = bugReportClient;
     }
 
     /**
@@ -78,5 +82,20 @@ public class AdminController {
     public ResponseEntity<List<AdminProfileSummaryResponse>> getAllProfiles() {
         List<AdminProfileSummaryResponse> profiles = profileClient.getAllProfiles();
         return ResponseEntity.ok(profiles);
+    }
+
+    /** Fetch all bug reports, optionally filtered by status (OPEN / CLOSED). */
+    @GetMapping("/bug-reports")
+    public ResponseEntity<List<BugReportDTO>> getBugReports(
+            @RequestParam(value = "status", required = false) String status) {
+        List<BugReportDTO> reports = bugReportClient.getBugReports(status);
+        return ResponseEntity.ok(reports);
+    }
+
+    /** Close a bug report by ID (sets status to CLOSED). */
+    @PutMapping("/bug-reports/{id}/close")
+    public ResponseEntity<BugReportDTO> closeBugReport(@PathVariable String id) {
+        BugReportDTO report = bugReportClient.closeBugReport(id);
+        return ResponseEntity.ok(report);
     }
 }
