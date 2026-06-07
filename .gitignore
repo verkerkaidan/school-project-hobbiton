@@ -41,6 +41,7 @@ htmlcov/
 *.sublime-project
 
 pgadmin-data
+.gradle
 
 # Playwright
 /test-results/

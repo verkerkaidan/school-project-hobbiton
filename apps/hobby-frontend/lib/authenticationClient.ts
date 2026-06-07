@@ -47,30 +47,6 @@ export async function login(email: string, password: string): Promise<void> {
     throw new Error(message);
   }
 }
-/**
- * Tries to register user by fetching with post, if return is 200 goes to handleResponse and saves into cookies with savesSession()
- * If register fails, throws error
- * @param email User email for login
- * @param password User password for login
- */
-export async function register(email: string, password: string): Promise<void> {
-  console.log("BASE URL: " + BASE_URL);
-  const res = await fetch(`${BASE_URL}/api/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (res.status == 200) {
-    const data = await handleResponse<AuthResponse>(res);
-    saveSession(data, email);
-  } else {
-    // Parse the error body if your API returns one, fallback to a generic message
-    const errorData = await res.json().catch(() => null);
-    const message = errorData?.message ?? `Login failed (${res.status})`;
-    throw new Error(message);
-  }
-}
 
 /**
  * Returns the email address of the currently authenticated user.
