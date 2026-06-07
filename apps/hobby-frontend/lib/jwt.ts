@@ -32,6 +32,7 @@ export function decodeJwtPayload(
 export function getJwtRoles(token: string): string[] {
   const payload = decodeJwtPayload(token);
   if (!payload) return [];
+  // Use the `role` claim only (the auth service emits `role` as a list)
   const roles = payload["role"];
   if (Array.isArray(roles)) return roles as string[];
   // Some implementations emit a single string instead of an array

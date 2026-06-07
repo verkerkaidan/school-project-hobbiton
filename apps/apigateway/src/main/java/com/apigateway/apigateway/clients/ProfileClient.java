@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -33,6 +34,12 @@ public interface ProfileClient {
     // so the
     // profile-service can extract the userId from the JWT claims
     @PostMapping("/profile/create")
-    ProfileResponse createProfile(@RequestBody CreateProfileRequest request,
-            @RequestHeader("Authorization") String authorization);
+    ProfileResponse createProfile(
+        @RequestBody CreateProfileRequest request,
+        @RequestHeader("Authorization") String authorization
+    );
+
+    // Edits a profile in the profile-service;
+    @PutMapping("/profile/edit/")
+    ProfileResponse editProfile(@RequestBody CreateProfileRequest request);
 }
