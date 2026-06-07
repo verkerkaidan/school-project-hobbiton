@@ -6,6 +6,7 @@ import { ShieldAlert } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { UsersOverview } from "@/components/admin/UsersOverview";
 import { ReportsTable } from "@/components/admin/ReportsTable";
+import { BugReportsTable } from "@/components/admin/BugReportsTable";
 
 export default function AdminReportsPage() {
   const currentUser = useCurrentUser();
@@ -49,6 +50,11 @@ export default function AdminReportsPage() {
       {/* Reports table */}
       <div className="mt-8">
         <ReportsTable />
+      </div>
+
+      {/* Bug reports */}
+      <div className="mt-8">
+        <BugReportsTable />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { BlockedUsersSection } from "@/components/settings/BlockedUsersSection";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { BugReportSection } from "@/components/settings/BugReportSection";
 import { DeletionSection } from "@/components/settings/DeletionSection";
 
 export default function SettingsPage() {
@@ -19,6 +20,8 @@ export default function SettingsPage() {
         <BlockedUsersSection />
 
         <SecuritySettings />
+
+        <BugReportSection />
 
         <DeletionSection />
       </div>
