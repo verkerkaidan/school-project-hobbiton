@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+
+## [1.26.0] - 2026-06-06
+
+### Added
+- **feat**: General docker setup for auth in C
+
 ## [1.25.0] - 2026-06-07
 
 ### Added
@@ -15,7 +21,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - **fix**: register improvement
-
 ## [1.24.0] - 2026-06-05
 
 ### Changed

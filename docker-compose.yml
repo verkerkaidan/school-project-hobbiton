@@ -162,6 +162,30 @@ services:
       database:
         condition: service_healthy
 
+  authentication-service-c:
+    build: ./apps/authentication-service-c
+    container_name: authentication-service-c
+    restart: always
+    ports:
+      - "21527:21527"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_AUTHENTICATION_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_AUTHENTICATION}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_AUTHENTICATION}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_SECRET: ${JWT_SECRET}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      ADMIN_TEST_USER: ${ADMIN_TEST_USER}
+      ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
+    cpus: 0.5
+    mem_limit: 512m
+    networks:
+      - microservices-network
+    depends_on:
+      database:
+        condition: service_healthy
+
   profile-service:
     build: ./apps/profile-service
     container_name: profile-service
