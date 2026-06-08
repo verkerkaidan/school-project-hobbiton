@@ -7,7 +7,7 @@ import Image from "next/image";
 
 interface EditProfilePictureModalProps {
   isOpen: boolean;
-  currentImageUrl: string;
+  currentImage: string;
   username: string;
   onClose: () => void;
   /** Called with the selected File when the user confirms. Integration TBD. */
@@ -16,7 +16,7 @@ interface EditProfilePictureModalProps {
 
 export function EditProfilePictureModal({
   isOpen,
-  currentImageUrl,
+  currentImage,
   username,
   onClose,
   onSave,
@@ -54,7 +54,7 @@ export function EditProfilePictureModal({
     if (!selectedFile) return;
     setSaving(true);
     try {
-      await onSave(selectedFile);
+      onSave(selectedFile);
       handleClose();
     } finally {
       setSaving(false);
@@ -122,7 +122,7 @@ export function EditProfilePictureModal({
             <div className="flex justify-center">
               <div className="relative w-36 h-36 rounded-full overflow-hidden border-2 border-brand/30 shadow-lg">
                 <Image
-                  src={preview ?? currentImageUrl}
+                  src={preview ?? currentImage}
                   alt={username}
                   fill
                   className="object-cover"

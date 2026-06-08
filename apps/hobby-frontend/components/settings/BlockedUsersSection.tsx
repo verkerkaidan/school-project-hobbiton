@@ -7,6 +7,7 @@ import { ChevronRight, ChevronDown, UserX, Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getBlockedUsers, toggleBlock } from "@/queries/getProfile";
 import type { User } from "@/types/profile";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 export function BlockedUsersSection() {
   const currentUser = useCurrentUser();
@@ -17,6 +18,7 @@ export function BlockedUsersSection() {
   const [loading, setLoading] = useState(false);
   const [unblockingIds, setUnblockingIds] = useState<Set<string>>(new Set());
   const [fetched, setFetched] = useState(false);
+  const {imageSrc: contextImageSrc} = useProfilePic();
 
   const fetchBlocked = useCallback(async () => {
     if (fetched) return;
@@ -49,6 +51,13 @@ export function BlockedUsersSection() {
       });
     }
   };
+
+  function getProfilePicture(user: User): string {
+    return contextImageSrc
+        ?? (user.profilePicture?.fileData
+            ? `data:${user.profilePicture.contentType};base64,${user.profilePicture.fileData}`
+            : "/jpeg.png");
+  }
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden">
@@ -101,7 +110,7 @@ export function BlockedUsersSection() {
                     className="flex items-center gap-3 flex-1 min-w-0"
                   >
                     <Image
-                      src={user.profilePictureUrl || "/jpeg.png"}
+                      src={getProfilePicture(user)}
                       alt={user.username}
                       width={36}
                       height={36}

@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import {MediaSet} from "@/types/posts";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface User {
   id: string;
   username: string;
-  profilePictureUrl: string;
+  profilePicture?: MediaSet;
 }
 
 interface UserListModalProps {
@@ -42,6 +44,7 @@ export const UserListModal = ({
   );
   // Tracks which user IDs have an in-flight toggle request to disable their button
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const {imageSrc: contextImageSrc} = useProfilePic();
 
   // Re-sync local follow state whenever the parent's followingIds or the user list changes
   // (e.g. opening the modal with a different set of users)
@@ -57,6 +60,14 @@ export const UserListModal = ({
   // Prefer the local optimistic state; fall back to the parent set if not yet initialised
   const isFollowingUser = (userId: string): boolean =>
     localFollowing.get(userId) ?? followingIds?.has(userId) ?? false;
+
+  function getProfilePicture(user: User): string {
+    return contextImageSrc
+        ?? (user.profilePicture?.fileData
+            ? `data:${user.profilePicture.contentType};base64,${user.profilePicture.fileData}`
+            : "/jpeg.png");
+  }
+
 
   const handleToggle = async (user: User) => {
     if (!onToggleFollow || !currentUserId || pendingIds.has(user.id)) return;
@@ -147,7 +158,7 @@ export const UserListModal = ({
                           className="relative w-10 h-10 rounded-full overflow-hidden border border-brand/20 shrink-0 hover:border-brand/60 transition-colors"
                         >
                           <Image
-                            src={user.profilePictureUrl}
+                            src={getProfilePicture(user)}
                             alt={user.username}
                             fill
                             className="object-cover"

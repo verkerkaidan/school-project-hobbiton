@@ -7,15 +7,18 @@ import {
   getAllAdminProfiles,
   type AdminProfileSummary,
 } from "@/lib/adminClient";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 const DEFAULT_PROFILE_IMAGE = "/jpeg.png";
 
 function UserImage({ profile }: { profile: AdminProfileSummary }) {
   const [imageFailed, setImageFailed] = useState(false);
-  const imageSrc =
-    !profile.profilePictureUrl || imageFailed
-      ? DEFAULT_PROFILE_IMAGE
-      : profile.profilePictureUrl;
+  const {imageSrc: contextImageSrc} = useProfilePic();
+
+  const imageSrc = contextImageSrc
+      ?? (profile.profilePicture?.fileData
+          ? `data:${profile.profilePicture.contentType};base64,${profile.profilePicture.fileData}`
+          : DEFAULT_PROFILE_IMAGE);
 
   return (
     <img

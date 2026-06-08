@@ -5,6 +5,7 @@ import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.Post;
+import com.apigateway.apigateway.service.MediaService;
 import com.apigateway.apigateway.service.PostAggregationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,12 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://localhost:3000","http://localhost:19293"})
 public class PostsController {
 
-    private final PostAggregationService service;
+    private final PostAggregationService postService;
+    private final MediaService mediaService;
 
-    public PostsController(PostAggregationService service) {
-        this.service = service;
+    public PostsController(PostAggregationService postService, MediaService mediaService) {
+        this.postService = postService;
+        this.mediaService = mediaService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(PostsController.class);
@@ -38,7 +41,7 @@ public class PostsController {
         if (post.getMediaInstanceSet() == null || post.getMediaInstanceSet().size() == 0) {
             return new ArrayList<MediaDTO>();
         }
-        return service.getMedia(post.getMediaInstanceSet());
+        return mediaService.getMedia(post.getMediaInstanceSet());
     }
     @SchemaMapping(typeName = "Post", field = "interaction")
     public Interaction interaction(Post post) {
@@ -46,24 +49,24 @@ public class PostsController {
             log.warn("Post has null ID, skipping interaction fetch");
             return null;
         }
-        return service.getInteraction(post.getId());
+        return postService.getInteraction(post.getId());
     }
     @QueryMapping
     public List<Post> getPostsByHobbyType(@Argument HobbyType hobbyType) {
-        List<Post> postSet = new ArrayList<>(service.getPostsByHobbyType(hobbyType));
+        List<Post> postSet = new ArrayList<>(postService.getPostsByHobbyType(hobbyType));
         postSet.forEach(p -> log.info("Post class = {}", p.getClass().getName()));
         return postSet;
     }
 
     @QueryMapping
     public List<Post> getPosts() {
-        List<Post> postSet = new ArrayList<>(service.getAllPosts());
+        List<Post> postSet = new ArrayList<>(postService.getAllPosts());
         return postSet;
     }
 
     @QueryMapping
     public Post getPostById(@Argument UUID id) {
-        return service.getPostById(id);
+        return postService.getPostById(id);
     }
 
     @ResponseBody
@@ -73,7 +76,7 @@ public class PostsController {
             @RequestPart(value = "files[]", required = false) List<MultipartFile> files
     ) {
         dto.mediaInstanceDTOSet = files;
-        Object response = service.forwardCreatePost(dto);
+        Object response = postService.forwardCreatePost(dto);
         return ResponseEntity.ok(response);
     }
 }

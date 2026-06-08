@@ -5,11 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, BellOff } from "lucide-react";
 import Image from "next/image";
 import { EditProfilePictureModal } from "@/components/profile/EditProfilePictureModal";
+import {MediaSet} from "@/types/posts";
+import {postChangeProfilePicture} from "@/lib/profileClient";
+import Cookies from "js-cookie";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface ProfileHeaderProps {
   username: string;
   bio: string;
-  profilePictureUrl: string;
+  profilePicture?: MediaSet;
   followerCount: number;
   followingCount: number;
   onFollowersClick: () => void;
@@ -24,14 +28,12 @@ interface ProfileHeaderProps {
   onBlock?: () => Promise<void>;
   onSubscriptionToggle?: () => Promise<void>;
   onReport?: () => void;
-  /** Called with the selected File when the user confirms the new picture. Integration TBD. */
-  onEditPicture?: (file: File) => Promise<void>;
 }
 
 export const ProfileHeader = ({
   username,
   bio,
-  profilePictureUrl,
+  profilePicture,
   followerCount,
   followingCount,
   onFollowersClick,
@@ -45,7 +47,6 @@ export const ProfileHeader = ({
   onBlock,
   onSubscriptionToggle,
   onReport,
-  onEditPicture,
 }: ProfileHeaderProps) => {
   const [editPictureOpen, setEditPictureOpen] = useState(false);
   const [followPending, setFollowPending] = useState(false);
@@ -53,6 +54,12 @@ export const ProfileHeader = ({
   const [subscriptionPending, setSubscriptionPending] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const { imageSrc: contextImageSrc, setImageSrc, showToast } = useProfilePic();
+
+  const imageSrc = contextImageSrc
+    ?? (profilePicture?.fileData
+      ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
+      : "/jpeg.png");
 
   // Close settings dropdown when clicking outside
   useEffect(() => {
@@ -104,6 +111,27 @@ export const ProfileHeader = ({
     onReport?.();
   };
 
+  async function onEditProfilePicture(newFile: File) {
+    const userId = Cookies.get("userId") ?? "";
+    const token = Cookies.get("token") ?? "";
+
+    if (contextImageSrc?.startsWith("blob:")) {
+      URL.revokeObjectURL(contextImageSrc);
+    }
+
+    const previewUrl = URL.createObjectURL(newFile);
+    setImageSrc(previewUrl); // optimistic update
+
+    try {
+      const oldId = profilePicture?.relevantId ?? "";
+      await postChangeProfilePicture(userId, [newFile], token, oldId);
+      showToast({ message: "Profile picture updated", type: "success" });
+    } catch (error) {
+      setImageSrc(undefined); // revert
+      showToast({ message: "Failed to update profile picture", type: "error" });
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -121,7 +149,7 @@ export const ProfileHeader = ({
         >
           <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand/30 shadow-xl">
             <Image
-              src={profilePictureUrl}
+              src={imageSrc}
               alt={username}
               fill
               className="object-cover"
@@ -160,12 +188,10 @@ export const ProfileHeader = ({
         {isOwnProfile && (
           <EditProfilePictureModal
             isOpen={editPictureOpen}
-            currentImageUrl={profilePictureUrl}
+            currentImage={imageSrc}
             username={username}
             onClose={() => setEditPictureOpen(false)}
-            onSave={async (file) => {
-              await onEditPicture?.(file);
-            }}
+            onSave={onEditProfilePicture}
           />
         )}
 

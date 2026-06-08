@@ -43,7 +43,12 @@ const GET_PROFILE_QUERY = `
       id
       username
       bio
-      profilePictureUrl
+      profilePicture {
+        relevantId
+        fileData
+        contentType
+        contentFlag
+      }
       followerCount
       followingCount
     }
@@ -56,9 +61,14 @@ const GET_PROFILE_BY_USERNAME_QUERY = `
       id
       username
       bio
-      profilePictureUrl
       followerCount
       followingCount
+      profilePicture {
+        relevantId
+        fileData
+        contentType
+        contentFlag
+      }
     }
   }
 `;
@@ -113,7 +123,12 @@ const GET_FOLLOWERS_QUERY = `
     getFollowers(userId: $userId) {
       id
       username
-      profilePictureUrl
+      profilePicture {
+        relevantId
+        fileData
+        contentType
+        contentFlag
+      }
     }
   }
 `;
@@ -123,7 +138,12 @@ const GET_FOLLOWING_QUERY = `
     getFollowing(userId: $userId) {
       id
       username
-      profilePictureUrl
+      profilePicture {
+        relevantId
+        fileData
+        contentType
+        contentFlag
+      }
     }
   }
 `;
@@ -190,7 +210,12 @@ const GET_BLOCKED_USERS_QUERY = `
     getBlockedUsers(userId: $userId) {
       id
       username
-      profilePictureUrl
+      profilePicture {
+        relevantId
+        fileData
+        contentType
+        contentFlag
+      }
     }
   }
 `;

@@ -1,7 +1,6 @@
 package com.apigateway.apigateway.service;
 
 import com.apigateway.apigateway.clients.*;
-import com.apigateway.apigateway.modelDtos.media.MediaUploadResponse;
 import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
@@ -11,13 +10,7 @@ import com.apigateway.apigateway.models.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
@@ -30,29 +23,27 @@ public class PostAggregationService {
 
     @Value("${post.service.url}")
     private String postServiceUrl;
-    @Value("${media.service.url}")
-    private String mediaServiceUrl;
 
     private final PostClient postClient;
-    private final MediaClient mediaClient;
     private final WebClient webClient;
     private final ProfileClient profileClient;
     private final ProfileConnectionClient profileConnectionClient;
     private final NotificationClient notificationClient;
     private final RecognitionService recognitionService;
+    private final MediaService mediaService;
 
-    public PostAggregationService(PostClient postClient, MediaClient mediaClient, WebClient webClient,
+    public PostAggregationService(PostClient postClient, WebClient webClient,
                                   ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
                                   NotificationClient notificationClient, InteractionClient interactionClient,
-                                  RecognitionService recognitionService) {
+                                  RecognitionService recognitionService, MediaService mediaService) {
         this.postClient = postClient;
-        this.mediaClient = mediaClient;
         this.webClient = webClient;
         this.profileClient = profileClient;
         this.profileConnectionClient = profileConnectionClient;
         this.notificationClient = notificationClient;
         this.interactionClient = interactionClient;
         this.recognitionService = recognitionService;
+        this.mediaService = mediaService;
     }
 
     public List<Post> getPostsByHobbyType(HobbyType hobbyType) {
@@ -61,21 +52,6 @@ public class PostAggregationService {
 
     public List<Post> getAllPosts() {
         return postClient.getAllPosts();
-    }
-
-    /**
-     * retrieve all mediaFiles from a list of instances
-     * Retrieves the same file multiple times, if the instances refer to the same
-     * file
-     */
-    public List<MediaDTO> getMedia(List<MediaInstance> instances) {
-        List<UUID> instanceIds = instances.stream().map((MediaInstance instance) -> {
-            return instance.instanceId;
-        }).toList();
-        List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
-        System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
-
-        return mediaDTOList;
     }
 
     public Interaction getInteraction(UUID referenceId) {
@@ -95,7 +71,7 @@ public class PostAggregationService {
     public Object forwardCreatePost(PostDTO dto) {
         Set<UUID> mediaInstanceSet = new HashSet<>();
         if (dto.mediaInstanceDTOSet != null && !dto.mediaInstanceDTOSet.isEmpty()) {
-            mediaInstanceSet = uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
+            mediaInstanceSet = mediaService.uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
             recognitionService.startRecognitionPipeline(dto.mediaInstanceDTOSet);
         } else {
             dto.mediaInstanceDTOSet = new ArrayList<>();
@@ -147,42 +123,6 @@ public class PostAggregationService {
         }
 
         return savedPost;
-    }
-
-    /**
-     * Handles the uploading of media and returns the list of instances Id's
-     */
-    private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
-        Set<UUID> mediaInstanceSet = new HashSet<>();
-
-       MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
-
-        files.forEach((file) -> {
-            HttpHeaders fileHeaders = new HttpHeaders();
-            fileHeaders.setContentType(MediaType.parseMediaType(file.getContentType()));
-            multipartBody.add("files[]", new HttpEntity<>(file.getResource(), fileHeaders));
-        });
-
-        multipartBody.add("owner_id", new HttpEntity<>(owner_id.toString()));
-
-        MediaUploadResponse response = webClient.post()
-                .uri(mediaServiceUrl + "/media/")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .bodyValue(multipartBody)
-                .retrieve()
-                .bodyToMono(MediaUploadResponse.class)
-                .block();
-
-        if (response != null) {
-            response.results.stream()
-                    .filter(r -> "ok".equals(r.status))
-                    .map(r -> r.id)
-                    .forEach(mediaInstanceSet::add);
-        }
-        for (UUID id : mediaInstanceSet) {
-            System.out.println("Retrieved instanceId: " + id);
-        }
-        return mediaInstanceSet;
     }
 
     /**

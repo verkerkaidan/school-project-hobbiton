@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.27.0] - 2026-06-08
+
+### Added
+- **feat**: Users can now update their profile picture
+
 
 ## [1.26.0] - 2026-06-06
 

@@ -12,17 +12,19 @@ import {
   createReport,
 } from "@/queries/getProfile";
 import { ReportModal } from "@/components/profile/ReportModal";
+import {MediaSet} from "@/types/posts";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface PostAuthorCardProps {
   authorId: string;
   username: string;
-  profilePictureUrl: string;
+  profilePicture?: MediaSet;
 }
 
 export function PostAuthorCard({
   authorId,
   username,
-  profilePictureUrl,
+  profilePicture,
 }: PostAuthorCardProps) {
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id ?? "";
@@ -36,6 +38,12 @@ export function PostAuthorCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const {imageSrc: contextImageSrc} = useProfilePic();
+
+  const imageSrc = contextImageSrc
+      ?? (profilePicture?.fileData
+          ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
+          : "/jpeg.png");
 
   useEffect(() => {
     if (!currentUserId || isOwnPost) return;
@@ -94,7 +102,7 @@ export function PostAuthorCard({
         >
           <div className="relative w-10 h-10 rounded-full overflow-hidden border border-brand/30 shrink-0">
             <Image
-              src={profilePictureUrl || "/jpeg.png"}
+              src={imageSrc}
               alt={username}
               fill
               className="object-cover"

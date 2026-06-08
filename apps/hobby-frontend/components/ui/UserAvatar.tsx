@@ -5,21 +5,24 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { clearCurrentUser } from "@/hooks/useCurrentUser";
+import {MediaSet} from "@/types/posts";
+import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface UserAvatarProps {
   name: string;
   role: string;
-  imageUrl: string;
+  profilePicture?: MediaSet;
   isOnline?: boolean;
 }
 
 export const UserAvatar = ({
   name,
   role,
-  imageUrl,
+  profilePicture,
   isOnline = true,
 }: UserAvatarProps) => {
   const router = useRouter();
+  const {imageSrc: contextImageSrc} = useProfilePic();
 
   const handleLogout = () => {
     Cookies.remove("token");
@@ -29,6 +32,11 @@ export const UserAvatar = ({
     router.push("/authentication");
   };
 
+  const imageSrc = contextImageSrc
+      ?? (profilePicture?.fileData
+          ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
+          : "/jpeg.png");
+
   return (
     <div className="mt-auto w-full pt-6 border-t border-white/5 flex flex-col md:flex-row items-center gap-3">
       <Link
@@ -36,7 +44,7 @@ export const UserAvatar = ({
         className="flex items-center gap-3 min-w-0 group/avatar"
       >
         <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-brand/20 shrink-0 group-hover/avatar:border-brand/60 transition-colors">
-          <Image src={imageUrl} alt={name} fill className={"object-cover"} />
+          <Image src={imageSrc} alt={name} fill className={"object-cover"} />
           {isOnline && (
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background" />
           )}

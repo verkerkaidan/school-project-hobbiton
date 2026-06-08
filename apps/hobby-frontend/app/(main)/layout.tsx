@@ -2,6 +2,7 @@ import React from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MainContent } from "@/components/layout/MainContent";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
+import {ProfilePicProvider} from "@/components/ui/ProfilePicProvider";
 
 export default function MainLayout({
   children,
@@ -9,9 +10,11 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <NotificationProvider>
-      <Sidebar />
-      <MainContent>{children}</MainContent>
-    </NotificationProvider>
+      <ProfilePicProvider>
+        <NotificationProvider>
+          <Sidebar />
+          <MainContent>{children}</MainContent>
+        </NotificationProvider>
+      </ProfilePicProvider>
   );
 }

@@ -51,7 +51,7 @@ export async function fetchUsersFromChat(chatId: string): Promise<User[]> {
     usersList.push({
       id: user.id,
       username: user.username,
-      profilePictureUrl: user.profilePictureUrl,
+      profilePicture: user.profilePicture,
     });
   }
 
