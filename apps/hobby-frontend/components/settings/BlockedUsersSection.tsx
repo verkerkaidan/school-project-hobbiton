@@ -53,10 +53,9 @@ export function BlockedUsersSection() {
   };
 
   function getProfilePicture(user: User): string {
-    return contextImageSrc
-        ?? (user.profilePicture?.fileData
+    return user.profilePicture?.fileData
             ? `data:${user.profilePicture.contentType};base64,${user.profilePicture.fileData}`
-            : "/jpeg.png");
+            : "/jpeg.png";
   }
 
   return (

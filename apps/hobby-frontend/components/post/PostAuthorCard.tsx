@@ -40,10 +40,9 @@ export function PostAuthorCard({
   const menuRef = useRef<HTMLDivElement>(null);
   const {imageSrc: contextImageSrc} = useProfilePic();
 
-  const imageSrc = contextImageSrc
-      ?? (profilePicture?.fileData
+  const imageSrc = profilePicture?.fileData
           ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
-          : "/jpeg.png");
+          : "/jpeg.png";
 
   useEffect(() => {
     if (!currentUserId || isOwnPost) return;

@@ -7,6 +7,7 @@ import com.apigateway.apigateway.clients.ProfileConnectionClient;
 import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
 import com.apigateway.apigateway.models.BugReportDTO;
 import com.apigateway.apigateway.models.ReportDTO;
+import com.apigateway.apigateway.service.ProfileAggregationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,15 +34,15 @@ public class AdminController {
 
     private final ProfileConnectionClient profileConnectionClient;
     private final PostClient postClient;
-    private final ProfileClient profileClient;
     private final BugReportClient bugReportClient;
+    private final ProfileAggregationService profileAggregationService;
 
     public AdminController(ProfileConnectionClient profileConnectionClient, PostClient postClient,
-            ProfileClient profileClient, BugReportClient bugReportClient) {
+                           BugReportClient bugReportClient, ProfileAggregationService profileAggregationService) {
         this.profileConnectionClient = profileConnectionClient;
         this.postClient = postClient;
-        this.profileClient = profileClient;
         this.bugReportClient = bugReportClient;
+        this.profileAggregationService = profileAggregationService;
     }
 
     /**
@@ -80,7 +81,7 @@ public class AdminController {
     /** Fetch all user profiles with lightweight fields for admin viewing. */
     @GetMapping("/profiles")
     public ResponseEntity<List<AdminProfileSummaryResponse>> getAllProfiles() {
-        List<AdminProfileSummaryResponse> profiles = profileClient.getAllProfiles();
+        List<AdminProfileSummaryResponse> profiles = profileAggregationService.getAllProfiles();
         return ResponseEntity.ok(profiles);
     }
 
