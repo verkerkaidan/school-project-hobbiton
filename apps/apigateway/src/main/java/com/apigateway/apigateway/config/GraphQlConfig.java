@@ -1,8 +1,8 @@
 package com.apigateway.apigateway.config;
 
+import com.apigateway.apigateway.models.other.Other;
 import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.models.reading.Reading;
-import graphql.schema.TypeResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
@@ -24,6 +24,9 @@ public class GraphQlConfig {
                             }
                              if (obj instanceof Reading) {
                                  return env.getSchema().getObjectType("Reading");
+                             }
+                             if (obj instanceof Other) {
+                                 return env.getSchema().getObjectType("Other");
                              }
 
                             return null;
