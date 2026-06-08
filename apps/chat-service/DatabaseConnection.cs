@@ -131,10 +131,15 @@ public class DatabaseConnection
     public List<object> getAllChatsFromUser(string userId)
     {
         const string sql = """
-    SELECT allowed_users.chat_id, chat.title 
-    FROM allowed_users
-    LEFT JOIN chat ON chat.chat_id = allowed_users.chat_id
-    WHERE user_id = @userId
+    SELECT au.chat_id,
+           c.title,
+           MAX(ci.created_at) AS latest_updated
+    FROM allowed_users au
+    LEFT JOIN chat c ON c.chat_id = au.chat_id
+    LEFT JOIN chat_item ci ON ci.chat_id = au.chat_id
+    WHERE au.user_id = @userId
+    GROUP BY au.chat_id, c.title
+    ORDER BY MAX(ci.created_at) DESC NULLS LAST
     """;
 
         using var conn = _dataSource.OpenConnection();

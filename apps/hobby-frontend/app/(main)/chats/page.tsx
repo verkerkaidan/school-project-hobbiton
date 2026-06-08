@@ -16,6 +16,7 @@ export default function ChatsPage() {
 
   useEffect(() => {
     async function loadChats() {
+      
       const userId = Cookies.get("userId");
       if (!userId) return;
 
