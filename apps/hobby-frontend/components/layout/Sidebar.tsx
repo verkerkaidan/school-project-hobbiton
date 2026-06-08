@@ -9,12 +9,14 @@ import { useNavigation } from "../navigation/useNavigation";
 import { motion } from "framer-motion";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useNotifications } from "@/components/notifications/NotificationProvider";
+import { useChatNotifications } from "@/components/notifications/ChatNotificationProvider";
 import Image from "next/image";
 
 export const Sidebar = () => {
   const { isActive, navigate } = useNavigation();
   const currentUser = useCurrentUser();
   const { unreadCount } = useNotifications();
+  const { unreadTotal: chatUnreadTotal } = useChatNotifications();
   const [, setHasAnimated] = useState(false);
   const [hasSession, setHasSession] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -138,9 +140,9 @@ export const Sidebar = () => {
                   {item.label}
                 </span>
 
-                {item.badge && (
+                {item.href === "/chats" && chatUnreadTotal > 0 && (
                   <span className="absolute top-2 right-2 md:static md:top-auto md:right-auto ml-auto bg-rose-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {item.badge}
+                    {chatUnreadTotal > 99 ? "99+" : chatUnreadTotal}
                   </span>
                 )}
 

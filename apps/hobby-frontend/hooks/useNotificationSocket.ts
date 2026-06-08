@@ -1,69 +1,61 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import { buildWebSocketUrl } from "@/lib/notificationClient";
+const API_URL = process.env.NEXT_PUBLIC_WS_NOTIFICATION_SERVICE_URL;
+
+import { useEffect, useRef } from "react";
 import { Notification } from "@/types/notifications";
+import { useCurrentUser } from "./useCurrentUser";
 
 export interface UseNotificationSocketOptions {
   onNotification?: (notification: Notification) => void;
-  /** Called whenever a new notification arrives so the consumer can increment its count. */
   onUnreadCountChange?: () => void;
-  /** Called when the WebSocket connection is (re-)established. Use to re-sync state. */
   onOpen?: () => void;
   enabled?: boolean;
 }
 
-/**
- * Establishes and maintains a WebSocket connection to the notification-service.
- * Automatically reconnects on unexpected disconnection with exponential backoff.
- */
 export function useNotificationSocket({
   onNotification,
   onUnreadCountChange,
   onOpen,
   enabled = true,
 }: UseNotificationSocketOptions = {}) {
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectDelay = useRef(1000);
-  const isMounted = useRef(true);
+  const ws = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Keep callback refs up-to-date without destabilising the socket connection
   const onNotificationRef = useRef(onNotification);
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
   const onOpenRef = useRef(onOpen);
+  const currentUser = useCurrentUser();
+  useEffect(() => { onNotificationRef.current = onNotification; }, [onNotification]);
+  useEffect(() => { onUnreadCountChangeRef.current = onUnreadCountChange; }, [onUnreadCountChange]);
+  useEffect(() => { onOpenRef.current = onOpen; }, [onOpen]);
+
   useEffect(() => {
-    onNotificationRef.current = onNotification;
-  }, [onNotification]);
-  useEffect(() => {
-    onUnreadCountChangeRef.current = onUnreadCountChange;
-  }, [onUnreadCountChange]);
-  useEffect(() => {
-    onOpenRef.current = onOpen;
-  }, [onOpen]);
+    if (!enabled) return;
+    if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
 
-  const connect = useCallback(() => {
-    if (!isMounted.current || !enabled) return;
+    const connect = () => {
+      if (!currentUser) return;
+      if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
+      if (!API_URL) return;
 
-    const url = buildWebSocketUrl();
-    if (!url || url.startsWith("ws/ws")) return; // no token yet
+      ws.current = new WebSocket(`${API_URL}/ws/notifications/${currentUser.id}`);
 
-    try {
-      const ws = new WebSocket(url);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        reconnectDelay.current = 1000; // reset backoff on successful connect
-        // Re-sync unread count: catch any notifications that arrived during the
-        // connection handshake window (typically 100-500 ms on first load).
+      ws.current.onopen = () => {
         onOpenRef.current?.();
       };
 
-      ws.onmessage = (event) => {
+      ws.current.onclose = (e: CloseEvent) => {
+        ws.current = null;
+        if (e.code === 1000 || e.code === 1001) return;
+        reconnectTimer.current = setTimeout(connect, 3000);
+      };
+
+      ws.current.onmessage = (e: MessageEvent<string>) => {
         try {
-          const msg = JSON.parse(event.data as string);
+          const msg = JSON.parse(e.data);
           if (msg.type === "NOTIFICATION" && msg.payload) {
-            const notif = msg.payload as Notification;
-            onNotificationRef.current?.(notif);
+            onNotificationRef.current?.(msg.payload as Notification);
             onUnreadCountChangeRef.current?.();
           }
         } catch {
@@ -71,41 +63,25 @@ export function useNotificationSocket({
         }
       };
 
-      ws.onclose = (event) => {
-        wsRef.current = null;
-        if (!isMounted.current) return;
-        // Only reconnect on abnormal closure (not deliberate disconnect)
-        if (event.code !== 1000 && event.code !== 1001) {
-          const delay = Math.min(reconnectDelay.current, 30000);
-          reconnectDelay.current = delay * 2;
-          setTimeout(connect, delay);
-        }
+      ws.current.onerror = () => {
+        ws.current?.close();
       };
+    };
 
-      ws.onerror = () => {
-        ws.close();
-      };
-    } catch {
-      // WebSocket not available (SSR) — silently ignore
-    }
-  }, [enabled]); // callbacks accessed via refs — no reconnect on re-render
-
-  useEffect(() => {
-    isMounted.current = true;
     connect();
 
     return () => {
-      isMounted.current = false;
-      if (wsRef.current) {
-        wsRef.current.close(1000, "component unmounted");
-      }
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      ws.current?.close(1000, "component unmounted");
+      ws.current = null;
     };
-  }, [connect]);
+  }, [enabled]);
 
   return {
     disconnect: () => {
-      isMounted.current = false;
-      wsRef.current?.close(1000, "manual disconnect");
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      ws.current?.close(1000, "manual disconnect");
+      ws.current = null;
     },
   };
 }

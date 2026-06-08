@@ -22,7 +22,7 @@ export interface NavItem {
 export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   { icon: Rss, label: "Feed", href: "/" },
   { icon: Search, label: "Discover", href: "/discover" },
-  { icon: MessageSquare, label: "Chats", href: "/chats", badge: 3 },
+  { icon: MessageSquare, label: "Chats", href: "/chats" },
   { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: Bookmark, label: "Saved", href: "/saved" },
   { icon: User, label: "Profile", href: "/profile" },
