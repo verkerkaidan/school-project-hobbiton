@@ -5,6 +5,7 @@ import { ChatManageUsersModal } from "@/components/modals/ChatManageUsersModal";
 import { LeaveChatModal } from "@/components/modals/LeaveChatmodal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useChatNotifications } from "@/components/notifications/ChatNotificationProvider";
 import { fetchUsersFromChat, getChatTitle, updateChatTitle } from "@/lib/chatClient";
 import { getFollowers } from "@/queries/getProfile";
 import { User } from "@/types/profile";
@@ -15,6 +16,7 @@ import { use, useEffect, useMemo, useRef, useState } from "react";
 export default function ChatPage({ params }: { params: Promise<{ chatId: string }> }) {
   const { chatId } = use(params);
   const currentUser = useCurrentUser()!;
+  const { chatUnreadCounts, markChatAsRead } = useChatNotifications();
   const { messages, send, isConnected, deleteUser, addUser } = useWebSocket(chatId);
   const [input, setInput] = useState("");
   const [title, setTitle] = useState("");
@@ -45,6 +47,11 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
     if (!currentUser) return;
     fetchUsersAndFollowers();
   }, [chatId, currentUser?.id]); // re-fetch when chatId or currentUser changes
+
+  useEffect(() => {
+    if (!chatId) return;
+    markChatAsRead(chatId);
+  }, [chatId]);
 
   const fetchUsersAndFollowers = () => {
     if (!currentUser) return;
@@ -84,8 +91,8 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
               onChange={(e) => setTitleInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  updateChatTitle(chatId, titleInput) // your update function
-                  setTitle(titleInput); // update title state immediately
+                  updateChatTitle(chatId, titleInput);
+                  setTitle(titleInput);
                   setIsEditingTitle(false);
                 }
                 if (e.key === "Escape") setIsEditingTitle(false);

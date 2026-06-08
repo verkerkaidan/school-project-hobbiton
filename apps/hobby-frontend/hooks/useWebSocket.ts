@@ -1,6 +1,7 @@
 "use client";
 const API_URL = process.env.NEXT_PUBLIC_WS_CHAT_SERVICE_URL;
 const MIDDLEWARE_ENDPOINT_SERVERSIDE = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE;
+const MIDDLEWARE_ENDPOINT_CLIENTSIDE = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE;
 
 import { decodeMessage, encodeMessage } from "@/lib/chat";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -68,7 +69,7 @@ export function useWebSocket(chatId: string | null) {
 
   const deleteUser = useCallback(async (userId: string) => {
     if (!chatId) return;
-    await fetch(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/delete-user-from-chat`, {
+    await fetch(`${MIDDLEWARE_ENDPOINT_CLIENTSIDE}/api/delete-user-from-chat`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, chatId }),

@@ -1,16 +1,15 @@
 using Microsoft.VisualBasic;
 using Npgsql;
 
-class DatabaseConnection
+public class DatabaseConnection
 {
-    private NpgsqlConnection CreateConnection()
+    private readonly NpgsqlDataSource _dataSource;
+
+    public DatabaseConnection()
     {
         var connectionString = Environment.GetEnvironmentVariable("CHAT_DB_CONNECTION_STRING")
-                ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set");
-
-        var conn = new NpgsqlConnection(connectionString);
-        conn.Open();
-        return conn;
+            ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set");
+        _dataSource = NpgsqlDataSource.Create(connectionString);
     }
 
     public bool isUserAllowed(string chatId, string userId)
@@ -22,7 +21,7 @@ class DatabaseConnection
     )
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
@@ -39,7 +38,7 @@ class DatabaseConnection
     ON CONFLICT (chat_id, user_id) DO NOTHING
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.Add("@id", NpgsqlTypes.NpgsqlDbType.Uuid);
@@ -64,7 +63,7 @@ class DatabaseConnection
         WHERE chat_id = @chatId
         """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
@@ -83,7 +82,7 @@ class DatabaseConnection
     WHERE chat_id = @chatId
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
@@ -104,7 +103,7 @@ class DatabaseConnection
     VALUES (@id, @chatId, @protobuf)
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
@@ -120,7 +119,7 @@ class DatabaseConnection
     VALUES (@chatId, @title)
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", chatId);
@@ -138,7 +137,7 @@ class DatabaseConnection
     WHERE user_id = @userId
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@userId", Guid.Parse(userId));
@@ -163,7 +162,7 @@ class DatabaseConnection
     WHERE chat_id = @chatId
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
@@ -183,7 +182,7 @@ class DatabaseConnection
     WHERE chat_id = @chatId
     """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@title", titleModel.title);
@@ -200,7 +199,7 @@ class DatabaseConnection
         WHERE user_id = @userId AND chat_id = @chatId
         """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@userId", Guid.Parse(alterUserModel.userId));
@@ -218,7 +217,7 @@ class DatabaseConnection
         ON CONFLICT (chat_id, user_id) DO NOTHING
         """;
 
-        using var conn = CreateConnection();
+        using var conn = _dataSource.OpenConnection();
         using var cmd = new NpgsqlCommand(sql, conn);
 
         cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
@@ -227,5 +226,72 @@ class DatabaseConnection
 
         var rowsAffected = cmd.ExecuteNonQuery();
         return rowsAffected > 0;
+    }
+
+    public Dictionary<string, int> GetUnreadCountsForUser(string userId)
+    {
+        const string sql = """
+        SELECT ci.chat_id, COUNT(*) as unread
+        FROM chat_item ci
+        LEFT JOIN user_chat_state ucs ON ucs.chat_id = ci.chat_id AND ucs.user_id = @userId
+        WHERE ci.chat_id IN (SELECT chat_id FROM allowed_users WHERE user_id = @userId)
+        AND (ucs.last_read_at IS NULL OR ci.created_at > ucs.last_read_at)
+        GROUP BY ci.chat_id
+        """;
+
+        using var conn = _dataSource.OpenConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@userId", Guid.Parse(userId));
+
+        var unreadCounts = new Dictionary<string, int>();
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            unreadCounts.Add(
+                reader["chat_id"].ToString()!,
+                Convert.ToInt32(reader["unread"])
+            );
+
+        return unreadCounts;
+    }
+
+    public void MarkChatAsRead(string userId, string chatId)
+    {
+        Console.WriteLine($"Marking chat {chatId} as read for user {userId}");
+        const string sql = """
+    INSERT INTO user_chat_state (user_id, chat_id, last_read_at)
+    VALUES (@userId, @chatId, NOW())
+    ON CONFLICT (user_id, chat_id) DO UPDATE
+    SET last_read_at = NOW()
+    """;
+
+        using var conn = _dataSource.OpenConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@userId", Guid.Parse(userId));
+        cmd.Parameters.AddWithValue("@chatId", Guid.Parse(chatId));
+
+        cmd.ExecuteNonQuery();
+    }
+
+    public void MarkAllChatsAsRead(string userId)
+    {
+        const string sql = """
+        INSERT INTO user_chat_state (user_id, chat_id, last_read_at)
+        SELECT @userId, allowed_users.chat_id, NOW()
+        FROM allowed_users
+        WHERE allowed_users.user_id = @userId
+        ON CONFLICT (user_id, chat_id) DO UPDATE
+        SET last_read_at = NOW()
+        """;
+
+        using var conn = _dataSource.OpenConnection();
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
+        cmd.Parameters.AddWithValue("@userId", Guid.Parse(userId));
+
+        cmd.ExecuteNonQuery();
     }
 }
