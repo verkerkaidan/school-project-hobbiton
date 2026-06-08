@@ -53,3 +53,8 @@ pgadmin-data
 # AI-models
 *.pt
 *.pth
+apps/profile-service/.gradle/
+apps/profile-service/build.gradle
+apps/profile-service/gradlew
+apps/profile-service/gradlew.bat
+apps/profile-service/settings.gradle

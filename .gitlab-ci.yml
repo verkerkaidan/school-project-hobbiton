@@ -211,7 +211,7 @@ build:
   script:
     - |
       set -e
-      for SERVICE_NAME in apigateway authentication-service chat-service interaction-service library-service media_service_elx notification-service bug-report-service post-service profile-connection-service profile-service recognition-service; do
+      for SERVICE_NAME in apigateway authentication-service-c chat-service interaction-service library-service media_service_elx notification-service bug-report-service post-service profile-connection-service profile-service recognition-service; do
         if git diff --name-only HEAD~1 HEAD | grep -q "^apps/$SERVICE_NAME/"; then
           echo "Changes detected in $SERVICE_NAME, building service from scratch..."
           docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"

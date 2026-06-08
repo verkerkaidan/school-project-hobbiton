@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "auth-service", url = "${auth.service.url}")
+@FeignClient(name = "auth-service-c", url = "${auth.service.url}")
 public interface AuthClient {
     @PostMapping("/auth/register")
     AuthenticationResponse createAuthentication(

@@ -1,0 +1,6 @@
+# Ignore local build artifacts and object files
+**/*.o
+auth-service-c
+tests/test_*
+*.o
+.DS_Store

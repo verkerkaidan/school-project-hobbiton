@@ -2,19 +2,18 @@ package com.postservice.postservice.models;
 
 import com.postservice.postservice.dto.PostDTO;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Post {
+
     @Id
     @GeneratedValue
     @Column(nullable = false)
@@ -29,7 +28,12 @@ public abstract class Post {
     @Column(nullable = false)
     private UUID userId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        mappedBy = "post",
+        fetch = FetchType.EAGER
+    )
     private Set<MediaInstance> mediaInstanceSet;
 
     @CreatedDate
@@ -42,11 +46,10 @@ public abstract class Post {
 
     private String hobbyType;
 
-    public Post() {
-    }
+    public Post() {}
 
-    public Post(PostDTO postDTO){
-        if(postDTO.id != null) {
+    public Post(PostDTO postDTO) {
+        if (postDTO.id != null) {
             this.id = postDTO.id;
         }
         this.description = postDTO.description;

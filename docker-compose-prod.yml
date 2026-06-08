@@ -15,7 +15,7 @@ services:
       - NEXT_PUBLIC_WS_CHAT_SERVICE_URL= ${NEXT_PUBLIC_WS_CHAT_SERVICE_URL}
       - NEXT_PUBLIC_CHAT_SERVICE_URL= ${NEXT_PUBLIC_CHAT_SERVICE_URL}
       - NEXT_PUBLIC_NOTIFICATION_URL=${NEXT_PUBLIC_NOTIFICATION_URL}
-      - NEXT_PUBLIC_LIBRARY_URL=${NEXT_PUBLIC_LIBRARY_URL}
+      - NEXT_PUBLIC_LIBRARY_SERVICE_URL=${NEXT_PUBLIC_LIBRARY_SERVICE_URL}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -97,8 +97,8 @@ services:
     networks:
       - hobbithon-network
 
-  authentication-service:
-    image: ${CI_REGISTRY_IMAGE}/authentication-service:latest
+  authentication-service-c:
+    image: ${CI_REGISTRY_IMAGE}/authentication-service-c:latest
     restart: always
     ports:
       - "21525:21525"
