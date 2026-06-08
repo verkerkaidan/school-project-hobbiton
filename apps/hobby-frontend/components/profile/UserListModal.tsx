@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {MediaSet} from "@/types/posts";
-import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface User {
   id: string;
@@ -44,7 +43,6 @@ export const UserListModal = ({
   );
   // Tracks which user IDs have an in-flight toggle request to disable their button
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const {imageSrc: contextImageSrc} = useProfilePic();
 
   // Re-sync local follow state whenever the parent's followingIds or the user list changes
   // (e.g. opening the modal with a different set of users)
@@ -62,10 +60,9 @@ export const UserListModal = ({
     localFollowing.get(userId) ?? followingIds?.has(userId) ?? false;
 
   function getProfilePicture(user: User): string {
-    return contextImageSrc
-        ?? (user.profilePicture?.fileData
+    return user.profilePicture?.fileData
             ? `data:${user.profilePicture.contentType};base64,${user.profilePicture.fileData}`
-            : "/jpeg.png");
+            : "/jpeg.png";
   }
 
 

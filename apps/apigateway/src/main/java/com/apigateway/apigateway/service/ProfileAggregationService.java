@@ -5,10 +5,7 @@ import com.apigateway.apigateway.enums.ContentFlag;
 import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
-import com.apigateway.apigateway.models.CreateReportRequest;
-import com.apigateway.apigateway.models.User;
-import com.apigateway.apigateway.models.Post;
-import com.apigateway.apigateway.models.ProfileResponse;
+import com.apigateway.apigateway.models.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -86,6 +83,32 @@ public class ProfileAggregationService {
                     e.getClass().getName(), e);
             throw new RuntimeException("Failed to fetch profile for user: " + userId, e);
         }
+    }
+
+    public List<AdminProfileSummaryResponse> getAllProfiles() {
+        List<AdminProfileSummaryResponse> response = profileClient.getAllProfiles();
+        List<MediaInstance> mediaPointers = response.stream()
+                .filter(profile -> profile.profilePictureUrl != null && !profile.profilePictureUrl.isEmpty())
+                .map(profile -> new MediaInstance(
+                        UUID.fromString(profile.profilePictureUrl)
+                ))
+                .collect(Collectors.toList());
+        if (!mediaPointers.isEmpty()) {
+            List<MediaDTO> media = mediaService.getMedia(mediaPointers);
+            Map<String, MediaDTO> mediaByRelevantId = media.stream()
+                    .collect(Collectors.toMap(
+                            m -> m.relevantId.toString(),
+                            m -> m
+                    ));
+
+            // Enrich each profile with its matching MediaDTO
+            response.forEach(profile -> {
+                if (profile.profilePictureUrl != null) {
+                    profile.profilePicture = mediaByRelevantId.get(profile.profilePictureUrl);
+                }
+            });
+        }
+        return response;
     }
 
     public List<User> getFollowers(UUID userId) {

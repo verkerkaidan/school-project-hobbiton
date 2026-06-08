@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.30.2] - 2026-06-08
+
+### Fixed
+- **fix**: Pfp's are rendered correctly instead of always default or optimistic updated
+
 ## [1.30.1] - 2026-06-08
 
 ### Fixed

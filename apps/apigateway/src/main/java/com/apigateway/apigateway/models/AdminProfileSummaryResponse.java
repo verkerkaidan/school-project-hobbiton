@@ -1,17 +1,12 @@
 package com.apigateway.apigateway.models;
 
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+
 public class AdminProfileSummaryResponse {
-    private String username;
-    private String profilePictureUrl;
+    public String username;
+    public MediaDTO profilePicture;
+    public String profilePictureUrl;
 
     public AdminProfileSummaryResponse() {
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
     }
 }
