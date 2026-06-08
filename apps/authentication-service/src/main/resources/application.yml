@@ -1,8 +1,0 @@
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${OAUTH_CLIENT_ID}
-            client-secret: ${OAUTH_CLIENT_SECRET}

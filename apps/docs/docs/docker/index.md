@@ -62,7 +62,7 @@ The `database` (PostgreSQL) and `redis` services expose Docker health checks. Se
 ## Per-service ports
 
 | Service                          | Host port |
-| -------------------------------- | --------- |
+|----------------------------------| --------- |
 | frontend                         | 19293     |
 | pgadmin                          | 8000      |
 | database                         | 5432      |
@@ -71,7 +71,7 @@ The `database` (PostgreSQL) and `redis` services expose Docker health checks. Se
 | media-service                    | 27086     |
 | media-service-elx                | 27089     |
 | recognition-service              | 27088     |
-| authentication-service           | 21525     |
+| authentication-service-c         | 21525     |
 | profile-service                  | 21526     |
 | library-service                  | 28877     |
 | interaction-service              | 27087     |

@@ -38,7 +38,6 @@ public class RegisterController {
         AuthenticationResponse auth = null;
 
         try {
-            // Create authentication (auth service) first
             auth = createAuthentication(request);
 
             // Then create profile in profile-service using the returned access token
