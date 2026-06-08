@@ -1,6 +1,7 @@
 package com.apigateway.apigateway.models;
 
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.models.other.Other;
 import com.apigateway.apigateway.models.gym.Gym;
 import com.apigateway.apigateway.models.reading.Reading;
 
@@ -19,7 +20,8 @@ import java.util.UUID;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Gym.class, name = "GYM"),
-        @JsonSubTypes.Type(value = Reading.class, name = "READING")
+        @JsonSubTypes.Type(value = Reading.class, name = "READING"),
+        @JsonSubTypes.Type(value = Other.class, name = "OTHER")
 })
 public abstract class Post {
 

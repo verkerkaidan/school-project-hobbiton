@@ -52,6 +52,18 @@ type Gym implements Post {
   interaction: Interaction
 }
 
+type Other implements Post {
+  id: ID
+  title: String
+  description: String
+  userId: ID
+  createdAt: String
+  updatedAt: String
+  mediaSet: [Media]
+  hobbyType: String
+  interaction: Interaction
+}
+
 type Reading implements Post {
   id: ID
   title: String
@@ -84,19 +96,20 @@ type Media {
 }
 
 type Interaction {
-  likes: Int
-  comments: [Comment]
+    likes: Int
+    comments: [Comment]
 }
 type Comment {
-  id: ID
-  referenceId: ID
-  userId: ID
-  comment: String
+    id: ID
+    referenceId: ID
+    userId: ID
+    comment: String
 }
 
 enum HobbyType {
   GYM
   READING
+  OTHER
 }
 
 enum ContentFlag {

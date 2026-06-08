@@ -45,4 +45,7 @@ export interface Reading extends Post {
   bookFinished?: boolean;
 }
 
-export type PostResponse = Gym | Reading;
+export interface Other extends Post {
+}
+
+export type PostResponse = Gym | Reading | Other;

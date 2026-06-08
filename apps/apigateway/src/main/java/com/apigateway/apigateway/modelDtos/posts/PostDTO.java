@@ -12,7 +12,8 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = GymDTO.class,     name = "GYM"),
-        @JsonSubTypes.Type(value = ReadingDTO.class, name = "READING")
+        @JsonSubTypes.Type(value = ReadingDTO.class, name = "READING"),
+        @JsonSubTypes.Type(value = OtherDTO.class, name = "OTHER")
 })
 public abstract class PostDTO {
     public UUID id;

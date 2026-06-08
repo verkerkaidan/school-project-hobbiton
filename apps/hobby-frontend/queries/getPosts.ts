@@ -30,6 +30,9 @@ query {
         totalPagesRead
         bookFinished
     }
+    ... on Other {
+        __typename
+    }
     mediaSet {
       relevantId
       fileData

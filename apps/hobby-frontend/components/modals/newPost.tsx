@@ -10,12 +10,13 @@ import {
   CreateGymPost,
   CreatePost,
   CreateReadingPost,
+  CreateOtherPost,
   ModalProps,
 } from "@/types/interfaces";
 import Cookies from "js-cookie";
 import { Post } from "@/types/posts";
 
-type PostType = "GYM" | "READING";
+type PostType = "GYM" | "READING" | "OTHER";
 
 interface Exercise {
   title: string;
@@ -47,6 +48,11 @@ const READING_DEFAULTS: CreateReadingPost = {
   bookFinished: false,
 };
 
+const OTHER_DEFAULTS: CreateOtherPost = {
+  ...BASE_DEFAULTS,
+  type: "OTHER",
+};
+
 export function CreatePostModal({ isOpen, onClose }: ModalProps) {
   const [form, setForm] = useState<CreatePost>(GYM_DEFAULTS);
   const [error, setError] = useState<string>("");
@@ -69,12 +75,20 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         description: form.description,
         totalDuration: form.totalDuration,
       });
-    } else {
+    } else if (newType === "READING") {
       setForm({
         ...READING_DEFAULTS,
         title: form.title,
         description: form.description,
         totalDuration: form.totalDuration,
+      });
+    } else if (newType === "OTHER") {
+      setForm({
+        ...OTHER_DEFAULTS
+      });
+    } else {
+      setForm({
+        ...OTHER_DEFAULTS
       });
     }
     setError("");
@@ -294,6 +308,9 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
             </option>
             <option className="text-black" value="READING">
               Reading
+            </option>
+            <option className="text-black" value="OTHER">
+              Other
             </option>
           </select>
         </div>

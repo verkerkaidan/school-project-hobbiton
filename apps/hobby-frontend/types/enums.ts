@@ -1,6 +1,7 @@
 export enum HobbyType {
     GYM,
-    READING
+    READING,
+    OTHER
 }
 
 export enum ContentFlag {

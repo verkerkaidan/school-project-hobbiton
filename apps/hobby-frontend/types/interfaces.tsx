@@ -39,4 +39,8 @@ export interface CreateReadingPost extends BaseCreatePost {
   bookFinished: boolean;
 }
 
-export type CreatePost = CreateGymPost | CreateReadingPost;
+export interface CreateOtherPost extends BaseCreatePost {
+  type: "OTHER";
+}
+
+export type CreatePost = CreateGymPost | CreateReadingPost | CreateOtherPost;

@@ -15,11 +15,13 @@ public class PostDAO {
     private final PostRepository postRepository;
     private final GymRepository gymRepository;
     private final ReadingRepository readingRepository;
+    private final OtherRepository otherRepository;
 
-    public PostDAO(PostRepository postRepository, GymRepository gymRepository, ReadingRepository readingRepository) {
+    public PostDAO(PostRepository postRepository, GymRepository gymRepository, ReadingRepository readingRepository, OtherRepository otherRepository) {
         this.postRepository = postRepository;
         this.gymRepository = gymRepository;
         this.readingRepository = readingRepository;
+        this.otherRepository = otherRepository;
     }
 
     public Post getPostById(UUID postId) {
@@ -48,6 +50,7 @@ public class PostDAO {
         return switch (propertyType) {
             case "GYM" -> this.gymRepository.findAllByOrderByCreatedAtDesc(pageable);
             case "READING" -> this.readingRepository.findAllByOrderByCreatedAtDesc(pageable);
+            case "OTHER" -> this.otherRepository.findAllByOrderByCreatedAtDesc(pageable);
             default -> throw new RuntimeException("Post Type not found");
         };
     }
