@@ -8,7 +8,6 @@ import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.transform.CenterCrop;
 import ai.djl.modality.cv.transform.Normalize;
-import ai.djl.modality.cv.transform.Resize;
 import ai.djl.modality.cv.transform.ToTensor;
 import ai.djl.modality.cv.translator.ImageClassificationTranslator;
 import ai.djl.translate.TranslateException;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -51,8 +49,7 @@ public class RecognitionService {
     public void init() throws IOException, ModelException {
 
         ImageClassificationTranslator translator = ImageClassificationTranslator.builder()
-                .addTransform(new Resize(256))
-                .addTransform(new CenterCrop(224, 224))
+                .addTransform(new CenterCrop(224, 224))  // Resize(256) removed — done in flagFile
                 .addTransform(new ToTensor())
                 .addTransform(new Normalize(MEAN, STD))
                 .optApplySoftmax(true)
@@ -85,20 +82,23 @@ public class RecognitionService {
      */
     public ContentFlag flagFile(byte[] fileData) {
         try {
-            // Normalize to PNG so DJL's BufferedImageFactory always succeeds,
-            // regardless of whether the input was WebP, JPEG, PNG, GIF, etc.
-            byte[] normalized = normalizeImageBytes(fileData);
+            validateImageBytes(fileData);
+            BufferedImage raw = ImageIO.read(new ByteArrayInputStream(fileData));
+            if (raw == null) throw new IOException("Unsupported or corrupt image format.");
 
-            Image image = ImageFactory.getInstance()
-                    .fromInputStream(new ByteArrayInputStream(normalized));
+            // Resize to model input size BEFORE DJL touches it
+            // Your translator already does Resize(256) + CenterCrop(224,224) — do it here instead
+            BufferedImage resized = resizeImage(raw, 256);
+            raw = null; // allow GC of the large original
 
+            Image image = ImageFactory.getInstance().fromImage(resized);
             Classifications result = predictor.predict(image);
             String topLabel = result.best().getClassName();
 
             return switch (topLabel) {
                 case "SAFE" -> ContentFlag.SAFE;
                 case "RISK" -> ContentFlag.RISK;
-                default -> throw new RuntimeException("Unexpected label from model: " + topLabel);
+                default -> throw new RuntimeException("Unexpected label: " + topLabel);
             };
 
         } catch (TranslateException | IOException e) {
@@ -106,41 +106,29 @@ public class RecognitionService {
         }
     }
 
+    private BufferedImage resizeImage(BufferedImage src, int targetSize) {
+        int w = src.getWidth(), h = src.getHeight();
+        int newW, newH;
+        if (w < h) { newW = targetSize; newH = (int) (h * ((double) targetSize / w)); }
+        else        { newH = targetSize; newW = (int) (w * ((double) targetSize / h)); }
+
+        BufferedImage out = new BufferedImage(newW, newH, BufferedImage.TYPE_3BYTE_BGR);
+        java.awt.Graphics2D g = out.createGraphics();
+        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(src, 0, 0, newW, newH, null);
+        g.dispose();
+        return out;
+    }
 
     /**
-     * Re-encodes image bytes to PNG if the format isn't natively supported by
-     * Java ImageIO (e.g. WebP without a plugin). With TwelveMonkeys on the
-     * classpath this also acts as a validation step.
-     *
-     * @param fileData raw image bytes (any format)
-     * @return PNG-encoded bytes that ImageIO / DJL can always read
-     * @throws IOException if the bytes cannot be decoded as any known image format
+     * Validates the given file
+     * @param fileData: byte[]
      */
-    private byte[] normalizeImageBytes(byte[] fileData) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(fileData));
-
-        if (bufferedImage == null) {
-            throw new IOException(
-                    "ImageIO could not decode the supplied bytes. " +
-                            "Unsupported or corrupt image format."
-            );
+    private void validateImageBytes(byte[] fileData) throws IOException {
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(fileData));
+        if (img == null) {
+            throw new IOException("Unsupported or corrupt image format.");
         }
-
-        // If the image has no alpha channel, use RGB to avoid PNG palette issues
-        // with some DJL backends.
-        if (bufferedImage.getType() == BufferedImage.TYPE_BYTE_INDEXED
-                || bufferedImage.getType() == BufferedImage.TYPE_CUSTOM) {
-            BufferedImage rgb = new BufferedImage(
-                    bufferedImage.getWidth(),
-                    bufferedImage.getHeight(),
-                    BufferedImage.TYPE_3BYTE_BGR
-            );
-            rgb.getGraphics().drawImage(bufferedImage, 0, 0, null);
-            bufferedImage = rgb;
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "PNG", out);
-        return out.toByteArray();
     }
 }

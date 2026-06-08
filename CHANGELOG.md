@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.28.1] - 2026-06-08
+
+### Fixed
+- **fix**: Larger files can now also be uploaded and assigned a contentFlag by ai
+
 ## [1.28.0] - 2026-06-08
 
 ### Added
