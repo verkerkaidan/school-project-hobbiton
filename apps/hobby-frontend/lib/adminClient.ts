@@ -3,7 +3,7 @@ import type { MediaSet } from "@/types/posts";
 
 export interface AdminProfileSummary {
   username: string;
-  profilePictureUrl: string | null;
+  profilePicture?: MediaSet;
 }
 
 /** Base URL for the API gateway — same origin used by the rest of the app. */

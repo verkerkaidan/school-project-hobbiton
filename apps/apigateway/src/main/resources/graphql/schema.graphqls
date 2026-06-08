@@ -109,7 +109,7 @@ type User {
   id: ID
   username: String
   bio: String
-  profilePictureUrl: String
+  profilePicture: Media
   followerCount: Int
   followingCount: Int
 }

@@ -166,7 +166,7 @@ export const Sidebar = () => {
       <UserAvatar
         name={currentUser?.username ?? "..."}
         role="Owner"
-        imageUrl={currentUser?.profilePictureUrl ?? "/jpeg.png"}
+        profilePicture={currentUser?.profilePicture}
         isOnline={true}
       />
 

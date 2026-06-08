@@ -47,6 +47,7 @@ public class ProfileDAO {
             profile.setLocation(profileDTO.location);
         }
         profile.setLastEdited(OffsetDateTime.now());
+        profileRepository.save(profile);
         return profile;
     }
 

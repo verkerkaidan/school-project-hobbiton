@@ -82,7 +82,7 @@ export default async function PostPage({ params }: PostPageProps) {
         <PostAuthorCard
           authorId={author.id}
           username={author.username}
-          profilePictureUrl={author.profilePictureUrl}
+          profilePicture={author.profilePicture}
         />
       )}
 

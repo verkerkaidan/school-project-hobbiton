@@ -1,9 +1,10 @@
 package com.apigateway.apigateway.service;
 
-import com.apigateway.apigateway.clients.NotificationClient;
-import com.apigateway.apigateway.clients.PostClient;
-import com.apigateway.apigateway.clients.ProfileClient;
-import com.apigateway.apigateway.clients.ProfileConnectionClient;
+import com.apigateway.apigateway.clients.*;
+import com.apigateway.apigateway.enums.ContentFlag;
+import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
 import com.apigateway.apigateway.models.CreateReportRequest;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.Post;
@@ -11,12 +12,10 @@ import com.apigateway.apigateway.models.ProfileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.security.MessageDigest;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,13 +27,19 @@ public class ProfileAggregationService {
     private final ProfileConnectionClient profileConnectionClient;
     private final PostClient postClient;
     private final NotificationClient notificationClient;
+    private final MediaClient mediaClient;
+    private final RecognitionClient recognitionClient;
+    private final MediaService mediaService;
 
     public ProfileAggregationService(ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
-            PostClient postClient, NotificationClient notificationClient) {
+                                     PostClient postClient, NotificationClient notificationClient, MediaClient mediaClient, RecognitionClient recognitionClient, MediaService mediaService) {
         this.profileClient = profileClient;
         this.profileConnectionClient = profileConnectionClient;
         this.postClient = postClient;
         this.notificationClient = notificationClient;
+        this.mediaClient = mediaClient;
+        this.recognitionClient = recognitionClient;
+        this.mediaService = mediaService;
     }
 
     public User getProfileByUsername(String username) {
@@ -42,11 +47,12 @@ public class ProfileAggregationService {
         UUID userId = profileResponse.getUserId();
         Set<UUID> followers = profileConnectionClient.getFollowerIds(userId);
         Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
+
         return new User(
                 profileResponse.getUserId(),
                 profileResponse.getUsername(),
                 profileResponse.getBiography() != null ? profileResponse.getBiography() : "",
-                profileResponse.getMediaPointer() != null ? profileResponse.getMediaPointer() : "/jpeg.png",
+                retrieveProfilePicture(profileResponse),
                 followers.size(),
                 following.size());
     }
@@ -69,7 +75,7 @@ public class ProfileAggregationService {
                     profileResponse.getUserId(),
                     profileResponse.getUsername(),
                     profileResponse.getBiography() != null ? profileResponse.getBiography() : "",
-                    profileResponse.getMediaPointer() != null ? profileResponse.getMediaPointer() : "/jpeg.png",
+                    retrieveProfilePicture(profileResponse),
                     followers.size(),
                     following.size());
 
@@ -177,9 +183,8 @@ public class ProfileAggregationService {
         try {
             logger.debug("[convertUUIDToUser] Converting UUID to User: {}", userId);
             ProfileResponse profileResponse = profileClient.getProfile(userId);
-            String profilePictureUrl = profileResponse.getMediaPointer() != null ? profileResponse.getMediaPointer()
-                    : "/jpeg.png";
-            User user = new User(userId, profileResponse.getUsername(), profilePictureUrl);
+
+            User user = new User(userId, profileResponse.getUsername(), retrieveProfilePicture(profileResponse));
             logger.debug("[convertUUIDToUser] Successfully converted: {}", userId);
             return user;
         } catch (Exception e) {
@@ -263,6 +268,68 @@ public class ProfileAggregationService {
             logger.error("[getUserPosts] FAILED to fetch posts for userId: {} - Exception: {}", userId,
                     e.getClass().getName(), e);
             throw new RuntimeException("Failed to fetch posts for user: " + userId, e);
+        }
+    }
+
+    public String updateProfilePicture(UUID userId, List<MultipartFile> files, String authorization, UUID oldId) {
+        List<ContentFlagUpdateDTO> dtos = new ArrayList<>();
+        files.forEach((MultipartFile file) -> {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                byte[] bytes = file.getBytes();
+                byte[] recHash = digest.digest(bytes);
+                String base64Hash = Base64.getEncoder().encodeToString(recHash);
+                String base64File = Base64.getEncoder().encodeToString(bytes);
+
+                dtos.add(new ContentFlagUpdateDTO(base64File, base64Hash));
+            } catch (Exception e) {
+                System.out.println("Error occurred while hashing a file: " + e.getMessage());
+            }
+        });
+        List<ContentFlagUpdateDTO> results = recognitionClient.assignContentFlags(dtos);
+
+        if (results.getFirst().contentFlag == ContentFlag.SAFE) {
+            return updateProfilePicturePipeline(files, userId, authorization, oldId);
+        }
+        else if (results.getFirst().contentFlag == ContentFlag.RISK) {
+            throw new RuntimeException("Couldn't update profile picture as the AI-model flagged it as against TOS");
+        }
+        else {
+            throw new RuntimeException("Couldn't update profile picture. Staying with current one");
+        }
+    }
+
+    private MediaDTO retrieveProfilePicture(ProfileResponse profileResponse) {
+        List<MediaDTO> mediaDtos = new ArrayList<>();
+        if (profileResponse.getMediaPointer() != null) {
+            mediaDtos = mediaClient.getMediaByInstanceIds(
+                    List.of(
+                            UUID.fromString(profileResponse.getMediaPointer())
+                    ));
+        }
+        return mediaDtos.isEmpty() ? null : mediaDtos.getFirst();
+    }
+
+    private String updateProfilePicturePipeline(List<MultipartFile> files, UUID userId, String authorization, UUID oldId) {
+        try  {
+            Set<UUID> updatedProfile = mediaService.uploadMedia(files, userId);
+            String uuid = updatedProfile.stream().findFirst()
+                    .map(UUID::toString)
+                    .orElseThrow(() -> new RuntimeException("No media returned"));
+
+            UpdateProfileDTO updateProfileDTO = new UpdateProfileDTO();
+            updateProfileDTO.mediaPointer = uuid;
+
+            if (oldId != null) {
+                mediaClient.deleteMediaInstance(oldId);
+            }
+
+            profileClient.updateProfile(updateProfileDTO, authorization);
+
+            return "Profile picture updated successfully";
+        } catch (Exception e) {
+            throw new RuntimeException("Error occurred while updating profile picture: " + e.getMessage());
         }
     }
 }

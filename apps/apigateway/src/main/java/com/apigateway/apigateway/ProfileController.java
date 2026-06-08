@@ -1,15 +1,24 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.models.MediaInstance;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.Post;
+import com.apigateway.apigateway.service.MediaService;
 import com.apigateway.apigateway.service.ProfileAggregationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,9 +27,24 @@ public class ProfileController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
     private final ProfileAggregationService profileAggregationService;
+    private final MediaService mediaService;
 
-    public ProfileController(ProfileAggregationService profileAggregationService) {
+
+    public ProfileController(ProfileAggregationService profileAggregationService, MediaService mediaService) {
         this.profileAggregationService = profileAggregationService;
+        this.mediaService = mediaService;
+    }
+
+    @SchemaMapping(typeName = "User", field = "profilePicture")
+    public MediaDTO mediaSet(User user) {
+        if (user.getProfilePicture() == null || user.getProfilePicture().relevantId == null) {
+            return null;
+        }
+        List<MediaInstance> dtos = new ArrayList<>();
+        dtos.add(new MediaInstance(user.getProfilePicture().relevantId));
+        MediaDTO dto = mediaService.getMedia(dtos).getFirst();
+
+        return dto;
     }
 
     // GraphQL query: resolves a profile by username
@@ -36,7 +60,7 @@ public class ProfileController {
         logger.info("[getProfile] Received request for userId: {}", userId);
         try {
             User profile = profileAggregationService.getProfile(UUID.fromString(userId));
-            logger.info("[getProfile] Successfully retrieved profile for userId: {}", userId);
+            logger.info("[getProfile] Successfully retrieved profile for userId: {} with pfp: {}", userId, profile.getProfilePicture() != null ? profile.getProfilePicture().relevantId : "Not set yet");
             return profile;
         } catch (Exception e) {
             logger.error("[getProfile] Error retrieving profile for userId: {}", userId, e);
@@ -162,5 +186,18 @@ public class ProfileController {
             logger.error("[getUserPosts] Error retrieving posts for userId: {}", userId, e);
             throw e;
         }
+    }
+
+    // Handles the changing of a users profile picture
+    @ResponseBody
+    @PostMapping(value = "/change-profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createPost(
+            @RequestParam("userId") UUID userId,
+            @RequestPart(value = "files[]") List<MultipartFile> files,
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam(value = "oldId", required = false) UUID oldId
+    ) {
+        String response = profileAggregationService.updateProfilePicture(userId, files, authorization, oldId);
+        return ResponseEntity.ok(response);
     }
 }

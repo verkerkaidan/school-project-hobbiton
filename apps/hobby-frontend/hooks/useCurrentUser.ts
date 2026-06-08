@@ -5,11 +5,12 @@ import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
 import { isAdminToken } from "@/lib/jwt";
 import { getCurrentUserEmail } from "@/lib/authenticationClient";
+import {MediaSet} from "@/types/posts";
 
 interface CurrentUser {
   id: string;
   username: string;
-  profilePictureUrl: string;
+  profilePicture?: MediaSet;
   /** Email address, persisted in a cookie at login/register time. */
   email: string | null;
   /**
@@ -43,7 +44,7 @@ export function useCurrentUser(): CurrentUser | null {
         cachedUser = {
           id: profile.id,
           username: profile.username,
-          profilePictureUrl: profile.profilePictureUrl,
+          profilePicture: profile.profilePicture,
           email: getCurrentUserEmail(),
           isAdmin: isAdminToken(token),
         };

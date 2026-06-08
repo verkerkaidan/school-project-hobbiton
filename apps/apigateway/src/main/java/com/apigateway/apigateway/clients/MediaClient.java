@@ -5,7 +5,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @FeignClient(name = "media-service", url="${media.service.url}")
@@ -27,4 +26,7 @@ public interface MediaClient {
 
     @DeleteMapping("/media/admin")
     DeleteMediaResponseDTO deleteMediaFile(@RequestBody DeleteMediaRequestDTO request);
+
+    @DeleteMapping("media/file/{instanceId}")
+    DeleteMediaResponseDTO deleteMediaInstance(@PathVariable UUID instanceId);
 }

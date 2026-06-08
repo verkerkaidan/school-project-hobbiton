@@ -1,30 +1,32 @@
 package com.apigateway.apigateway.models;
 
+import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+
 import java.util.UUID;
 
 public class User {
     private UUID id;
     private String username;
     private String bio;
-    private String profilePictureUrl;
     private Integer followerCount;
     private Integer followingCount;
+    private MediaDTO profilePicture;
 
     public User() {
     }
 
-    public User(UUID id, String username, String profilePictureUrl) {
+    public User(UUID id, String username, MediaDTO profilePicture) {
         this.id = id;
         this.username = username;
-        this.profilePictureUrl = profilePictureUrl;
+        this.profilePicture = profilePicture;
     }
 
-    public User(UUID id, String username, String bio, String profilePictureUrl, Integer followerCount,
+    public User(UUID id, String username, String bio, MediaDTO profilePicture, Integer followerCount,
             Integer followingCount) {
         this.id = id;
         this.username = username;
         this.bio = bio;
-        this.profilePictureUrl = profilePictureUrl;
+        this.profilePicture = profilePicture;
         this.followerCount = followerCount;
         this.followingCount = followingCount;
     }
@@ -53,12 +55,12 @@ public class User {
         this.bio = bio;
     }
 
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
+    public MediaDTO getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
+    public void setProfilePicture(MediaDTO profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public Integer getFollowerCount() {

@@ -213,7 +213,7 @@ export function ProfileView({
                 {
                   id: currentUserId,
                   username: "",
-                  profilePictureUrl: "/jpeg.png",
+                  profilePicture: undefined,
                 },
               ],
         );
@@ -258,7 +258,7 @@ export function ProfileView({
                 {
                   id: targetUserId,
                   username: "",
-                  profilePictureUrl: "/jpeg.png",
+                  profilePictureUrl: undefined,
                 },
               ]
       : (prev: User[]) => prev.filter((u) => u.id !== targetUserId);
@@ -290,7 +290,7 @@ export function ProfileView({
       <ProfileHeader
         username={profile.username}
         bio={profile.bio ?? ""}
-        profilePictureUrl={profile.profilePictureUrl}
+        profilePicture={profile.profilePicture}
         followerCount={followerCount}
         followingCount={followingCount}
         onFollowersClick={handleFollowersClick}
