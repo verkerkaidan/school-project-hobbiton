@@ -11,6 +11,7 @@ public class RegistrationRequest {
     private String name; // display name
     private String bio;
     private String profilePictureUrl;
+    private Boolean acceptedTOS;
 
     public String getEmail() {
         return email;
@@ -52,6 +53,14 @@ public class RegistrationRequest {
         this.bio = bio;
     }
 
+    public Boolean getAcceptedTOS() {
+        return acceptedTOS;
+    }
+
+    public void setAcceptedTOS(Boolean acceptedTOS) {
+        this.acceptedTOS = acceptedTOS;
+    }
+
     public String getProfilePictureUrl() {
         return profilePictureUrl;
     }
@@ -66,6 +75,6 @@ public class RegistrationRequest {
 
     public CreateProfileRequest toProfileRequest() {
         // CreateProfileRequest(username, name, biography)
-        return new CreateProfileRequest(username, name, bio);
+        return new CreateProfileRequest(username, name, bio, acceptedTOS);
     }
 }

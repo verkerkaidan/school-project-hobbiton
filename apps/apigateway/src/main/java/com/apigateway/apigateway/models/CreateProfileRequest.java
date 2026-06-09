@@ -5,14 +5,16 @@ public class CreateProfileRequest {
     private String username;
     private String name;
     private String biography;
+    private Boolean acceptedTOS;
 
     public CreateProfileRequest() {
     }
 
-    public CreateProfileRequest(String username, String name, String biography) {
+    public CreateProfileRequest(String username, String name, String biography, Boolean acceptedTOS) {
         this.username = username;
         this.name = name;
         this.biography = biography;
+        this.acceptedTOS = acceptedTOS;
     }
 
     public String getUsername() {
@@ -37,5 +39,13 @@ public class CreateProfileRequest {
 
     public void setBiography(String biography) {
         this.biography = biography;
+    }
+
+    public Boolean getAcceptedTOS() {
+        return acceptedTOS;
+    }
+
+    public void setAcceptedTOS(Boolean acceptedTOS) {
+        this.acceptedTOS = acceptedTOS;
     }
 }

@@ -17,6 +17,8 @@ int add_user_db(const char *email, const char *password, char *out_id, size_t id
 int delete_user_by_id_db(const char *id);
 int update_user_role_db(const char *id, const char *role_name);
 
+int update_user_state(const char *id, const char *state);
+
 /* Authenticate user using plaintext password against DB-stored bcrypt hash.
    Returns 0 on success and fills out_id and out_roles_csv. */
 int authenticate_user_db(const char *email, const char *password, char *out_id, size_t idlen, char *out_roles_csv, size_t roleslen);

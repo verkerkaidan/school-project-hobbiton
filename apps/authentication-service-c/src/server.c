@@ -182,6 +182,40 @@ static void *handle_client(void *arg) {
             free(token); free(userId); free(roles_csv);
         }
     }
+    else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/activate") == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *callerId = NULL; char *caller_roles = NULL;
+            if (jwt_validate_and_extract(token, &callerId, &caller_roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                if (update_user_state(callerId, "ACTIVE") != 0) send_response(client, 404, "Not Found", "{\"error\":\"User not found\"}", "application/json");
+                else send_response(client, 200, "OK", "{\"result\":\"Successfully made user active\"}", "application/json");
+            }
+            free(token); free(callerId); free(caller_roles);
+        }
+    }
+    else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/deactivate/", 16) == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *callerId = NULL; char *caller_roles = NULL;
+            if (jwt_validate_and_extract(token, &callerId, &caller_roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                int isAdmin = (caller_roles && strstr(caller_roles, "ROLE_ADMIN")) ? 1 : 0;
+                if (!isAdmin) send_response(client, 403, "Forbidden", "{\"error\":\"Requires admin role\"}", "application/json");
+                else {
+                    const char *target = path + 16;
+                    if (strlen(target) != 36) send_response(client, 400, "Bad Request", "{\"error\":\"Invalid user id\"}", "application/json");
+                    else {
+                        if (update_user_state(target, "DEACTIVATE") != 0) send_response(client, 404, "Not Found", "{\"error\":\"User not found\"}", "application/json");
+                        else send_response(client, 200, "OK", "{\"result\":\"Successfully deactivated user\"}", "application/json");
+                    }
+                }
+            }
+            free(token); free(callerId); free(caller_roles);
+        }
+    }
     else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/new/", 16) == 0) {
         char *token = extract_bearer_token(headers);
         if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
