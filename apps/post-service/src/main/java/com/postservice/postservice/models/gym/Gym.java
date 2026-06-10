@@ -1,7 +1,7 @@
 package com.postservice.postservice.models.gym;
 
 import com.postservice.postservice.dto.GymDTO;
-import com.postservice.postservice.dto.GymExcerciseDTO;
+import com.postservice.postservice.dto.GymExerciseDTO;
 import com.postservice.postservice.models.Post;
 import jakarta.persistence.*;
 
@@ -14,7 +14,7 @@ public class Gym extends Post {
     // One gym session owns many exercises
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "post")
-    private Set<GymExcercise> exercises = new HashSet<>();
+    private Set<GymExercise> exercises = new HashSet<>();
 
     @Column(name = "total_duration")
     private double totalDuration;// in minutes
@@ -26,17 +26,21 @@ public class Gym extends Post {
     public Gym(GymDTO gymDTO) {
         super(gymDTO);
         super.setHobbyType("GYM");
-        for(GymExcerciseDTO gymExcerciseDTO : gymDTO.excercises) {
-            this.exercises.add(new GymExcercise(gymExcerciseDTO));
+
+        if (gymDTO.exercises != null) {
+            for (GymExerciseDTO dto : gymDTO.exercises) {
+                this.exercises.add(new GymExercise(dto));
+            }
         }
+
         this.totalDuration = gymDTO.totalDuration;
     }
 
-    public Set<GymExcercise> getExercises() {
+    public Set<GymExercise> getExercises() {
         return exercises;
     }
 
-    public void setExercises(Set<GymExcercise> exercises) {
+    public void setExercises(Set<GymExercise> exercises) {
         this.exercises = exercises;
     }
 

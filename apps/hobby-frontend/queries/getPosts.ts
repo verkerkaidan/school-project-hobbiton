@@ -1,7 +1,7 @@
 // queries/getPosts.ts
 
 import { gqlRequest } from "@/lib/graphQlClient";
-import { HobbyType } from "@/types/enums";
+import HobbyType from "@/types/enums";
 import { Post, Gym, Reading, PostResponse } from "@/types/posts";
 
 const GET_POSTS_QUERY = `

@@ -117,8 +117,8 @@ export default function DiscoverPage() {
                     results={results}
                     loading={loading}
                     error={error}
-                    onBack={handleBack}
-                    onSelect={setSelectedResult}
+                    onBackAction={handleBack}
+                    onSelectAction={setSelectedResult}
                 />
             )}
             {selectedResult && (

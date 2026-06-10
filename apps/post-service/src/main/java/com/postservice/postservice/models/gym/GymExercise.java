@@ -1,6 +1,6 @@
 package com.postservice.postservice.models.gym;
 
-import com.postservice.postservice.dto.GymExcerciseDTO;
+import com.postservice.postservice.dto.GymExerciseDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.util.UUID;
 
 @Entity
-public class GymExcercise {
+public class GymExercise {
     @Id
     @GeneratedValue
     private UUID id;
@@ -17,15 +17,11 @@ public class GymExcercise {
     private double weight;
     private double rpe;
 
-    public GymExcercise (GymExcerciseDTO gymExcerciseDTO){
-        this.reps = gymExcerciseDTO.reps;
-        this.weight = gymExcerciseDTO.weight;
-        this.rpe = gymExcerciseDTO.rpe;
-        this.title = gymExcerciseDTO.title;
-    }
-
-    public GymExcercise() {
-
+    public GymExercise(GymExerciseDTO gymExerciseDTO){
+        this.reps = gymExerciseDTO.reps;
+        this.weight = gymExerciseDTO.weight;
+        this.rpe = gymExerciseDTO.rpe;
+        this.title = gymExerciseDTO.title;
     }
 
     public UUID getId() {

@@ -1,22 +1,32 @@
 "use client";
-import { useState, useRef } from "react";
+
+import { useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { useRouter } from "next/navigation";
 import { GymExercise } from "../createPost/GymExercise";
 import { ReadingFields } from "../createPost/ReadingFields";
 import { postCreateRequest } from "@/lib/graphQlClient";
-import {
-  BaseCreatePost,
-  CreateGymPost,
-  CreatePost,
-  CreateReadingPost,
-  CreateOtherPost,
-  ModalProps,
-} from "@/types/interfaces";
+import { LinkedItem } from "@/types/LinkedItem";
+import SearchBar from "@/components/discover/SearchBar";
+import ResultsList, { ResultItem } from "@/components/discover/ResultsList";
+import { BaseCreatePost, CreateGymPost, CreatePost, CreateReadingPost, ModalProps } from "@/types/interfaces";
 import Cookies from "js-cookie";
-import { Post } from "@/types/posts";
+import HobbyType from "@/types/enums";
+import { motion, AnimatePresence } from "framer-motion";
 
-type PostType = "GYM" | "READING" | "OTHER";
+type QueryType = "exercise" | "book" | "movie";
+
+const QUERY_TYPES: { value: QueryType; label: string; icon: string }[] = [
+  { value: "exercise", label: "Exercise", icon: "🏋️" },
+  { value: "book",     label: "Book",     icon: "📚" },
+  { value: "movie",    label: "Movie",    icon: "🎬" },
+];
+
+const HOBBY_OPTIONS = [
+  { value: HobbyType.GYM, label: "Gym", icon: "🏋️" },
+  { value: HobbyType.READING, label: "Reading", icon: "📚" },
+  { value: HobbyType.OTHER, label: "Other", icon: "✨" },
+];
 
 interface Exercise {
   title: string;
@@ -26,31 +36,33 @@ interface Exercise {
 }
 
 const BASE_DEFAULTS: BaseCreatePost = {
-  title: "",
   description: "",
-  totalDuration: 0,
-  userId: "",
+  linkedItems: [],
   mediaInstanceDTOSet: [],
+  title: "",
+  totalDuration: 0,
+  type: HobbyType.OTHER,
+  userId: ""
 };
 
 const GYM_DEFAULTS: CreateGymPost = {
   ...BASE_DEFAULTS,
-  type: "GYM",
-  excercises: [],
+  type: HobbyType.GYM,
+  exercises: [],
 };
 
 const READING_DEFAULTS: CreateReadingPost = {
   ...BASE_DEFAULTS,
+  type: HobbyType.READING,
   bookTitle: "",
-  type: "READING",
   pagesRead: 0,
   totalPagesRead: 0,
   bookFinished: false,
 };
 
-const OTHER_DEFAULTS: CreateOtherPost = {
+const GENERIC_DEFAULTS = {
   ...BASE_DEFAULTS,
-  type: "OTHER",
+  type: HobbyType.OTHER,
 };
 
 export function CreatePostModal({ isOpen, onClose }: ModalProps) {
@@ -59,113 +71,130 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
   const [loading, setLoading] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  /**
-   * When type changes, the form also changes directly
-   */
-  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as PostType;
-    // Reset to defaults for the new type, preserving shared base fields
-    if (newType === "GYM") {
+  // ── Linked items ─────────────────────────────────────────────────────────────
+  const [linkedItems, setLinkedItems] = useState<LinkedItem[]>([]);
+  const [queryType, setQueryType] = useState<QueryType | null>(null);
+  const [searchResults, setSearchResults] = useState<ResultItem[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handlePostTypeChange = (newType: HobbyType) => {
+    if (newType === HobbyType.GYM) {
       setForm({
         ...GYM_DEFAULTS,
         title: form.title,
         description: form.description,
         totalDuration: form.totalDuration,
       });
-    } else if (newType === "READING") {
+    } else if (newType === HobbyType.READING) {
       setForm({
         ...READING_DEFAULTS,
         title: form.title,
         description: form.description,
         totalDuration: form.totalDuration,
       });
-    } else if (newType === "OTHER") {
-      setForm({
-        ...OTHER_DEFAULTS
-      });
     } else {
       setForm({
-        ...OTHER_DEFAULTS
-      });
+        ...GENERIC_DEFAULTS,
+        title: form.title,
+        description: form.description,
+        totalDuration: 0,
+      } as any);
     }
     setError("");
   };
 
-  /**
-   * Gets called when form changes, so global items keep what they have
-   */
-  const handleBaseChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleBaseChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
     setError("");
   };
 
-  const handleGymChange = (
-    index: number,
-    field: keyof Exercise,
-    value: string,
-  ) => {
-    if (form.type !== "GYM") return;
-    const updated = form.excercises.map((ex, i) =>
-      i === index
-        ? { ...ex, [field]: field === "title" ? value : Number(value) }
-        : ex,
+  const handleGymChange = (index: number, field: keyof Exercise, value: string) => {
+    if (form.type !== HobbyType.GYM) return;
+    const updated = form.exercises.map((ex, i) =>
+        i === index ? {...ex, [field]: field === "title" ? value : Number(value)} : ex
     );
-    setForm({ ...form, excercises: updated });
+    setForm({...form, exercises: updated});
     setError("");
   };
 
-  /**
-   * Gets called when user wants to add another exercise
-   * @returns void
-   */
   const addExercise = () => {
-    if (form.type !== "GYM") return;
-    setForm({
-      ...form,
-      excercises: [
-        ...form.excercises,
-        { title: "", reps: 0, weight: 0, rpe: 0 },
-      ],
-    });
+    if (form.type !== HobbyType.GYM) return;
+    setForm({...form, exercises: [...form.exercises, {title: "", reps: 0, weight: 0, rpe: 0}]});
   };
 
-  /**
-   * Removes 1 item from list of Exercises
-   * @param index Index of item to be removed
-   * @returns void
-   */
   const removeExercise = (index: number) => {
-    if (form.type !== "GYM") return;
-    setForm({
-      ...form,
-      excercises: form.excercises.filter((_, i) => i !== index),
-    });
+    if (form.type !== HobbyType.GYM) return;
+    setForm({...form, exercises: form.exercises.filter((_, i) => i !== index)});
   };
 
-  /**
-   * When change is made in a field, this always triggers to make sure it is type string | number or boolean & updates the form
-   * @returns
-   */
   const handleReadingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (form.type !== "READING") return;
-    const { name, value, type, checked } = e.target;
-
+    if (form.type !== HobbyType.READING) return;
+    const {name, value, type, checked} = e.target;
     let parsed: string | number | boolean = value;
     if (type === "checkbox") parsed = checked;
     else if (type === "number") parsed = Number(value);
-
-    setForm({ ...form, [name]: parsed });
+    setForm({...form, [name]: parsed});
     setError("");
   };
 
-  /**
-   * On submit, validates the entire form for errors
-   */
+  const handleSearch = async (query: string) => {
+    if (!queryType) return;
+    setSearchLoading(true);
+    setSearchError("");
+    setHasSearched(true);
+    try {
+      const res = await fetch(
+          `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
+          {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({type: queryType.toUpperCase(), query, maxResults: 10}),
+          }
+      );
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Search failed");
+      setSearchResults(data.data || []);
+    } catch (e: unknown) {
+      setSearchError(e instanceof Error ? e.message : "Error searching");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleQueryTypeChange = (type: QueryType) => {
+    setQueryType(type);
+    setSearchResults([]);
+    setHasSearched(false);
+    setSearchError("");
+  };
+
+  const addLinkedItem = (item: ResultItem) => {
+    let linkedItem: LinkedItem;
+    if (item.resultType === "book") {
+      linkedItem = {title: item.title, imageUrl: item.thumbnailUrl || "", externalId: item.id || "", type: "BOOK"};
+    } else if (item.resultType === "exercise") {
+      linkedItem = {title: item.name, imageUrl: item.gifUrl || "", externalId: item.exerciseId, type: "EXERCISE"};
+    } else {
+      linkedItem = {title: item.title, imageUrl: item.poster || "", externalId: item.id, type: "MOVIE"};
+    }
+
+    setLinkedItems((prev) => {
+      if (prev.some((li) => li.externalId === linkedItem.externalId)) return prev;
+      return [...prev, linkedItem];
+    });
+  };
+
+  const removeLinkedItem = (externalId: string | undefined) => {
+    setLinkedItems((prev) => prev.filter((li) => li.externalId !== externalId));
+  };
+
   const validate = (): boolean => {
     if (!form.title.trim()) {
       setError("Title is required.");
@@ -175,17 +204,16 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
       setError("Description is required.");
       return false;
     }
-    if (!form.totalDuration || form.totalDuration <= 0) {
+    if (form.type !== HobbyType.OTHER && (!form.totalDuration || form.totalDuration <= 0)) {
       setError("Total duration must be greater than 0.");
       return false;
     }
-
-    if (form.type === "GYM") {
-      if (form.excercises.length === 0) {
+    if (form.type === HobbyType.GYM) {
+      if (form.exercises.length === 0) {
         setError("Add at least one exercise.");
         return false;
       }
-      for (const [i, ex] of form.excercises.entries()) {
+      for (const [i, ex] of form.exercises.entries()) {
         if (!ex.title.trim()) {
           setError(`Exercise ${i + 1}: title is required.`);
           return false;
@@ -204,8 +232,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         }
       }
     }
-
-    if (form.type === "READING") {
+    if (form.type === HobbyType.READING) {
       if (!form.bookTitle.trim()) {
         setError("Book title is required.");
         return false;
@@ -223,22 +250,16 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         return false;
       }
     }
-
     return true;
   };
 
-  /**
-   * Triggers when user clicks post, creates the post
-   * @returns void
-   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
-
     form.userId = Cookies.get("userId")!;
     try {
       setLoading(true);
-      await postCreateRequest(form);
+      await postCreateRequest({...form, linkedItems});
       router.push("/profile");
       onClose();
     } catch (err) {
@@ -257,16 +278,8 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
     }
     const toAdd = arr.slice(0, remaining);
     const newPreviews = toAdd.map((f) => URL.createObjectURL(f));
-    setForm((prev) => ({
-      ...prev,
-      mediaInstanceDTOSet: [...prev.mediaInstanceDTOSet, ...toAdd],
-    }));
+    setForm((prev) => ({...prev, mediaInstanceDTOSet: [...prev.mediaInstanceDTOSet, ...toAdd]}));
     setImagePreviews((prev) => [...prev, ...newPreviews]);
-    if (arr.length > remaining) {
-      setError(
-        `Only ${remaining} more image${remaining === 1 ? "" : "s"} can be added (max 3).`,
-      );
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,231 +287,263 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleImageDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files) addImages(e.dataTransfer.files);
-  };
-
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
-    setForm((prev) => ({
-      ...prev,
-      mediaInstanceDTOSet: prev.mediaInstanceDTOSet.filter(
-        (_, i) => i !== index,
-      ),
-    }));
+    setForm((prev) => ({...prev, mediaInstanceDTOSet: prev.mediaInstanceDTOSet.filter((_, i) => i !== index)}));
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const currentHobby = HOBBY_OPTIONS.find(opt => opt.value === form.type) || HOBBY_OPTIONS[2];
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-xl font-bold mb-4">Create Post</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Post type */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-white">Post type</label>
-          <select
-            value={form.type}
-            onChange={handleTypeChange}
-            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-          >
-            <option className="text-black" value="GYM">
-              Gym
-            </option>
-            <option className="text-black" value="READING">
-              Reading
-            </option>
-            <option className="text-black" value="OTHER">
-              Other
-            </option>
-          </select>
-        </div>
-
-        {/* Shared base fields */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-white">Title</label>
-          <input
-            name="title"
-            type="text"
-            placeholder="Post title"
-            value={form.title}
-            onChange={handleBaseChange}
-            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-white">Description</label>
-          <textarea
-            name="description"
-            placeholder="How did it go?"
-            value={form.description}
-            onChange={handleBaseChange}
-            rows={3}
-            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-white">
-            Total duration (minutes)
-          </label>
-          <input
-            name="totalDuration"
-            type="number"
-            min={0}
-            step={0.25}
-            placeholder="55.25"
-            value={form.totalDuration || ""}
-            onChange={handleBaseChange}
-            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-          />
-        </div>
-
-        {/* GYM-specific fields */}
-        {form.type === "GYM" && (
-          <div className="flex flex-col gap-2 overflow-y-auto max-h-48 pr-1">
-            <label className="text-sm font-medium text-white">Exercises</label>
-            {form.excercises.map((ex, i) => (
-              <GymExercise
-                key={i}
-                ex={ex}
-                index={i}
-                onRemove={removeExercise}
-                onChange={handleGymChange}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={addExercise}
-              className="text-sm text-brand border border-brand rounded px-3 py-2 hover:bg-brand hover:text-white transition-colors duration-200"
-            >
-              + Add exercise
-            </button>
-          </div>
-        )}
-
-        {/* READING-specific fields */}
-        {form.type === "READING" && (
-          <ReadingFields form={form} onChange={handleReadingChange} />
-        )}
-
-        {/* Media upload */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-white">Photos</label>
-            <span className="text-xs text-white/40">
-              {form.mediaInstanceDTOSet.length}/3
-            </span>
+      <Modal isOpen={isOpen} onClose={onClose} largeModal={true}>
+        <div className="np-root w-full mx-auto">
+          <div className="np-header mb-6">
+            <h2 className="np-title text-xl md:text-2xl">New Post</h2>
+            <p className="np-subtitle text-xs md:text-sm">Share what you&#39;ve been up to</p>
           </div>
 
-          {form.mediaInstanceDTOSet.length < 3 && (
-            <button
-              type="button"
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragOver(true);
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleImageDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`w-full flex flex-col items-center gap-2 py-5 rounded-2xl border-2 border-dashed transition-colors cursor-pointer
-                                ${
-                                  dragOver
-                                    ? "border-brand/60 bg-brand/10"
-                                    : "border-white/15 hover:border-brand/40"
-                                }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-accent"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <span className="text-sm text-accent">
-                Click or drag &amp; drop to upload
-              </span>
-              <span className="text-xs text-white/30">
-                PNG &middot; JPG &middot; WEBP &middot; max 3
-              </span>
-            </button>
-          )}
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            multiple
-            className="hidden"
-            onChange={handleImageUpload}
-          />
+            {/* LEFT SIDE: Title, Description, Type, Specific Fields */}
+            <div className="lg:col-span-6 flex flex-col gap-4 md:gap-5">
 
-          {imagePreviews.length > 0 && (
-            <div className="flex gap-2 flex-wrap">
-              {imagePreviews.map((src, i) => (
-                <div key={i} className="relative group w-20 h-20">
-                  <img
-                    src={src}
-                    alt={`preview-${i}`}
-                    className="w-20 h-20 object-cover rounded-xl border border-white/10"
-                  />
-                  <button
+              {/* Custom Dynamic Dropdown */}
+              <div className="relative z-30">
+                <label className="np-label mb-1.5 block">Post Type</label>
+                <button
                     type="button"
-                    onClick={() => removeImage(i)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-red-500/80"
-                    aria-label="Remove image"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="10"
-                      height="10"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#7c6af5] transition-colors"
+                >
+              <span className="flex items-center gap-2">
+                <span>{currentHobby.icon}</span>
+                <span>{currentHobby.label}</span>
+              </span>
+                  <motion.span animate={{rotate: dropdownOpen ? 180 : 0}} className="text-xs opacity-60">
+                    ▼
+                  </motion.span>
+                </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                      <motion.div
+                          initial={{opacity: 0, y: -8}}
+                          animate={{opacity: 1, y: 0}}
+                          exit={{opacity: 0, y: -8}}
+                          transition={{duration: 0.15}}
+                          className="absolute left-0 right-0 mt-2 bg-[var(--color-background-secondary)] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                        {HOBBY_OPTIONS.map((opt) => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                  handlePostTypeChange(opt.value);
+                                  setDropdownOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2 px-4 py-3 text-sm text-white/80 hover:bg-white/5 hover:text-white text-left transition-colors"
+                            >
+                              <span>{opt.icon}</span>
+                              <span>{opt.label}</span>
+                            </button>
+                        ))}
+                      </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="np-field">
+                <label className="np-label">Title</label>
+                <input name="title" type="text" placeholder="Post title" value={form.title} onChange={handleBaseChange}
+                       className="np-input"/>
+              </div>
+
+              <div className="np-field">
+                <label className="np-label">Description</label>
+                <textarea name="description" placeholder="How did it go?" value={form.description}
+                          onChange={handleBaseChange} rows={4} className="np-textarea"/>
+              </div>
+
+              {form.type !== HobbyType.OTHER && (
+                  <div className="np-field">
+                    <label className="np-label">Total duration (minutes)</label>
+                    <input name="totalDuration" type="number" min={0} step={0.25} placeholder="55"
+                           value={form.totalDuration || ""} onChange={handleBaseChange} className="np-input"/>
+                  </div>
+              )}
+
+              {form.type === HobbyType.GYM && (
+                  <div className="np-field">
+                    <label className="np-label">Exercises</label>
+                    <div className="np-exercises">
+                      {form.exercises.map((ex, i) => (
+                          <GymExercise key={i} ex={ex} index={i} onRemove={removeExercise} onChange={handleGymChange}/>
+                      ))}
+                      <button type="button" onClick={addExercise} className="np-add-exercise-btn w-full mt-1">
+                        + Add exercise
+                      </button>
+                    </div>
+                  </div>
+              )}
+
+              {form.type === HobbyType.READING && (
+                  <ReadingFields form={form as CreateReadingPost} onChange={handleReadingChange}/>
+              )}
             </div>
-          )}
-        </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+            {/* RIGHT SIDE: Linked items & Media uploads */}
+            <div
+                className="lg:col-span-6 flex flex-col gap-5 lg:border-l lg:border-white/10 lg:pl-8 border-t border-white/5 lg:border-t-0 pt-6 lg:pt-0">
+              <div className="np-section h-full flex flex-col justify-between">
+                <div>
+                  <div className="np-section-header mb-3">
+                <span className="np-label">
+                  Linked items
+                  {linkedItems.length > 0 && <span className="np-badge ml-1">{linkedItems.length}</span>}
+                </span>
+                    <button
+                        type="button"
+                        className="np-toggle-btn text-xs md:text-sm px-3 py-1.5"
+                        onClick={() => {
+                          setSearchOpen((v) => !v);
+                          if (searchOpen) {
+                            setHasSearched(false);
+                            setSearchResults([]);
+                          }
+                        }}
+                    >
+                      {searchOpen ? "− Close" : "+ Add item"}
+                    </button>
+                  </div>
 
-        <div className="flex gap-2 pt-1">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-brand text-white py-2 rounded hover:opacity-90 transition-opacity duration-200"
-          >
-            {loading ? "Posting..." : "Create post"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-sm text-gray-400 hover:text-gray-600 px-3"
-          >
-            Cancel
-          </button>
+                  {linkedItems.length > 0 && (
+                      <div className="np-chips mb-4">
+                        {linkedItems.map((li) => (
+                            <div key={li.externalId} className="np-chip flex-wrap sm:flex-nowrap gap-2 p-3">
+                              {li.imageUrl ? <img src={li.imageUrl} alt={li.title}
+                                                  className="np-chip-img w-10 h-10 md:w-12 md:h-12"/> :
+                                  <div className="np-chip-img np-chip-placeholder w-10 h-10 md:w-12 md:h-12"/>}
+                              <span
+                                  className="np-chip-title text-xs md:text-sm min-w-[120px] truncate flex-1">{li.title}</span>
+                              <span className="np-chip-type text-[10px] md:text-xs">{li.type}</span>
+                              <button type="button" className="np-chip-remove text-lg ml-auto"
+                                      onClick={() => removeLinkedItem(li.externalId)}>×
+                              </button>
+                            </div>
+                        ))}
+                      </div>
+                  )}
+
+                  <AnimatePresence>
+                    {searchOpen && (
+                        <motion.div
+                            initial={{opacity: 0, height: 0}}
+                            animate={{opacity: 1, height: "auto"}}
+                            exit={{opacity: 0, height: 0}}
+                            className="np-search-panel border-t border-white/5 pt-3 overflow-hidden"
+                            onSubmit={(e) => e.stopPropagation()}
+                        >
+                          {/* Veranderd naar grid-cols-3 zodat knoppen op mobile netjes schalen en niet afbreken */}
+                          <div className="grid grid-cols-3 gap-1.5 md:gap-2 mb-3">
+                            {QUERY_TYPES.map(({value, label, icon}) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    className={`np-type-btn flex-col md:flex-row p-2 text-xs md:text-sm gap-1 ${queryType === value ? "np-type-btn--active" : ""}`}
+                                    onClick={() => handleQueryTypeChange(value)}
+                                >
+                                  <span className="np-type-icon text-sm md:text-base">{icon}</span>
+                                  <span className="text-[11px] md:text-xs font-medium">{label}</span>
+                                </button>
+                            ))}
+                          </div>
+
+                          {queryType && (
+                              <div className="w-full">
+                                <SearchBar
+                                    queryType={queryType}
+                                    onSearch={handleSearch}
+                                    showBackButton={false}
+                                />
+
+                                {(searchLoading || hasSearched) && (
+                                    <div className="np-results-wrap mt-2 max-w-full">
+                                      <ResultsList
+                                          results={searchResults}
+                                          loading={searchLoading}
+                                          error={searchError}
+                                          mode="select"
+                                          onAddAction={addLinkedItem}
+                                          showBackButton={false}
+                                      />
+                                    </div>
+                                )}
+                              </div>
+                          )}
+                        </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Photos Sub-section */}
+              <div className="np-field mt-4 lg:mt-auto">
+                <div className="np-field-row flex justify-between items-center mb-1.5">
+                  <label className="np-label">Photos</label>
+                  <span className="np-img-count text-xs opacity-60">{form.mediaInstanceDTOSet.length}/3</span>
+                </div>
+                {form.mediaInstanceDTOSet.length < 3 && (
+                    <button
+                        type="button"
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setDragOver(true);
+                        }}
+                        onDragLeave={() => setDragOver(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setDragOver(false);
+                          if (e.dataTransfer.files) addImages(e.dataTransfer.files);
+                        }}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`np-dropzone p-4 md:p-6 ${dragOver ? "np-dropzone--active" : ""}`}
+                    >
+                      <span className="np-dropzone-text text-xs md:text-sm">Click or drag & drop</span>
+                    </button>
+                )}
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
+                       onChange={handleImageUpload}/>
+
+                {imagePreviews.length > 0 && (
+                    <div className="np-previews mt-2 flex gap-2 overflow-x-auto py-1">
+                      {imagePreviews.map((src, i) => (
+                          <div key={i} className="np-preview-wrap flex-shrink-0">
+                            <img src={src} alt="preview" className="np-preview-img w-14 h-14 md:w-16 md:h-16"/>
+                            <button type="button" onClick={() => removeImage(i)} className="np-preview-remove">×
+                            </button>
+                          </div>
+                      ))}
+                    </div>
+                )}
+              </div>
+            </div>
+
+            {/* ACTIONS ROW */}
+            <div
+                className="lg:col-span-12 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 border-t border-white/10 pt-4 mt-2">
+              {error &&
+                  <p className="np-error text-xs md:text-sm text-red-500 mr-auto w-full sm:w-auto mb-2 sm:mb-0">{error}</p>}
+              <div className="flex w-full sm:w-auto items-center justify-end gap-3">
+                <button type="button" onClick={onClose} className="np-cancel-btn px-4 py-2">Cancel</button>
+                <button type="submit" disabled={loading}
+                        className="np-submit-btn w-full sm:w-auto min-w-[120px] px-4 py-2 text-sm">
+                  {loading ? "Posting..." : "Create Post"}
+                </button>
+              </div>
+            </div>
+
+          </form>
         </div>
-      </form>
-    </Modal>
+      </Modal>
   );
 }

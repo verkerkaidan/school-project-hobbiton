@@ -58,3 +58,281 @@
 h1, h2, h3, h4, h5, h6, #text, label, input, textarea, select, p, .light-mode-text {
     color: var(--color-accent);
 }
+
+/* ==========================================
+   CREATE POST MODAL STYLES (SCOPED)
+   ========================================== */
+
+.np-root {
+    font-family: 'DM Sans', sans-serif;
+}
+
+.np-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.np-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.5;
+    margin: 0;
+}
+
+.np-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+}
+
+.np-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--color-brand);
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff !important; /* Keep text readable on brand color */
+}
+
+.np-input, .np-textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.np-textarea {
+    resize: none;
+}
+
+.np-input:focus, .np-textarea:focus {
+    border-color: var(--color-brand);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.np-exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.np-add-exercise-btn {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--color-brand);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    border-radius: 10px;
+    padding: 0.6rem;
+    background: rgba(236, 72, 153, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.np-add-exercise-btn:hover {
+    background: rgba(236, 72, 153, 0.12);
+}
+
+.np-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.25rem;
+}
+
+.np-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.np-toggle-btn {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-brand);
+    background: rgba(236, 72, 153, 0.08);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    cursor: pointer;
+}
+
+.np-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.np-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+}
+
+.np-chip-img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.np-chip-placeholder {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.np-chip-title {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.np-chip-type {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-brand);
+    background: rgba(236, 72, 153, 0.12);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+}
+
+.np-chip-remove {
+    opacity: 0.4;
+    font-size: 1.1rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.np-chip-remove:hover {
+    color: #f87171;
+    opacity: 1;
+}
+
+.np-type-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.np-type-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.np-type-btn--active {
+    background: rgba(236, 72, 153, 0.15);
+    border-color: rgba(236, 72, 153, 0.4);
+}
+
+.np-dropzone {
+    width: 100%;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    background: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.np-dropzone--active {
+    border-color: var(--color-brand);
+    background: rgba(236, 72, 153, 0.04);
+}
+
+.np-dropzone-text {
+    font-size: 0.85rem;
+    opacity: 0.5;
+}
+
+.np-previews {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.np-preview-wrap {
+    position: relative;
+}
+
+.np-preview-img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.np-preview-remove {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white !important;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.np-error {
+    font-size: 0.85rem;
+    color: #f87171;
+}
+
+.np-submit-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-brand);
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.np-submit-btn:hover {
+    opacity: 0.9;
+}
+
+.np-cancel-btn {
+    font-size: 0.9rem;
+    opacity: 0.5;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.np-cancel-btn:hover {
+    opacity: 1;
+}

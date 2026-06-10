@@ -2,18 +2,18 @@ package com.apigateway.apigateway.models.gym;
 
 import java.util.UUID;
 
-public class GymExcercise {
+public class GymExercise {
     private UUID id;
     private String title;
     private int reps;
     private double weight;
     private double rpe;
 
-    public GymExcercise() {
+    public GymExercise() {
 
     }
 
-    public GymExcercise(UUID id, String title, int reps, double weight, double rpe) {
+    public GymExercise(UUID id, String title, int reps, double weight, double rpe) {
         this.id = id;
         this.title = title;
         this.reps = reps;

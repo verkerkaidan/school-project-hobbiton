@@ -1,8 +1,10 @@
-export enum HobbyType {
-    GYM,
-    READING,
-    OTHER
+enum HobbyType {
+    GYM = "GYM",
+    READING = "READING",
+    OTHER = "OTHER"
 }
+
+export default HobbyType
 
 export enum ContentFlag {
     SAFE = "SAFE",

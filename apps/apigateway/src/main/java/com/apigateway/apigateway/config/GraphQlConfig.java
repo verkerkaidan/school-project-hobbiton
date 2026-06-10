@@ -1,7 +1,7 @@
 package com.apigateway.apigateway.config;
 
-import com.apigateway.apigateway.models.other.Other;
 import com.apigateway.apigateway.models.gym.Gym;
+import com.apigateway.apigateway.models.other.Other;
 import com.apigateway.apigateway.models.reading.Reading;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,17 +22,18 @@ public class GraphQlConfig {
                             if (obj instanceof Gym) {
                                 return env.getSchema().getObjectType("Gym");
                             }
-                             if (obj instanceof Reading) {
-                                 return env.getSchema().getObjectType("Reading");
-                             }
-                             if (obj instanceof Other) {
-                                 return env.getSchema().getObjectType("Other");
-                             }
+                            if (obj instanceof Reading) {
+                                return env.getSchema().getObjectType("Reading");
+                            }
+                            if (obj instanceof Other) {
+                                return env.getSchema().getObjectType("Other");
+                            }
 
                             return null;
                         })
                 );
     }
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

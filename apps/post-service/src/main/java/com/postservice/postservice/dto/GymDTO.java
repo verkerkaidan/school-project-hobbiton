@@ -6,7 +6,7 @@ import com.postservice.postservice.models.gym.Gym;
 import java.util.Set;
 
 public class GymDTO extends PostDTO{
-    public Set<GymExcerciseDTO> excercises;
+    public Set<GymExerciseDTO> exercises;
     public double totalDuration;
 
     @Override

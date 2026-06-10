@@ -9,7 +9,7 @@ import java.util.*;
 
 public class Gym extends Post {
 
-    private List<GymExcercise> exercises = new ArrayList<>();
+    private List<GymExercise> exercises = new ArrayList<>();
 
     private double totalDuration;// in minutes
 
@@ -17,17 +17,17 @@ public class Gym extends Post {
 
     }
 
-    public Gym(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, List<GymExcercise> exercises, double totalDuration, Interaction interaction) {
+    public Gym(UUID id, String description, String title, UUID userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<MediaInstance> mediaInstanceSet, String hobbyType, List<GymExercise> exercises, double totalDuration, Interaction interaction) {
         super(id, description, title, userId, createdAt, updatedAt, mediaInstanceSet, hobbyType, interaction);
         this.exercises = exercises;
         this.totalDuration = totalDuration;
     }
 
-    public List<GymExcercise> getExercises() {
+    public List<GymExercise> getExercises() {
         return exercises;
     }
 
-    public void setExercises(List<GymExcercise> exercises) {
+    public void setExercises(List<GymExercise> exercises) {
         this.exercises = exercises;
     }
 
