@@ -17,6 +17,7 @@ export function useWebSocket(chatId: string | null) {
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null); // ← moved to ref
   const currentUser = useCurrentUser()!;
+  const [userHasBeenConnected, setUserHasBeenConnected] = useState(false);
 
   useEffect(() => {
     if (!chatId) return;
@@ -31,9 +32,10 @@ export function useWebSocket(chatId: string | null) {
 
       ws.current = new WebSocket(`${API_URL}/ws/${chatId}?userId=${currentUser.id}`);
       ws.current.binaryType = "arraybuffer";
-
-      ws.current.onopen = () => setIsConnected(true);
-
+      ws.current.onopen = () => {
+        setIsConnected(true);
+        setUserHasBeenConnected(true);
+      };
       ws.current.onclose = (e: CloseEvent) => {
         setIsConnected(false);
         if (e.code === 1008) return;
@@ -86,5 +88,5 @@ export function useWebSocket(chatId: string | null) {
   }, [chatId]);
 
 
-  return { messages, isConnected, send, deleteUser, addUser };
+  return { messages, isConnected, send, deleteUser, addUser, userHasBeenConnected };
 }

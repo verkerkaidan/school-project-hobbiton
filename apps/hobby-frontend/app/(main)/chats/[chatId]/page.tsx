@@ -12,12 +12,14 @@ import { User } from "@/types/profile";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ChatPage({ params }: { params: Promise<{ chatId: string }> }) {
+  const router = useRouter();
   const { chatId } = use(params);
   const currentUser = useCurrentUser()!;
   const { chatUnreadCounts, markChatAsRead } = useChatNotifications();
-  const { messages, send, isConnected, deleteUser, addUser } = useWebSocket(chatId);
+  const { messages, send, isConnected, deleteUser, addUser, userHasBeenConnected } = useWebSocket(chatId);
   const [input, setInput] = useState("");
   const [title, setTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -26,7 +28,6 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
   const [leaveChatModalOpen, setLeaveChatModalOpen] = useState(false);
   const [chatUsersList, setChatUsersList] = useState<User[]>([]);
   const [followers, setFollowers] = useState<User[]>([]);
-
   const chatUsersById = useMemo(
     () => Object.fromEntries(chatUsersList.map((user) => [user.id, user])),
     [chatUsersList],
@@ -43,6 +44,14 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
     setInput("");
   }
 
+  useEffect(() => {
+    console.log(userHasBeenConnected)
+    if (!userHasBeenConnected) return;
+
+    if (!isConnected) {
+      router.push("/chats");
+    }
+  }, [userHasBeenConnected, isConnected]);
   useEffect(() => {
     if (!currentUser) return;
     fetchUsersAndFollowers();
