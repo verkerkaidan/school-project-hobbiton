@@ -11,7 +11,7 @@ import java.util.UUID;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = GymDTO.class,     name = "GYM"),
         @JsonSubTypes.Type(value = ReadingDTO.class, name = "READING"),
-        @JsonSubTypes.Type(value = OtherDTO.class, name = "OTHER")
+        @JsonSubTypes.Type(value = OtherDTO.class, name = "OTHER")  // ← new
 })
 public abstract class PostDTO {
     public UUID id;
@@ -21,4 +21,5 @@ public abstract class PostDTO {
     public String hobbyType;
     public Set<UUID> mediaInstanceSet;
     public abstract Post toEntity();
+    public Set<LinkedHobbyItemDTO> linkedItems;
 }

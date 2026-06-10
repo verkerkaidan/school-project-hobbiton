@@ -30,7 +30,8 @@ export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
   const { mediaInstanceDTOSet, ...rest } = post;
   formData.append("data", new Blob([JSON.stringify(rest)], { type: "application/json" }));
   mediaInstanceDTOSet.forEach((file) => formData.append("files[]", file));
-  console.log(formData.get("data"));
+  console.log("POST OBJECT", rest);
+  console.log("POST JSON", JSON.stringify(rest, null, 2));
 
   const res = await fetch(endpoint + "/api/create-post", {
     method: 'POST',

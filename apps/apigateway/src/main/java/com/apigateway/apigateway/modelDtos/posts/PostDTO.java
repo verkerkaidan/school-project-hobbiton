@@ -22,6 +22,8 @@ public abstract class PostDTO {
     public UUID userId;
     public String hobbyType;
     public Set<UUID> mediaInstanceSet;
+    public List<LinkedHobbyItemDTO> linkedItems;  // ← was missing, caused items to be stripped
+
     @JsonIgnore
     public List<MultipartFile> mediaInstanceDTOSet;
 }

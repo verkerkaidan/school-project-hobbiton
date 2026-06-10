@@ -1,4 +1,6 @@
 import { Exercise } from "./posts";
+import {LinkedItem} from "@/types/LinkedItem";
+import HobbyType from "@/types/enums";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -24,23 +26,28 @@ export interface BaseCreatePost {
   totalDuration: number;
   userId: string;
   mediaInstanceDTOSet: File[];
+  linkedItems?: LinkedItem[];
+  type: HobbyType;
 }
 
 export interface CreateGymPost extends BaseCreatePost {
-  type: "GYM";
-  excercises: Exercise[];
+  type: HobbyType.GYM
+  exercises: Exercise[];
 }
 
 export interface CreateReadingPost extends BaseCreatePost {
   bookTitle: string;
-  type: "READING";
+  type: HobbyType.READING;
   pagesRead: number;
   totalPagesRead: number;
   bookFinished: boolean;
 }
 
-export interface CreateOtherPost extends BaseCreatePost {
-  type: "OTHER";
+export interface CreateGenericPost extends BaseCreatePost {
+  type: HobbyType.OTHER;
 }
 
-export type CreatePost = CreateGymPost | CreateReadingPost | CreateOtherPost;
+export type CreatePost =
+    | CreateGymPost
+    | CreateReadingPost
+    | CreateGenericPost;

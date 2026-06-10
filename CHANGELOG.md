@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-06-09
+
+### Added
+- **feat**: Added link hobby to post
+
 ## [1.31.0] - 2026-06-09
 
 ### Added

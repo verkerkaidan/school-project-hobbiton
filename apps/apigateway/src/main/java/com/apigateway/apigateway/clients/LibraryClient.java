@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Simple Feign client to forward requests to the library-service (Rust).
- * Methods use generic Object/Map types to avoid copying the Rust DTOs.
+ * Methods use other Object/Map types to avoid copying the Rust DTOs.
  */
 @FeignClient(name = "library-service", url = "${library.service.url}")
 public interface LibraryClient {

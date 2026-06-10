@@ -1,6 +1,8 @@
+"use client"
+
 import {motion} from "framer-motion";
 
-type BookResult = {
+export type BookResult = {
     id?: string;
     title: string;
     authors?: string[];
@@ -13,7 +15,7 @@ type BookResult = {
     thumbnailUrl?: string;
     resultType: "book";
 };
-type ExerciseResult = {
+export type ExerciseResult = {
     exerciseId: string;
     name: string;
     instructions?: string[];
@@ -24,7 +26,7 @@ type ExerciseResult = {
     equipments?: string[];
     resultType: "exercise";
 };
-type MovieResult = {
+export type MovieResult = {
     id: string;
     title: string;
     year?: string;
@@ -44,121 +46,108 @@ type MovieResult = {
     mediaType: string;
     resultType: "movie";
 };
-type ResultItem = BookResult | ExerciseResult | MovieResult;
+export type ResultItem = BookResult | ExerciseResult | MovieResult;
 
 export default function ResultsList({
                                         results,
                                         loading,
                                         error,
-                                        onBack,
-                                        onSelect,
+                                        onBackAction,
+                                        onSelectAction,
+                                        onAddAction,
+                                        mode = "discover",
+                                        showBackButton = true, // Nieuwe prop met default op true
                                     }: {
     results: ResultItem[];
     loading: boolean;
     error: string;
-    onBack: () => void;
-    onSelect?: (result: ResultItem) => void;
+    onBackAction?: () => void; // Nu optioneel gemaakt
+    onSelectAction?: (result: ResultItem) => void;
+    onAddAction?: (result: ResultItem) => void;
+    mode?: "discover" | "select";
+    showBackButton?: boolean; // Type toegevoegd
 }) {
+    const handleClick = (item: ResultItem) => {
+        if (mode === "select") {
+            onAddAction?.(item);
+        } else {
+            onSelectAction?.(item);
+        }
+    };
+
+    const getTitle = (item: ResultItem) => {
+        if (item.resultType === "exercise") return item.name;
+        return item.title;
+    };
+
+    const getImage = (item: ResultItem) => {
+        if (item.resultType === "book") return item.thumbnailUrl;
+        if (item.resultType === "exercise") return item.gifUrl;
+        if (item.resultType === "movie") return item.poster;
+        return undefined;
+    };
+
     return (
         <motion.div
-            className="flex flex-col items-center mt-12 w-full max-w-2xl"
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.6}}
+            className="flex flex-col items-center mt-6 w-full max-w-2xl" /* mt-12 verlaagd naar mt-6 voor betere modal layout */
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
         >
-            <button
-                type="button"
-                className="self-start text-brand underline text-sm mb-4"
-                onClick={onBack}
-            >
-                ← Back
-            </button>
-            <h3 className="text-2xl font-bold mb-4">Results</h3>
-            {loading && <div className="text-accent">Loading...</div>}
-            {error && <div className="text-red-500">{error}</div>}
-            {!loading && !error && results.length === 0 && (
-                <div className="text-accent">No results found.</div>
+            {/* Alleen renderen als showBackButton true is */}
+            {showBackButton && (
+                <button
+                    type="button"
+                    className="self-start text-brand underline text-sm mb-4"
+                    onClick={onBackAction}
+                >
+                    ← Back
+                </button>
             )}
+
+            <h3 className="text-xl font-bold mb-4 self-start">Results</h3>
+
+            {loading && <div className="py-4 opacity-60">Loading...</div>}
+            {error && <div className="text-red-500 py-2 text-sm">{error}</div>}
+
             <ul className="w-full">
-                {results.map((item, idx) => {
-                    if (item.resultType === "book") {
-                        return (
-                            <li
-                                key={item.title + idx}
-                                className="glass-card px-6 py-4 rounded-xl mb-4 shadow-md flex gap-4 items-center cursor-pointer hover:border-[2px] hover:border-brand-muted hover:shadow-pink-100 transition"
-                                onClick={() => onSelect && onSelect(item)}
-                            >
-                                {item.thumbnailUrl ? (
-                                    <img
-                                        src={item.thumbnailUrl}
-                                        alt={item.title}
-                                        className="w-16 h-20 object-cover rounded-md border border-gray-200 bg-white"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-16 h-20 bg-gray-200 rounded-md flex items-center justify-center text-gray-400">?</div>
-                                )}
-                                <div>
-                                    <div className="font-semibold text-lg">{item.title}</div>
-                                    {item.authors &&
-                                        <div className="text-sm text-gray-500">{item.authors.join(", ")}</div>}
-                                    {item.publishedDate &&
-                                        <div className="text-sm text-gray-500 mt-1">Published: {item.publishedDate}</div>}
+                {results.map((item, idx) => (
+                    <li
+                        key={(item as any).id || (item as any).exerciseId || idx}
+                        className="glass-card px-6 py-4 rounded-xl mb-4 flex gap-4 items-center cursor-pointer hover:border-brand"
+                        onClick={() => handleClick(item)}
+                    >
+                        {getImage(item) ? (
+                            <img
+                                src={getImage(item)}
+                                className="w-16 h-16 object-cover rounded"
+                                alt=""
+                            />
+                        ) : (
+                            <div className="w-16 h-16 bg-white/10 rounded flex items-center justify-content" />
+                        )}
+
+                        <div>
+                            <div className="font-semibold">{getTitle(item)}</div>
+
+                            {item.resultType === "book" && item.authors && (
+                                <div className="text-sm text-gray-500">
+                                    {item.authors.join(", ")}
                                 </div>
-                            </li>
-                        );
-                    } else if (item.resultType === "exercise") {
-                        return (
-                            <li
-                                key={item.exerciseId}
-                                className="glass-card px-6 py-4 rounded-xl mb-4 shadow-md flex gap-4 items-center cursor-pointer hover:border-[2px] hover:border-brand-muted hover:shadow-pink-100 transition"
-                                onClick={() => onSelect && onSelect(item)}
-                            >
-                                {item.gifUrl ? (
-                                    <img
-                                        src={item.gifUrl}
-                                        alt={item.name}
-                                        className="w-16 h-16 object-cover rounded-md border border-gray-200 bg-white"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center text-gray-400">?</div>
-                                )}
-                                <div>
-                                    <div className="font-semibold text-lg">{item.name}</div>
-                                    {item.targetMuscles && <div className="text-sm text-gray-500 mt-1">Target: {item.targetMuscles.join(", ")}</div>}
+                            )}
+
+                            {item.resultType === "movie" && item.year && (
+                                <div className="text-sm text-gray-500">{item.year}</div>
+                            )}
+
+                            {item.resultType === "exercise" && item.targetMuscles && (
+                                <div className="text-sm text-gray-500">
+                                    {item.targetMuscles.join(", ")}
                                 </div>
-                            </li>
-                        );
-                    } else if (item.resultType === "movie") {
-                        return (
-                            <li
-                                key={item.id}
-                                className="glass-card px-6 py-4 rounded-xl mb-4 shadow-md flex gap-4 items-center cursor-pointer hover:border-[2px] hover:border-brand-muted hover:shadow-pink-100 transition"
-                                onClick={() => onSelect && onSelect(item)}
-                            >
-                                {item.poster ? (
-                                    <img
-                                        src={item.poster}
-                                        alt={item.title}
-                                        className="w-16 h-20 object-cover rounded-md border border-gray-200 bg-white"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-16 h-20 bg-gray-200 rounded-md flex items-center justify-center text-gray-400">?</div>
-                                )}
-                                <div>
-                                    <div className="font-semibold text-lg">{item.title}</div>
-                                    {item.year && <div className="text-sm text-gray-500">{item.year}</div>}
-                                    {item.plot &&
-                                        <div className="text-sm text-gray-500 mt-1 line-clamp-2">{item.plot}</div>}
-                                </div>
-                            </li>
-                        );
-                    } else {
-                        return null;
-                    }
-                })}
+                            )}
+                        </div>
+                    </li>
+                ))}
             </ul>
         </motion.div>
     );

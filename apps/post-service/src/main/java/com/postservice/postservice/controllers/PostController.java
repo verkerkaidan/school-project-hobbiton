@@ -1,7 +1,9 @@
 package com.postservice.postservice.controllers;
 
 import com.postservice.postservice.dao.PostDAO;
+import com.postservice.postservice.dto.LinkedHobbyItemDTO;
 import com.postservice.postservice.dto.PostDTO;
+import com.postservice.postservice.models.LinkedHobbyItem;
 import com.postservice.postservice.models.MediaInstance;
 import com.postservice.postservice.models.Post;
 import com.postservice.postservice.services.PostService;
@@ -40,16 +42,39 @@ public class PostController {
         Post post;
 
         if (postDTO.id != null) {
+            // UPDATE: only update basic fields
             post = this.postDAO.getPostById(postDTO.id);
             post.setTitle(postDTO.title);
             post.setDescription(postDTO.description);
             post.setUserId(postDTO.userId);
         } else {
+            // CREATE: use constructor — it already maps linkedItems correctly
+            // (sets displayName, imageUrl, externalId, hobbyType, post reference)
             post = postDTO.toEntity();
+
+            // Re-map linked items here so we can be explicit and not rely
+            // solely on the constructor — avoids any stale/detached state issues
+            Set<LinkedHobbyItem> linked = new HashSet<>();
+            if (postDTO.linkedItems != null) {
+                for (LinkedHobbyItemDTO dto : postDTO.linkedItems) {
+                    LinkedHobbyItem item = new LinkedHobbyItem();
+                    item.setDisplayName(dto.displayName);      // ← was missing
+                    item.setImageUrl(dto.imageUrl);      // ← was missing
+                    item.setExternalId(dto.externalId);
+                    item.setHobbyType(dto.hobbyType);
+                    item.setPost(post);
+                    linked.add(item);
+                }
+            }
+            post.setLinkedItems(linked);
         }
 
         Set<MediaInstance> mediaInstanceSet = new HashSet<>();
-        post.setMediaInstanceSet(this.postService.saveAsSetMediaInstanceFromSetUUID(mediaInstanceSet, postDTO.mediaInstanceSet, post));
+        post.setMediaInstanceSet(
+                this.postService.saveAsSetMediaInstanceFromSetUUID(
+                        mediaInstanceSet, postDTO.mediaInstanceSet, post
+                )
+        );
 
         this.postDAO.save(post);
         return ResponseEntity.ok(this.postDAO.getPostById(post.getId()));
@@ -84,21 +109,17 @@ public class PostController {
     public ResponseEntity<List<? extends Post>> getPostsByHobbyProperty(
             @PathVariable String propertyType,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pagesize){
+            @RequestParam(defaultValue = "20") int pagesize) {
         Pageable pageable = PageRequest.of(page, pagesize);
-
-        List<?extends Post> posts =this.postDAO.getPostsByHobbyProperty(propertyType, pageable);
-
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(this.postDAO.getPostsByHobbyProperty(propertyType, pageable));
     }
 
     @GetMapping()
     public ResponseEntity<List<? extends Post>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pagesize){
+            @RequestParam(defaultValue = "20") int pagesize) {
         Pageable pageable = PageRequest.of(page, pagesize);
         return ResponseEntity.ok(this.postDAO.getPosts(pageable));
-
     }
 
     /**
@@ -106,9 +127,8 @@ public class PostController {
      * @param post_id delete post by post id
      */
     @DeleteMapping("/{post_id}")
-    public ResponseEntity<UUID> deletePostById(@PathVariable UUID post_id){
+    public ResponseEntity<UUID> deletePostById(@PathVariable UUID post_id) {
         this.postDAO.deletePostById(post_id);
-
         return ResponseEntity.ok(post_id);
     }
 
@@ -118,9 +138,8 @@ public class PostController {
      * @return ResponseEntity 200, response is ok
      */
     @DeleteMapping("/users/{user_id}")
-    public ResponseEntity deleteAllPostsByUserId(@PathVariable UUID user_id){
+    public ResponseEntity<?> deleteAllPostsByUserId(@PathVariable UUID user_id) {
         this.postDAO.deletePostsByUserId(user_id);
-
         return ResponseEntity.ok().build();
     }
 }
