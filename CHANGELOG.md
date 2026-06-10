@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.32.1] - 2026-06-10
+
+### Fixed
+- **fix**: User was allowed to kick user from chat, when already kicked from chat. Now user gets redirected to /chats when kicked from chat.
+
 ## [1.32.0] - 2026-06-09
 
 ### Added
