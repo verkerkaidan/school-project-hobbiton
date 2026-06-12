@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.33.3] - 2026-06-12
+
+### Fixed
+- **hotfix**: CORS issues in Chats & Graphql
+
 ## [1.33.2] - 2026-06-08
 
 ### Security
