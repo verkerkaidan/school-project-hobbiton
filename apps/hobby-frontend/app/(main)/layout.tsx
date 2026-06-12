@@ -1,9 +1,8 @@
 import React from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { MainContent } from "@/components/layout/MainContent";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import { ChatNotificationProvider } from "@/components/notifications/ChatNotificationProvider";
-import {ProfilePicProvider} from "@/components/ui/ProfilePicProvider";
+import { ProfilePicProvider } from "@/components/ui/ProfilePicProvider";
+import { ResponsiveNavigation } from "@/components/layout/ResponsiveNavigation";
 
 export default function MainLayout({
   children,
@@ -14,11 +13,16 @@ export default function MainLayout({
     <ProfilePicProvider>
       <NotificationProvider>
         <ChatNotificationProvider>
-          <Sidebar />
-          <MainContent>{children}</MainContent>
+          <div className="min-h-dvh md:flex">
+            <div className="md:w-64 md:shrink-0">
+              <ResponsiveNavigation />
+            </div>
+            <main className="flex-1 pb-16 md:pb-0 flex justify-center px-4">
+              <div className="w-full max-w-5xl">{children}</div>
+            </main>
+          </div>
         </ChatNotificationProvider>
       </NotificationProvider>
     </ProfilePicProvider>
-
   );
 }

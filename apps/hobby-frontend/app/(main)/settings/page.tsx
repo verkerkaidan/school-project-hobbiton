@@ -9,20 +9,15 @@ import { DeletionSection } from "@/components/settings/DeletionSection";
 
 export default function SettingsPage() {
   return (
-    <div className="mx-auto px-6 pt-16 pb-20 max-w-2xl">
+    <div className="pt-16 pb-20">
       <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
       <div className="flex flex-col gap-4">
         <AccountSettings />
-
         <NotificationSettings />
-
         <BlockedUsersSection />
-
         <SecuritySettings />
-
         <BugReportSection />
-
         <DeletionSection />
       </div>
 

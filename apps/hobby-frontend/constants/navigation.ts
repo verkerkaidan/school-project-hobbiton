@@ -8,6 +8,7 @@ import {
   Bookmark,
   ShieldAlert,
   type LucideIcon,
+  MoreHorizontal,
 } from "lucide-react";
 
 export interface NavItem {

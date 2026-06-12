@@ -9,7 +9,7 @@ export default function HomePage() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mx-auto px-6 pt-16 pb-12">
+    <div className="pt-16 pb-12">
       <header className="mb-6 space-y-2">
         <h1 className="text-5xl md:text-7xl font-serif italic text-white">
           Welcome{" "}

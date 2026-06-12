@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.33.0] - 2026-06-10
+
 ### Changed
+- **refactor**: Refactor sidebar to be responsive on mobile viewports
 - **docs**: docs for chat service update
 
 ## [1.32.1] - 2026-06-10
