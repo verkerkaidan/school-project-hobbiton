@@ -41,13 +41,11 @@ export default async function PostPage({ params }: PostPageProps) {
             readingPost={isReading(post) ? (post as Reading) : undefined}
         >
             <ImageSlider media={post.mediaSet} />
-            {author && (
-                <PostAuthorCard
-                    authorId={author.id}
-                    username={author.username}
-                    profilePicture={author.profilePicture}
-                />
-            )}
+            <PostAuthorCard
+                authorId={author?.id ?? post.userId}
+                username={author?.username ?? "Unknown"}
+                profilePicture={author?.profilePicture}
+            />
             <CompleteInteraction post={post} />
         </PostPageClient>
     );
