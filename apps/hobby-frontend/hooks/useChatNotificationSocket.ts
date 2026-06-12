@@ -37,7 +37,7 @@ export function useChatNotificationSocket({
         if (!enabled || !isMounted.current) return;
         if (!currentUser?.id) return;
 
-        const url = buildChatNotificationWebSocketUrl(currentUser.id);
+        const url = buildChatNotificationWebSocketUrl(currentUser.id, currentUser.token);
         if (!url) return;
 
         try {
