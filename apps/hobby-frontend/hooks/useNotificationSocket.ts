@@ -1,8 +1,7 @@
 "use client";
 
-const API_URL = process.env.NEXT_PUBLIC_WS_NOTIFICATION_SERVICE_URL;
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { buildWebSocketUrl } from "@/lib/notificationClient";
 import { Notification } from "@/types/notifications";
 import { useCurrentUser } from "./useCurrentUser";
 
@@ -19,69 +18,111 @@ export function useNotificationSocket({
   onOpen,
   enabled = true,
 }: UseNotificationSocketOptions = {}) {
-  const ws = useRef<WebSocket | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectDelay = useRef(1000);
+  const isMounted = useRef(true);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const currentUser = useCurrentUser();
 
   const onNotificationRef = useRef(onNotification);
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
   const onOpenRef = useRef(onOpen);
-  const currentUser = useCurrentUser();
-  useEffect(() => { onNotificationRef.current = onNotification; }, [onNotification]);
-  useEffect(() => { onUnreadCountChangeRef.current = onUnreadCountChange; }, [onUnreadCountChange]);
-  useEffect(() => { onOpenRef.current = onOpen; }, [onOpen]);
 
   useEffect(() => {
-    if (!enabled) return;
-    if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
+    onNotificationRef.current = onNotification;
+  }, [onNotification]);
 
-    const connect = () => {
-      if (!currentUser) return;
-      if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
-      if (!API_URL) return;
+  useEffect(() => {
+    onUnreadCountChangeRef.current = onUnreadCountChange;
+  }, [onUnreadCountChange]);
 
-      ws.current = new WebSocket(`${API_URL}/ws/notifications/${currentUser.id}`);
+  useEffect(() => {
+    onOpenRef.current = onOpen;
+  }, [onOpen]);
 
-      ws.current.onopen = () => {
+  const connect = useCallback(() => {
+    if (!isMounted.current || !enabled) return;
+
+    const url = buildWebSocketUrl();
+
+    // IMPORTANT: preserve old safety check
+    if (!url || url.startsWith("ws/ws")) return;
+
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+      return;
+    }
+
+    try {
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        reconnectDelay.current = 1000;
         onOpenRef.current?.();
       };
 
-      ws.current.onclose = (e: CloseEvent) => {
-        ws.current = null;
-        if (e.code === 1000 || e.code === 1001) return;
-        reconnectTimer.current = setTimeout(connect, 3000);
-      };
-
-      ws.current.onmessage = (e: MessageEvent<string>) => {
+      ws.onmessage = (event) => {
         try {
-          const msg = JSON.parse(e.data);
+          const msg = JSON.parse(event.data);
+
           if (msg.type === "NOTIFICATION" && msg.payload) {
             onNotificationRef.current?.(msg.payload as Notification);
             onUnreadCountChangeRef.current?.();
           }
         } catch {
-          // Ignore malformed messages
+          // ignore malformed messages
         }
       };
 
-      ws.current.onerror = () => {
-        ws.current?.close();
+      ws.onclose = (event) => {
+        wsRef.current = null;
+
+        if (!isMounted.current) return;
+
+        if (event.code === 1000 || event.code === 1001) return;
+
+        const delay = Math.min(reconnectDelay.current, 30000);
+        reconnectDelay.current *= 2;
+
+        reconnectTimer.current = setTimeout(connect, delay);
       };
-    };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    } catch {
+      // SSR safety
+    }
+  }, [enabled, currentUser]);
+
+  useEffect(() => {
+    isMounted.current = true;
 
     connect();
 
     return () => {
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-      ws.current?.close(1000, "component unmounted");
-      ws.current = null;
+      isMounted.current = false;
+
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
+
+      wsRef.current?.close(1000, "unmount");
+      wsRef.current = null;
     };
-  }, [enabled]);
+  }, [connect]);
 
   return {
     disconnect: () => {
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-      ws.current?.close(1000, "manual disconnect");
-      ws.current = null;
+      isMounted.current = false;
+
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
+
+      wsRef.current?.close(1000, "manual");
+      wsRef.current = null;
     },
   };
 }
