@@ -329,7 +329,10 @@ services:
         condition: service_healthy
     environment:
       - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ISSUER=${JWT_ISSUER}
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
+
 
   docs:
     build:

@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+
 var migrationRunner = new MigrationRunner(
     Environment.GetEnvironmentVariable("CHAT_DB_CONNECTION_STRING")
     ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set")
@@ -29,9 +31,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSingleton<JwtUtil>();
+
 var app = builder.Build();
 app.UseCors();
 app.UseWebSockets();
+app.UseMiddleware<JwtMiddleware>();
 
 var lobbies = new ConcurrentDictionary<string, List<WebSocket>>();
 var userSockets = new ConcurrentDictionary<string, WebSocket>();

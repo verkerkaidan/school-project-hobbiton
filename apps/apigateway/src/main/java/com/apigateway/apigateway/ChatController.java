@@ -3,6 +3,7 @@ package com.apigateway.apigateway;
 import com.apigateway.apigateway.modelDtos.chats.AlterUserDTO;
 import com.apigateway.apigateway.modelDtos.chats.ChatDTO;
 import com.apigateway.apigateway.modelDtos.chats.TitleDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -22,82 +23,96 @@ public class ChatController {
         this.http = WebClient.create(httpUrl);
     }
 
+    private String bearerToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        System.out.println("Forwarding Authorization: " + token);
+        return token;    }
+
     @GetMapping("/allowed-users/{chatId}")
     public Mono<ResponseEntity<List<String>>> getAllowedUsers(
-        @PathVariable("chatId") String chatId
+            @PathVariable("chatId") String chatId,
+            HttpServletRequest request
     ) {
-        return http
-            .get()
-            .uri("/allowed-users/" + chatId)
-            .retrieve()
-            .toEntity(new ParameterizedTypeReference<List<String>>() {});
+        return http.get()
+                .uri("/allowed-users/" + chatId)
+                .header("Authorization", bearerToken(request))
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {});
     }
 
     @GetMapping("/get-chats/{userId}")
-    public Mono<ResponseEntity<String>> getChats(@PathVariable String userId) {
-        return http
-            .get()
-            .uri("/get-chats/{userId}", userId)
-            .retrieve()
-            .toEntity(String.class);
+    public Mono<ResponseEntity<String>> getChats(
+            @PathVariable String userId,
+            HttpServletRequest request
+    ) {
+        return http.get()
+                .uri("/get-chats/{userId}", userId)
+                .header("Authorization", bearerToken(request))
+                .retrieve()
+                .toEntity(String.class);
     }
 
     @PostMapping("/create-chat")
     public Mono<ResponseEntity<String>> createChat(
-        @RequestBody ChatDTO chatDTO
+            @RequestBody ChatDTO chatDTO,
+            HttpServletRequest request
     ) {
-        return http
-            .post()
-            .uri("/create-chat")
-            .bodyValue(chatDTO)
-            .retrieve()
-            .toEntity(String.class);
+        return http.post()
+                .uri("/create-chat")
+                .header("Authorization", bearerToken(request))
+                .bodyValue(chatDTO)
+                .retrieve()
+                .toEntity(String.class);
     }
 
     @GetMapping("/get-chat-title/{chatId}")
     public Mono<ResponseEntity<String>> getChatTitle(
-        @PathVariable String chatId
+            @PathVariable String chatId,
+            HttpServletRequest request
     ) {
-        return http
-            .get()
-            .uri("/get-chat-title/{chatId}", chatId)
-            .retrieve()
-            .toEntity(String.class);
+        return http.get()
+                .uri("/get-chat-title/{chatId}", chatId)
+                .header("Authorization", bearerToken(request))
+                .retrieve()
+                .toEntity(String.class);
     }
 
     @PutMapping("/update-title")
     public Mono<ResponseEntity<String>> updateChatTitle(
-        @RequestBody TitleDTO titleDTO
+            @RequestBody TitleDTO titleDTO,
+            HttpServletRequest request
     ) {
-        return http
-            .put()
-            .uri("/update-title")
-            .bodyValue(titleDTO)
-            .retrieve()
-            .toEntity(String.class);
+        return http.put()
+                .uri("/update-title")
+                .header("Authorization", bearerToken(request))
+                .bodyValue(titleDTO)
+                .retrieve()
+                .toEntity(String.class);
     }
 
     @DeleteMapping("/delete-user-from-chat")
     public Mono<ResponseEntity<Boolean>> deleteUserFromChat(
-        @RequestBody AlterUserDTO alterUserDTO
+            @RequestBody AlterUserDTO alterUserDTO,
+            HttpServletRequest request
     ) {
-        return http
-            .put()
-            .uri("/delete-user-from-chat")
-            .bodyValue(alterUserDTO)
-            .retrieve()
-            .toEntity(Boolean.class);
+        return http.put()
+                .uri("/delete-user-from-chat")
+                .header("Authorization", bearerToken(request))
+                .bodyValue(alterUserDTO)
+                .retrieve()
+                .toEntity(Boolean.class);
     }
 
     @PostMapping("/add-user-to-chat")
     public Mono<ResponseEntity<Boolean>> addUserToChat(
-        @RequestBody AlterUserDTO alterUserDTO
+            @RequestBody AlterUserDTO alterUserDTO,
+            HttpServletRequest request
     ) {
-        return http
-            .put()
-            .uri("/add-user-to-chat")
-            .bodyValue(alterUserDTO)
-            .retrieve()
-            .toEntity(Boolean.class);
+        return http.put()
+                .uri("/add-user-to-chat")
+                .header("Authorization", bearerToken(request))
+                .bodyValue(alterUserDTO)
+                .retrieve()
+                .toEntity(Boolean.class);
     }
 }

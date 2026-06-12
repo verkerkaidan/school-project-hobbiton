@@ -13,6 +13,7 @@ interface CurrentUser {
   profilePicture?: MediaSet;
   /** Email address, persisted in a cookie at login/register time. */
   email: string | null;
+  token: string;
   /**
    * Derived from the `roles` claim in the JWT.
    * Always false until the auth service adds the claim to the token.
@@ -47,6 +48,7 @@ export function useCurrentUser(): CurrentUser | null {
           profilePicture: profile.profilePicture,
           email: getCurrentUserEmail(),
           isAdmin: isAdminToken(token),
+          token: token,
         };
         setUser(cachedUser);
       })
