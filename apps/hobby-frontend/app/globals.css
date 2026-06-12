@@ -383,3 +383,165 @@ h1, h2, h3, h4, h5, h6, #text, label, input, textarea, select, p, .light-mode-te
         position: static;
     }
 }
+
+/* ==========================================
+   REPORT MODAL STYLES
+   ========================================== */
+
+.rm-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+.rm-close-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    cursor: pointer;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rm-close-btn:hover {
+    opacity: 1;
+}
+
+.rm-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+    margin-bottom: 0.5rem;
+}
+
+.rm-input-hint {
+    text-transform: none;
+    opacity: 0.4;
+    font-weight: 400;
+}
+
+.rm-select, .rm-textarea {
+    width: 100%;
+    background: rgba(125, 125, 125, 0.08);
+    border: 1px solid rgba(125, 125, 125, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.rm-select:focus, .rm-textarea:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 1px var(--color-brand);
+}
+
+.rm-option {
+    background-color: var(--color-background);
+    color: var(--color-accent);
+}
+
+.rm-textarea {
+    resize: none;
+}
+
+.rm-btn-cancel {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(125, 125, 125, 0.2);
+    background: transparent;
+    color: var(--color-accent);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.rm-btn-cancel:hover {
+    background: rgba(125, 125, 125, 0.05);
+    border-color: rgba(125, 125, 125, 0.3);
+}
+
+.rm-btn-submit {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.rm-btn-submit:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+}
+
+.rm-btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* Custom Dropdown uitbreiding voor ReportModal */
+.rm-dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(125, 125, 125, 0.08);
+    border: 1px solid rgba(125, 125, 125, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rm-dropdown-trigger:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 1px var(--color-brand);
+}
+
+.rm-dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--color-background-secondary);
+    border: 1px solid rgba(125, 125, 125, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    overflow-hidden: hidden;
+    z-index: 50;
+}
+
+.rm-dropdown-item {
+    width: 100%;
+    display: block;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    opacity: 0.8;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.rm-dropdown-item:hover {
+    background: rgba(125, 125, 125, 0.08);
+    opacity: 1;
+}
