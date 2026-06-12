@@ -56,10 +56,19 @@ export const ProfileHeader = ({
   const settingsRef = useRef<HTMLDivElement>(null);
   const { imageSrc: contextImageSrc, setImageSrc, showToast } = useProfilePic();
 
-  const imageSrc = contextImageSrc
-    ?? (profilePicture?.fileData
-      ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
-      : "/jpeg.png");
+  function getImageSrc() {
+    if (isOwnProfile) {
+      return contextImageSrc
+          ?? (profilePicture?.fileData
+              ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
+              : "/jpeg.png");
+    }
+    else {
+      return profilePicture?.fileData
+          ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`
+          : "/jpeg.png";
+    }
+  }
 
   // Close settings dropdown when clicking outside
   useEffect(() => {
@@ -149,7 +158,7 @@ export const ProfileHeader = ({
         >
           <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand/30 shadow-xl">
             <Image
-              src={imageSrc}
+              src={getImageSrc()}
               alt={username}
               fill
               className="object-cover"
@@ -188,7 +197,7 @@ export const ProfileHeader = ({
         {isOwnProfile && (
           <EditProfilePictureModal
             isOpen={editPictureOpen}
-            currentImage={imageSrc}
+            currentImage={getImageSrc()}
             username={username}
             onClose={() => setEditPictureOpen(false)}
             onSave={onEditProfilePicture}
