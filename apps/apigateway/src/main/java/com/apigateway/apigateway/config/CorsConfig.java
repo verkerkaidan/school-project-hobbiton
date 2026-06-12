@@ -13,24 +13,22 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${gateway.allowed-origin-patterns:http://localhost:*,http://*.student.inf.st.hsleiden.nl:*,https://hobbiton.student.inf.st.hsleiden.nl,https://hobbiton.student.inf.st.hsleiden.nl:*}")
-    private String allowedOriginPatterns;
-
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        List<String> originPatterns = Arrays.stream(allowedOriginPatterns.split(","))
-                .map(String::trim)
-                .filter(pattern -> !pattern.isEmpty())
-                .toList();
-        config.setAllowedOriginPatterns(originPatterns);
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        config.setAllowedOriginPatterns(List.of(
+                "https://hobbiton.student.inf.st.hsleiden.nl",
+                "http://localhost:*"));
+
+        config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsFilter(source);
+        return new CorsWebFilter(source);
     }
 }
