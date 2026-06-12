@@ -58,8 +58,8 @@ public class PostController {
             if (postDTO.linkedItems != null) {
                 for (LinkedHobbyItemDTO dto : postDTO.linkedItems) {
                     LinkedHobbyItem item = new LinkedHobbyItem();
-                    item.setDisplayName(dto.displayName);      // ← was missing
-                    item.setImageUrl(dto.imageUrl);      // ← was missing
+                    item.setDisplayName(dto.displayName);
+                    item.setImageUrl(dto.imageUrl);
                     item.setExternalId(dto.externalId);
                     item.setHobbyType(dto.hobbyType);
                     item.setPost(post);

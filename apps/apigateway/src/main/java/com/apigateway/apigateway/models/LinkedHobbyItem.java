@@ -24,4 +24,6 @@ public class LinkedHobbyItem {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+    public UUID getHobbyId() { return id; }
+
 }

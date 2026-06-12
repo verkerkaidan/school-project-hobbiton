@@ -336,3 +336,50 @@ h1, h2, h3, h4, h5, h6, #text, label, input, textarea, select, p, .light-mode-te
 .np-cancel-btn:hover {
     opacity: 1;
 }
+
+/* ==========================================
+   POST PAGE V2 LAYOUT
+   ========================================== */
+
+.post-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 2rem;
+}
+
+.post-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.post-sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+}
+
+.post-sidebar-card {
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.post-comments {
+    max-width: 1400px;
+    margin: 2rem auto 0;
+    padding: 0 2rem;
+}
+
+@media (max-width: 1024px) {
+    .post-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .post-sidebar {
+        position: static;
+    }
+}

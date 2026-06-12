@@ -4,6 +4,7 @@ import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Interaction;
+import com.apigateway.apigateway.models.LinkedHobbyItem;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.service.MediaService;
 import com.apigateway.apigateway.service.PostAggregationService;
@@ -78,5 +79,12 @@ public class PostsController {
         dto.mediaInstanceDTOSet = files;
         Object response = postService.forwardCreatePost(dto);
         return ResponseEntity.ok(response);
+    }
+
+    @SchemaMapping(typeName = "Post", field = "linkedItems")
+    public List<LinkedHobbyItem> linkedItems(Post post) {
+        List<LinkedHobbyItem> items = post.getLinkedItems();
+        System.out.println("🔗 linkedItems for post " + post.getId() + ": " + (items != null ? items.size() : "null"));
+        return items != null ? items : new ArrayList<>();
     }
 }

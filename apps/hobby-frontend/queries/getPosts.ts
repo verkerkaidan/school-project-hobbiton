@@ -48,6 +48,13 @@ query {
         comment
       }
     }
+    linkedItems {
+      hobbyId
+      externalId
+      hobbyType
+      displayName
+      imageUrl
+    }
   }
 }
 `;

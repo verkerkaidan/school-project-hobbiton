@@ -24,6 +24,10 @@ public class GymExercise {
         this.title = gymExerciseDTO.title;
     }
 
+    public GymExercise() {
+
+    }
+
     public UUID getId() {
         return id;
     }

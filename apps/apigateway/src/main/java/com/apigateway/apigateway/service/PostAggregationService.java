@@ -8,6 +8,7 @@ import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.MediaInstance;
 import com.apigateway.apigateway.models.Post;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,10 +42,12 @@ public class PostAggregationService {
     private final NotificationClient notificationClient;
     private final RecognitionService recognitionService;
 
+    private final ObjectMapper objectMapper;
+
     public PostAggregationService(PostClient postClient, MediaClient mediaClient, WebClient webClient,
                                   ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
                                   NotificationClient notificationClient, InteractionClient interactionClient,
-                                  RecognitionService recognitionService) {
+                                  RecognitionService recognitionService, ObjectMapper objectMapper) {
         this.postClient = postClient;
         this.mediaClient = mediaClient;
         this.webClient = webClient;
@@ -53,6 +56,7 @@ public class PostAggregationService {
         this.notificationClient = notificationClient;
         this.interactionClient = interactionClient;
         this.recognitionService = recognitionService;
+        this.objectMapper = objectMapper;
     }
 
     public List<Post> getPostsByHobbyType(HobbyType hobbyType) {
@@ -103,22 +107,6 @@ public class PostAggregationService {
                     .toUpperCase();
         }
 
-        // 🔥 IMPORTANT: align DTO polymorphism field
-        // (post-service expects "type")
-        Map<String, Object> payload = new HashMap<>();
-
-        payload.put("id", dto.id);
-        payload.put("title", dto.title);
-        payload.put("description", dto.description);
-        payload.put("userId", dto.userId);
-        payload.put("hobbyType", dto.hobbyType);
-
-        // 🔥 CRITICAL: this is what fixes OTHER disappearing
-        payload.put("type", dto.hobbyType);
-
-        payload.put("mediaInstanceSet", dto.mediaInstanceSet);
-        payload.put("linkedItems", dto.linkedItems);
-
         // -----------------------------
         // 2. MEDIA UPLOAD
         // -----------------------------
@@ -132,10 +120,19 @@ public class PostAggregationService {
         }
 
         dto.mediaInstanceSet = mediaInstanceSet;
-        payload.put("mediaInstanceSet", mediaInstanceSet);
 
         // -----------------------------
-        // 3. SEND TO POST SERVICE
+        // 3. DYNAMISCHE PAYLOAD BOUWEN (Gebruikt de Feign-ObjectMapper)
+        // -----------------------------
+        Map<String, Object> payload = objectMapper.convertValue(
+                dto,
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {}
+        );
+
+        payload.put("type", dto.hobbyType);
+
+        // -----------------------------
+        // 4. SEND TO POST SERVICE
         // -----------------------------
         Object savedPost = webClient.post()
                 .uri(postServiceUrl + "/posts")
@@ -146,7 +143,7 @@ public class PostAggregationService {
                 .block();
 
         // -----------------------------
-        // 4. SAFE RESPONSE PARSING
+        // 5. SAFE RESPONSE PARSING
         // -----------------------------
         UUID savedPostId = null;
         String savedPostTitle = dto.title;
@@ -166,7 +163,7 @@ public class PostAggregationService {
         } catch (Exception ignored) {}
 
         // -----------------------------
-        // 5. NOTIFICATIONS
+        // 6. NOTIFICATIONS
         // -----------------------------
         final UUID postId = savedPostId;
         final String postTitle = savedPostTitle;
@@ -187,7 +184,7 @@ public class PostAggregationService {
     private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
         Set<UUID> mediaInstanceSet = new HashSet<>();
 
-       MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
+        MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
 
         files.forEach((file) -> {
             HttpHeaders fileHeaders = new HttpHeaders();

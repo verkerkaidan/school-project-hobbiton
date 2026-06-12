@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.34.0] - 2026-06-12
+
+### Added
+- **feat**: Changed and styled the post details page
+
 ## [1.33.3] - 2026-06-12
 
 ### Fixed

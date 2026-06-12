@@ -14,6 +14,9 @@ export async function gqlRequest<T>(query: string, variables?: Record<string, un
 
   const json = await res.json();
 
+  console.log("=== RUWE GRAPHQL BACKEND RESPONS ===");
+  console.log(JSON.stringify(json, null, 2));
+
   const { data, errors } = json;
   if (errors?.length) {
     console.error("GraphQL errors:", JSON.stringify(errors, null, 2));
@@ -27,11 +30,22 @@ export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
   const endpoint: string = typeof window === 'undefined' ? MIDDLEWARE_ENDPOINT_SERVERSIDE! : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
   const formData = new FormData();
 
-  const { mediaInstanceDTOSet, ...rest } = post;
-  formData.append("data", new Blob([JSON.stringify(rest)], { type: "application/json" }));
+  const { mediaInstanceDTOSet, linkedItems, ...rest } = post;
+
+  // ← remap frontend LinkedItem fields to what the backend DTO expects
+  const mappedLinkedItems = (linkedItems ?? []).map((li) => ({
+    displayName: li.title,
+    hobbyType: li.type,
+    imageUrl: li.imageUrl,
+    externalId: li.externalId,
+  }));
+
+  const payload = { ...rest, linkedItems: mappedLinkedItems };
+
+  console.log("POST JSON", JSON.stringify(payload, null, 2)); // verify the remap
+
+  formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
   mediaInstanceDTOSet.forEach((file) => formData.append("files[]", file));
-  console.log("POST OBJECT", rest);
-  console.log("POST JSON", JSON.stringify(rest, null, 2));
 
   const res = await fetch(endpoint + "/api/create-post", {
     method: 'POST',
