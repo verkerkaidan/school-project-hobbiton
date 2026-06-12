@@ -250,6 +250,8 @@ services:
     environment:
       - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ISSUER=${JWT_ISSUER}
 
   database:
     image: postgres:16
