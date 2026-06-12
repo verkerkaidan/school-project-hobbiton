@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@CrossOrigin(origins = {"http://localhost:3000","http://localhost:19293"})
 public class PostsController {
 
     private final PostAggregationService postService;
@@ -43,6 +42,7 @@ public class PostsController {
         }
         return mediaService.getMedia(post.getMediaInstanceSet());
     }
+
     @SchemaMapping(typeName = "Post", field = "interaction")
     public Interaction interaction(Post post) {
         if (post.getId() == null) {
@@ -51,6 +51,7 @@ public class PostsController {
         }
         return postService.getInteraction(post.getId());
     }
+
     @QueryMapping
     public List<Post> getPostsByHobbyType(@Argument HobbyType hobbyType) {
         List<Post> postSet = new ArrayList<>(postService.getPostsByHobbyType(hobbyType));
@@ -73,8 +74,7 @@ public class PostsController {
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createPost(
             @RequestPart("data") PostDTO dto,
-            @RequestPart(value = "files[]", required = false) List<MultipartFile> files
-    ) {
+            @RequestPart(value = "files[]", required = false) List<MultipartFile> files) {
         dto.mediaInstanceDTOSet = files;
         Object response = postService.forwardCreatePost(dto);
         return ResponseEntity.ok(response);

@@ -11,6 +11,7 @@ mod strategy;
 use std::sync::Arc;
 
 use axum::Router;
+use axum::http::{HeaderValue, Method};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::info;
@@ -70,9 +71,35 @@ async fn main() {
     let state = AppState { factory, cache };
 
     // ── CORS ─────────────────────────────────────────────────────────────────
+    let allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
+        .unwrap_or_else(|_| "http://localhost:23738".to_string());
+    let origin_values: Vec<HeaderValue> = allowed_origins
+        .split(',')
+        .filter_map(|origin| {
+            let trimmed = origin.trim();
+            if trimmed.is_empty() {
+                return None;
+            }
+
+            match HeaderValue::from_str(trimmed) {
+                Ok(value) => Some(value),
+                Err(error) => {
+                    tracing::warn!("Skipping invalid CORS origin '{}': {}", trimmed, error);
+                    None
+                }
+            }
+        })
+        .collect();
+
     let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
+        .allow_origin(origin_values)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
         .allow_headers(Any);
 
     let app = Router::new()

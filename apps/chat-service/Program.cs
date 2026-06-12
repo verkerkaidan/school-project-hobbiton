@@ -7,6 +7,12 @@ var migrationRunner = new MigrationRunner(
 );
 migrationRunner.Run();
 
+var chatAllowedOrigins = GetAllowedOrigins(
+    Environment.GetEnvironmentVariable("CHAT_ALLOWED_ORIGINS")
+    ?? "https://hobbiton.student.inf.st.hsleiden.nl,http://localhost:23738"
+);
+
+// ... rest of your app startup
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
@@ -15,10 +21,8 @@ builder.Services.AddCors(options =>
     {
         policy.SetIsOriginAllowed(origin =>
         {
-            var uri = new Uri(origin);
-            if (uri.Host == "localhost" || uri.Host == "apigateway-service") return true;
-            return uri.Host == "student.inf.st.hsleiden.nl" ||
-                   uri.Host.EndsWith(".student.inf.st.hsleiden.nl");
+            var normalizedOrigin = NormalizeOrigin(origin);
+            return normalizedOrigin != null && chatAllowedOrigins.Contains(normalizedOrigin);
         })
         .AllowAnyHeader()
         .AllowAnyMethod();
@@ -39,3 +43,28 @@ NotificationWebSocketHandler.Map(app, notificationSockets, db);
 ChatEndpoints.Map(app, userSockets, db);
 
 app.Run();
+
+static HashSet<string> GetAllowedOrigins(string csvOrigins)
+{
+    return csvOrigins
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(NormalizeOrigin)
+        .Where(origin => origin != null)
+        .Cast<string>()
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+}
+
+static string? NormalizeOrigin(string? origin)
+{
+    if (string.IsNullOrWhiteSpace(origin))
+    {
+        return null;
+    }
+
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return null;
+    }
+
+    return $"{uri.Scheme}://{uri.Authority}";
+}

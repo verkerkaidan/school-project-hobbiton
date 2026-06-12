@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = { "*" })
 @RequestMapping("/recognition")
 public class RecognitionController {
 
@@ -23,8 +22,10 @@ public class RecognitionController {
     /**
      * Generates a content risk assessment for each of the given files
      *
-     * @param DTOToBeUpdatedList, list of objects with fileId (UUID) and file (byte[]) specified
-     * @return list of objects with fileId (UUID) and contentFlag (ContentFlag) specified
+     * @param DTOToBeUpdatedList, list of objects with fileId (UUID) and file
+     *                            (byte[]) specified
+     * @return list of objects with fileId (UUID) and contentFlag (ContentFlag)
+     *         specified
      */
     @PostMapping
     public ResponseEntity<List<ContentFlagUpdateDTO>> generateContentFlags(

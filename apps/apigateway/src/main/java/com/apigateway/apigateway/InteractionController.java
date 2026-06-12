@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:19293" })
 public class InteractionController {
     private final InteractionAggregationService interactionAggregationService;
 

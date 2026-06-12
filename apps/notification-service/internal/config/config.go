@@ -24,7 +24,7 @@ func Load() *Config {
 		DBName:         getEnv("DB_NAME", "notifications"),
 		JWTSecret:      getEnv("JWT_SECRET", ""),
 		JWTIssuer:      getEnv("JWT_ISSUER", ""),
-		AllowedOrigins: getEnv("NOTIFICATION_ALLOWED_ORIGINS", "*"),
+		AllowedOrigins: getEnv("NOTIFICATION_ALLOWED_ORIGINS", "http://localhost:19293,http://localhost:23738"),
 	}
 }
 

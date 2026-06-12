@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @Controller
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:19293" })
 public class ChatController {
 
     private final WebClient http;

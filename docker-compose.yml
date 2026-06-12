@@ -72,6 +72,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_POSTS_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_POSTS}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_POSTS}
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
     mem_limit: 512m
     networks:
@@ -93,6 +94,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_PROFILE_CONNECTION}
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
       PROFILE_SERVICE_URL: http://profile-service:21526
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
     mem_limit: 512m
     networks:
@@ -115,6 +117,7 @@ services:
       DB_NAME: ${SPRING_DATASOURCE_MEDIA_DATABASE}
       DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
       DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     cpus: 0.5
     mem_limit: 256m
@@ -130,6 +133,7 @@ services:
     container_name: recognition-service
     environment:
       MODEL_NAME: ${RECOGNITION_MODEL_NAME}
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     restart: always
     ports:
       - "27088:27088"
@@ -178,6 +182,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_TEST_USER: ${ADMIN_TEST_USER}
       ADMIN_TEST_PASSWORD: ${ADMIN_TEST_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
     mem_limit: 512m
     networks:
@@ -199,6 +204,7 @@ services:
       # Ensure containers use the internal redis service when running via docker-compose
       REDIS_URL: "redis://redis:6379"
       RUST_LOG: debug
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
     mem_limit: 128m
     networks:
@@ -220,6 +226,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${SPRING_DATASOURCE_INTERACTION_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME_INTERACTION}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_INTERACTION}
+      CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
     mem_limit: 512m
     networks:
@@ -303,6 +310,7 @@ services:
       INTERACTION_SERVICE_URL: ${INTERACTION_SERVICE_URL}
       CHAT_HTTP_URL: ${CHAT_HTTP_URL}
       CHAT_WS_URL: ${CHAT_WS_URL}
+      GATEWAY_ALLOWED_ORIGIN_PATTERNS: ${GATEWAY_ALLOWED_ORIGIN_PATTERNS}
       BUG_REPORT_SERVICE_URL: ${BUG_REPORT_SERVICE_URL}
 
   chat-service:
@@ -321,6 +329,7 @@ services:
         condition: service_healthy
     environment:
       - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
+      - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
 
   docs:
     build:

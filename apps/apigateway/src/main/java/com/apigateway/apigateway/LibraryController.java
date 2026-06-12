@@ -8,7 +8,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/library")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:19293"}, allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class LibraryController {
 
     private final LibraryClient libraryClient;
@@ -18,7 +17,8 @@ public class LibraryController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Object> searchPost(@RequestHeader Map<String, String> headers, @RequestBody Map<String, Object> body) {
+    public ResponseEntity<Object> searchPost(@RequestHeader Map<String, String> headers,
+            @RequestBody Map<String, Object> body) {
         Map<String, String> filtered = headers.entrySet().stream()
                 .filter(e -> !e.getKey().equalsIgnoreCase("content-length")
                         && !e.getKey().equalsIgnoreCase("host")
@@ -30,13 +30,15 @@ public class LibraryController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchGet(@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> queryParams) {
+    public ResponseEntity<Object> searchGet(@RequestHeader Map<String, String> headers,
+            @RequestParam Map<String, String> queryParams) {
         Object resp = libraryClient.searchGet(headers, queryParams);
         return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/{type}/{id}")
-    public ResponseEntity<Object> findById(@RequestHeader Map<String, String> headers, @PathVariable String type, @PathVariable String id) {
+    public ResponseEntity<Object> findById(@RequestHeader Map<String, String> headers, @PathVariable String type,
+            @PathVariable String id) {
         Object resp = libraryClient.findById(headers, type, id);
         return ResponseEntity.ok(resp);
     }
@@ -47,5 +49,3 @@ public class LibraryController {
         return ResponseEntity.ok(resp);
     }
 }
-
-

@@ -40,17 +40,17 @@ A lightweight real-time notification service written in Go, using WebSockets for
 
 ## Environment Variables
 
-| Variable                       | Default         | Description                                                   |
-| ------------------------------ | --------------- | ------------------------------------------------------------- |
-| `PORT`                         | `29555`         | HTTP server port                                              |
-| `DB_HOST`                      | `localhost`     | PostgreSQL host                                               |
-| `DB_PORT`                      | `5432`          | PostgreSQL port                                               |
-| `DB_USER`                      |                 | Database username                                             |
-| `DB_PASSWORD`                  |                 | Database password                                             |
-| `DB_NAME`                      | `notifications` | Database name                                                 |
-| `JWT_SECRET`                   |                 | Secret for validating JWT tokens                              |
-| `JWT_ISSUER`                   |                 | Expected JWT issuer claim                                     |
-| `NOTIFICATION_ALLOWED_ORIGINS` | `*`             | Comma-separated list of allowed CORS origins (supports regex) |
+| Variable                       | Default                                         | Description                                                       |
+| ------------------------------ | ----------------------------------------------- | ----------------------------------------------------------------- |
+| `PORT`                         | `29555`                                         | HTTP server port                                                  |
+| `DB_HOST`                      | `localhost`                                     | PostgreSQL host                                                   |
+| `DB_PORT`                      | `5432`                                          | PostgreSQL port                                                   |
+| `DB_USER`                      |                                                 | Database username                                                 |
+| `DB_PASSWORD`                  |                                                 | Database password                                                 |
+| `DB_NAME`                      | `notifications`                                 | Database name                                                     |
+| `JWT_SECRET`                   |                                                 | Secret for validating JWT tokens                                  |
+| `JWT_ISSUER`                   |                                                 | Expected JWT issuer claim                                         |
+| `NOTIFICATION_ALLOWED_ORIGINS` | `http://localhost:19293,http://localhost:23738` | Comma-separated list of allowed CORS origins (exact origins only) |
 
 ## Running Locally
 

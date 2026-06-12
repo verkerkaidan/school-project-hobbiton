@@ -1,5 +1,6 @@
 defmodule MediaServiceElxWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :media_service_elx
+  import Plug.Conn
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -49,6 +50,35 @@ defmodule MediaServiceElxWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
+  plug :cors
   plug Plug.Session, @session_options
   plug MediaServiceElxWeb.Router
+
+  defp cors(conn, _opts) do
+    origin = get_req_header(conn, "origin") |> List.first()
+
+    conn =
+      if origin && origin in allowed_origins() do
+        conn
+        |> put_resp_header("access-control-allow-origin", origin)
+        |> put_resp_header("access-control-allow-methods", "GET,POST,PUT,DELETE,OPTIONS")
+        |> put_resp_header("access-control-allow-headers", "Authorization,Content-Type")
+      else
+        conn
+      end
+
+    if conn.method == "OPTIONS" do
+      conn
+      |> send_resp(204, "")
+      |> halt()
+    else
+      conn
+    end
+  end
+
+  defp allowed_origins do
+    System.get_env("CORS_ALLOWED_ORIGINS", "http://localhost:23738")
+    |> String.split(",", trim: true)
+    |> Enum.map(&String.trim/1)
+  end
 end
