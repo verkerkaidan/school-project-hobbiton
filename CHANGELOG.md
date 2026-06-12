@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.33.1] - 2026-06-12
+
+### Fixed
+- **fix**: Profile header showed your pfp instead of the user you're viewing if you changed yours recently
+
 ## [1.33.0] - 2026-06-10
 
 ### Changed
