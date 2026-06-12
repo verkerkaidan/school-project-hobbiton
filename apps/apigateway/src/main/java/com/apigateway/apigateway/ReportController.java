@@ -14,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:19293" })
 public class ReportController {
 
     private final MediaClient mediaClient;

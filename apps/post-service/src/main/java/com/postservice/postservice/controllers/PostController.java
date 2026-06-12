@@ -17,9 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.List;
 
-
 @RestController
-@CrossOrigin(origins = {"*"})
 @RequestMapping("/posts")
 public class PostController {
 
@@ -32,12 +30,14 @@ public class PostController {
     }
 
     /**
-     * RequestMapping, because @PutMapping and @PostMapping can't be put under each other
+     * RequestMapping, because @PutMapping and @PostMapping can't be put under each
+     * other
      * Updates or creates post
+     * 
      * @param postDTO body of post that is to be made or updated
      * @return ResponseEntity with post inside it
      */
-    @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
+    @RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity<Post> save(@RequestBody PostDTO postDTO) {
         Post post;
 
@@ -82,6 +82,7 @@ public class PostController {
 
     /**
      * Gets all posts by the user id, if user doesn't exist, 0 fetches.
+     * 
      * @param user_id get all posts by user
      * @return Return a ResponseEntity with a set (list) of posts by user
      */
@@ -92,6 +93,7 @@ public class PostController {
 
     /**
      * Gets post by postId, always singular
+     * 
      * @param post_id fetch by post id
      * @return if post is found, return post, else throw error in postDAO
      */
@@ -102,6 +104,7 @@ public class PostController {
 
     /**
      * Gets all posts by hobbyProperty, by example GYM or READING
+     * 
      * @param propertyType
      * @return
      */
@@ -123,7 +126,9 @@ public class PostController {
     }
 
     /**
-     * Delete the post by id, always executes delete query even if post does not exist
+     * Delete the post by id, always executes delete query even if post does not
+     * exist
+     * 
      * @param post_id delete post by post id
      */
     @DeleteMapping("/{post_id}")
@@ -134,6 +139,7 @@ public class PostController {
 
     /**
      * Delete based on user_id
+     * 
      * @param user_id userId that is to be deleted
      * @return ResponseEntity 200, response is ok
      */

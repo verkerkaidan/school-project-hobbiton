@@ -29,7 +29,6 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = { "http://localhost:*", "http://*.student.inf.st.hsleiden.nl:*" })
 public class AdminController {
 
     private final ProfileConnectionClient profileConnectionClient;

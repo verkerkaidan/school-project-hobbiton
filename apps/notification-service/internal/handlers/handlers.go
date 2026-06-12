@@ -3,7 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
-	"regexp"
+	"net/url"
 	"strings"
 
 	"notification-service/internal/auth"
@@ -54,18 +54,21 @@ func (h *Handler) Register(mux *http.ServeMux) {
 }
 
 // withCORS wraps a handler to add CORS headers on every response.
-// AllowedOrigins is a comma-separated list of exact origins or regex patterns.
+// AllowedOrigins is a comma-separated list of exact origins.
 func withCORS(cfg *config.Config, next http.HandlerFunc) http.HandlerFunc {
+	allowedOrigins := map[string]struct{}{}
+	for _, raw := range strings.Split(cfg.AllowedOrigins, ",") {
+		normalized, ok := normalizeOrigin(raw)
+		if ok {
+			allowedOrigins[normalized] = struct{}{}
+		}
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin != "" {
-			for _, pattern := range strings.Split(cfg.AllowedOrigins, ",") {
-				pattern = strings.TrimSpace(pattern)
-				matched, err := regexp.MatchString("^"+pattern+"$", origin)
-				if err == nil && matched {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					break
-				}
+		if origin, ok := normalizeOrigin(r.Header.Get("Origin")); ok {
+			if _, exists := allowedOrigins[origin]; exists {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
 			}
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
@@ -76,6 +79,20 @@ func withCORS(cfg *config.Config, next http.HandlerFunc) http.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+func normalizeOrigin(origin string) (string, bool) {
+	origin = strings.TrimSpace(strings.TrimSuffix(origin, "/"))
+	if origin == "" {
+		return "", false
+	}
+
+	u, err := url.Parse(origin)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return "", false
+	}
+
+	return u.Scheme + "://" + u.Host, true
 }
 
 func (h *Handler) health(w http.ResponseWriter, _ *http.Request) {

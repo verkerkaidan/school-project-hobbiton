@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hobbithon",
+  title: "Hobbiton",
   description: "Hobby Social Media App",
 };
 

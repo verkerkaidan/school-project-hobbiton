@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = {"*"})
 @RequestMapping("/interaction")
 public class InteractionController {
     @Autowired
@@ -24,15 +23,14 @@ public class InteractionController {
     /**
      * Toggle a like to a post or comment.
      *
-     * @param userId, UUID of the user
+     * @param userId,      UUID of the user
      * @param referenceId, UUID of the post or comments that was liked
      * @return True if the like now exists, false if the like was deleted
      */
     @PutMapping("/{userId}/{referenceId}")
     public ResponseEntity<Boolean> toggleLike(
             @PathVariable UUID userId,
-            @PathVariable UUID referenceId
-    ) {
+            @PathVariable UUID referenceId) {
         boolean likeNowExists = likeService.toggleLike(userId, referenceId);
         return ResponseEntity.ok(likeNowExists);
     }
@@ -83,11 +81,13 @@ public class InteractionController {
     }
 
     /**
-     * Get a list of user identifiers of users that have liked the users post or comment.
+     * Get a list of user identifiers of users that have liked the users post or
+     * comment.
      * Should only be used by the owner of the reference
      *
      * @param referenceId, identifier of the post or comment
-     * @return list of user identifiers that are connected via likes to the given reference
+     * @return list of user identifiers that are connected via likes to the given
+     *         reference
      */
     @GetMapping("likes/{referenceId}")
     public ResponseEntity<List<UUID>> getUsersThatLiked(@PathVariable UUID referenceId) {
