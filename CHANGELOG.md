@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.35.3] - 2026-06-12
+
+### Fixed
+- **fix**: Report modal being behind components
+
 ## [1.35.2] - 2026-06-12
 
 ### Fixed
