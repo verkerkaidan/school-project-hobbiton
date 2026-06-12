@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [1.35.1] - 2026-06-12
 
 ### Fixed
+- **fix**: missing env variables in docker compose prod
+
+## [1.35.1] - 2026-06-12
+
+### Fixed
 - **fix**: In notification connection to chats, & in stead of ? for token
 
 ## [1.35.0] - 2026-06-12
