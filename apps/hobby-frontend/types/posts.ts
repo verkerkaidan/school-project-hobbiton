@@ -21,6 +21,14 @@ export interface CompletePost {
   comments: Comment[];
 }
 
+export interface LinkedHobbyItem {
+  hobbyId: string;
+  externalId: string;
+  hobbyType: string;
+  displayName: string;
+  imageUrl: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -31,6 +39,7 @@ export interface Post {
   hobbyType: string;
   mediaSet: MediaSet[];
   interaction: Interaction;
+  linkedItems: LinkedHobbyItem[];
 }
 
 export interface Gym extends Post {
@@ -45,7 +54,6 @@ export interface Reading extends Post {
   bookFinished?: boolean;
 }
 
-export interface Other extends Post {
-}
+export type Other = Post
 
 export type PostResponse = Gym | Reading | Other;

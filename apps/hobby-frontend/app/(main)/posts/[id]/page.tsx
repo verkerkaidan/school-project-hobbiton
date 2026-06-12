@@ -1,125 +1,54 @@
 import ImageSlider from "@/components/ui/ImageSlider";
-import { gqlRequest } from "@/lib/graphQlClient";
-import { PostResponse, Gym, Reading } from "@/types/posts";
 import CompleteInteraction from "@/components/interaction/completeInteraction";
 import { PostAuthorCard } from "@/components/post/PostAuthorCard";
 import { getProfile } from "@/queries/getProfile";
+import { getPostById } from "@/queries/getPostById";
+import { PostResponse, Gym, Reading } from "@/types/posts";
+import PostPageClient from "@/components/post/PostPageClient";
 
 interface PostPageProps {
-  params: Promise<{ id: string }>; // ✅ should be a Promise
+    params: Promise<{ id: string }>;
 }
-
-const GET_POST_BY_ID_QUERY = `
-    query GetPostById($id: ID!) {
-        getPostById(id: $id) {
-            id
-            title
-            description
-            userId
-            createdAt
-            updatedAt
-            hobbyType
-            ... on Gym {
-                totalDuration
-                exercises {
-                    title
-                    reps
-                    weight
-                    rpe
-                }
-            }
-            ... on Reading {
-                bookTitle
-                pagesRead
-                totalPagesRead
-                bookFinished
-            }
-            mediaSet {
-              relevantId
-              fileData
-              contentType
-              contentFlag
-            }
-            interaction {
-              likes
-              comments {
-                id
-                referenceId
-                userId
-                comment
-              }
-            }
-        }
-    }
-`;
 
 function isGym(post: PostResponse): post is Gym {
-  return post.hobbyType === "GYM";
+    return post.hobbyType === "GYM";
 }
-
 function isReading(post: PostResponse): post is Reading {
-  return post.hobbyType === "READING";
+    return post.hobbyType === "READING";
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { id } = await params;
-  const { getPostById: post } = await gqlRequest<{ getPostById: PostResponse }>(
-    GET_POST_BY_ID_QUERY,
-    { id },
-  );
+    const { id } = await params;
+    const post = await getPostById(id);
 
-  if (!post) {
-    return <div>Post not found.</div>;
-  }
-
-  const author = await getProfile(post.userId).catch(() => null);
-
-  return (
-    <main className="max-w-2xl mx-auto px-4 py-10">
-      <ImageSlider media={post.mediaSet} />
-
-      {author && (
-        <PostAuthorCard
-          authorId={author.id}
-          username={author.username}
-          profilePicture={author.profilePicture}
-        />
-      )}
-
-      <span className="text-xs font-mono uppercase tracking-tighter text-accent">
-        {post.hobbyType}
-      </span>
-      <h1 className="text-4xl font-semibold mt-2 mb-4">{post.title}</h1>
-      <p className="text-accent text-sm leading-relaxed">{post.description}</p>
-
-      {isGym(post) && (
-        <div className="mt-6 space-y-3">
-          <h2 className="text-lg font-semibold">Exercises</h2>
-          {post.exercises?.map((ex, i) => (
-            <div
-              key={i}
-              className="border border-gray rounded p-4 text-sm space-y-1"
-            >
-              <p className="font-medium">{ex.title}</p>
-              <p className="text-accent">
-                Reps: {ex.reps} · Weight: {ex.weight}kg · RPE: {ex.rpe}
-              </p>
+    if (!post) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-sm opacity-40" style={{ color: "var(--color-accent)" }}>Post not found.</p>
             </div>
-          ))}
-        </div>
-      )}
+        );
+    }
 
-      {isReading(post) && (
-        <div className="mt-6 space-y-2 text-sm text-accent">
-          <p>📖 {post.bookTitle}</p>
-          <p>
-            Pages read: {post.pagesRead} / {post.totalPagesRead}
-          </p>
-          <p>Finished: {post.bookFinished ? "Yes" : "No"}</p>
-        </div>
-      )}
+    const author = await getProfile(post.userId).catch(() => null);
 
-      <CompleteInteraction post={post} />
-    </main>
-  );
+    return (
+        <PostPageClient
+            post={post}
+            author={author}
+            isGym={isGym(post)}
+            isReading={isReading(post)}
+            gymPost={isGym(post) ? (post as Gym) : undefined}
+            readingPost={isReading(post) ? (post as Reading) : undefined}
+        >
+            <ImageSlider media={post.mediaSet} />
+            {author && (
+                <PostAuthorCard
+                    authorId={author.id}
+                    username={author.username}
+                    profilePicture={author.profilePicture}
+                />
+            )}
+            <CompleteInteraction post={post} />
+        </PostPageClient>
+    );
 }
