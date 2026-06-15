@@ -3,8 +3,16 @@ WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
+COPY tests ./tests
 
-# dummy build voor cache (MAG, maar pas NA src copy)
+# Run tests before building the release binary.
+# If any test fails the entire Docker build fails,
+# which blocks the pipeline from producing an image.
+# REDIS_URL is pointed at an intentionally unreachable port so
+# any test that needs Redis skips itself via the require_redis! macro,
+# and unit/mock tests run without any external dependency.
+RUN REDIS_URL=redis://127.0.0.1:1 cargo test
+
 RUN cargo build --release
 
 FROM rust:1.96-slim

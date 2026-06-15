@@ -74,3 +74,59 @@ impl From<SearchQueryParams> for SearchRequest {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::str::FromStr;
+
+    #[test]
+    fn display_outputs_uppercase_values() {
+        assert_eq!(SearchType::Book.to_string(), "BOOK");
+        assert_eq!(SearchType::Movie.to_string(), "MOVIE");
+        assert_eq!(SearchType::Exercise.to_string(), "EXERCISE");
+    }
+
+    #[test]
+    fn from_str_is_case_insensitive() {
+        assert_eq!(
+            SearchType::from_str("book").unwrap(),
+            SearchType::Book
+        );
+
+        assert_eq!(
+            SearchType::from_str("MOVIE").unwrap(),
+            SearchType::Movie
+        );
+
+        assert_eq!(
+            SearchType::from_str("Exercise").unwrap(),
+            SearchType::Exercise
+        );
+    }
+
+    #[test]
+    fn from_str_returns_error_for_unknown_type() {
+        assert!(SearchType::from_str("foobar").is_err());
+    }
+
+    #[test]
+    fn query_params_convert_to_request() {
+        let params = SearchQueryParams {
+            query: "clean code".to_string(),
+            search_type: SearchType::Book,
+            max_results: 25,
+        };
+
+        let request: SearchRequest = params.into();
+
+        assert_eq!(request.query, "clean code");
+        assert_eq!(request.search_type, SearchType::Book);
+        assert_eq!(request.max_results, 25);
+    }
+
+    #[test]
+    fn default_max_results_is_ten() {
+        assert_eq!(default_max_results(), 10);
+    }
+}

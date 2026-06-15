@@ -37,13 +37,14 @@ impl<T: Serialize> ApiResponse<T> {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "resultType")]
+#[derive(Debug)]
 pub enum SearchResult {
     Book(BookResponse),
     Exercise(ExerciseResponse),
     Movie(MovieResponse)
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BookResponse {
     pub id: Option<String>,
@@ -58,10 +59,9 @@ pub struct BookResponse {
     pub cover_id: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 #[skip_serializing_none]
-#[derive(Default)]
 pub struct MovieResponse {
     pub id: Option<String>,
     pub title: Option<String>,
@@ -82,10 +82,9 @@ pub struct MovieResponse {
     pub media_type: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 #[skip_serializing_none]
-#[derive(Default)]
 pub struct ExerciseResponse {
     pub exercise_id: Option<String>,
     pub name: Option<String>,
@@ -104,5 +103,68 @@ impl SearchResult {
             SearchResult::Exercise(e) => e.exercise_id.clone(),
             SearchResult::Movie(m) => m.id.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn book_result_returns_book_id() {
+        let result = SearchResult::Book(BookResponse {
+            id: Some("book123".into()),
+            title: None,
+            authors: vec![],
+            published_date: None,
+            publishers: vec![],
+            isbn: vec![],
+            page_count: None,
+            languages: vec![],
+            thumbnail_url: None,
+            cover_id: None,
+        });
+
+        assert_eq!(result.id(), Some("book123".to_string()));
+    }
+
+    #[test]
+    fn movie_result_returns_movie_id() {
+        let result = SearchResult::Movie(MovieResponse {
+            id: Some("tt0111161".into()),
+            ..Default::default()
+        });
+
+        assert_eq!(result.id(), Some("tt0111161".to_string()));
+    }
+
+    #[test]
+    fn exercise_result_returns_exercise_id() {
+        let result = SearchResult::Exercise(ExerciseResponse {
+            exercise_id: Some("42".into()),
+            ..Default::default()
+        });
+
+        assert_eq!(result.id(), Some("42".to_string()));
+    }
+
+    #[test]
+    fn api_response_success_sets_fields() {
+        let response = ApiResponse::success(vec!["test"], 1, "Success");
+
+        assert!(response.success);
+        assert_eq!(response.message, "Success");
+        assert_eq!(response.total_results, 1);
+        assert!(response.data.is_some());
+    }
+
+    #[test]
+    fn api_response_error_sets_fields() {
+        let response: ApiResponse<String> = ApiResponse::error("Something failed");
+
+        assert!(!response.success);
+        assert_eq!(response.message, "Something failed");
+        assert_eq!(response.total_results, 0);
+        assert!(response.data.is_none());
     }
 }

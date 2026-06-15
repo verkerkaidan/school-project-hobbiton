@@ -8,25 +8,16 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use crate::dto::request::SearchType;
 use crate::error::AppError;
 
-/// 30 days in seconds — media metadata barely ever changes.
-pub const CACHE_TTL_SECONDS: usize = 30 * 24 * 60 * 60; // 2_592_000
+pub const CACHE_TTL_SECONDS: usize = 30 * 24 * 60 * 60;
 
-/// Wraps a Redis `ConnectionManager` (auto-reconnects on drop).
-///
-/// All cache operations are fire-and-forget on write — a Redis
-/// failure never surfaces as a user-visible error. On read, a
-/// cache miss is treated the same as a Redis error (just fetch
-/// from the API instead).
 #[derive(Clone)]
 pub struct CacheService {
-    conn: ConnectionManager,
+    conn: Option<ConnectionManager>,
     cache_enabled: Arc<AtomicBool>,
 }
 
 impl CacheService {
     /// Connect to Redis. Call once at startup.
-    ///
-    /// `redis_url` example: `redis://127.0.0.1:6379`
     pub async fn new(redis_url: &str) -> Result<Self, AppError> {
         let client = Client::open(redis_url)
             .map_err(|e| AppError::Cache(format!("Redis connect error: {}", e)))?;
@@ -38,78 +29,93 @@ impl CacheService {
         tracing::info!("Redis cache connected: {}", redis_url);
 
         Ok(CacheService {
-            conn,
+            conn: Some(conn),
             cache_enabled: Arc::new(AtomicBool::new(true)),
         })
     }
 
-    // ─── Public API ─────────────────────────────────────────────────────────
+    /// A permanently-disabled no-op cache.
+    /// Every get returns None, every set is a no-op.
+    /// Use this in tests when Redis is unavailable (e.g. Docker build, CI).
+    pub fn disabled() -> Self {
+        CacheService {
+            conn: None,
+            cache_enabled: Arc::new(AtomicBool::new(false)),
+        }
+    }
 
-    /// Try to get a cached value. Returns `None` on miss or any Redis error.
-    /// A Redis hiccup should never break the user's request.
+    // ─── Public API ──────────────────────────────────────────────────────────
+
     pub async fn get<T: DeserializeOwned>(&self, key: &str) -> Option<T> {
         if !self.is_enabled() {
             return None;
         }
 
-        let mut conn = self.conn.clone();
+        let mut conn = self.conn.clone()?;
 
-        match conn.get::<_, Option<Vec<u8>>>(key).await {
-            Ok(Some(bytes)) => match bincode::deserialize::<T>(&bytes) {
+        match conn.get::<_, Option<String>>(key).await {
+            Ok(Some(json)) => match serde_json::from_str::<T>(&json) {
                 Ok(val) => {
                     debug!("Cache HIT: {}", key);
                     Some(val)
                 }
                 Err(e) => {
-                    warn!("Cache deserialize error for key {}: {}", key, e);
+                    warn!("Cache deserialize error for key '{}': {}", key, e);
                     None
                 }
             },
-            Ok(None) => None,
+            Ok(None) => {
+                debug!("Cache MISS: {}", key);
+                None
+            }
             Err(e) => {
-                warn!("Redis GET error for key {}: {}", key, e);
+                warn!("Redis GET error for key '{}': {}", key, e);
                 self.disable_temporarily();
                 None
             }
         }
     }
 
-    /// Store a value in Redis with the configured TTL (30 days).
-    /// Errors are logged but not propagated — a write failure is non-fatal.
     pub async fn set<T: Serialize>(&self, key: &str, value: &T) {
         if !self.is_enabled() {
             return;
         }
 
-        let mut conn = self.conn.clone();
+        let mut conn = match self.conn.clone() {
+            Some(c) => c,
+            None => return,
+        };
 
-        match bincode::serialize(value) {
-            Ok(bytes) => {
+        match serde_json::to_string(value) {
+            Ok(json) => {
                 let result: redis::RedisResult<()> =
-                    conn.set_ex(key, bytes, CACHE_TTL_SECONDS as u64).await;
+                    conn.set_ex(key, json, CACHE_TTL_SECONDS as u64).await;
 
                 if let Err(e) = result {
-                    warn!("Redis SET error for key {}: {}", key, e);
+                    warn!("Redis SET error for key '{}': {}", key, e);
                     self.disable_temporarily();
                 }
             }
-            Err(e) => warn!("Cache serialize error for key {}: {}", key, e),
+            Err(e) => {
+                warn!("Cache serialize error for key '{}': {}", key, e);
+            }
         }
     }
 
-    /// Manually invalidate (delete) a key. Used for admin/testing.
     pub async fn invalidate(&self, key: &str) {
-        let mut conn = self.conn.clone();
+        if !self.is_enabled() {
+            return;
+        }
+        let mut conn = match self.conn.clone() {
+            Some(c) => c,
+            None => return,
+        };
         let _: redis::RedisResult<()> = conn.del(key).await;
         debug!("Cache INVALIDATED: {}", key);
     }
 
     // ─── Key builders ────────────────────────────────────────────────────────
 
-    /// Key for a search result list.
-    ///
-    /// Format: `search:{TYPE}:{query_lowercase}:{max_results}`
-    /// Example: `search:BOOK:clean code:10`
     pub fn search_key(search_type: SearchType, query: &str, max_results: usize) -> String {
         format!(
             "search:{}:{}:{}",
@@ -119,10 +125,6 @@ impl CacheService {
         )
     }
 
-    /// Key for a single item lookup by ID.
-    ///
-    /// Format: `item:{TYPE}:{id}`
-    /// Example: `item:MOVIE:tt0111161`
     pub fn item_key(search_type: SearchType, id: &str) -> String {
         format!("item:{}:{}", search_type, id)
     }
@@ -132,16 +134,48 @@ impl CacheService {
     }
 
     fn disable_temporarily(&self) {
-        warn!("Redis unhealthy → disabling cache temporarily");
-
+        warn!("Redis unhealthy — disabling cache temporarily");
         self.cache_enabled.store(false, Ordering::Relaxed);
-
         let flag = self.cache_enabled.clone();
-
         tokio::spawn(async move {
             tokio::time::sleep(std::time::Duration::from_secs(30)).await;
             flag.store(true, Ordering::Relaxed);
             tracing::info!("Redis cache re-enabled");
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::dto::request::SearchType;
+
+    #[test]
+    fn search_key_normalizes_query() {
+        let key = CacheService::search_key(SearchType::Book, "  Clean Code  ", 10);
+        assert_eq!(key, "search:BOOK:clean code:10");
+    }
+
+    #[test]
+    fn search_key_handles_movie_type() {
+        let key = CacheService::search_key(SearchType::Movie, "Batman", 5);
+        assert_eq!(key, "search:MOVIE:batman:5");
+    }
+
+    #[test]
+    fn item_key_builds_correct_key() {
+        let key = CacheService::item_key(SearchType::Movie, "tt0111161");
+        assert_eq!(key, "item:MOVIE:tt0111161");
+    }
+
+    #[test]
+    fn item_key_for_book() {
+        let key = CacheService::item_key(SearchType::Book, "9780132350884");
+        assert_eq!(key, "item:BOOK:9780132350884");
+    }
+
+    #[test]
+    fn ttl_is_thirty_days() {
+        assert_eq!(CACHE_TTL_SECONDS, 30 * 24 * 60 * 60);
     }
 }

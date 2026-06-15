@@ -39,3 +39,43 @@ impl IntoResponse for AppError {
         (status, Json(body)).into_response()
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::response::IntoResponse;
+
+    #[test]
+    fn not_found_maps_to_404() {
+        let response =
+            AppError::NotFound("missing".into()).into_response();
+
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::NOT_FOUND
+        );
+    }
+
+    #[test]
+    fn unknown_search_type_maps_to_400() {
+        let response =
+            AppError::UnknownSearchType("BAD".into())
+                .into_response();
+
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::BAD_REQUEST
+        );
+    }
+
+    #[test]
+    fn cache_error_maps_to_500() {
+        let response =
+            AppError::Cache("redis down".into())
+                .into_response();
+
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+}
