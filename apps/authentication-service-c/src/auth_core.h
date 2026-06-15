@@ -4,6 +4,7 @@
 
 int db_init(void);
 void db_close(void);
+extern char *g_conninfo;
 
 /* Find a user by email. Buffers must have sufficient size. Returns 0 on found, -1 on not found/error */
 int find_user_by_email_db(const char *email, char *out_id, size_t idlen, char *out_hash, size_t hashlen, char *out_roles_csv, size_t roleslen, int *enabled);

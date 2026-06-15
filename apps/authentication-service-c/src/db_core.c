@@ -23,7 +23,8 @@
 #  include <libpq-fe.h>
 #endif
 
-static PGconn *pg_conn = NULL;
+static __thread PGconn *pg_conn = NULL;
+char *g_conninfo = NULL;
 
 static int migrate_schema(void);
 static int exec_sql(const char *sql);
@@ -66,46 +67,113 @@ static int parse_jdbc_url(const char *url, char *host, size_t hostlen, char *por
     dbname[dbnamelen] = '\0';
     return 0;
 }
-
-int db_init(void) {
+static char *build_conninfo(void) {
     const char *url = getenv("SPRING_DATASOURCE_URL");
     const char *user = getenv("SPRING_DATASOURCE_USERNAME");
     const char *pass = getenv("SPRING_DATASOURCE_PASSWORD");
+
     if (!url) url = getenv("DATABASE_URL");
+
+    char *conn = malloc(512);
+    conn[0] = '\0';
+
     if (!url) {
-        const char *pghost = getenv("PGHOST"); const char *pgport = getenv("PGPORT"); const char *pgdb = getenv("PGDATABASE");
-        if (pghost && pgdb) {
-            char conn[512]; snprintf(conn, sizeof(conn), "host=%s port=%s dbname=%s user=%s password=%s", pghost, pgport?pgport:"5432", pgdb, user?user:"", pass?pass:"");
-            pg_conn = PQconnectdb(conn);
-        } else {
-            fprintf(stderr, "No SPRING_DATASOURCE_URL or PGHOST provided\n");
-            return -1;
-        }
-    } else {
-        char host[128] = ""; char port[16] = "5432"; char dbname[128] = "";
-        if (parse_jdbc_url(url, host, sizeof(host), port, sizeof(port), dbname, sizeof(dbname)) != 0) {
-            char conn[512]; snprintf(conn, sizeof(conn), "%s user=%s password=%s", url, user?user:"", pass?pass:"");
-            pg_conn = PQconnectdb(conn);
-        } else {
-            char conn[512]; snprintf(conn, sizeof(conn), "host=%s port=%s dbname=%s user=%s password=%s", host, port, dbname, user?user:"", pass?pass:"");
-            pg_conn = PQconnectdb(conn);
+        snprintf(conn, 512,
+            "user=%s password=%s",
+            user ? user : "",
+            pass ? pass : ""
+        );
+        return conn;
+    }
+
+    if (strstr(url, "jdbc:postgresql://")) {
+        char host[128], port[16] = "5432", db[128];
+
+        if (parse_jdbc_url(url, host, sizeof(host), port, sizeof(port), db, sizeof(db)) == 0) {
+            snprintf(conn, 512,
+                "host=%s port=%s dbname=%s user=%s password=%s",
+                host, port, db,
+                user ? user : "",
+                pass ? pass : ""
+            );
+            return conn;
         }
     }
-    if (!pg_conn) { fprintf(stderr, "PQconnectdb returned NULL\n"); return -1; }
-    if (PQstatus(pg_conn) != CONNECTION_OK) { fprintf(stderr, "Connection to database failed: %s", PQerrorMessage(pg_conn)); PQfinish(pg_conn); pg_conn = NULL; return -1; }
-    if (migrate_schema() != 0) {fprintf(stderr, "Schema migration failed\n"); PQfinish(pg_conn);pg_conn = NULL;return -1;}
+
+    snprintf(conn, 512, "%s user=%s password=%s",
+        url,
+        user ? user : "",
+        pass ? pass : ""
+    );
+
+    return conn;
+}
+
+int db_init(void)
+{
+    g_conninfo = build_conninfo();
+    if (!g_conninfo) return -1;
+
+    PGconn *conn = PQconnectdb(g_conninfo);
+
+    if (!conn || PQstatus(conn) != CONNECTION_OK) {
+        fprintf(stderr, "DB init failed: %s\n",
+                conn ? PQerrorMessage(conn) : "NULL");
+        return -1;
+    }
+
+    if (migrate_schema() != 0) {
+        PQfinish(conn);
+        return -1;
+    }
+
+    PQfinish(conn);
     return 0;
+}
+
+static PGconn *db_conn(void) {
+    if (!pg_conn) {
+        pg_conn = PQconnectdb(g_conninfo);
+
+        if (!pg_conn || PQstatus(pg_conn) != CONNECTION_OK) {
+            fprintf(stderr, "Thread DB connection failed: %s\n",
+                    pg_conn ? PQerrorMessage(pg_conn) : "NULL");
+
+            if (pg_conn) {
+                PQfinish(pg_conn);
+                pg_conn = NULL;
+            }
+            return NULL;
+        }
+    }
+    return pg_conn;
 }
 
 void db_close(void) { if (pg_conn) { PQfinish(pg_conn); pg_conn = NULL; } }
 
-int db_test_connect(void) { if (!pg_conn) return -1; PGresult *res = PQexec(pg_conn, "SELECT 1"); if (!res) return -1; if (PQresultStatus(res) != PGRES_TUPLES_OK) { PQclear(res); return -1; } PQclear(res); return 0; }
+int db_test_connect(void)
+{
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
+
+    PGresult *res = PQexec(conn, "SELECT 1");
+    if (!res) return -1;
+
+    if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+        PQclear(res);
+        return -1;
+    }
+
+    PQclear(res);
+    return 0;
+}
 
 int find_user_by_email_db(const char *email, char *out_id, size_t idlen, char *out_hash, size_t hashlen, char *out_roles_csv, size_t roleslen, int *enabled) {
-    if (!pg_conn) return -1;
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
     const char *paramValues[1] = { email };
     const char *sql = "SELECT cu.id::text, cu.email, cu.password, cu.enabled, COALESCE(string_agg(r.name, ','), '') AS roles FROM custom_user cu LEFT JOIN users_roles ur ON cu.id = ur.user_id LEFT JOIN role r ON ur.role_id = r.id WHERE cu.email = $1 GROUP BY cu.id, cu.email, cu.password, cu.enabled";
-    PGresult *res = PQexecParams(pg_conn, sql, 1, NULL, paramValues, NULL, NULL, 0);
+    PGresult *res = PQexecParams(conn, sql, 1, NULL, paramValues, NULL, NULL, 0);
     if (!res) return -1;
     if (PQresultStatus(res) != PGRES_TUPLES_OK) { PQclear(res); return -1; }
     if (PQntuples(res) < 1) { PQclear(res); return -1; }
@@ -113,8 +181,8 @@ int find_user_by_email_db(const char *email, char *out_id, size_t idlen, char *o
     char *password = PQgetvalue(res, 0, 2);
     char *roles = PQgetvalue(res, 0, 4);
     char *enabled_s = PQgetvalue(res, 0, 3);
-    if (out_id && id) strncpy(out_id, id, idlen);
-    if (out_hash && password) strncpy(out_hash, password, hashlen);
+    if (out_id && id) snprintf(out_id, idlen, "%s", id);
+    if (out_hash && password) snprintf(out_hash, hashlen, "%s", password);
     if (out_roles_csv && roles) strncpy(out_roles_csv, roles, roleslen);
     if (enabled) *enabled = enabled_s ? atoi(enabled_s) : 1;
     PQclear(res);
@@ -122,11 +190,11 @@ int find_user_by_email_db(const char *email, char *out_id, size_t idlen, char *o
 }
 
 int authenticate_user_db(const char *email, const char *password, char *out_id, size_t idlen, char *out_roles_csv, size_t roleslen) {
-    if (!pg_conn) return -1;
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
     const char *paramValues[2] = { email, password };
     const char *sql = "SELECT cu.id::text, COALESCE(string_agg(r.name, ','), '') AS roles FROM custom_user cu LEFT JOIN users_roles ur ON cu.id = ur.user_id LEFT JOIN role r ON ur.role_id = r.id WHERE cu.email = $1 AND cu.password = crypt($2, cu.password) GROUP BY cu.id";
-    PGresult *res = PQexecParams(pg_conn, sql, 2, NULL, paramValues, NULL, NULL, 0);
-    if (!res) return -1;
+    PGresult *res = PQexecParams(conn, sql, 2, NULL, paramValues, NULL, NULL, 0);    if (!res) return -1;
     if (PQresultStatus(res) != PGRES_TUPLES_OK) { PQclear(res); return -1; }
     if (PQntuples(res) < 1) { PQclear(res); return -1; }
     if (out_id) strncpy(out_id, PQgetvalue(res, 0, 0), idlen);
@@ -136,20 +204,22 @@ int authenticate_user_db(const char *email, const char *password, char *out_id, 
 }
 
 static char *ensure_role_and_get_id(const char *role_name) {
-    if (!pg_conn) return NULL;
+    PGconn *conn = db_conn();
+    if (!conn) return NULL;
     const char *paramValues[1] = { role_name };
-    PGresult *res = PQexecParams(pg_conn, "SELECT id::text FROM role WHERE name = $1", 1, NULL, paramValues, NULL, NULL, 0);
+    PGresult *res = PQexecParams(conn, "SELECT id::text FROM role WHERE name = $1", 1, NULL, paramValues, NULL, NULL, 0);
     if (!res) return NULL;
     if (PQresultStatus(res) == PGRES_TUPLES_OK && PQntuples(res) >= 1) { char *rid = strdup(PQgetvalue(res, 0, 0)); PQclear(res); return rid; }
     PQclear(res);
-    PGresult *ins = PQexecParams(pg_conn, "INSERT INTO role (name) VALUES ($1) RETURNING id::text", 1, NULL, paramValues, NULL, NULL, 0);
+    PGresult *ins = PQexecParams(conn, "INSERT INTO role (name) VALUES ($1) RETURNING id::text", 1, NULL, paramValues, NULL, NULL, 0);
     if (!ins) return NULL;
     if (PQresultStatus(ins) == PGRES_TUPLES_OK && PQntuples(ins) >= 1) { char *rid = strdup(PQgetvalue(ins, 0, 0)); PQclear(ins); return rid; }
     PQclear(ins); return NULL;
 }
 
 int add_user_db_with_hash(const char *email, const char *hash, const char *roles_csv, char *out_id, size_t idlen) {
-    if (!pg_conn) return -1;
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
     char id[37]; unsigned char rnd[16];
     // simple uuid v4 generation
     int fd = open("/dev/urandom", O_RDONLY);
@@ -159,27 +229,28 @@ int add_user_db_with_hash(const char *email, const char *hash, const char *roles
     snprintf(id, sizeof(id), "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
              rnd[0],rnd[1],rnd[2],rnd[3],rnd[4],rnd[5],(rnd[6]&0x0F)|0x40,rnd[7],(rnd[8]&0x3F)|0x80,rnd[9],rnd[10],rnd[11],rnd[12],rnd[13],rnd[14],rnd[15]);
     const char *params[4]; params[0] = id; params[1] = email; params[2] = hash; params[3] = "t";
-    PGresult *res = PQexecParams(pg_conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
+    PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
     const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1::uuid, $2, $3, $4)";
-    PGresult *ins = PQexecParams(pg_conn, sql, 4, NULL, params, NULL, NULL, 0);
-    if (!ins) { PQexec(pg_conn, "ROLLBACK"); return -1; }
-    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(pg_conn, "ROLLBACK"); return -1; }
+    PGresult *ins = PQexecParams(conn, sql, 4, NULL, params, NULL, NULL, 0);
+    if (!ins) { PQexec(conn, "ROLLBACK"); return -1; }
+    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(conn, "ROLLBACK"); return -1; }
     PQclear(ins);
     char role_buf[256]; if (!roles_csv || strlen(roles_csv)==0) strncpy(role_buf, "ROLE_USER", sizeof(role_buf)); else { strncpy(role_buf, roles_csv, sizeof(role_buf)); char *comma = strchr(role_buf, ','); if (comma) *comma = '\0'; }
     char *rid = ensure_role_and_get_id(role_buf);
-    if (!rid) { PQexec(pg_conn, "ROLLBACK"); return -1; }
+    if (!rid) { PQexec(conn, "ROLLBACK"); return -1; }
     const char *params2[2]; params2[0] = id; params2[1] = rid;
-    PGresult *ins2 = PQexecParams(pg_conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
-    if (!ins2) { free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; }
-    if (PQresultStatus(ins2) != PGRES_COMMAND_OK) { PQclear(ins2); free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; }
+    PGresult *ins2 = PQexecParams(conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
+    if (!ins2) { free(rid); PQexec(conn, "ROLLBACK"); return -1; }
+    if (PQresultStatus(ins2) != PGRES_COMMAND_OK) { PQclear(ins2); free(rid); PQexec(conn, "ROLLBACK"); return -1; }
     PQclear(ins2); free(rid);
-    PGresult *comm = PQexec(pg_conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
-    if (out_id) strncpy(out_id, id, idlen);
+    PGresult *comm = PQexec(conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
+    if (out_id) snprintf(out_id, idlen, "%s", id);
     return 0;
 }
 
 int add_user_db(const char *email, const char *password, char *out_id, size_t idlen) {
-    if (!pg_conn) return -1;
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
     // Use PostgreSQL's pgcrypto to generate bcrypt hash server-side: crypt($1, gen_salt('bf', 12))
     char id[37]; unsigned char rnd[16];
     int fd = open("/dev/urandom", O_RDONLY);
@@ -189,73 +260,72 @@ int add_user_db(const char *email, const char *password, char *out_id, size_t id
     snprintf(id, sizeof(id), "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
              rnd[0],rnd[1],rnd[2],rnd[3],rnd[4],rnd[5],(rnd[6]&0x0F)|0x40,rnd[7],(rnd[8]&0x3F)|0x80,rnd[9],rnd[10],rnd[11],rnd[12],rnd[13],rnd[14],rnd[15]);
     const char *params[4]; params[0] = id; params[1] = email; params[2] = password; params[3] = "t";
-    PGresult *res = PQexecParams(pg_conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
-    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1::uuid, $2, crypt($3, gen_salt('bf', 12)), $4)";
-    PGresult *ins = PQexecParams(pg_conn, sql, 4, NULL, params, NULL, NULL, 0);
-    if (!ins) { PQexec(pg_conn, "ROLLBACK"); return -1; }
-    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(pg_conn, "ROLLBACK"); return -1; }
+    PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
+    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1::uuid, $2, crypt($3, gen_salt('bf', 12)), $4) ON CONFLICT (email) DO NOTHING;";
+    PGresult *ins = PQexecParams(conn, sql, 4, NULL, params, NULL, NULL, 0);
+    if (!ins) { PQexec(conn, "ROLLBACK"); return -1; }
+    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(conn, "ROLLBACK"); return -1; }
     PQclear(ins);
     // assign default role ROLE_USER
     char role_buf[256]; strncpy(role_buf, "ROLE_USER", sizeof(role_buf));
     char *rid = ensure_role_and_get_id(role_buf);
-    if (!rid) { PQexec(pg_conn, "ROLLBACK"); return -1; }
+    if (!rid) { PQexec(conn, "ROLLBACK"); return -1; }
     const char *params2[2]; params2[0] = id; params2[1] = rid;
-    PGresult *ins2 = PQexecParams(pg_conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
-    if (!ins2) { free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; }
-    if (PQresultStatus(ins2) != PGRES_COMMAND_OK) { PQclear(ins2); free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; }
+    PGresult *ins2 = PQexecParams(conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
+    if (!ins2) { free(rid); PQexec(conn, "ROLLBACK"); return -1; }
+    if (PQresultStatus(ins2) != PGRES_COMMAND_OK) { PQclear(ins2); free(rid); PQexec(conn, "ROLLBACK"); return -1; }
     PQclear(ins2); free(rid);
-    PGresult *comm = PQexec(pg_conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
-    if (out_id) strncpy(out_id, id, idlen);
+    PGresult *comm = PQexec(conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
+    if (out_id) snprintf(out_id, idlen, "%s", id);
     return 0;
 }
 
 int delete_user_by_id_db(const char *id) {
-    if (!pg_conn) return -1;
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
     const char *params[1] = { id };
-    PGresult *res = PQexecParams(pg_conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
-    PGresult *r1 = PQexecParams(pg_conn, "DELETE FROM users_roles WHERE user_id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
-    if (!r1) { PQexec(pg_conn, "ROLLBACK"); return -1; } PQclear(r1);
-    PGresult *r2 = PQexecParams(pg_conn, "DELETE FROM custom_user WHERE id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
-    if (!r2) { PQexec(pg_conn, "ROLLBACK"); return -1; } PQclear(r2);
-    PGresult *comm = PQexec(pg_conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
+    PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
+    PGresult *r1 = PQexecParams(conn, "DELETE FROM users_roles WHERE user_id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
+    if (!r1) { PQexec(conn, "ROLLBACK"); return -1; } PQclear(r1);
+    PGresult *r2 = PQexecParams(conn, "DELETE FROM custom_user WHERE id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
+    if (!r2) { PQexec(conn, "ROLLBACK"); return -1; } PQclear(r2);
+    PGresult *comm = PQexec(conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
     return 0;
 }
 
 int update_user_role_db(const char *id, const char *role_name) {
-    if (!pg_conn) return -1;
+   PGconn *conn = db_conn();
+   if (!conn) return -1;
     char *rid = ensure_role_and_get_id(role_name); if (!rid) return -1;
     const char *params[1] = { id };
-    PGresult *res = PQexecParams(pg_conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) { free(rid); return -1; } PQclear(res);
-    PGresult *d = PQexecParams(pg_conn, "DELETE FROM users_roles WHERE user_id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
-    if (!d) { free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; } PQclear(d);
+    PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) { free(rid); return -1; } PQclear(res);
+    PGresult *d = PQexecParams(conn, "DELETE FROM users_roles WHERE user_id = $1::uuid", 1, NULL, params, NULL, NULL, 0);
+    if (!d) { free(rid); PQexec(conn, "ROLLBACK"); return -1; } PQclear(d);
     const char *params2[2] = { id, rid };
-    PGresult *ins = PQexecParams(pg_conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
-    if (!ins) { free(rid); PQexec(pg_conn, "ROLLBACK"); return -1; }
-    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { free(rid); PQclear(ins); PQexec(pg_conn, "ROLLBACK"); return -1; }
+    PGresult *ins = PQexecParams(conn, "INSERT INTO users_roles (user_id, role_id) VALUES ($1::uuid, $2::bigint)", 2, NULL, params2, NULL, NULL, 0);
+    if (!ins) { free(rid); PQexec(conn, "ROLLBACK"); return -1; }
+    if (PQresultStatus(ins) != PGRES_COMMAND_OK) { free(rid); PQclear(ins); PQexec(conn, "ROLLBACK"); return -1; }
     PQclear(ins); free(rid);
-    PGresult *comm = PQexec(pg_conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
+    PGresult *comm = PQexec(conn, "COMMIT"); if (!comm) return -1; PQclear(comm);
     return 0;
 }
 
 static int exec_sql(const char *sql)
 {
-    PGresult *res = PQexec(pg_conn, sql);
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
 
+    PGresult *res = PQexec(conn, sql);
     if (!res) {
-        fprintf(stderr, "Migration failed: PQexec returned NULL\n");
+        fprintf(stderr, "PQexec failed: %s\n", PQerrorMessage(conn));
         return -1;
     }
 
     ExecStatusType status = PQresultStatus(res);
 
-    if (status != PGRES_COMMAND_OK &&
-        status != PGRES_TUPLES_OK)
-    {
-        fprintf(stderr,
-                "Migration failed:\n%s\n%s\n",
-                sql,
-                PQerrorMessage(pg_conn));
-
+    if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
+        fprintf(stderr, "SQL failed:\n%s\n%s\n",
+                sql, PQerrorMessage(conn));
         PQclear(res);
         return -1;
     }
@@ -266,7 +336,8 @@ static int exec_sql(const char *sql)
 
 static int migrate_schema(void)
 {
-    if (!pg_conn)
+    PGconn *conn = db_conn();
+    if (!conn)
         return -1;
 
     fprintf(stderr, "Running authentication schema migration...\n");

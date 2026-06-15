@@ -207,27 +207,19 @@ static unsigned char *base64_decode_alloc(const char *in, size_t *outlen) {
     *outlen = idx; return out;
 }
 
-static int secure_random(unsigned char *buf, size_t len) {
-    ssize_t r = 0; size_t got = 0;
-    int fd = open("/dev/urandom", O_RDONLY);
-    if (fd >= 0) {
-        while (got < len) {
-            r = read(fd, buf + got, len - got);
-            if (r <= 0) { close(fd); return -1; }
-            got += r;
-        }
-        close(fd); return 0;
-    }
-    for (size_t i = 0; i < len; ++i) buf[i] = rand() & 0xFF;
-    return 0;
-}
-
 static char *JWT_SECRET = NULL;
 static char *JWT_ISSUER = NULL;
 
 char *jwt_generate(const char *userId, const char *roles_csv) {
-    if (!JWT_SECRET) JWT_SECRET = getenv("JWT_SECRET"); if (!JWT_SECRET) JWT_SECRET = "your-secret";
-    if (!JWT_ISSUER) JWT_ISSUER = getenv("JWT_ISSUER"); if (!JWT_ISSUER) JWT_ISSUER = "auth-service";
+    if (!JWT_SECRET)
+        JWT_SECRET = getenv("JWT_SECRET");
+    if (!JWT_SECRET)
+        JWT_SECRET = "your-secret";
+    if (!JWT_ISSUER)
+        JWT_ISSUER = getenv("JWT_ISSUER");
+
+    if (!JWT_ISSUER)
+        JWT_ISSUER = "auth-service";
     time_t now = time(NULL);
     time_t exp = now + 6*60*60;
     char roles_json[512] = "[";
