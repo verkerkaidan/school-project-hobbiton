@@ -14,6 +14,10 @@ public class RegistrationResponse {
     @JsonProperty("userId")
     private UUID userId;
 
+    private boolean success = true;
+    private String errorCode;
+    private String errorMessage;
+
     public RegistrationResponse() {}
 
     public RegistrationResponse(ProfileResponse profile, String token, UUID userId) {
@@ -44,5 +48,29 @@ public class RegistrationResponse {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

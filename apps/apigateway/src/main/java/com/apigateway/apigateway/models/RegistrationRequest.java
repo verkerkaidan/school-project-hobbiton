@@ -1,6 +1,8 @@
 package com.apigateway.apigateway.models;
 
-public class RegistrationRequest {
+import java.io.Serializable;
+
+public class RegistrationRequest implements Serializable {
 
     // Auth Service fields
     private String email;
@@ -65,7 +67,11 @@ public class RegistrationRequest {
     }
 
     public CreateProfileRequest toProfileRequest() {
-        // CreateProfileRequest(username, name, biography)
-        return new CreateProfileRequest(username, name, bio);
+        if (profilePictureUrl == null){
+            return new CreateProfileRequest(username, name, bio);
+        } else {
+            return new CreateProfileRequest(username, name, bio, profilePictureUrl);
+        }
+
     }
 }

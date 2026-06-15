@@ -33,17 +33,4 @@ build/
 .project
 .settings/
 bin/
-*.iws
-*.iml
-*.ipr
-.vscode/
-*.swp
-*.swo
 *~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Build
-*.log

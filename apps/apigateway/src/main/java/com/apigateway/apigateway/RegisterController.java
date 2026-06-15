@@ -1,14 +1,12 @@
 package com.apigateway.apigateway;
 
-import com.apigateway.apigateway.clients.AuthClient;
-import com.apigateway.apigateway.clients.ProfileClient;
-import com.apigateway.apigateway.models.AuthenticationResponse;
-import com.apigateway.apigateway.models.ProfileResponse;
 import com.apigateway.apigateway.models.RegistrationRequest;
 import com.apigateway.apigateway.models.RegistrationResponse;
+import com.apigateway.apigateway.registration.RegistrationService;
+
+import java.util.Map;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,78 +14,46 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/register")
 public class RegisterController {
 
-    private static final Logger logger = LoggerFactory.getLogger(
-        RegisterController.class
-    );
-
-    private final ProfileClient profileClient;
-    private final AuthClient authClient;
+    private final RegistrationService service;
 
     public RegisterController(
-        ProfileClient profileClient,
-        AuthClient authClient
-    ) {
-        this.profileClient = profileClient;
-        this.authClient = authClient;
-    }
+            RegistrationService service) {
 
+        this.service = service;
+    }
     @PostMapping
     public ResponseEntity<RegistrationResponse> register(
-        @RequestBody RegistrationRequest request
-    ) {
-        AuthenticationResponse auth = null;
+            @RequestBody RegistrationRequest request) {
 
-        try {
-            auth = createAuthentication(request);
+        RegistrationResponse response =
+                service.submitRegistration(request);
 
-            // Then create profile in profile-service using the returned access token
-            ProfileResponse profile = createProfileInProfileService(
-                request,
-                auth.getAccessToken()
-            );
-
-            // Build a response containing the created profile and auth token
-            RegistrationResponse response = new RegistrationResponse();
-            response.setProfile(profile);
-            response.setToken(auth.getAccessToken());
-            response.setUserId(auth.getUserId());
-
+        if (response.isSuccess()) {
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            // Rollback: if creating the profile failed after creating auth, delete the auth user
-            if (auth != null) {
-                deleteAuthentication(auth.getUserId());
-            }
-
-            throw e;
         }
-    }
-
-    private AuthenticationResponse createAuthentication(
-        RegistrationRequest request
-    ) {
-        return authClient.createAuthentication(
-            request.toAuthenticationRequest()
-        );
-    }
-
-    private ProfileResponse createProfileInProfileService(
-        RegistrationRequest request,
-        String accessToken
-    ) {
-        return profileClient.createProfile(
-            request.toProfileRequest(),
-            "Bearer " + accessToken
-        );
-    }
-
-    private void deleteAuthentication(UUID userId) {
-        try {
-            authClient.deleteAuthentication(userId);
-
-            logger.warn("[rollback] Deleted auth user {}", userId);
-        } catch (Exception e) {
-            logger.error("[rollback] Failed to delete auth user {}", userId, e);
-        }
+        return switch (response.getErrorCode()) {
+            case "BAD_REQUEST",
+                 "CONFLICT" ->
+                    ResponseEntity.badRequest()
+                            .body(response);
+            case "UNAUTHORIZED" ->
+                    ResponseEntity.status(401)
+                            .body(response);
+            case "FORBIDDEN" ->
+                    ResponseEntity.status(403)
+                            .body(response);
+            case "NOT_FOUND" ->
+                    ResponseEntity.status(404)
+                            .body(response);
+            case "SERVICE_UNAVAILABLE" ->
+                    ResponseEntity.status(503)
+                            .body(response);
+            case "GATEWAY_TIMEOUT" ->
+                    ResponseEntity.status(504)
+                            .body(response);
+            default ->
+                    ResponseEntity.status(500)
+                            .body(response);
+        };
     }
 }
