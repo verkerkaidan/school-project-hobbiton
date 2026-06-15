@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FeedCard } from "./FeedCard";
-import {Post} from "@/types/posts";
+import { Post } from "@/types/posts";
+import Masonry from "react-masonry-css";
+import { breakpointColumns } from "@/constants/breakpointColumns";
 
 interface UserPostsProps {
   userId: string;
@@ -49,17 +51,14 @@ export const UserPosts = ({ userId, getPosts }: UserPostsProps) => {
   }
 
   return (
-    <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+    <Masonry
+      breakpointCols={breakpointColumns}
+      className="flex gap-4"
+      columnClassName="flex flex-col"
+    >
       {posts.map((post, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: index * 0.05 }}
-        >
-          <FeedCard key={index} item={post} index={index} />
-        </motion.div>
+        <FeedCard key={index} item={post} index={index} />
       ))}
-    </div>
+    </Masonry>
   );
 };

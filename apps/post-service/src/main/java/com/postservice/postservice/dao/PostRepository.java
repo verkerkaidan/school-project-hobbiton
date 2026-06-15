@@ -13,4 +13,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     void deleteByUserId(UUID userId);
 
     List<? extends Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    Set<Post> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }
