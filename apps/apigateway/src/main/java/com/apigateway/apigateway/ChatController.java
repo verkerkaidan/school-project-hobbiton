@@ -26,7 +26,8 @@ public class ChatController {
     private String bearerToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         System.out.println("Forwarding Authorization: " + token);
-        return token;    }
+        return token;
+    }
 
     @GetMapping("/allowed-users/{chatId}")
     public Mono<ResponseEntity<List<String>>> getAllowedUsers(
@@ -45,6 +46,7 @@ public class ChatController {
             @PathVariable String userId,
             HttpServletRequest request
     ) {
+        System.out.println("Getting chats for user: " + userId);
         return http.get()
                 .uri("/get-chats/{userId}", userId)
                 .header("Authorization", bearerToken(request))
