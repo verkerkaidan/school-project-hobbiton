@@ -43,6 +43,9 @@ impl ServiceFactory {
 
         ServiceFactory { strategies }
     }
+    pub fn new_with(strategies: HashMap<SearchType, Arc<dyn SearchStrategy>>) -> Self {
+        Self { strategies }
+    }
 
     /// Resolve the strategy for the given `SearchType`.
     ///
@@ -53,5 +56,49 @@ impl ServiceFactory {
             .get(&search_type)
             .cloned()
             .ok_or_else(|| AppError::UnknownSearchType(search_type.to_string()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn returns_book_strategy() {
+        let factory = ServiceFactory::new();
+
+        let strategy =
+            factory.get(SearchType::Book).unwrap();
+
+        assert_eq!(
+            strategy.search_type(),
+            SearchType::Book
+        );
+    }
+
+    #[test]
+    fn returns_movie_strategy() {
+        let factory = ServiceFactory::new();
+
+        let strategy =
+            factory.get(SearchType::Movie).unwrap();
+
+        assert_eq!(
+            strategy.search_type(),
+            SearchType::Movie
+        );
+    }
+
+    #[test]
+    fn returns_exercise_strategy() {
+        let factory = ServiceFactory::new();
+
+        let strategy =
+            factory.get(SearchType::Exercise).unwrap();
+
+        assert_eq!(
+            strategy.search_type(),
+            SearchType::Exercise
+        );
     }
 }

@@ -3,6 +3,13 @@ name = "library_service"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "library_service"
+path = "src/main.rs"
+
+[lib]
+name = "library_service"
+path = "src/lib.rs"
 [dependencies]
 # Web framework (NOT Rocket — using Axum)
 axum = { version = "0.8.9", features = ["json"] }
@@ -37,4 +44,4 @@ dotenvy = "0.15"
 # Redis cache
 redis = { version = "1.2.2", features = ["tokio-comp", "connection-manager"] }
 
-bincode = "1.3"
+axum-test = "20.1.0"

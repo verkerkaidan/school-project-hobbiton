@@ -1,12 +1,4 @@
-mod adapters;
-mod cache;
-mod dto;
-mod error;
-mod factory;
-mod models;
-mod routes;
-mod service;
-mod strategy;
+use library_service::AppState;
 
 use std::sync::Arc;
 
@@ -17,23 +9,14 @@ use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use cache::CacheService;
-use factory::ServiceFactory;
-use routes::library_routes;
-
-/// Application-wide shared state injected into every handler via Axum's State extractor.
-#[derive(Clone)]
-pub struct AppState {
-    pub factory: Arc<ServiceFactory>,
-    pub cache: Arc<CacheService>,
-}
+use library_service::cache::CacheService;
+use library_service::factory::ServiceFactory;
+use library_service::routes::library_routes;
 
 #[tokio::main]
 async fn main() {
-    // Load .env file if present
     dotenvy::dotenv().ok();
 
-    // Initialize structured logging
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -56,10 +39,10 @@ async fn main() {
             }
             Err(e) => {
                 tracing::warn!(
-                "Redis not ready yet ({}), retrying in 2s... error: {}",
-                redis_url,
-                e
-            );
+                    "Redis not ready yet ({}), retrying in 2s... error: {}",
+                    redis_url,
+                    e
+                );
                 sleep(Duration::from_secs(2)).await;
             }
         }
@@ -67,12 +50,12 @@ async fn main() {
 
     // ── Service factory ──────────────────────────────────────────────────────
     let factory = Arc::new(ServiceFactory::new());
-
     let state = AppState { factory, cache };
 
     // ── CORS ─────────────────────────────────────────────────────────────────
     let allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
         .unwrap_or_else(|_| "http://localhost:23738".to_string());
+
     let origin_values: Vec<HeaderValue> = allowed_origins
         .split(',')
         .filter_map(|origin| {
@@ -80,7 +63,6 @@ async fn main() {
             if trimmed.is_empty() {
                 return None;
             }
-
             match HeaderValue::from_str(trimmed) {
                 Ok(value) => Some(value),
                 Err(error) => {
@@ -110,7 +92,6 @@ async fn main() {
 
     let addr = "0.0.0.0:28877";
     info!("Library microservice listening on http://{}", addr);
-
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }

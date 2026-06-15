@@ -92,3 +92,109 @@ fn json_str_array(json: &Value) -> Vec<String> {
     })
         .unwrap_or_default()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn adapt_search_doc_maps_all_fields() {
+        let raw = json!({
+            "title": "Clean Code",
+            "author_name": ["Robert C. Martin"],
+            "publisher": ["Prentice Hall"],
+            "isbn": ["9780132350884"],
+            "language": ["eng"],
+            "first_publish_year": 2008,
+            "number_of_pages_median": 464,
+            "cover_i": 12345
+        });
+
+        let book = adapt_search_doc(&raw);
+
+        assert_eq!(book.id, Some("9780132350884".to_string()));
+        assert_eq!(book.title, Some("Clean Code".to_string()));
+        assert_eq!(book.authors, vec!["Robert C. Martin"]);
+        assert_eq!(book.publishers, vec!["Prentice Hall"]);
+        assert_eq!(book.languages, vec!["eng"]);
+        assert_eq!(book.page_count, Some(464));
+        assert_eq!(book.cover_id, Some("12345".to_string()));
+
+        assert_eq!(
+            book.thumbnail_url,
+            Some("https://covers.openlibrary.org/b/id/12345-M.jpg".to_string())
+        );
+    }
+
+    #[test]
+    fn adapt_search_doc_falls_back_to_key_when_no_isbn() {
+        let raw = json!({
+            "key": "/works/OL123W",
+            "title": "Test Book"
+        });
+
+        let book = adapt_search_doc(&raw);
+
+        assert_eq!(book.id, Some("/works/OL123W".to_string()));
+    }
+
+    #[test]
+    fn adapt_search_doc_handles_missing_fields() {
+        let raw = json!({});
+
+        let book = adapt_search_doc(&raw);
+
+        assert_eq!(book.id, None);
+        assert_eq!(book.title, None);
+        assert!(book.authors.is_empty());
+        assert!(book.publishers.is_empty());
+        assert!(book.languages.is_empty());
+        assert_eq!(book.page_count, None);
+    }
+
+    #[test]
+    fn adapt_isbn_doc_maps_all_fields() {
+        let raw = json!({
+            "title": "Clean Code",
+            "publish_date": "2008",
+            "number_of_pages": 464,
+            "cover": {
+                "medium": "https://example.com/cover.jpg"
+            },
+            "authors": [
+                { "name": "Robert C. Martin" }
+            ],
+            "publishers": [
+                { "name": "Prentice Hall" }
+            ],
+            "languages": [
+                { "name": "English" }
+            ]
+        });
+
+        let book = adapt_isbn_doc("9780132350884", &raw);
+
+        assert_eq!(book.id, Some("9780132350884".to_string()));
+        assert_eq!(book.title, Some("Clean Code".to_string()));
+        assert_eq!(book.page_count, Some(464));
+        assert_eq!(
+            book.thumbnail_url,
+            Some("https://example.com/cover.jpg".to_string())
+        );
+        assert_eq!(book.authors, vec!["Robert C. Martin"]);
+        assert_eq!(book.publishers, vec!["Prentice Hall"]);
+        assert_eq!(book.languages, vec!["English"]);
+    }
+
+    #[test]
+    fn json_str_array_returns_empty_for_non_array() {
+        let value = json!({
+            "foo": "bar"
+        });
+
+        let result = json_str_array(&value);
+
+        assert!(result.is_empty());
+    }
+}

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.35.5] - 2026-06-15
+
+### Security
+- **security**: added unit and integration tests to the library-service
+
 ### Fixed
 - **fix**: added logging to middleware
 - **fix**: Added logging to chat-service get chats

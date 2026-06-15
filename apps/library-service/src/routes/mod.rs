@@ -1,3 +1,9 @@
+// src/routes/mod.rs
+//
+// `AppState` is defined in `lib.rs` (the crate root), so `crate::AppState`
+// resolves correctly whether this code is built as the binary (via main.rs)
+// or as the library target (via lib.rs) — both share the same crate root.
+
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -17,7 +23,7 @@ use crate::{
     AppState,
 };
 
-/// Register all library routes under `/api/v1/library`.
+/// Register all library routes under `/api/library`.
 pub fn library_routes() -> Router<AppState> {
     Router::new()
         .route("/search", post(search_post))
