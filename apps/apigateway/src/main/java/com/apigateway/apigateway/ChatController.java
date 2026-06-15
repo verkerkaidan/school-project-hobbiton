@@ -49,6 +49,11 @@ public class ChatController {
                 .uri("/get-chats/{userId}", userId)
                 .header("Authorization", bearerToken(request))
                 .retrieve()
+                .onStatus(status -> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .doOnNext(body -> System.out.println("Error from chat service: " + body))
+                                .flatMap(body -> Mono.error(new RuntimeException("Chat service error: " + body)))
+                )
                 .toEntity(String.class);
     }
 
