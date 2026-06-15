@@ -13,7 +13,7 @@ public static class ChatEndpoints
             var chatId = Guid.NewGuid();
             db.createChat(chatId, chatModel.title);
             db.AllowUsers(chatId.ToString(), chatModel.userIds);
-            return Results.Ok(new { chatId });
+            return Results.Ok(chatId );
         });
 
         app.MapGet("/get-chats/{userId}", (string userId) =>

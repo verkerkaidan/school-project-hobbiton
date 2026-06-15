@@ -51,8 +51,7 @@ export default function NewChatModal({
             ],
             "title": title
         });
-
-        router.push(`/chats/${res.chatId}`);
+        router.push(`/chats/${res}`);
     }
 
     function toggle(user: string) {

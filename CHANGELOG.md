@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.37.0] - 2026-06-15
+
+### Fixed
+- **fix**: Users weren't able to create chats easily. Rerouting did not work. On refresh user has 1-infinite new chats with same name & users
+
 ### Changed
 - **docs**: docs for Profile Connection, Bug Reports & Notifications
 
@@ -13,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **feat**: Made feed page render left to right, then go to 2nd row
+
+## [1.35.7] - 2026-06-15
 
 ## [1.35.6] - 2026-06-15
 
