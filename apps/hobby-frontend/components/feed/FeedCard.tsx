@@ -39,7 +39,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="break-inside-avoid group mb-6 rounded-xl overflow-hidden ring-1 ring-brand/30 shadow-[0_0_20px_rgba(236,72,153,0.12)]"
+      className="h-fit break-inside-avoid group mb-6 rounded-xl overflow-hidden ring-1 ring-brand/30 shadow-xl"
       onClick={() => router.push(`/posts/${item.id}`)}
     >
       {/* Image Container */}

@@ -39,7 +39,7 @@ public class PostDAO {
     }
 
     public Set<Post> getPostByUserId(UUID userId) {
-        return this.postRepository.findByUserId(userId);
+        return this.postRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     public void deletePostById(UUID postId) {
