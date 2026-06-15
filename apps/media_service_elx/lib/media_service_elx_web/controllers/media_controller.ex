@@ -109,15 +109,6 @@ Home of the first functions that are called when a request is coming in from api
   end
 
   @doc """
-  Retrieves complete MediaFile from an instance_id for admin inspection
-  @params:
-  @returns:
-  """
-  def get_complete_media_file(_conn, _params) do
-
-  end
-
-  @doc """
   Deletes and bans a MediaFile
   @params: connection, uuid
   @returns: {id: uuid}

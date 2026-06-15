@@ -13,7 +13,6 @@ defmodule MediaServiceElxWeb.Router do
     delete "/file/:instance_id", MediaController, :delete_instance
     put "/", MediaController, :update_content_flag
     get "/", MediaController, :get_unassigned_media_files
-    get "/admin/:instance_id", MediaController, :get_complete_media_file
     delete "/admin", MediaController, :delete_media_file
   end
 
