@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @RestController
-@Controller
 public class ChatController {
 
     private final WebClient http;
