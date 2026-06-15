@@ -5,6 +5,7 @@ public class CreateProfileRequest {
     private String username;
     private String name;
     private String biography;
+    private String profilePicture;
 
     public CreateProfileRequest() {
     }
@@ -13,6 +14,13 @@ public class CreateProfileRequest {
         this.username = username;
         this.name = name;
         this.biography = biography;
+    }
+
+    public CreateProfileRequest(String username, String name, String biography, String profilePicture) {
+        this.username = username;
+        this.name = name;
+        this.biography = biography;
+        this.profilePicture = profilePicture;
     }
 
     public String getUsername() {
