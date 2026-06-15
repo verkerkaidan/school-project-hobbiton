@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **docs**: Added complete documentation for media-service-elx, recognition-service and interaction-service
+
 ## [1.35.4] - 2026-06-12
 
 ### Fixed

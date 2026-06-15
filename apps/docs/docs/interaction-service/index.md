@@ -4,7 +4,11 @@ sidebar_position: 1
 
 # Interaction Service
 
-The **Interaction Service** manages user interactions such as likes, comments, and reactions on posts.
+The **Interaction Service** is a Java Springboot service
+
+## Overview
+
+The service manages user interactions such as likes, comments, and reactions on posts.
 
 ## Port
 
@@ -16,15 +20,7 @@ The **Interaction Service** manages user interactions such as likes, comments, a
 
 - Record and retrieve likes / reactions
 - Manage comments on posts
-- Expose interaction counts to other services
-
-## Environment Variables
-
-| Variable                     | Description                       |
-| ---------------------------- | --------------------------------- |
-| `SPRING_DATASOURCE_URL`      | PostgreSQL JDBC connection string |
-| `SPRING_DATASOURCE_USERNAME` | DB username                       |
-| `SPRING_DATASOURCE_PASSWORD` | DB password                       |
+- Expose interaction counts to the middleware
 
 ## Technology Stack
 

@@ -4,7 +4,11 @@ sidebar_position: 1
 
 # Recognition Service
 
-The **Recognition Service** performs image analysis and auto-tagging of uploaded media.
+The **Recognition Service** is a Java Springboot service.
+
+## Overview
+
+The service performs image analysis and auto-tagging of uploaded media. Using an ai-model that is downloaded at docker startup.
 
 ## Port
 
@@ -14,9 +18,9 @@ The **Recognition Service** performs image analysis and auto-tagging of uploaded
 
 ## Responsibilities
 
-- Analyse images to detect objects, scenes, and faces
-- Return structured tags and confidence scores
-- Integrate with the Media Service pipeline
+- Analyze images to detect cars
+- Return a ContentFlag to assign to the image
+- Integrated with Media Service pipelines
 
 ## Technology Stack
 
