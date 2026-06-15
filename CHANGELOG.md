@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- **fix**: added logging to middleware
 - **fix**: Added logging to chat-service get chats
 - **fix**: Added temporary sanity check to chat-service
 
