@@ -46,7 +46,6 @@ public class ChatController {
             @PathVariable String userId,
             HttpServletRequest request
     ) {
-        System.out.println("Getting chats for user: " + userId);
         return http.get()
                 .uri("/get-chats/{userId}", userId)
                 .header("Authorization", bearerToken(request))
@@ -56,7 +55,8 @@ public class ChatController {
                                 .doOnNext(body -> System.out.println("Error from chat service: " + body))
                                 .flatMap(body -> Mono.error(new RuntimeException("Chat service error: " + body)))
                 )
-                .toEntity(String.class);
+                .toEntity(String.class)
+                .doOnNext(response -> System.out.println("Chat service response: " + response.getBody()));
     }
 
     @PostMapping("/create-chat")
