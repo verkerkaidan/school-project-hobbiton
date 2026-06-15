@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **fix**: Added temporary sanity check to chat-service
+
 ### Changed
 - **docs**: Added complete documentation for media-service-elx, recognition-service and interaction-service
 

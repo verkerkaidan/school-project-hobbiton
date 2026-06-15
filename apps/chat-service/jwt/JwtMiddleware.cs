@@ -25,6 +25,7 @@ public class JwtMiddleware
             await context.Response.WriteAsync("Unauthorized");
             return;
         }
+        Console.WriteLine($"[JWT] Auth header received: '{token}'");
 
         try
         {
