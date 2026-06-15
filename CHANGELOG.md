@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.35.6] - 2026-06-15
+
 ### Fixed
+- **fix**: Removed @controller from chatcontroller
 - **fix**: added logging on response from get
 
 ## [1.35.5] - 2026-06-15
