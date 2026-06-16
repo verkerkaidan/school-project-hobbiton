@@ -201,12 +201,12 @@ services:
     environment:
       OMDB_API_KEY: ${OMDB_API_KEY}
       OMDB_API_URL: ${OMDB_API_URL}
-      # Ensure containers use the internal redis service when running via docker-compose
       REDIS_URL: "redis://redis:6379"
+      DATABASE_URL: postgresql://${SPRING_DATASOURCE_USERNAME_LIBRARY}:${SPRING_DATASOURCE_PASSWORD_LIBRARY}@database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
       RUST_LOG: debug
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 0.5
-    mem_limit: 128m
+    mem_limit: 256m          # bump from 128m — sqlx + migrations need headroom
     networks:
       - microservices-network
     depends_on:

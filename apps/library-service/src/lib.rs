@@ -15,10 +15,12 @@ pub mod models;
 pub mod routes;
 pub mod service;
 pub mod strategy;
+pub mod db;
 
 use std::sync::Arc;
 
 use crate::cache::CacheService;
+use crate::db::DbService;
 use crate::factory::ServiceFactory;
 
 /// Shared state injected into every Axum handler via `State<AppState>`.
@@ -29,4 +31,5 @@ use crate::factory::ServiceFactory;
 pub struct AppState {
     pub factory: Arc<ServiceFactory>,
     pub cache: Arc<CacheService>,
+    pub db: Arc<DbService>,
 }

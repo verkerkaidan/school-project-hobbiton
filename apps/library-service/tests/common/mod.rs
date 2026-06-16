@@ -9,6 +9,7 @@ use tower_http::cors::{Any, CorsLayer};
 use library_service::{
     AppState,
     cache::CacheService,
+    db::DbService,
     dto::request::SearchType,
     dto::response::{BookResponse, ExerciseResponse, MovieResponse, SearchResult},
     error::AppError,
@@ -25,15 +26,9 @@ pub struct MockBookStrategy;
 
 #[async_trait]
 impl SearchStrategy for MockBookStrategy {
-    fn search_type(&self) -> SearchType {
-        SearchType::Book
-    }
+    fn search_type(&self) -> SearchType { SearchType::Book }
 
-    async fn search(
-        &self,
-        _query: &str,
-        max_results: usize,
-    ) -> Result<Vec<SearchResult>, AppError> {
+    async fn search(&self, _query: &str, max_results: usize) -> Result<Vec<SearchResult>, AppError> {
         let results = (0..max_results.min(1))
             .map(|_| SearchResult::Book(BookResponse {
                 id: Some("mock-123".to_string()),
@@ -46,9 +41,7 @@ impl SearchStrategy for MockBookStrategy {
     }
 
     async fn find_by_id(&self, id: &str) -> Result<Option<SearchResult>, AppError> {
-        if id.starts_with("000") {
-            return Ok(None);
-        }
+        if id.starts_with("000") { return Ok(None); }
         Ok(Some(SearchResult::Book(BookResponse {
             id: Some(id.to_string()),
             title: Some("Mock Rust Book".to_string()),
@@ -61,15 +54,9 @@ pub struct MockMovieStrategy;
 
 #[async_trait]
 impl SearchStrategy for MockMovieStrategy {
-    fn search_type(&self) -> SearchType {
-        SearchType::Movie
-    }
+    fn search_type(&self) -> SearchType { SearchType::Movie }
 
-    async fn search(
-        &self,
-        _query: &str,
-        max_results: usize,
-    ) -> Result<Vec<SearchResult>, AppError> {
+    async fn search(&self, _query: &str, max_results: usize) -> Result<Vec<SearchResult>, AppError> {
         let results = (0..max_results.min(1))
             .map(|_| SearchResult::Movie(MovieResponse {
                 id: Some("tt0000001".to_string()),
@@ -82,9 +69,7 @@ impl SearchStrategy for MockMovieStrategy {
     }
 
     async fn find_by_id(&self, id: &str) -> Result<Option<SearchResult>, AppError> {
-        if id.starts_with("000") {
-            return Ok(None);
-        }
+        if id.starts_with("000") { return Ok(None); }
         Ok(Some(SearchResult::Movie(MovieResponse {
             id: Some(id.to_string()),
             title: Some("Mock Movie".to_string()),
@@ -97,15 +82,9 @@ pub struct MockExerciseStrategy;
 
 #[async_trait]
 impl SearchStrategy for MockExerciseStrategy {
-    fn search_type(&self) -> SearchType {
-        SearchType::Exercise
-    }
+    fn search_type(&self) -> SearchType { SearchType::Exercise }
 
-    async fn search(
-        &self,
-        _query: &str,
-        max_results: usize,
-    ) -> Result<Vec<SearchResult>, AppError> {
+    async fn search(&self, _query: &str, max_results: usize) -> Result<Vec<SearchResult>, AppError> {
         let results = (0..max_results.min(1))
             .map(|_| SearchResult::Exercise(ExerciseResponse {
                 exercise_id: Some("mock-ex-1".to_string()),
@@ -120,9 +99,7 @@ impl SearchStrategy for MockExerciseStrategy {
     }
 
     async fn find_by_id(&self, id: &str) -> Result<Option<SearchResult>, AppError> {
-        if id.starts_with("000") {
-            return Ok(None);
-        }
+        if id.starts_with("000") { return Ok(None); }
         Ok(Some(SearchResult::Exercise(ExerciseResponse {
             exercise_id: Some(id.to_string()),
             name: Some("Mock Squat".to_string()),
@@ -140,11 +117,7 @@ impl SearchStrategy for MockExerciseStrategy {
 
 pub fn build_app(state: AppState) -> Router {
     let cors = CorsLayer::new()
-        .allow_origin(
-            "http://localhost:23738"
-                .parse::<HeaderValue>()
-                .unwrap(),
-        )
+        .allow_origin("http://localhost:23738".parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST])
         .allow_headers(Any);
 
@@ -152,6 +125,21 @@ pub fn build_app(state: AppState) -> Router {
         .nest("/api/library", library_routes())
         .layer(cors)
         .with_state(state)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DB HELPER — connects if DATABASE_URL is set, otherwise skips
+// ─────────────────────────────────────────────────────────────────────────────
+
+pub async fn try_build_db() -> Arc<DbService> {
+    match std::env::var("DATABASE_URL") {
+        Ok(url) => Arc::new(
+            DbService::new(&url)
+                .await
+                .expect("DATABASE_URL set but could not connect to Postgres"),
+        ),
+        Err(_) => Arc::new(DbService::disabled()),
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,7 +162,8 @@ pub async fn try_connect_redis() -> Option<Arc<CacheService>> {
 pub async fn state_with_mock_cache() -> AppState {
     let cache = build_cache().await;
     let factory = build_mock_factory();
-    AppState { factory, cache }
+    let db = try_build_db().await;
+    AppState { factory, cache, db }
 }
 
 pub async fn state_with_live_cache() -> AppState {
@@ -185,9 +174,11 @@ pub async fn state_with_live_cache() -> AppState {
             .await
             .expect("Redis must be available for this test"),
     );
+    let db = try_build_db().await;
     AppState {
         factory: build_mock_factory(),
         cache,
+        db,
     }
 }
 
@@ -203,16 +194,9 @@ fn build_mock_factory() -> Arc<ServiceFactory> {
     Arc::new(ServiceFactory::new_with(strategies))
 }
 
-/// Build a cache for tests:
-/// - If Redis is reachable (local dev), use it.
-/// - If Redis is unreachable (Docker build, CI), use the disabled no-op
-///   cache so HTTP handler tests still run without any external dependency.
-///   The service layer treats all cache misses as non-fatal, so tests pass
-///   correctly — they just always take the cache-miss path.
 async fn build_cache() -> Arc<CacheService> {
     let url = std::env::var("REDIS_URL")
         .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
-
     match CacheService::new(&url).await {
         Ok(c) => Arc::new(c),
         Err(_) => Arc::new(CacheService::disabled()),
