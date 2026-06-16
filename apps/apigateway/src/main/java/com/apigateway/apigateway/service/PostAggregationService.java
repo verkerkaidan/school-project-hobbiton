@@ -6,19 +6,14 @@ import com.apigateway.apigateway.modelDtos.posts.PostDTO;
 import com.apigateway.apigateway.enums.HobbyType;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.Interaction;
-import com.apigateway.apigateway.models.MediaInstance;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.Post;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
@@ -41,13 +36,14 @@ public class PostAggregationService {
     private final ProfileConnectionClient profileConnectionClient;
     private final NotificationClient notificationClient;
     private final RecognitionService recognitionService;
+    private final MediaService mediaService;
 
     private final ObjectMapper objectMapper;
 
     public PostAggregationService(PostClient postClient, MediaClient mediaClient, WebClient webClient,
                                   ProfileClient profileClient, ProfileConnectionClient profileConnectionClient,
                                   NotificationClient notificationClient, InteractionClient interactionClient,
-                                  RecognitionService recognitionService, ObjectMapper objectMapper) {
+                                  RecognitionService recognitionService, ObjectMapper objectMapper, MediaService mediaService) {
         this.postClient = postClient;
         this.mediaClient = mediaClient;
         this.webClient = webClient;
@@ -57,6 +53,7 @@ public class PostAggregationService {
         this.interactionClient = interactionClient;
         this.recognitionService = recognitionService;
         this.objectMapper = objectMapper;
+        this.mediaService = mediaService;
     }
 
     public List<Post> getPostsByHobbyType(HobbyType hobbyType) {
@@ -74,16 +71,26 @@ public class PostAggregationService {
      */
     public List<MediaDTO> getMedia(List<MediaInstance> instances) {
         List<UUID> instanceIds = instances.stream().map((MediaInstance instance) -> instance.instanceId).toList();
-        List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
-        System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
+        try {
+            List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
+            System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
 
-        return mediaDTOList;
+            return mediaDTOList;
+        } catch (RuntimeException e) {
+            logger.error("[POSTAGGREGATIONSERVICE getMedia] Could not send request to mediaServiceElx --- \n{}", e.getMessage());
+            return new ArrayList<MediaDTO>();
+        }
     }
 
     public Interaction getInteraction(UUID referenceId) {
-        Interaction interaction = interactionClient.getInteraction(referenceId);
-        System.out.println("Fetched interaction for referenceId: " + referenceId);
-        return interaction;
+        try {
+            Interaction interaction = interactionClient.getInteraction(referenceId);
+            System.out.println("Fetched interaction for referenceId: " + referenceId);
+            return interaction;
+        } catch (RuntimeException e) {
+            logger.error("[POSTAGGREGATIONSERVICE getInteraction] Could not send request to interactionService --- \n{}", e.getMessage());
+            return new Interaction(0, new ArrayList<Interaction.Comment>());
+        }
     }
 
     /**
@@ -113,7 +120,7 @@ public class PostAggregationService {
         Set<UUID> mediaInstanceSet = new HashSet<>();
 
         if (dto.mediaInstanceDTOSet != null && !dto.mediaInstanceDTOSet.isEmpty()) {
-            mediaInstanceSet = uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
+            mediaInstanceSet = mediaService.uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
             recognitionService.startRecognitionPipeline(dto.mediaInstanceDTOSet);
         } else {
             dto.mediaInstanceDTOSet = new ArrayList<>();
@@ -176,42 +183,6 @@ public class PostAggregationService {
         }
 
         return savedPost;
-    }
-
-    /**
-     * Handles the uploading of media and returns the list of instances Id's
-     */
-    private Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
-        Set<UUID> mediaInstanceSet = new HashSet<>();
-
-        MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
-
-        files.forEach((file) -> {
-            HttpHeaders fileHeaders = new HttpHeaders();
-            fileHeaders.setContentType(MediaType.parseMediaType(Objects.requireNonNull(file.getContentType())));
-            multipartBody.add("files[]", new HttpEntity<>(file.getResource(), fileHeaders));
-        });
-
-        multipartBody.add("owner_id", new HttpEntity<>(owner_id.toString()));
-
-        MediaUploadResponse response = webClient.post()
-                .uri(mediaServiceUrl + "/media/")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .bodyValue(multipartBody)
-                .retrieve()
-                .bodyToMono(MediaUploadResponse.class)
-                .block();
-
-        if (response != null) {
-            response.results.stream()
-                    .filter(r -> "ok".equals(r.status))
-                    .map(r -> r.id)
-                    .forEach(mediaInstanceSet::add);
-        }
-        for (UUID id : mediaInstanceSet) {
-            System.out.println("Retrieved instanceId: " + id);
-        }
-        return mediaInstanceSet;
     }
 
     /**

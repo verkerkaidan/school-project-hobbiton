@@ -6,6 +6,7 @@ import com.apigateway.apigateway.modelDtos.media.ContentFlagUpdateDTO;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
 import com.apigateway.apigateway.models.*;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -94,19 +95,28 @@ public class ProfileAggregationService {
                 ))
                 .collect(Collectors.toList());
         if (!mediaPointers.isEmpty()) {
-            List<MediaDTO> media = mediaService.getMedia(mediaPointers);
-            Map<String, MediaDTO> mediaByRelevantId = media.stream()
-                    .collect(Collectors.toMap(
-                            m -> m.relevantId.toString(),
-                            m -> m
-                    ));
+            try {
+                List<MediaDTO> media = mediaService.getMedia(mediaPointers);
+                Map<String, MediaDTO> mediaByRelevantId = media.stream()
+                        .collect(Collectors.toMap(
+                                m -> m.relevantId.toString(),
+                                m -> m
+                        ));
 
-            // Enrich each profile with its matching MediaDTO
-            response.forEach(profile -> {
-                if (profile.profilePictureUrl != null) {
-                    profile.profilePicture = mediaByRelevantId.get(profile.profilePictureUrl);
-                }
-            });
+                // Enrich each profile with its matching MediaDTO
+                response.forEach(profile -> {
+                    if (profile.profilePictureUrl != null) {
+                        profile.profilePicture = mediaByRelevantId.get(profile.profilePictureUrl);
+                    }
+                });
+            } catch (RuntimeException e) {
+                logger.error("[PROFILEAGGREGATIONSERVICE getAllProfiles] Could not send request to mediaServiceElx --- \n, {}", e.getMessage());
+                response.forEach(profile -> {
+                    if (profile.profilePictureUrl != null) {
+                        profile.profilePicture = null;
+                    }
+                });
+            }
         }
         return response;
     }
@@ -294,7 +304,7 @@ public class ProfileAggregationService {
         }
     }
 
-    public String updateProfilePicture(UUID userId, List<MultipartFile> files, String authorization, UUID oldId) {
+    public void updateProfilePicture(UUID userId, List<MultipartFile> files, String authorization, UUID oldId) {
         List<ContentFlagUpdateDTO> dtos = new ArrayList<>();
         files.forEach((MultipartFile file) -> {
             try {
@@ -310,49 +320,67 @@ public class ProfileAggregationService {
                 System.out.println("Error occurred while hashing a file: " + e.getMessage());
             }
         });
-        List<ContentFlagUpdateDTO> results = recognitionClient.assignContentFlags(dtos);
-
-        if (results.getFirst().contentFlag == ContentFlag.SAFE) {
-            return updateProfilePicturePipeline(files, userId, authorization, oldId);
+        List<ContentFlagUpdateDTO> results = new ArrayList<ContentFlagUpdateDTO>();
+        try {
+            results = recognitionClient.assignContentFlags(dtos);
+        } catch (RuntimeException e) {
+            results.add(new ContentFlagUpdateDTO(ContentFlag.UNASSIGNED));
         }
-        else if (results.getFirst().contentFlag == ContentFlag.RISK) {
-            throw new RuntimeException("Couldn't update profile picture as the AI-model flagged it as against TOS");
+
+        if (results.getFirst().contentFlag == ContentFlag.RISK) {
+            throw new RuntimeException("AI-model flagged uploaded picture as against TOS");
         }
         else {
-            throw new RuntimeException("Couldn't update profile picture. Staying with current one");
+            updateProfilePicturePipeline(files, userId, authorization, oldId);
         }
     }
 
     private MediaDTO retrieveProfilePicture(ProfileResponse profileResponse) {
-        List<MediaDTO> mediaDtos = new ArrayList<>();
-        if (profileResponse.getMediaPointer() != null) {
-            mediaDtos = mediaClient.getMediaByInstanceIds(
-                    List.of(
-                            UUID.fromString(profileResponse.getMediaPointer())
-                    ));
+        try {
+            List<MediaDTO> mediaDtos = new ArrayList<>();
+            if (profileResponse.getMediaPointer() != null) {
+                mediaDtos = mediaClient.getMediaByInstanceIds(
+                        List.of(
+                                UUID.fromString(profileResponse.getMediaPointer())
+                        ));
+            }
+            return mediaDtos.isEmpty() ? null : mediaDtos.getFirst();
+        } catch (RuntimeException e) {
+            logger.error("[PROFILEAGGREGATIONSERVICE retrieveProfilePicture] Could not send request to mediaServiceElx --- \n{}", e.getMessage());
+            return null;
         }
-        return mediaDtos.isEmpty() ? null : mediaDtos.getFirst();
     }
 
-    private String updateProfilePicturePipeline(List<MultipartFile> files, UUID userId, String authorization, UUID oldId) {
-        try  {
-            Set<UUID> updatedProfile = mediaService.uploadMedia(files, userId);
-            String uuid = updatedProfile.stream().findFirst()
-                    .map(UUID::toString)
-                    .orElseThrow(() -> new RuntimeException("No media returned"));
-
-            UpdateProfileDTO updateProfileDTO = new UpdateProfileDTO();
-            updateProfileDTO.mediaPointer = uuid;
-
-            if (oldId != null) {
-                mediaClient.deleteMediaInstance(oldId);
-            }
-
-            profileClient.updateProfile(updateProfileDTO, authorization);
-
-            return "Profile picture updated successfully";
+    private void updateProfilePicturePipeline(List<MultipartFile> files, UUID userId, String authorization, UUID oldId) {
+        Set<UUID> updatedProfile = new HashSet<UUID>();
+        try {
+            updatedProfile = mediaService.uploadMedia(files, userId);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while updating profile picture: " + e.getMessage());
+            logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not upload file --- \n{}", e.getMessage());
+            throw new RuntimeException("One of the responsible services offline");
+        }
+
+        String uuid = updatedProfile.stream().findFirst()
+                .map(UUID::toString)
+                .orElseThrow(() -> new RuntimeException("Uploaded file was banned on the Hobbiton platform"));
+
+        UpdateProfileDTO updateProfileDTO = new UpdateProfileDTO();
+        updateProfileDTO.mediaPointer = uuid;
+
+        if (oldId != null) {
+            try {
+                mediaClient.deleteMediaInstance(oldId);
+            } catch (Exception e) {
+                logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not delete file --- \n{}", e.getMessage());
+                throw new RuntimeException("One of the responsible services offline");
+            }
+        }
+
+        try {
+            profileClient.updateProfile(updateProfileDTO, authorization);
+        } catch (Exception e) {
+            logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not update profile --- \n{}", e.getMessage());
+            throw new RuntimeException("One of the responsible services offline");
         }
     }
 }

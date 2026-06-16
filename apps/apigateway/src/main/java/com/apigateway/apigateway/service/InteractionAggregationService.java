@@ -35,7 +35,12 @@ public class InteractionAggregationService {
     }
 
     public boolean doesLikeExist(UUID userId, UUID referenceId) {
-        return interactionClient.doesLikeExist(userId, referenceId);
+        try {
+            return interactionClient.doesLikeExist(userId, referenceId);
+        } catch (RuntimeException e) {
+            logger.error("[INTERACTIONAGGREGATIONSERVICE doesLikeExist] Could not send request to interactionService --- \n{}", e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -44,11 +49,16 @@ public class InteractionAggregationService {
      * post.
      */
     public boolean toggleLike(UUID actorId, UUID referenceId) {
-        boolean nowLiked = interactionClient.toggleLike(actorId, referenceId);
-        if (nowLiked) {
-            sendLikeNotification(actorId, referenceId);
+        try {
+            boolean nowLiked = interactionClient.toggleLike(actorId, referenceId);
+            if (nowLiked) {
+                sendLikeNotification(actorId, referenceId);
+            }
+            return nowLiked;
+        } catch (Exception e) {
+            logger.error("[INTERACTIONAGGREGATIONSERVICE toggleLike] Could not reach interactionService --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service offline");
         }
-        return nowLiked;
     }
 
     /**

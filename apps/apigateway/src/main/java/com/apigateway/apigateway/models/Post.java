@@ -2,6 +2,7 @@ package com.apigateway.apigateway.models;
 
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.models.gym.Gym;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.reading.Reading;
 import com.apigateway.apigateway.models.other.Other;
 

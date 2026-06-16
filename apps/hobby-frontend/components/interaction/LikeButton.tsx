@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import {doesLikeExist, toggleLike} from "@/lib/interactionClient";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
 
 interface LikeButtonProps {
     itemId: string; // The id of the item to like/unlike
@@ -13,6 +14,7 @@ interface LikeButtonProps {
 const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
     const [liked, setLiked] = useState(false);
     const [likes, setLikes] = useState(initialLikes);
+    const { showErrorToast } = useErrorToast();
 
     // Check if the user has already liked the item on mount
     useEffect(() => {
@@ -32,8 +34,14 @@ const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
     // Toggle the like status and update likes count
     const onToggleLike = async () => {
         setLiked((prev) => !prev);
-        const likeNowExists = await toggleLike(Cookies.get("userId")!, itemId);
-        setLikes((prev) => likeNowExists ? prev + 1 : prev - 1);
+        try {
+            const likeNowExists = await toggleLike(Cookies.get("userId")!, itemId);
+            setLikes((prev) => likeNowExists ? prev + 1 : prev - 1);
+        } catch (e) {
+            const error = e instanceof Error ? e.message : "Could not update";
+            showErrorToast(error, "", "error");
+            setLiked((prev) => !prev);
+        }
     };
 
     return (

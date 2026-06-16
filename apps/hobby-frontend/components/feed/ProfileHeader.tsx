@@ -134,10 +134,11 @@ export const ProfileHeader = ({
     try {
       const oldId = profilePicture?.relevantId ?? "";
       await postChangeProfilePicture(userId, [newFile], token, oldId);
-      showToast({ message: "Profile picture updated", type: "success" });
+      showToast("Profile picture updated", "", "success");
     } catch (error) {
       setImageSrc(undefined); // revert
-      showToast({ message: "Failed to update profile picture", type: "error" });
+      const message = error instanceof Error ? error.message : "";
+      showToast("Failed to update profile picture", message, "error");
     }
   }
 

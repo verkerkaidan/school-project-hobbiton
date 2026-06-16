@@ -22,5 +22,9 @@ public class ContentFlagUpdateDTO {
         this.file = file;
         this.hash = hash;
     }
+
+    public ContentFlagUpdateDTO(ContentFlag contentFlag) {
+        this.contentFlag = contentFlag;
+    }
 }
 

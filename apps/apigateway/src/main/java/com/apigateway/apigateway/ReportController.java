@@ -8,6 +8,10 @@ import com.apigateway.apigateway.modelDtos.media.ReportCreationDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.apigateway.apigateway.service.ProfileAggregationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class ReportController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProfileAggregationService.class);
 
     private final MediaClient mediaClient;
 
@@ -27,8 +33,13 @@ public class ReportController {
         @PathVariable("user_id") UUID userId,
         @PathVariable("instance_id") UUID instanceId
     ) {
-        ReportCreationDTO dto = mediaClient.reportFile(userId, instanceId);
-        return ResponseEntity.ok(dto.report_id);
+        try {
+            ReportCreationDTO dto = mediaClient.reportFile(userId, instanceId);
+            return ResponseEntity.ok(dto.report_id);
+        } catch (Exception e) {
+            logger.error("[REPORTCONTROLLER reportFile] Could not reach mediaServiceElx --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service could not be reached");
+        }
     }
 
     @ResponseBody
@@ -38,20 +49,35 @@ public class ReportController {
     ) {
         List<ContentFlagUpdateDTO> contentFlags = new ArrayList<>();
         contentFlags.add(contentFlagUpdateDTO);
-        mediaClient.assignContentFlags(contentFlags);
-        return ResponseEntity.ok("ContentFlag updated");
+        try {
+            mediaClient.assignContentFlags(contentFlags);
+            return ResponseEntity.ok("ContentFlag updated");
+        } catch (Exception e) {
+            logger.error("[REPORTCONTROLLER assignContentFlag] Could not reach mediaServiceElx --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service could not be reached");
+        }
     }
 
     @DeleteMapping("/media")
     public ResponseEntity<String> deleteMediaFile(
         @RequestBody DeleteMediaRequestDTO request
     ) {
-        mediaClient.deleteMediaFile(request);
-        return ResponseEntity.ok("Media file deleted");
+        try {
+            mediaClient.deleteMediaFile(request);
+            return ResponseEntity.ok("Media file deleted");
+        } catch (Exception e) {
+            logger.error("[REPORTCONTROLLER deleteMediaFile] Could not reach mediaServiceElx --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service could not be reached");
+        }
     }
 
     @QueryMapping
     public List<FullMediaFile> getReportedFiles() {
-        return mediaClient.getReportedFiles();
+        try {
+            return mediaClient.getReportedFiles();
+        } catch (Exception e) {
+            logger.error("[REPORTCONTROLLER getReportedFiles] Could not retrieve reportedFiles --- \n{}", e.getMessage());
+            return new ArrayList<FullMediaFile>();
+        }
     }
 }

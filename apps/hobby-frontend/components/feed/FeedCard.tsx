@@ -48,26 +48,28 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
           className={`relative w-full rounded-t-xl overflow-hidden ${aspectRatio}`}
         >
           {/* 3-dot menu (top-right) */}
-          <div className="absolute top-2 right-2 z-20">
-            <ImageMenu
-              relevantId={media.relevantId}
-              userId={Cookies.get("userId")!}
-              contentFlag={media.contentFlag}
-            />
-          </div>
+          {!showOverlay && (
+              <div className="absolute top-2 right-2 z-20">
+              <ImageMenu
+                  relevantId={media.relevantId}
+                  userId={Cookies.get("userId")!}
+                  contentFlag={media.contentFlag}
+              />
+            </div>
+          )}
           <Image
             src={imageSrc}
             alt={item.title}
             fill
             sizes={"(max-width: 768px) 100vw, 50vw"}
-            className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : ""}`}
+            className={`object-cover transition-transform duration-700 ease-out ${!showOverlay ? "group-hover:scale-105" : "blur-xl"}`}
           />
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
           {/* 🚨 Content Warning Overlay */}
           {showOverlay && (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-3xl text-white text-center p-4"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center p-4"
             >
               <div className="max-w-xs">
                 <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
@@ -77,7 +79,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
 
                 <button
                   onClick={() => setRevealed(true)}
-                  className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                  className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
                 >
                   View Image
                 </button>
@@ -88,7 +90,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
       )}
 
       {/* Content Area */}
-      <div className="p-6 space-y-3">
+      <div className="p-6 space-y-3 cursor-pointer">
         <FeedCardAuthor userId={item.userId} />
         <div className="flex items-center gap-3">
           <span

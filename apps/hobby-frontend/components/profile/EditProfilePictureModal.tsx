@@ -10,7 +10,6 @@ interface EditProfilePictureModalProps {
   currentImage: string;
   username: string;
   onClose: () => void;
-  /** Called with the selected File when the user confirms. Integration TBD. */
   onSave: (file: File) => Promise<void>;
 }
 

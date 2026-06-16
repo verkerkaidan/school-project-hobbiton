@@ -3,7 +3,9 @@ package com.apigateway.apigateway.service;
 import com.apigateway.apigateway.clients.MediaClient;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.modelDtos.media.MediaUploadResponse;
-import com.apigateway.apigateway.models.MediaInstance;
+import com.apigateway.apigateway.models.media.MediaInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,13 +16,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class MediaService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProfileAggregationService.class);
 
     @Value("${media.service.url}")
     private String mediaServiceUrl;
@@ -62,9 +63,6 @@ public class MediaService {
                     .map(r -> r.id)
                     .forEach(mediaInstanceSet::add);
         }
-        for (UUID id : mediaInstanceSet) {
-            System.out.println("Retrieved instanceId: " + id);
-        }
         return mediaInstanceSet;
     }
 
@@ -77,9 +75,14 @@ public class MediaService {
         List<UUID> instanceIds = instances.stream().map((MediaInstance instance) -> {
             return instance.instanceId;
         }).toList();
-        List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
-        System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
+        try {
+            List<MediaDTO> mediaDTOList = mediaClient.getMediaByInstanceIds(instanceIds);
+            System.out.println("Retrieving media. Number of files: " + mediaDTOList.size());
 
-        return mediaDTOList;
+            return mediaDTOList;
+        } catch (RuntimeException e) {
+            logger.error("[MEDIASERVICE getMedia] Could not send request to mediaServiceElx --- \n{}", e.getMessage());
+            return new ArrayList<MediaDTO>();
+        }
     }
 }
