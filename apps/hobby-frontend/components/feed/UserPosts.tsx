@@ -10,25 +10,40 @@ import { breakpointColumns } from "@/constants/breakpointColumns";
 interface UserPostsProps {
   userId: string;
   getPosts: (userId: string) => Promise<Post[]>;
+  onPostsLoaded?: (count: number) => void;
 }
 
-export const UserPosts = ({ userId, getPosts }: UserPostsProps) => {
+export const UserPosts = ({
+  userId,
+  getPosts,
+  onPostsLoaded,
+}: UserPostsProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function getCompletePosts(userId: string): Promise<Post[]> {
-    return await getPosts(userId);
-  }
-
   useEffect(() => {
-    getCompletePosts(userId)
-      .then((data) => setPosts(data))
+    let cancelled = false;
+
+    getPosts(userId)
+      .then((data) => {
+        if (cancelled) return;
+        setPosts(data);
+        onPostsLoaded?.(data.length);
+      })
       .catch((error) => {
+        if (cancelled) return;
         console.error("Failed to load user posts:", error);
         setPosts([]);
+        onPostsLoaded?.(0);
       })
-      .finally(() => setLoading(false));
-  }, [userId, getPosts]);
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, getPosts, onPostsLoaded]);
 
   if (loading) {
     return (

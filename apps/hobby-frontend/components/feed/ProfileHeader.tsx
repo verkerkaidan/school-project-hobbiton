@@ -16,6 +16,7 @@ interface ProfileHeaderProps {
   profilePicture?: MediaSet;
   followerCount: number;
   followingCount: number;
+  postCount?: number;
   onFollowersClick: () => void;
   onFollowingClick: () => void;
   // Other-user view props
@@ -36,6 +37,7 @@ export const ProfileHeader = ({
   profilePicture,
   followerCount,
   followingCount,
+  postCount,
   onFollowersClick,
   onFollowingClick,
   isOwnProfile = true,
@@ -426,14 +428,16 @@ export const ProfileHeader = ({
             </motion.button>
 
             {/* Posts Count */}
-            <div className="flex flex-col items-start gap-2 p-4 rounded-xl">
-              <span className="text-2xl md:text-3xl font-bold text-brand">
-                —
-              </span>
-              <span className="text-xs md:text-sm text-accent uppercase tracking-wider font-semibold">
-                Posts
-              </span>
-            </div>
+            {!isBlocked && (
+              <div className="flex flex-col items-start gap-2 p-4 rounded-xl">
+                <span className="text-2xl md:text-3xl font-bold text-brand">
+                  {postCount === undefined ? "—" : postCount.toLocaleString()}
+                </span>
+                <span className="text-xs md:text-sm text-accent uppercase tracking-wider font-semibold">
+                  Posts
+                </span>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

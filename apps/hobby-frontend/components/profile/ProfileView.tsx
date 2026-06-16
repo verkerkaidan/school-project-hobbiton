@@ -57,6 +57,7 @@ export function ProfileView({
   const [isBlocked, setIsBlocked] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showPreferenceWarning, setShowPreferenceWarning] = useState(false);
+  const [postCount, setPostCount] = useState<number | undefined>();
   // Whether the profile being viewed follows the current user back
   const [targetFollowsCurrentUser, setTargetFollowsCurrentUser] =
     useState(false);
@@ -83,6 +84,7 @@ export function ProfileView({
     setIsBlocked(false);
     setIsSubscribed(false);
     setShowPreferenceWarning(false);
+    setPostCount(undefined);
     setTargetFollowsCurrentUser(false);
 
     const load = async () => {
@@ -293,6 +295,7 @@ export function ProfileView({
         profilePicture={profile.profilePicture}
         followerCount={followerCount}
         followingCount={followingCount}
+        postCount={postCount}
         onFollowersClick={handleFollowersClick}
         onFollowingClick={handleFollowingClick}
         isOwnProfile={isOwnProfile}
@@ -332,7 +335,11 @@ export function ProfileView({
             </p>
           </div>
         ) : (
-          <UserPosts userId={resolvedUserId} getPosts={getUserPosts} />
+          <UserPosts
+            userId={resolvedUserId}
+            getPosts={getUserPosts}
+            onPostsLoaded={setPostCount}
+          />
         )}
       </div>
 
