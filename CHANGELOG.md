@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.38.0] - 2026-06-16
+
+### Added
+- **feat**: Added saved lists for user
+
 ## [1.37.2] - 2026-06-15
 
 ### Fixed

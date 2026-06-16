@@ -10,6 +10,7 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use library_service::cache::CacheService;
+use library_service::db::DbService;
 use library_service::factory::ServiceFactory;
 use library_service::routes::library_routes;
 
@@ -25,11 +26,11 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    use tokio::time::{sleep, Duration};
+
     // ── Redis cache ──────────────────────────────────────────────────────────
     let redis_url = std::env::var("REDIS_URL")
         .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
-
-    use tokio::time::{sleep, Duration};
 
     let cache = loop {
         match CacheService::new(&redis_url).await {
@@ -38,19 +39,26 @@ async fn main() {
                 break Arc::new(c);
             }
             Err(e) => {
-                tracing::warn!(
-                    "Redis not ready yet ({}), retrying in 2s... error: {}",
-                    redis_url,
-                    e
-                );
+                tracing::warn!("Redis not ready yet ({}), retrying in 2s... error: {}", redis_url, e);
                 sleep(Duration::from_secs(2)).await;
             }
         }
     };
 
+    // ── Postgres ─────────────────────────────────────────────────────────────
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+
+    let db = Arc::new(
+        DbService::new(&database_url)
+            .await
+            .expect("Failed to connect to Postgres"),
+    );
+
     // ── Service factory ──────────────────────────────────────────────────────
     let factory = Arc::new(ServiceFactory::new());
-    let state = AppState { factory, cache };
+
+    let state = AppState { factory, cache, db };
 
     // ── CORS ─────────────────────────────────────────────────────────────────
     let allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")

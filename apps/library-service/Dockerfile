@@ -1,22 +1,20 @@
-FROM rust:1.96-slim as builder
+FROM rust:1.96-slim AS builder
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY tests ./tests
+COPY migrations ./migrations
 
-# Run tests before building the release binary.
-# If any test fails the entire Docker build fails,
-# which blocks the pipeline from producing an image.
-# REDIS_URL is pointed at an intentionally unreachable port so
-# any test that needs Redis skips itself via the require_redis! macro,
-# and unit/mock tests run without any external dependency.
 RUN REDIS_URL=redis://127.0.0.1:1 cargo test
-
 RUN cargo build --release
 
 FROM rust:1.96-slim
 WORKDIR /app
+
 COPY --from=builder /app/target/release/library_service .
+COPY --from=builder /app/migrations ./migrations
 
 CMD ["./library_service"]
