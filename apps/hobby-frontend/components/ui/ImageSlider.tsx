@@ -37,13 +37,15 @@ export default function ImageSlider({
 
                     return (
                         <div key={item.relevantId} className="relative w-full h-full shrink-0 overflow-hidden flex items-center justify-center">
-                            <div className="absolute top-2 right-2 z-20">
-                                <ImageMenu
-                                    relevantId={item.relevantId}
-                                    userId={Cookies.get('userId')!}
-                                    contentFlag={item.contentFlag}
-                                />
-                            </div>
+                            {!showOverlay && (
+                                <div className="absolute top-2 right-2 z-20">
+                                    <ImageMenu
+                                        relevantId={item.relevantId}
+                                        userId={Cookies.get('userId')!}
+                                        contentFlag={item.contentFlag}
+                                    />
+                                </div>
+                            )}
 
                             <Image
                                 src={`data:${item.contentType};base64,${item.fileData}`}
@@ -51,7 +53,9 @@ export default function ImageSlider({
                                 width={0}
                                 height={0}
                                 sizes="(max-width: 768px) 100vw, 50vw"
-                                className="w-full h-auto max-w-full max-h-full object-contain"
+                                className={`w-full h-auto max-w-full max-h-full object-contain ${
+                                    showOverlay ? 'blur-xl' : ''
+                                }`}
                             />
 
                             <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-60" />
@@ -61,16 +65,15 @@ export default function ImageSlider({
                                     onClick={(e) => e.stopPropagation()}
                                     className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white text-center p-4"
                                 >
-                                    <div className="absolute inset-0 backdrop-blur-3xl" />
-
-                                    <div className="relative z-10 max-w-xs">
+                                    <div className="max-w-xs">
                                         <h3 className="text-lg font-semibold mb-2">Content Warning</h3>
                                         <p className="text-sm opacity-80 mb-4">
                                             This image may contain sensitive or disturbing content.
                                         </p>
+
                                         <button
                                             onClick={revealCurrent}
-                                            className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                                            className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
                                         >
                                             View Image
                                         </button>
@@ -86,13 +89,13 @@ export default function ImageSlider({
                 <>
                     <button
                         onClick={prev}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                     >
                         ‹
                     </button>
                     <button
                         onClick={next}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                     >
                         ›
                     </button>
@@ -102,7 +105,7 @@ export default function ImageSlider({
                             <button
                                 key={i}
                                 onClick={() => setCurrent(i)}
-                                className={`h-1.5 rounded-full transition-all ${
+                                className={`h-1.5 rounded-full transition-all cursor-pointer ${
                                     i === current ? 'bg-white w-4' : 'bg-white/50 w-1.5'
                                 }`}
                             />

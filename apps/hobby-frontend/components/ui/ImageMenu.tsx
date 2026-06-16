@@ -3,12 +3,13 @@
 import React, {useEffect, useRef, useState} from "react";
 import {reportFile} from "@/lib/reportClient";
 import {ContentFlag} from "@/types/enums";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
 
 export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string, relevantId: string, contentFlag: ContentFlag }) {
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const { showErrorToast } = useErrorToast();
 
     // close on outside click
     useEffect(() => {
@@ -26,9 +27,10 @@ export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string,
             setSubmitting(true);
             await reportFile(userId, relevantId);
             setOpen(false);
-            setToast({ message: "Report submitted", type: "success" });
-        } catch {
-            setToast({ message: "Failed to submit report", type: "error" });
+            showErrorToast("Report submitted", "", "success")
+        } catch (e) {
+            const message = e instanceof Error ? e.message : "Something went wrong";
+            showErrorToast("Failed to submit report", message, "error")
         } finally {
             setSubmitting(false);
         }
@@ -42,7 +44,7 @@ export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string,
                     e.stopPropagation()
                     setOpen((prev) => !prev)
                 }}
-                className="bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-full hover:bg-black/80 transition"
+                className="bg-black/60 backdrop-blur-md text-white px-2 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
             >
                 ⋯
             </button>
@@ -73,6 +75,7 @@ export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string,
                             hover:text-red-300
                             disabled:opacity-50
                             disabled:cursor-not-allowed
+                            cursor-pointer
                         "
                     >
                         <svg
@@ -101,36 +104,6 @@ export function ImageMenu({ userId, relevantId, contentFlag }: { userId: string,
                     </button>
                 </div>
             )}
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onDone={() => setToast(null)}
-                />
-            )}
-        </div>
-    );
-}
-
-function Toast({ message, type, onDone }: { message: string; type: "success" | "error"; onDone: () => void }) {
-    useEffect(() => {
-        const timer = setTimeout(onDone, 3000);
-        return () => clearTimeout(timer);
-    }, []);
-
-    const isSuccess = type === "success";
-
-    return (
-        <div className={`
-            fixed bottom-6 left-1/2 -translate-x-1/2
-            px-9 py-2 rounded-xl text-sm font-semibold
-            border transition-colors animate-fade-in-up
-            ${isSuccess
-            ? "bg-brand/30 border-brand/20 text-brand"
-            : "bg-red-500/30 border-red-500/30 text-red-400"
-        }
-        `}>
-            {message}
         </div>
     );
 }

@@ -1,4 +1,4 @@
-package com.apigateway.apigateway.models;
+package com.apigateway.apigateway.models.media;
 
 import java.util.UUID;
 

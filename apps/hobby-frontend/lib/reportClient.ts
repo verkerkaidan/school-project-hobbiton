@@ -10,7 +10,10 @@ export async function reportFile(userId: string, instanceId: string): Promise<st
         method: "POST",
     });
 
-    if (!res.ok) throw new Error("Failed to report");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not report file");
+    }
 
     return await res.json();
 }
@@ -24,7 +27,10 @@ export async function updateContentFlag(report: FileReport) {
         body: JSON.stringify(report)
     });
 
-    if (!res.ok) throw new Error("Failed to update content flag");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not update content flag");
+    }
 
     return;
 }
@@ -38,7 +44,10 @@ export async function deleteMediaFile(hash: string) {
         body: JSON.stringify({ "hash": hash })
     });
 
-    if (!res.ok) throw new Error("Failed to delete media file");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not delete file");
+    }
 
     return;
 }

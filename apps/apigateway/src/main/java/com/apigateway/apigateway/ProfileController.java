@@ -1,7 +1,7 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
-import com.apigateway.apigateway.models.MediaInstance;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.service.MediaService;
@@ -197,7 +197,7 @@ public class ProfileController {
             @RequestHeader("Authorization") String authorization,
             @RequestParam(value = "oldId", required = false) UUID oldId
     ) {
-        String response = profileAggregationService.updateProfilePicture(userId, files, authorization, oldId);
-        return ResponseEntity.ok(response);
+        profileAggregationService.updateProfilePicture(userId, files, authorization, oldId);
+        return ResponseEntity.ok("Profile picture was updated");
     }
 }

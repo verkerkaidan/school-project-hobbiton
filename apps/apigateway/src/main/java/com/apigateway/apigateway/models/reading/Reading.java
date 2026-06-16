@@ -2,7 +2,7 @@ package com.apigateway.apigateway.models.reading;
 
 import com.apigateway.apigateway.models.Interaction;
 import com.apigateway.apigateway.models.Post;
-import com.apigateway.apigateway.models.MediaInstance;
+import com.apigateway.apigateway.models.media.MediaInstance;
 
 import java.time.LocalDateTime;
 import java.util.List;

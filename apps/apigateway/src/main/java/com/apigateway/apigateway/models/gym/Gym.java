@@ -1,7 +1,7 @@
 package com.apigateway.apigateway.models.gym;
 
 import com.apigateway.apigateway.models.Interaction;
-import com.apigateway.apigateway.models.MediaInstance;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.Post;
 
 import java.time.LocalDateTime;

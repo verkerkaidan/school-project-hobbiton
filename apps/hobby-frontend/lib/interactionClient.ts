@@ -8,7 +8,10 @@ export async function toggleLike(userId: string, referenceId: string): Promise<b
         method: "PUT",
     });
 
-    if (!res.ok) throw new Error("Failed to report");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not update like");
+    }
 
     return await res.json();
 }
@@ -18,7 +21,10 @@ export async function doesLikeExist(userId:string, referenceId: string): Promise
         method: "GET",
     });
 
-    if (!res.ok) throw new Error("Failed to report");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not fetch like");
+    }
 
     return await res.json();
 }
@@ -32,7 +38,10 @@ export async function createComment(userId: string, referenceId: string, comment
         body: JSON.stringify({ userId, referenceId, comment }),
     });
 
-    if (!res.ok) throw new Error("Failed to report");
+    if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? "Could not create comment");
+    }
 
     return await res.json();
 }

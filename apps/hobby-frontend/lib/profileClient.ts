@@ -8,7 +8,7 @@ export async function postChangeProfilePicture(
     files: File[],
     token: string,
     oldId: string
-): Promise<string> {
+): Promise<void> {
   const formData = new FormData();
 
   formData.append("userId", userId);
@@ -25,9 +25,11 @@ export async function postChangeProfilePicture(
     body: formData,
   });
 
-  const text = await res.text();
-  if (!res.ok) throw new Error(text);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    console.log("Error body:", body);
+    throw new Error(body?.message ?? "Could not update content flag");
+  }
 
-  console.log(text);
-  return text;
+  return;
 }

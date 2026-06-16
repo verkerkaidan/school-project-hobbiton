@@ -13,6 +13,8 @@ import { BaseCreatePost, CreateGymPost, CreatePost, CreateReadingPost, ModalProp
 import Cookies from "js-cookie";
 import HobbyType from "@/types/enums";
 import { motion, AnimatePresence } from "framer-motion";
+import {Post} from "@/types/posts";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
 
 type QueryType = "exercise" | "book" | "movie";
 
@@ -83,6 +85,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
   const [searchError, setSearchError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const {showErrorToast} = useErrorToast();
 
   const handlePostTypeChange = (newType: HobbyType) => {
     if (newType === HobbyType.GYM) {
@@ -259,7 +262,12 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
     form.userId = Cookies.get("userId")!;
     try {
       setLoading(true);
-      await postCreateRequest({...form, linkedItems});
+      const post: Post = await postCreateRequest({...form, linkedItems});
+
+      if (post.mediaSet.length < form.mediaInstanceDTOSet.length) {
+        showErrorToast("Error uploading", "One or more of the uploaded files could not be attached because they are banned on the Hobbiton platform", "error");
+      }
+
       router.push("/profile");
       onClose();
     } catch (err) {
