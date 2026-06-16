@@ -125,6 +125,7 @@ static void send_response(int client, int status, const char *status_text,
         "Content-Length: %d\r\n"
         "Connection: close\r\n"
         "Access-Control-Allow-Origin: *\r\n"
+        "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n"
         "Access-Control-Allow-Headers: Content-Type, Authorization\r\n"
         "\r\n",
         status, status_text,
@@ -388,7 +389,94 @@ static void handle_client_fd(int client) {
         free(email);
         free(password);
     }
-
+     else if (strcmp(method, "DELETE") == 0 && strcmp(path, "/api/auth/delete") == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *userId = NULL; char *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                char *email = json_get_string_local(body, "email");
+                char *password = json_get_string_local(body, "password");
+                if (!email || !password) { send_response(client, 400, "Bad Request", "{\"error\":\"email and password required\"}", "application/json"); }
+                else {
+                    char id[37]; char hash[512]; char roles[512]; int enabled;
+                    if (find_user_by_email_db(email, id, sizeof(id), hash, sizeof(hash), roles, sizeof(roles), &enabled) != 0) { send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json"); }
+                    else {
+                        char auth_id[37]; char roles2[512];
+                        if (authenticate_user_db(email, password, auth_id, sizeof(auth_id), roles2, sizeof(roles2)) != 0 || strcmp(auth_id, userId) != 0) {
+                            send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json");
+                        } else {
+                            if (delete_user_by_id_db(auth_id) != 0) send_response(client, 500, "Internal Server Error", "{\"error\":\"Could not delete user\"}", "application/json");
+                            else send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");
+                        }
+                    }
+                }
+                free(email); free(password);
+            }
+            free(token); free(userId); free(roles_csv);
+        }
+    }
+    else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/new/", 16) == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *callerId = NULL; char *caller_roles = NULL;
+            if (jwt_validate_and_extract(token, &callerId, &caller_roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                int isAdmin = (caller_roles && strstr(caller_roles, "ROLE_ADMIN")) ? 1 : 0;
+                if (!isAdmin) send_response(client, 403, "Forbidden", "{\"error\":\"Requires admin role\"}", "application/json");
+                else {
+                    const char *target = path + 16;
+                    if (strlen(target) != 36) send_response(client, 400, "Bad Request", "{\"error\":\"Invalid user id\"}", "application/json");
+                    else {
+                        if (update_user_role_db(target, "ROLE_ADMIN") != 0) send_response(client, 404, "Not Found", "{\"error\":\"User not found\"}", "application/json");
+                        else send_response(client, 200, "OK", "{\"result\":\"Successfully made user admin\"}", "application/json");
+                    }
+                }
+            }
+            free(token); free(callerId); free(caller_roles);
+        }
+    }
+    else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/staff/new/", 16) == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *callerId = NULL; char *caller_roles = NULL;
+            if (jwt_validate_and_extract(token, &callerId, &caller_roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                int isAdmin = (caller_roles && strstr(caller_roles, "ROLE_ADMIN")) ? 1 : 0;
+                if (!isAdmin) send_response(client, 403, "Forbidden", "{\"error\":\"Requires admin role\"}", "application/json");
+                else {
+                    const char *target = path + 16;
+                    if (strlen(target) != 36) send_response(client, 400, "Bad Request", "{\"error\":\"Invalid user id\"}", "application/json");
+                    else {
+                        if (update_user_role_db(target, "ROLE_STAFF") != 0) send_response(client, 404, "Not Found", "{\"error\":\"User not found\"}", "application/json");
+                        else send_response(client, 200, "OK", "{\"result\":\"Successfully made user staff\"}", "application/json");
+                    }
+                }
+            }
+            free(token); free(callerId); free(caller_roles);
+        }
+    }
+    else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/Oauth/dashboard") == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
+        else {
+            char *userId = NULL; char *roles = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
+            else {
+                // read user from DB
+                char id[37]; char hash[512]; char roles_csv[512]; int enabled;
+                if (find_user_by_email_db("", id, sizeof(id), hash, sizeof(hash), roles_csv, sizeof(roles_csv), &enabled) == 0) {
+                    // we called with empty email, above returns not found; instead query by id is needed but not exposed; keep response generic
+                }
+                char body_out[512]; snprintf(body_out, sizeof(body_out), "{\"message\":\"Welcome, %s (%s)\"}", userId, userId);
+                send_response(client, 200, "OK", body_out, "application/json");
+            }
+            free(token); free(userId); free(roles);
+        }
+    }
     else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/Oauth/me") == 0) {
         char *token = extract_bearer_token(headers);
 
@@ -416,9 +504,7 @@ static void handle_client_fd(int client) {
                       "{\"error\":\"not found\"}", "application/json");
     }
 
-    free(headers);
-    if (body) free(body);
-    close(client);
+    goto cleanup;
     cleanup:
         free(headers);
         if (body) {

@@ -230,7 +230,7 @@ int add_user_db_with_hash(const char *email, const char *hash, const char *roles
              rnd[0],rnd[1],rnd[2],rnd[3],rnd[4],rnd[5],(rnd[6]&0x0F)|0x40,rnd[7],(rnd[8]&0x3F)|0x80,rnd[9],rnd[10],rnd[11],rnd[12],rnd[13],rnd[14],rnd[15]);
     const char *params[4]; params[0] = id; params[1] = email; params[2] = hash; params[3] = "t";
     PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
-    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1::uuid, $2, $3, $4)";
+    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1, $2, crypt($3, gen_salt('bf', 12)), $4) ON CONFLICT (email) DO UPDATE SET email = custom_user.email RETURNING id;";
     PGresult *ins = PQexecParams(conn, sql, 4, NULL, params, NULL, NULL, 0);
     if (!ins) { PQexec(conn, "ROLLBACK"); return -1; }
     if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(conn, "ROLLBACK"); return -1; }

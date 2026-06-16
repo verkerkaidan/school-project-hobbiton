@@ -66,6 +66,31 @@ export async function register(
 }
 
 /**
+ * Log's in user by navigating and filling out the email and password fields and
+ * @param page The Playwright page object
+ * @param email The test email
+ * @param password The test password
+ */
+export async function login(
+    page: Page,
+    email: string,
+    password: string
+): Promise<void> {
+  await page.goto('/authentication');
+  await page.waitForLoadState('networkidle');
+
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
+
+  await page.getByRole('button', { name: /^Login$/ }).click();
+
+  await page.waitForURL('/', {
+    timeout: 10000,
+  });
+
+  await page.waitForLoadState('networkidle');
+}
+/**
  * Logs out the user by navigating to home and finding the logout functionality
  * @param page The Playwright page object
  */
