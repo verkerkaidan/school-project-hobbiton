@@ -87,23 +87,6 @@ public static class ChatWebSocketHandler
                 db.SaveMessage(chatId, msgBytes);
                 db.MarkChatAsRead(userId, chatId);
 
-                foreach (var kvp in userSockets)
-                {
-                    var key = kvp.Key;
-                    if (!key.EndsWith($":{chatId}"))
-                        continue;
-
-                    var recipientUserId = key[..key.LastIndexOf(':')];
-                    if (recipientUserId == userId)
-                        continue;
-
-                    var recipientSocket = kvp.Value;
-                    if (recipientSocket.State == WebSocketState.Open)
-                    {
-                        db.MarkChatAsRead(recipientUserId, chatId);
-                    }
-                }
-
                 List<WebSocket> snapshot;
                 lock (sockets) snapshot = sockets.ToList();
 
@@ -117,6 +100,14 @@ public static class ChatWebSocketHandler
                             WebSocketMessageType.Binary,
                             endOfMessage: true,
                             CancellationToken.None);
+
+                        // Find which user this socket belongs to and mark as read
+                        var recipientKey = userSockets.FirstOrDefault(kvp => kvp.Value == socket).Key;
+                        if (recipientKey != null)
+                        {
+                            var recipientUserId = recipientKey[..recipientKey.LastIndexOf(':')];
+                            db.MarkChatAsRead(recipientUserId, chatId);
+                        }
                     }
                 }
 

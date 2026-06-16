@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.40.0] - 2026-06-16
+
+### Fixed
+- **fix**: Notifications would not appear if user (receiving end) is connected earlier to the websocket then user b (sender) sends a chat.
+
 ## [1.39.0] - 2026-06-16
 
 ### Added
