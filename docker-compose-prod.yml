@@ -241,6 +241,8 @@ services:
       CHAT_WS_URL: ${CHAT_WS_URL}
       GATEWAY_ALLOWED_ORIGIN_PATTERNS: ${GATEWAY_ALLOWED_ORIGIN_PATTERNS}
       BUG_REPORT_SERVICE_URL: ${BUG_REPORT_SERVICE_URL}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
   chat-service:
     image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always
@@ -316,6 +318,21 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+
+    ports:
+      - "21527:5672"
+      - "15672:15672"
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+    networks:
+      - microservices-network
 
 volumes:
   postgres_data:
