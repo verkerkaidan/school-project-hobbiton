@@ -1,6 +1,7 @@
 package com.recognitionservice.services;
 
 import ai.djl.Model;
+import ai.djl.Device;
 import ai.djl.ModelException;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.Classifications;
@@ -56,7 +57,8 @@ public class RecognitionService {
                 .optSynset(CLASS_NAMES)
                 .build();
 
-        model = Model.newInstance("car-model");
+        System.setProperty("ai.djl.default_engine", "PyTorch");
+        model = Model.newInstance("car_classifier", Device.cpu());
 
         // Load externally downloaded model file
         model.load(Paths.get(modelPath));

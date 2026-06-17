@@ -94,7 +94,7 @@ services:
     ports:
       - "27088:27088"
     environment:
-      MODEL_NAME: ${RECOGNITION_MODEL_NAME}
+      MODEL_URL: ${RECOGNITION_MODEL_URL}
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     cpus: 1
     mem_limit: 1024m
