@@ -162,7 +162,7 @@ export const DesktopSidebar = () => {
         <div className="scale-90 md:scale-100 origin-bottom">
           <UserAvatar
             name={currentUser?.username ?? "..."}
-            role="Owner"
+            role={currentUser?.isAdmin ? "Admin" : "Hobbiist"}
             profilePicture={currentUser?.profilePicture}
             isOnline={true}
           />
