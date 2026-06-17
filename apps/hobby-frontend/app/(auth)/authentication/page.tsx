@@ -23,7 +23,7 @@ export default function Authentication() {
       <main className="max-w-2xl w-full mx-auto px-6 py-20">
         <header className="mb-8 space-y-4 text-center">
           <h1 className="text-5xl md:text-7xl font-serif italic text-white">
-            Welcome <span className="text-brand">User</span>
+            Welcome <span className="text-brand">Hobbiist</span>
           </h1>
           <p className="text-accent text-lg">
             Jouw persoonlijke stroom van literatuur, cinema en beweging.
