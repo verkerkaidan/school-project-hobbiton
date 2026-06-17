@@ -315,7 +315,7 @@ services:
 
   chat-service:
     build:
-      context: ./apps/chat-service/src
+      context: ./apps/chat-service
     container_name: chat-service
     restart: always
     ports:

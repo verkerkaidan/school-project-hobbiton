@@ -245,7 +245,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
   chat-service:
-    image: ${CI_REGISTRY_IMAGE}/chat-service/src:latest
+    image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always
     ports:
       - "29294:29294"
