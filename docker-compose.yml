@@ -374,7 +374,7 @@ services:
 
     ports:
       - "21527:5672"
-      - "15672:15672"
+      - "11527:11527"
 
     environment:
       RABBITMQ_DEFAULT_USER: guest
