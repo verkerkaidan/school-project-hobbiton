@@ -72,7 +72,7 @@ export function useWebSocket(chatId: string | null) {
   const addUser = useCallback(async (userId: string) => {
     if (!chatId) return;
 
-    await api.post(`${MIDDLEWARE_ENDPOINT_SERVERSIDE}/api/add-user-to-chat`, {
+    await api.post(`${MIDDLEWARE_ENDPOINT_CLIENTSIDE}/api/add-user-to-chat`, {
       userId,
       chatId,
     });
