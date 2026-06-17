@@ -305,7 +305,16 @@ static void handle_client_fd(int client) {
         log_msg(LOG_INFO, "BODY: %s", body);
     }
 
-
+    if (strcmp(method, "OPTIONS") == 0) {
+        send_response(
+            client,
+            200,
+            "OK",
+            "",
+            "application/json"
+        );
+        goto cleanup;
+    }
     if (strcmp(method, "POST") == 0 && strcmp(path, "/api/auth/register") == 0) {
         log_msg(LOG_INFO, "REGISTER START");
 
