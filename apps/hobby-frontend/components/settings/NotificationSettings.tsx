@@ -14,7 +14,6 @@ import {
 const TYPE_LABELS: Record<NotificationType, string> = {
   FOLLOW: "Follows",
   USER_POST: "Posts from followed users",
-  RECOMMENDED_POST: "Recommended posts",
   LIKE: "Likes on your posts",
   COMMENT: "Comments on your posts",
 };

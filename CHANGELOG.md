@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.43.4] - 2026-06-17
+
+### Changed
+- **chore**: remove display name from app
+- **chore**: remove certain settings
+
 ## [1.43.3] - 2026-06-17
 
 ### Fixed
