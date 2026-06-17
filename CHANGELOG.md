@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.43.3] - 2026-06-17
+
+### Fixed
+- **hotfix**: dockerfile fix chats
+
 ## [1.43.2] - 2026-06-17
 
 ### Changed

@@ -6,10 +6,10 @@ WORKDIR /src
 COPY . .
 
 # Restore using the solution file
-RUN dotnet restore webApplication.sln
+RUN dotnet restore ./webApplication.sln
 
 # Publish
-RUN dotnet publish webApplication.csproj -c Release -o /app/publish
+RUN dotnet publish src/webApplication/webApplication.csproj -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
