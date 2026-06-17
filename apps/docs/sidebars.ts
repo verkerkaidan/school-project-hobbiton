@@ -25,6 +25,7 @@ const sidebars: SidebarsConfig = {
         "notification-service/http-api",
         "notification-service/database-schema",
         "notification-service/deployment",
+        "notification-service/unit-tests",
       ],
     },
     {

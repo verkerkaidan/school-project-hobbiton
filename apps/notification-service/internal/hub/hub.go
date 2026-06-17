@@ -52,7 +52,9 @@ func (h *Hub) Run() {
 			if existing, ok := h.clients[client.UserID]; ok {
 				log.Printf("hub: replacing existing connection for user %s", client.UserID)
 				close(existing.Send)
-				existing.Conn.Close()
+				if existing.Conn != nil {
+					existing.Conn.Close()
+				}
 			}
 			h.clients[client.UserID] = client
 			h.mu.Unlock()
