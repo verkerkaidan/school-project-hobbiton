@@ -15,17 +15,14 @@ export async function register(
 ): Promise<{ username: string; email: string; password: string }> {
   const credentials = generateTestCredentials();
 
-  // Give the server up to 60 seconds to compile, but don't wait for background networks to freeze
   await page.goto('/authentication', {
     waitUntil: 'domcontentloaded',
     timeout: 60000
   });
 
-  // Explicitly look for the button instead of a generic networkidle wait
   await page.getByRole('button', { name: /^Register$/ }).waitFor({ state: 'visible' });
   await page.getByRole('button', { name: /^Register$/ }).click();
 
-  // 2. Fill in the credentials
   const usernameInput = page.locator('input[name="username"]');
   await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
 
@@ -34,20 +31,12 @@ export async function register(
   await page.locator('input[name="password"]').fill(credentials.password);
   await page.locator('input[name="confirmPassword"]').fill(credentials.password);
 
-  // 3. Submit the registration form
   const submitButton = page.getByRole('button', { name: /^Register$/ }).last();
   await submitButton.click();
 
-// ====================================================================
-  // 4. Handle the Terms of Service step right here on /authentication
-  // ====================================================================
-
-  // Wait for the ToS text header to become visible so we know the step loaded
   const tosHeader = page.getByText('Continued use of the platform');
   await tosHeader.waitFor({ state: 'visible', timeout: 5000 });
 
-  // Find the inner text box using a phrase inside it, scroll it to the bottom,
-  // and fire a scroll event so React updates its `hasScrolledToBottom` state.
   await page.getByText('Welcome to Hobbiton.').evaluate((el) => {
     const container = el.closest('.overflow-y-auto');
     if (container) {
@@ -56,20 +45,14 @@ export async function register(
     }
   });
 
-  // Locate the checkboxes (which are now successfully enabled!)
   const checkbox1 = page.getByRole('checkbox', { name: 'I have read and agree to the' });
   const checkbox2 = page.getByRole('checkbox', { name: 'I understand that posting' });
 
-  // Check them normally
   await checkbox1.check();
   await checkbox2.check();
 
-  // Click Accept & Continue to finally trigger the redirect
   await page.getByRole('button', { name: 'Accept & Continue' }).click();
 
-  // ====================================================================
-
-  // 5. Wait for final redirect to home page
   await page.waitForURL('/', { timeout: 10000 });
   await page.waitForLoadState('networkidle');
   await page.waitForSelector('text=Welcome', { timeout: 5000 });
@@ -106,8 +89,6 @@ export async function login(
  * @param page The Playwright page object
  */
 export async function logout(page: Page): Promise<void> {
-  // Navigate to profile or settings where logout might be available
-  // For now, we can just clear the cookies
   await page.context().clearCookies();
   await page.goto('/');
   await page.waitForLoadState('networkidle');
@@ -119,7 +100,6 @@ export async function logout(page: Page): Promise<void> {
  * @returns true if user appears to be logged in
  */
 export async function isLoggedIn(page: Page): Promise<boolean> {
-  // Check if token cookie exists
   const cookies = await page.context().cookies();
   return cookies.some(cookie => cookie.name === 'token');
 }
