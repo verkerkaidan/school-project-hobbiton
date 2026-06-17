@@ -8,30 +8,16 @@ public static class ChatWebSocketHandler
         ConcurrentDictionary<string, List<WebSocket>> lobbies,
         ConcurrentDictionary<string, WebSocket> userSockets,
         ConcurrentDictionary<string, WebSocket> notificationSockets,
-        DatabaseConnection db)
+        IDatabaseConnection db)
     {
         app.Map("/ws/{chatId}", async context =>
         {
             var chatId = context.Request.RouteValues["chatId"]?.ToString();
             var userId = context.Request.Query["userId"].ToString();
 
-            if (string.IsNullOrEmpty(chatId) || string.IsNullOrEmpty(userId))
-            {
-                context.Response.StatusCode = 400;
-                return;
-            }
-
-            if (!context.WebSockets.IsWebSocketRequest)
-            {
-                context.Response.StatusCode = 400;
-                return;
-            }
-
-            if (!db.isUserAllowed(chatId, userId))
-            {
-                context.Response.StatusCode = 403;
-                return;
-            }
+            if (string.IsNullOrEmpty(chatId) || string.IsNullOrEmpty(userId)) { context.Response.StatusCode = 400; return; }
+            if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; return; }
+            if (!db.isUserAllowed(chatId, userId)) { context.Response.StatusCode = 403; return; }
 
             var webSocket = await context.WebSockets.AcceptWebSocketAsync();
             userSockets[$"{userId}:{chatId}"] = webSocket;
@@ -41,25 +27,18 @@ public static class ChatWebSocketHandler
 
             var history = db.GetChatHistory(chatId);
             foreach (var msgBytes in history)
-            {
-                await webSocket.SendAsync(
-                    new ArraySegment<byte>(msgBytes),
-                    WebSocketMessageType.Binary,
-                    endOfMessage: true,
-                    CancellationToken.None);
-            }
+                await webSocket.SendAsync(new ArraySegment<byte>(msgBytes), WebSocketMessageType.Binary, true, CancellationToken.None);
 
-            await HandleAsync(webSocket, sockets, chatId, userId, db, context, notificationSockets, userSockets);
+            await HandleAsync(webSocket, sockets, chatId, userId, db, notificationSockets, userSockets);
         });
     }
 
-    private static async Task HandleAsync(
+    public static async Task HandleAsync(
         WebSocket webSocket,
         List<WebSocket> sockets,
         string chatId,
         string userId,
-        DatabaseConnection db,
-        HttpContext context,
+        IDatabaseConnection db,
         ConcurrentDictionary<string, WebSocket> notificationSockets,
         ConcurrentDictionary<string, WebSocket> userSockets)
     {
@@ -69,11 +48,7 @@ public static class ChatWebSocketHandler
         {
             while (webSocket.State == WebSocketState.Open)
             {
-                if (!db.isUserAllowed(chatId, userId))
-                {
-                    context.Response.StatusCode = 403;
-                    return;
-                }
+                if (!db.isUserAllowed(chatId, userId)) return;
 
                 var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
@@ -94,14 +69,8 @@ public static class ChatWebSocketHandler
                 {
                     if (socket != webSocket && socket.State == WebSocketState.Open)
                     {
+                        await socket.SendAsync(new ArraySegment<byte>(msgBytes), WebSocketMessageType.Binary, true, CancellationToken.None);
 
-                        await socket.SendAsync(
-                            new ArraySegment<byte>(msgBytes),
-                            WebSocketMessageType.Binary,
-                            endOfMessage: true,
-                            CancellationToken.None);
-
-                        // Find which user this socket belongs to and mark as read
                         var recipientKey = userSockets.FirstOrDefault(kvp => kvp.Value == socket).Key;
                         if (recipientKey != null)
                         {
