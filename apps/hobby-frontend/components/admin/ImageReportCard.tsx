@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ContentFlag } from "@/types/enums";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { deleteMediaFile, updateContentFlag } from "@/lib/reportClient";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
 
 interface ImageReportCardProps {
   item: ReportedFile;
@@ -56,6 +57,7 @@ export const ImageReportCard = ({
   } | null>(null);
   const lastPinchDist = useRef<number | null>(null);
   const imgRef = useRef<HTMLDivElement>(null);
+  const { showErrorToast} = useErrorToast();
 
   const imageSrc = `data:${item.contentType};base64,${item.file}`;
 
@@ -174,13 +176,11 @@ export const ImageReportCard = ({
     try {
       setSubmitting(true);
       await updateContentFlag(form);
-      setToast({
-        message: "Content flag updated successfully",
-        type: "success",
-      });
+      showErrorToast("Content flag updated", "", "success");
       setTimeout(onRemove, 3000);
     } catch (error) {
-      setToast({ message: "Failed to update content flag", type: "error" });
+      const message = error instanceof Error ? error.message : "";
+      showErrorToast("Failed to update content flag", message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -204,10 +204,11 @@ export const ImageReportCard = ({
     try {
       setSubmitting(true);
       await deleteMediaFile(item.hash);
-      setToast({ message: "File was deleted", type: "success" });
+      showErrorToast("File was deleted", "", "success")
       setTimeout(onRemove, 3000);
     } catch (error) {
-      setToast({ message: "Failed to delete media file", type: "error" });
+      const message = error instanceof Error ? error.message : "";
+      showErrorToast("Failed to delete file", message, "error");
     } finally {
       setSubmitting(false);
       setDeleteModal(false);
@@ -393,13 +394,6 @@ export const ImageReportCard = ({
           </div>
         </div>
       )}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onDone={() => setToast(null)}
-        />
-      )}
       {deleteModalOpen && (
         <DeleteModal
           imageSrc={imageSrc}
@@ -410,40 +404,6 @@ export const ImageReportCard = ({
     </motion.div>
   );
 };
-
-function Toast({
-  message,
-  type,
-  onDone,
-}: {
-  message: string;
-  type: "success" | "error";
-  onDone: () => void;
-}) {
-  useEffect(() => {
-    const timer = setTimeout(onDone, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const isSuccess = type === "success";
-
-  return (
-    <div
-      className={`
-            fixed bottom-6 left-1/2 -translate-x-1/2
-            px-9 py-2 rounded-xl text-sm font-semibold
-            border transition-colors animate-fade-in-up
-            ${
-              isSuccess
-                ? "bg-brand/30 border-brand/20 text-brand"
-                : "bg-red-500/30 border-red-500/30 text-red-400"
-            }
-        `}
-    >
-      {message}
-    </div>
-  );
-}
 
 function DeleteModal({
   imageSrc,

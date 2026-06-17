@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Controller
@@ -73,11 +74,11 @@ public class PostsController {
 
     @ResponseBody
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> createPost(
+    public ResponseEntity<Set<UUID>> createPost(
             @RequestPart("data") PostDTO dto,
             @RequestPart(value = "files[]", required = false) List<MultipartFile> files) {
         dto.mediaInstanceDTOSet = files;
-        Object response = postService.forwardCreatePost(dto);
+        Set<UUID> response = postService.forwardCreatePost(dto);
         return ResponseEntity.ok(response);
     }
 

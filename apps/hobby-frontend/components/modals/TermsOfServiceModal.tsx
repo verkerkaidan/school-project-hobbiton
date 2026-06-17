@@ -21,14 +21,15 @@ const TOS_SECTIONS: TosSection[] = [
             "through it."
     },
     {
-        title: "3. USER CONTENT",
+        title: "2. USER CONTENT",
         body: "You retain ownership of the content you post, including text, images, comments, and other materials." +
             "\nBy posting content, you grant Hobbiton a non-exclusive, worldwide, royalty-free license to store, " +
             "display, and distribute that content as necessary to operate the platform." +
-            "\nYou are solely responsible for any content you upload or share."
+            "\nYou are solely responsible for any content you upload or share." +
+            "\nTo grant you successful access to the Hobbiton platform, we store Cookies on your device."
     },
     {
-        title: "4. PROHIBITED CONTENT",
+        title: "3. PROHIBITED CONTENT",
         body: "Users may not post, upload, share, or distribute content that:" +
             "\n  - Is illegal or promotes illegal activity." +
             "\n  - Harasses, threatens, intimidates, or abuses other users." +
@@ -41,7 +42,7 @@ const TOS_SECTIONS: TosSection[] = [
             "automatically imply that such content is permitted on the platform."
     },
     {
-        title: "5. MODERATION AND ENFORCEMENT",
+        title: "4. MODERATION AND ENFORCEMENT",
         body: "To maintain a safe and welcoming community, administrators and moderators may review content " +
             "posted on the platform. As such, administrators reserve the right to:" +
             "\n  - Remove or restrict access to any post, image, comment, profile, or other content." +
@@ -52,13 +53,13 @@ const TOS_SECTIONS: TosSection[] = [
             "considered harmful, inappropriate, disruptive, or in any way a violation of these Terms."
     },
     {
-        title: "6. REPORTING CONTENT",
+        title: "5. REPORTING CONTENT",
         body: "Users may report content or behavior they believe violates these Terms." +
             "\nThe platform may investigate reports and take appropriate action, including content " +
             "removal or account suspension."
     },
     {
-        title: "7. AVAILABILITY AND SERVICE",
+        title: "6. AVAILABILITY AND SERVICE",
         body: "The platform is provided on an \"as is\" and \"as available\" basis." +
             "\nBecause this project is developed, maintained, and operated by students, we do not guarantee:" +
             "\n  - Continuous availability." +
@@ -68,7 +69,7 @@ const TOS_SECTIONS: TosSection[] = [
             "\nWe may modify, suspend, or discontinue any part of the platform at any time without notice."
     },
     {
-        title: "8. LIMITATION AND LIABILITY",
+        title: "7. LIMITATION AND LIABILITY",
         body: "To the fullest extent permitted by law, Hobbiton, its developers, and contributors shall not " +
             "be liable for any damages, losses, or claims arising from:" +
             "\n  - User-generated content." +
@@ -78,7 +79,7 @@ const TOS_SECTIONS: TosSection[] = [
             "\n  - Unauthorized access to user accounts or data."
     },
     {
-        title: "9. CHANGES TO THESE TERMS",
+        title: "8. CHANGES TO THESE TERMS",
         body: "We may update these Terms from time to time." +
             "\nContinued use of the platform after changes are posted constitutes acceptance of the updated Terms."
     },
