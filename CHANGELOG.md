@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.43.8] - 2026-06-17
+
+### Fixed
+- **fix**: auth helper for e2e tests fix
+
 ### Changed
 - **chore**: tests for notification service
 - **chore**: Tests for media-service-elx/mediaService en media-service-elx/reportService
