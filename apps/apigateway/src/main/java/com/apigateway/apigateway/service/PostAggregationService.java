@@ -99,9 +99,9 @@ public class PostAggregationService {
      * per-author post notifications via the notification service batch endpoint.
      *
      * @param dto PostDTO with a list of datauri's for media
-     * @return Post with a list of instance uuids for media
+     * @return Set of instance uuids for media
      */
-    public Object forwardCreatePost(PostDTO dto) {
+    public Set<UUID> forwardCreatePost(PostDTO dto) {
 
         // -----------------------------
         // 1. FIX: ensure type consistency
@@ -141,12 +141,12 @@ public class PostAggregationService {
         // -----------------------------
         // 4. SEND TO POST SERVICE
         // -----------------------------
-        Object savedPost = webClient.post()
+        Post savedPost = webClient.post()
                 .uri(postServiceUrl + "/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .retrieve()
-                .bodyToMono(Object.class)
+                .bodyToMono(Post.class)
                 .block();
 
         // -----------------------------
@@ -154,18 +154,13 @@ public class PostAggregationService {
         // -----------------------------
         UUID savedPostId = null;
         String savedPostTitle = dto.title;
+        Set<UUID> savedPostMediaSet = new HashSet<>();
 
         try {
-            if (savedPost instanceof Map<?, ?> map) {
-                Object idObj = map.get("id");
-                if (idObj != null) {
-                    savedPostId = UUID.fromString(idObj.toString());
-                }
-
-                Object titleObj = map.get("title");
-                if (titleObj != null && !titleObj.toString().isBlank()) {
-                    savedPostTitle = titleObj.toString();
-                }
+            if (!savedPost.equals(null)) {
+                savedPostId = savedPost.getId();
+                savedPostTitle = savedPost.getTitle();
+                savedPostMediaSet = dto.mediaInstanceSet;
             }
         } catch (Exception ignored) {}
 
@@ -182,7 +177,7 @@ public class PostAggregationService {
                     dto.userId, e.getMessage());
         }
 
-        return savedPost;
+        return savedPostMediaSet;
     }
 
     /**

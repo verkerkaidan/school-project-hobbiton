@@ -13,8 +13,8 @@ import { BaseCreatePost, CreateGymPost, CreatePost, CreateReadingPost, ModalProp
 import Cookies from "js-cookie";
 import HobbyType from "@/types/enums";
 import { motion, AnimatePresence } from "framer-motion";
-import {Post} from "@/types/posts";
 import {useErrorToast} from "@/components/ui/ErrorToastProvider";
+import {UUID} from "node:crypto";
 
 type QueryType = "exercise" | "book" | "movie";
 
@@ -262,9 +262,9 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
     form.userId = Cookies.get("userId")!;
     try {
       setLoading(true);
-      const post: Post = await postCreateRequest({...form, linkedItems});
+      const media: UUID[] = await postCreateRequest({...form, linkedItems});
 
-      if (post.mediaSet.length < form.mediaInstanceDTOSet.length) {
+      if (media.length < form.mediaInstanceDTOSet.length) {
         showErrorToast("Error uploading", "One or more of the uploaded files could not be attached because they are banned on the Hobbiton platform", "error");
       }
 
@@ -519,7 +519,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
                       <span className="np-dropzone-text text-xs md:text-sm">Click or drag & drop</span>
                     </button>
                 )}
-                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/webp,image/png" multiple className="hidden"
                        onChange={handleImageUpload}/>
 
                 {imagePreviews.length > 0 && (

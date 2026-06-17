@@ -1,4 +1,5 @@
 import { CreatePost } from "@/types/interfaces";
+import {UUID} from "node:crypto";
 
 // lib/graphqlClient.ts
 const MIDDLEWARE_ENDPOINT_SERVERSIDE = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE;
@@ -26,7 +27,7 @@ export async function gqlRequest<T>(query: string, variables?: Record<string, un
   return data as T;
 }
 
-export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
+export async function postCreateRequest<T>(post: CreatePost): Promise<UUID[]> {
   const endpoint: string = typeof window === 'undefined' ? MIDDLEWARE_ENDPOINT_SERVERSIDE! : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
   const formData = new FormData();
 
@@ -42,8 +43,6 @@ export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
 
   const payload = { ...rest, linkedItems: mappedLinkedItems };
 
-  console.log("POST JSON", JSON.stringify(payload, null, 2)); // verify the remap
-
   formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
   mediaInstanceDTOSet.forEach((file) => formData.append("files[]", file));
 
@@ -52,7 +51,10 @@ export async function postCreateRequest<T>(post: CreatePost): Promise<T> {
     body: formData,
   });
 
-  const { data, errors } = await res.json();
-  if (errors?.length) throw new Error(errors[0].message);
-  return data as T;
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Could not create post");
+  }
+
+  return await res.json() as UUID[];
 }
