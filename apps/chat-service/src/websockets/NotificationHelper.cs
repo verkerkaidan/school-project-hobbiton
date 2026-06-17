@@ -21,7 +21,7 @@ public static class NotificationHelper
     public static async Task BroadcastUnreadCounts(
         string chatId,
         string senderUserId,
-        DatabaseConnection db,
+        IDatabaseConnection db,
         ConcurrentDictionary<string, WebSocket> notificationSockets)
     {
         var allowedUsers = db.chatUserList(chatId);

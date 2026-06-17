@@ -1,7 +1,7 @@
 using Microsoft.VisualBasic;
 using Npgsql;
 
-public class DatabaseConnection
+public class DatabaseConnection : IDatabaseConnection
 {
     private readonly NpgsqlDataSource _dataSource;
 
