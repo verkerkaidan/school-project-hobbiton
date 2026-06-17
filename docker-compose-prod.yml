@@ -331,7 +331,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-
+    cpus: 1
+    mem_limit: 1024m
     networks:
       - hobbithon-network
 
