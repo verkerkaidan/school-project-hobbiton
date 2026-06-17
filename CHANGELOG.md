@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.41.1] - 2026-06-17
+
+### Fixed
+- **hotfix**: Fix library vars
+
 ## [1.41.0] - 2026-06-17
 
 ### Fixed
