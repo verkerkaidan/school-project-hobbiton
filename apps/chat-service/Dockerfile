@@ -3,11 +3,14 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /app
 
+# Restore dependencies first so this layer is cached until .sln/.csproj changes
+COPY src/webApplication.sln ./src/
+COPY src/webApplication.csproj ./src/
+RUN dotnet restore src/webApplication.sln
+
+# Copy remaining source and publish
 COPY . .
-
 WORKDIR /app/src
-
-RUN dotnet restore webApplication.sln
 RUN dotnet publish webApplication.csproj -c Release -o /app/publish
 
 # Stage 2: Runtime

@@ -1,0 +1,7 @@
+target
+.mvn/repository
+*.class
+*.jar
+.DS_Store
+.git
+README.md
