@@ -49,11 +49,21 @@ async fn main() {
     let database_url = std::env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set");
 
-    let db = Arc::new(
-        DbService::new(&database_url)
-            .await
-            .expect("Failed to connect to Postgres"),
-    );
+    let db = loop {
+        match DbService::new(&database_url).await {
+            Ok(db) => {
+                info!("Postgres ready");
+                break Arc::new(db);
+            }
+            Err(err) => {
+                tracing::warn!(
+                "Postgres not ready yet, retrying in 5s: {}",
+                err
+            );
+                sleep(Duration::from_secs(5)).await;
+            }
+        }
+    };
 
     // ── Service factory ──────────────────────────────────────────────────────
     let factory = Arc::new(ServiceFactory::new());
