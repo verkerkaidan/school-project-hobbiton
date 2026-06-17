@@ -127,9 +127,7 @@ export function SecuritySettings() {
         </div>
         <div className="flex-1">
           <h2 className="font-semibold text-base">Security</h2>
-          <p className="text-accent text-sm">
-            Password, two-factor authentication, and sessions
-          </p>
+          <p className="text-accent text-sm">Email and Password</p>
         </div>
         {isOpen ? (
           <ChevronDown className="text-accent" size={18} />
@@ -254,8 +252,8 @@ export function SecuritySettings() {
             )}
           </div>
 
-          {/* ── Two-factor authentication ────────────────────────────────── */}
-          <div className="px-6 py-5">
+          {/* ── Two-factor authentication (out of scope) ────────────────────────────────── */}
+          {/* <div className="px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs text-accent uppercase tracking-wide">
@@ -277,7 +275,7 @@ export function SecuritySettings() {
                 />
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* ── Active sessions (Out of scope for now) ──────────────────────────────────────────── */}
           {/* <div className="px-6 py-5">

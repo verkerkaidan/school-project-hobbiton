@@ -14,18 +14,13 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfile } from "@/queries/getProfile";
 
 interface ProfileField {
-  key: "displayName" | "username" | "bio";
+  key: "username" | "bio";
   label: string;
   placeholder: string;
   multiline?: boolean;
 }
 
 const PROFILE_FIELDS: ProfileField[] = [
-  {
-    key: "displayName",
-    label: "Display name",
-    placeholder: "Your display name",
-  },
   { key: "username", label: "Username", placeholder: "Your username" },
   {
     key: "bio",
@@ -42,7 +37,6 @@ export function AccountSettings() {
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<ProfileField["key"] | null>(null);
   const [values, setValues] = useState<FieldValues>({
-    displayName: "",
     username: "",
     bio: "",
   });
