@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.40.4] - 2026-06-17
+
+### Fixed
+- **hotfix**: docker compose prod fix
+
 ## [1.40.3] - 2026-06-17
 
 ### Fixed
