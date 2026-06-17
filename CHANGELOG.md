@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.43.6] - 2026-06-17
+
+### Changed
+- **chore**: hobiist instead of user on landing page
+
 ## [1.43.5] - 2026-06-17
 
 ### Fixed
