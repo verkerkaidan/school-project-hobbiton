@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+
+## [1.40.1] - 2026-06-15
+
+### Fixed
+- **hotfix**: auth CORS for prod
+
 ## [1.40.0] - 2026-06-16
 
 ### Fixed
@@ -15,6 +21,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **feat**: Display amount of posts a user had on their profile
+
+## [1.38.2] - 2026-06-16
+
+### Fixed
+- **fix**: added rabbitMQ to prod
 
 ## [1.38.1] - 2026-06-16
 
