@@ -347,6 +347,13 @@ deploy:
       export BUG_REPORT_ALLOWED_ORIGINS='$BUG_REPORT_ALLOWED_ORIGINS'
       export RABBITMQ_DEFAULT_USER='$RABBITMQ_DEFAULT_USER'
       export RABBITMQ_DEFAULT_PASS='$RABBITMQ_DEFAULT_PASS'
+      export GRAFANA_ADMIN_USER='$GRAFANA_ADMIN_USER'
+      export GRAFANA_ADMIN_PASSWORD='$GRAFANA_ADMIN_PASSWORD'
+      export GRAFANA_PORT='$GRAFANA_PORT'
+      export GRAFANA_PLUGINS='$GRAFANA_PLUGINS'
+      export PROMETHEUS_PORT='$PROMETHEUS_PORT'
+      export LOKI_PORT='$LOKI_PORT'
+      export TZ='$TZ'
       docker compose -f docker-compose-prod.yml pull
       docker compose -f docker-compose-prod.yml stop frontend || true
       docker compose -f docker-compose-prod.yml rm -f frontend || true
