@@ -95,3 +95,21 @@ export async function reorderItems(listId: string, itemIds: string[]) {
     if (!res.ok) throw new Error("Failed to reorder items");
     return res.json();
 }
+
+export async function searchLibrary(queryType: string, query: string): Promise<any> {
+    // Adjust port if needed; default Spring Boot is 8080
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
+        {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({type: queryType, query, maxResults: 10}),
+        }
+    );
+
+    if (!res.ok) throw new Error("Failed to fetch results");
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Unknown error");
+
+    return data;
+}
