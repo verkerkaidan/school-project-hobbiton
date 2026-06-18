@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.48.2] - 2026-06-18
+
+### Changed
+- **chore**: fix ci
+
 ## [1.48.1] - 2026-06-18
 
 ### Changed
