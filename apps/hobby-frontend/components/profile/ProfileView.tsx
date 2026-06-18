@@ -102,10 +102,16 @@ export function ProfileView({
             : await getProfile(userId!);
           const targetId = profileData.id;
           setResolvedUserId(targetId);
-          const [following, blocking, followsBack, subscription] =
+          // Skip relationship checks until the current user's ID is known
+          if (!currentUserId) {
+            setProfile(profileData);
+            return;
+          }
+          const [following, blocking, blockedByTarget, followsBack, subscription] =
             await Promise.all([
               checkIsFollowing(currentUserId, targetId),
               checkIsBlocking(currentUserId, targetId),
+              checkIsBlocking(targetId, currentUserId),
               checkIsFollowing(targetId, currentUserId),
               getPostSubscription(targetId).catch(() => ({
                 subscribed: false,
@@ -113,7 +119,7 @@ export function ProfileView({
             ]);
           setProfile(profileData);
           setIsFollowing(following);
-          setIsBlocked(blocking);
+          setIsBlocked(blocking || blockedByTarget);
           setTargetFollowsCurrentUser(followsBack);
           setIsSubscribed(subscription.subscribed);
         }

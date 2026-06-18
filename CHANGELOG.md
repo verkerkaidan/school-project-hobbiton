@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: E2E tests: Notifications, Bug Report, Profile Connections
+
 ## [1.44.0] - 2026-06-18
 
 ### Changed
