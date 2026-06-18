@@ -212,7 +212,15 @@ build:
   script:
     - |
       set -e
-      for SERVICE_NAME in apigateway authentication-service-c chat-service interaction-service library-service media_service_elx notification-service bug-report-service post-service profile-connection-service profile-service recognition-service; do
+      if git diff --name-only HEAD~1 HEAD | grep -q "^docker/docs-auth/"; then
+        echo "Changes detected in docs-proxy, building..."
+        docker build -t "$CI_REGISTRY_IMAGE/docs-proxy:latest" docker/docs-auth
+        docker push "$CI_REGISTRY_IMAGE/docs-proxy:latest"
+        docker rmi "$CI_REGISTRY_IMAGE/docs-proxy:latest"
+      else
+        echo "No changes in docs-proxy, skipping."
+      fi
+      for SERVICE_NAME in apigateway authentication-service-c chat-service docs interaction-service library-service media_service_elx notification-service bug-report-service post-service profile-connection-service profile-service recognition-service; do
         if git diff --name-only HEAD~1 HEAD | grep -q "^apps/$SERVICE_NAME/"; then
           echo "Changes detected in $SERVICE_NAME, building service from scratch..."
           docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
@@ -267,6 +275,8 @@ deploy:
     - chmod 600 ~/.ssh/config
   script:
     - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" mkdir -p ~/docker/docs-auth
+    - scp docker/docs-auth/nginx.conf docker/docs-auth/entrypoint.sh "$DEPLOY_USER@$DEPLOY_HOST:~/docker/docs-auth/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
@@ -345,6 +355,8 @@ deploy:
       export DB_BUGREPORT_PASSWORD='$DB_BUGREPORT_PASSWORD'
       export DB_BUGREPORT_NAME='$DB_BUGREPORT_NAME'
       export BUG_REPORT_ALLOWED_ORIGINS='$BUG_REPORT_ALLOWED_ORIGINS'
+      export DOCS_USER='$DOCS_USER'
+      export DOCS_PASSWORD='$DOCS_PASSWORD'
       export RABBITMQ_DEFAULT_USER='$RABBITMQ_DEFAULT_USER'
       export RABBITMQ_DEFAULT_PASS='$RABBITMQ_DEFAULT_PASS'
       export GRAFANA_ADMIN_USER='$GRAFANA_ADMIN_USER'
