@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: add agent md files to services
+
 ## [1.47.1] - 2026-06-18
 
 ### Fixed
