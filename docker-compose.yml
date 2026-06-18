@@ -341,12 +341,27 @@ services:
       context: ./apps/docs
     container_name: docs
     restart: unless-stopped
-    ports:
-      - "3001:3001"
     cpus: 0.25
     mem_limit: 128m
     networks:
       - microservices-network
+
+  docs-proxy:
+    build:
+      context: ./docker/docs-auth
+    container_name: docs-proxy
+    restart: unless-stopped
+    ports:
+      - "13001:13001"
+    environment:
+      DOCS_USER: ${DOCS_USER}
+      DOCS_PASSWORD: ${DOCS_PASSWORD}
+    cpus: 0.25
+    mem_limit: 64m
+    networks:
+      - microservices-network
+    depends_on:
+      - docs
 
   redis:
     image: redis:7-alpine

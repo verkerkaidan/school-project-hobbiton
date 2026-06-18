@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.48.0] - 2026-06-18
+
+### Security
+- **security**: Release docs to prod, but protect them by password
+
 ## [1.47.2] - 2026-06-18
 
 ### Changed
