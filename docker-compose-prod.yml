@@ -24,6 +24,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
+    profiles: [tools]
     ports:
       - "15050:80"
     environment:
@@ -261,6 +262,7 @@ services:
   docs:
     image: ${CI_REGISTRY_IMAGE}/docs:latest
     restart: always
+    profiles: [tools]
     cpus: 0.5
     mem_limit: 128m
     networks:
@@ -269,6 +271,7 @@ services:
   docs-proxy:
     image: ${CI_REGISTRY_IMAGE}/docs-proxy:latest
     restart: always
+    profiles: [tools]
     ports:
       - "13001:13001"
     environment:
@@ -360,6 +363,7 @@ services:
   loki:
     image: grafana/loki:latest
     restart: unless-stopped
+    profiles: [monitoring]
     ports:
       - "21528"
     volumes:
@@ -376,6 +380,7 @@ services:
   promtail:
     image: grafana/promtail:latest
     restart: unless-stopped
+    profiles: [monitoring]
     volumes:
       - ./monitoring/loki/promtail.yml:/etc/promtail/promtail.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -392,6 +397,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
+    profiles: [monitoring]
     ports:
       - "21528"
     volumes:
@@ -409,6 +415,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     restart: unless-stopped
+    profiles: [monitoring]
     ports:
       - "11527"
     volumes:
