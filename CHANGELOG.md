@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **fix**: auth helper for e2e tests fix
 
 ### Changed
+- **chore**: Tests for Bug Report service
 - **chore**: tests for notification service
 - **chore**: Tests for media-service-elx/mediaService en media-service-elx/reportService
 
