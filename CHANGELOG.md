@@ -6,11 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [1.47.2] - 2026-06-18
-
-### Fixed
-- **fix**: fix deployment by switching some promtail stuff around
-
 ### Changed
 - **chore**: add agent md files to services
 
