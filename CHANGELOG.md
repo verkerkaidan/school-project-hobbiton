@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.47.1] - 2026-06-18
+
+### Fixed
+- **fix**: Container names where sometimes explicitly set, now they are dynamic
+
 ## [1.47.0] - 2026-06-18
 
 ### Added
