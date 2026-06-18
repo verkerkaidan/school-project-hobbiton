@@ -275,8 +275,12 @@ deploy:
     - chmod 600 ~/.ssh/config
   script:
     - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" mkdir -p ~/docker/docs-auth
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" mkdir -p ~/docker/docs-auth ~/monitoring/loki ~/monitoring/grafana/datasources ~/monitoring/grafana/dashboards
     - scp docker/docs-auth/nginx.conf docker/docs-auth/entrypoint.sh "$DEPLOY_USER@$DEPLOY_HOST:~/docker/docs-auth/"
+    - scp monitoring/prometheus.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/prometheus.yml"
+    - scp monitoring/loki/loki.yml monitoring/loki/promtail.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/loki/"
+    - scp monitoring/grafana/datasources/datasource.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/grafana/datasources/"
+    - scp monitoring/grafana/dashboards/dashboard.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/grafana/dashboards/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
@@ -366,8 +370,20 @@ deploy:
       export PROMETHEUS_PORT='$PROMETHEUS_PORT'
       export LOKI_PORT='$LOKI_PORT'
       export TZ='$TZ'
-      docker compose -f docker-compose-prod.yml pull
+
+      # Pull all images (core + optional)
+      docker compose -f docker-compose-prod.yml --profile monitoring --profile tools pull
+
+      # Deploy core prod services — failure here fails the pipeline
       docker compose -f docker-compose-prod.yml stop frontend || true
       docker compose -f docker-compose-prod.yml rm -f frontend || true
       docker compose -f docker-compose-prod.yml up -d --remove-orphans
+
+      # Deploy optional services — capture failure but don't abort core deploy
+      OPTIONAL_EXIT=0
+      docker compose -f docker-compose-prod.yml --profile monitoring --profile tools up -d || OPTIONAL_EXIT=\$?
+      if [ \$OPTIONAL_EXIT -ne 0 ]; then
+        echo "WARNING: One or more optional services (monitoring/docs/pgadmin) failed to start. Core services are unaffected."
+        exit \$OPTIONAL_EXIT
+      fi
       EOF
