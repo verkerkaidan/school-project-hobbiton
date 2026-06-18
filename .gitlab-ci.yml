@@ -275,7 +275,7 @@ deploy:
     - chmod 600 ~/.ssh/config
   script:
     - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" 'mkdir -p ~/docker/docs-auth ~/monitoring/loki ~/monitoring/grafana/datasources ~/monitoring/grafana/dashboards'
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" 'mkdir -p ~/docker/docs-auth ~/monitoring/loki ~/monitoring/grafana/datasources ~/monitoring/grafana/dashboards 2>/dev/null || true'
     - scp docker/docs-auth/nginx.conf docker/docs-auth/entrypoint.sh "$DEPLOY_USER@$DEPLOY_HOST:~/docker/docs-auth/"
     - scp monitoring/prometheus.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/prometheus.yml"
     - scp monitoring/loki/loki.yml monitoring/loki/promtail.yml "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/loki/"
