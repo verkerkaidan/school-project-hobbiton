@@ -1,11 +1,12 @@
 stages:
+  - validate
   - test
   - build
   - deploy
 
 # Enforce changelog update on every merge request
 check:changelog:
-  stage: test
+  stage: validate
   image: alpine:latest
   variables:
     GIT_DEPTH: "0"
