@@ -7,6 +7,10 @@ public class ReportDTO {
     private String id;
     private String initiator;
     private String target;
+    /** Username of the reporting user — populated by the gateway, not the connection service. */
+    private String initiatorUsername;
+    /** Username of the reported user — populated by the gateway, not the connection service. */
+    private String targetUsername;
     private String reason;
     private String description;
     private String status;
@@ -37,6 +41,22 @@ public class ReportDTO {
 
     public void setTarget(String target) {
         this.target = target;
+    }
+
+    public String getInitiatorUsername() {
+        return initiatorUsername;
+    }
+
+    public void setInitiatorUsername(String initiatorUsername) {
+        this.initiatorUsername = initiatorUsername;
+    }
+
+    public String getTargetUsername() {
+        return targetUsername;
+    }
+
+    public void setTargetUsername(String targetUsername) {
+        this.targetUsername = targetUsername;
     }
 
     public String getReason() {

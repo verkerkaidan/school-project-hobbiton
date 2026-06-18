@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/profile")
@@ -84,7 +85,25 @@ public class ProfileController {
     @GetMapping("/all")
     public ResponseEntity<List<ProfileSummaryDTO>> getAllProfiles() {
         List<ProfileSummaryDTO> profiles = profileRepository.findAll().stream()
-                .map(profile -> new ProfileSummaryDTO(profile.getUsername(), profile.getMediaPointer()))
+                .map(profile -> new ProfileSummaryDTO(
+                        profile.getUserId().toString(),
+                        profile.getUsername(),
+                        profile.getMediaPointer()))
+                .toList();
+        return ResponseEntity.ok(profiles);
+    }
+
+    /// This endpoint ("api/profile/batch") accepts a list of user UUIDs and returns
+    /// lightweight profile summaries (userId + username + profilePictureUrl) for each one.
+    /// Used by the gateway to bulk-enrich report data with usernames in a single round-trip.
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProfileSummaryDTO>> getProfilesByIds(@RequestBody List<UUID> userIds) {
+        List<ProfileSummaryDTO> profiles = StreamSupport
+                .stream(profileRepository.findAllById(userIds).spliterator(), false)
+                .map(profile -> new ProfileSummaryDTO(
+                        profile.getUserId().toString(),
+                        profile.getUsername(),
+                        profile.getMediaPointer()))
                 .toList();
         return ResponseEntity.ok(profiles);
     }

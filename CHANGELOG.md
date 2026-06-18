@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.44.0] - 2026-06-18
+
+### Changed
+- **refactor**: Add pagination to feed, make admin scrollable, improve request handling by batches
+
 ## [1.43.8] - 2026-06-17
 
 ### Fixed

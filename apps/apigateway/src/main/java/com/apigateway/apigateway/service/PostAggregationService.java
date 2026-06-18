@@ -61,7 +61,11 @@ public class PostAggregationService {
     }
 
     public List<Post> getAllPosts() {
-        return postClient.getAllPosts();
+        return postClient.getPagedPosts(0, Integer.MAX_VALUE);
+    }
+
+    public List<Post> getPagedPosts(int page, int size) {
+        return postClient.getPagedPosts(page, size);
     }
 
     /**

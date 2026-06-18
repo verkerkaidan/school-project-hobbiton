@@ -107,38 +107,40 @@ export function UsersOverview() {
           </div>
         )}
 
-        {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-accent/15 bg-background p-4 animate-pulse"
-              >
-                <div className="h-14 w-14 rounded-full bg-accent/10 mb-3" />
-                <div className="h-4 w-32 rounded bg-accent/10" />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!error && !loading && filteredProfiles.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filteredProfiles.map((profile) => (
-              <Link
-                key={profile.username}
-                href={`/profile/${encodeURIComponent(profile.username)}`}
-                className="rounded-xl border border-accent/15 bg-background p-4 hover:bg-background-secondary hover:border-accent/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <UserImage profile={profile} />
-                  <span className="text-base text-accent font-medium break-all">
-                    {profile.username}
-                  </span>
+        <div className="max-h-96 overflow-y-auto pr-1">
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-accent/15 bg-background p-4 animate-pulse"
+                >
+                  <div className="h-14 w-14 rounded-full bg-accent/10 mb-3" />
+                  <div className="h-4 w-32 rounded bg-accent/10" />
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+
+          {!error && !loading && filteredProfiles.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filteredProfiles.map((profile) => (
+                <Link
+                  key={profile.username}
+                  href={`/profile/${encodeURIComponent(profile.username)}`}
+                  className="rounded-xl border border-accent/15 bg-background p-4 hover:bg-background-secondary hover:border-accent/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserImage profile={profile} />
+                    <span className="text-base text-accent font-medium break-all">
+                      {profile.username}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

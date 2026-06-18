@@ -29,6 +29,22 @@ export async function doesLikeExist(userId:string, referenceId: string): Promise
     return await res.json();
 }
 
+/**
+ * Batch check: given a userId and a list of post IDs, returns the Set of IDs
+ * the user has liked. Replaces N individual doesLikeExist calls with one request.
+ */
+export async function batchDoesLikeExist(userId: string, referenceIds: string[]): Promise<Set<string>> {
+    if (!referenceIds.length) return new Set();
+    const res = await fetch(`${API_BASE}/interaction/likes/batch?userId=${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(referenceIds),
+    });
+    if (!res.ok) return new Set();
+    const liked: string[] = await res.json();
+    return new Set(liked);
+}
+
 export async function createComment(userId: string, referenceId: string, comment: string): Promise<string> {
     const res = await fetch(`${API_BASE}/interaction`, {
         method: "POST",

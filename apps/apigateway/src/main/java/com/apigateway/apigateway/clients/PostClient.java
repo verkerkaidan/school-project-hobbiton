@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,11 +16,12 @@ public interface PostClient {
     @GetMapping("/posts/hobby/{hobbyType}")
     List<Post> getPostsByHobbyType(@PathVariable HobbyType hobbyType);
 
+    /** Paginated list — use page=0,size=16 for the feed. */
     @GetMapping("/posts")
-    List<Post> getAllPosts();
+    List<Post> getPagedPosts(@RequestParam("page") int page, @RequestParam("pagesize") int pagesize);
 
     @GetMapping("/posts/users/{user_id}")
-    List<Post> getUserPosts(@PathVariable("user_id") java.util.UUID userId);
+    List<Post> getUserPosts(@PathVariable("user_id") UUID userId);
 
     @GetMapping("/posts/{id}")
     Post getPostById(@PathVariable UUID id);

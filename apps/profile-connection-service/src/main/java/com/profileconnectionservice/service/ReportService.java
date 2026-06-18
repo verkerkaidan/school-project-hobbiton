@@ -41,6 +41,10 @@ public class ReportService {
         return reportRepository.findByStatus(status);
     }
 
+    public List<Report> getAllReports() {
+        return reportRepository.findAll();
+    }
+
     public Optional<Report> getReportById(UUID reportId) {
         return reportRepository.findById(reportId);
     }

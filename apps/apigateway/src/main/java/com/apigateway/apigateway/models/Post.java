@@ -33,13 +33,15 @@ public abstract class Post {
     private String description;
     private String title;
     private UUID userId;
+    /** Pre-populated by the gateway's batch fetch in getPosts — avoids per-card profile lookups. */
+    private String authorUsername;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<MediaInstance> mediaInstanceSet;
     private String hobbyType;
     private List<MediaDTO> mediaDTOSet;
     private Interaction interaction;
-    private List<LinkedHobbyItem> linkedItems = new ArrayList<>(); // ← new
+    private List<LinkedHobbyItem> linkedItems = new ArrayList<>();
 
     public Post() {}
 
@@ -64,6 +66,8 @@ public abstract class Post {
     public void setTitle(String title) { this.title = title; }
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
+    public String getAuthorUsername() { return authorUsername; }
+    public void setAuthorUsername(String authorUsername) { this.authorUsername = authorUsername; }
     public UUID getId() { return id; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
