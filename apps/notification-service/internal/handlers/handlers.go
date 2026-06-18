@@ -34,6 +34,8 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	// Notification CRUD — JWT via Authorization header
 	mux.HandleFunc("POST /notifications", withCORS(h.cfg, h.createNotification))
 	mux.HandleFunc("POST /notifications/batch", withCORS(h.cfg, h.batchCreateNotifications))
+	mux.HandleFunc("DELETE /notifications/users/me", withCORS(h.cfg, h.deleteUserNotifications))
+	mux.HandleFunc("DELETE /notifications/users/{userId}", withCORS(h.cfg, h.adminDeleteUserNotifications))
 	mux.HandleFunc("GET /notifications", withCORS(h.cfg, h.listNotifications))
 	mux.HandleFunc("PATCH /notifications/{id}/read", withCORS(h.cfg, h.markAsRead))
 	mux.HandleFunc("POST /notifications/read-all", withCORS(h.cfg, h.markAllRead))

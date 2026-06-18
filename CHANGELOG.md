@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.45.0] - 2026-06-18
+
+### Added
+- **feat**: Allow user to delete all mentions in notification service
+
 ### Changed
 - **chore**: Move changelog job to validate stage
 - **chore**: E2E tests: Notifications, Bug Report, Profile Connections
