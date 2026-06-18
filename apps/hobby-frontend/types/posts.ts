@@ -40,6 +40,7 @@ export interface Post {
   mediaSet: MediaSet[];
   interaction: Interaction;
   linkedItems: LinkedHobbyItem[];
+  authorUsername?: string;
 }
 
 export interface Gym extends Post {

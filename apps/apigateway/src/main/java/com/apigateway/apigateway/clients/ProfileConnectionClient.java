@@ -47,6 +47,10 @@ public interface ProfileConnectionClient {
     @PostMapping("/reports")
     void createReport(@RequestBody CreateReportRequest request);
 
+    // Admin: fetch every report regardless of status
+    @GetMapping("/reports/all")
+    List<ReportDTO> getAllReports();
+
     // Admin: fetch all reports with a given status
     @GetMapping("/reports/status/{status}")
     List<ReportDTO> getReportsByStatus(@PathVariable String status);

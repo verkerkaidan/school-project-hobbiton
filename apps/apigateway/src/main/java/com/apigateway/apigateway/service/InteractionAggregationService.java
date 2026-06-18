@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -32,6 +34,16 @@ public class InteractionAggregationService {
         this.postClient = postClient;
         this.profileClient = profileClient;
         this.notificationClient = notificationClient;
+    }
+
+    /** Batch check: returns the subset of referenceIds that userId has liked — 1 DB query. */
+    public Set<UUID> batchDoesUserLike(UUID userId, List<UUID> referenceIds) {
+        try {
+            return interactionClient.batchDoesUserLike(userId, referenceIds);
+        } catch (Exception e) {
+            logger.error("[InteractionAggregationService batchDoesUserLike] Failed: {}", e.getMessage());
+            return Set.of();
+        }
     }
 
     public boolean doesLikeExist(UUID userId, UUID referenceId) {

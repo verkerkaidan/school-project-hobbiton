@@ -9,28 +9,15 @@ export interface AdminProfileSummary {
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
 
-/** Fetch reports filtered by status. Pass "ALL" to fetch every status in parallel. */
+/**
+ * Fetch reports filtered by status.
+ * Pass "ALL" to retrieve every report regardless of status — the gateway
+ * handles this in a single call to the profile-connection-service and enriches
+ * each report with initiatorUsername / targetUsername before responding.
+ */
 export async function getReportsByStatus(
   status: ReportStatus | "ALL",
 ): Promise<Report[]> {
-  if (status === "ALL") {
-    const statuses: ReportStatus[] = [
-      "PENDING",
-      "UNDER_REVIEW",
-      "RESOLVED",
-      "DISMISSED",
-      "ACTION_TAKEN",
-    ];
-    const results = await Promise.all(
-      statuses.map((s) =>
-        fetch(`${MIDDLEWARE_URL}/api/admin/reports/status/${s}`)
-          .then((r) => (r.ok ? (r.json() as Promise<Report[]>) : []))
-          .catch(() => [] as Report[]),
-      ),
-    );
-    return results.flat();
-  }
-
   const res = await fetch(
     `${MIDDLEWARE_URL}/api/admin/reports/status/${status}`,
   );

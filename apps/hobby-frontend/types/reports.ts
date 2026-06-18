@@ -25,6 +25,10 @@ export interface Report {
   initiator: string;
   /** UUID of the user being reported */
   target: string;
+  /** Username — enriched by the gateway before delivery; falls back to the UUID string */
+  initiatorUsername?: string;
+  /** Username — enriched by the gateway before delivery; falls back to the UUID string */
+  targetUsername?: string;
   reason: ReportReason;
   description: string;
   status: ReportStatus;

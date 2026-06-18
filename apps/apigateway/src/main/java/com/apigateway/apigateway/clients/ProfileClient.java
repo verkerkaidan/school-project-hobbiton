@@ -27,6 +27,11 @@ public interface ProfileClient {
     @GetMapping("/profile/all")
     List<AdminProfileSummaryResponse> getAllProfiles();
 
+    // Bulk-fetch lightweight profile summaries for a specific set of user IDs.
+    // Used by the gateway to enrich report data with usernames in a single request.
+    @PostMapping("/profile/batch")
+    List<AdminProfileSummaryResponse> getProfilesByIds(@RequestBody List<UUID> userIds);
+
     // Creates a new profile in the profile-service; the Bearer token is forwarded
     // so the
     // profile-service can extract the userId from the JWT claims

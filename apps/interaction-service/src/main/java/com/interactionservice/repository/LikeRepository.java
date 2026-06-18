@@ -26,4 +26,10 @@ public interface LikeRepository extends JpaRepository<CustomLike, UUID> {
 
     // Delete all like that are connected to the given reference
     void deleteAllByUserId(UUID userId);
+
+    // Bulk: get all likes for a set of references in one query
+    List<CustomLike> findAllByReferenceIdIn(List<UUID> referenceIds);
+
+    // Bulk: which of a given set of references has a specific user liked?
+    List<CustomLike> findAllByUserIdAndReferenceIdIn(UUID userId, List<UUID> referenceIds);
 }

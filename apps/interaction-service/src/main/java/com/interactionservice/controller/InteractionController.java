@@ -1,8 +1,12 @@
 package com.interactionservice.controller;
 
+import com.interactionservice.dto.BatchInteractionDTO;
 import com.interactionservice.dto.CommentDTO;
 import com.interactionservice.dto.InteractionReturnDTO;
 import com.interactionservice.model.Comment;
+import com.interactionservice.model.CustomLike;
+import com.interactionservice.repository.CommentRepository;
+import com.interactionservice.repository.LikeRepository;
 import com.interactionservice.service.CommentService;
 import com.interactionservice.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/interaction")
@@ -19,6 +26,10 @@ public class InteractionController {
     private LikeService likeService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private LikeRepository likeRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     /**
      * Toggle a like to a post or comment.
@@ -93,6 +104,61 @@ public class InteractionController {
     public ResponseEntity<List<UUID>> getUsersThatLiked(@PathVariable UUID referenceId) {
         List<UUID> users = likeService.getUsersThatLiked(referenceId);
         return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Bulk fetch interactions for a list of reference IDs (post IDs).
+     * Uses 2 DB queries total (one for likes, one for comments) regardless of batch size.
+     * Called by the gateway's getPosts to avoid N per-post round-trips.
+     */
+    @PostMapping("/batch")
+    public ResponseEntity<List<BatchInteractionDTO>> batchGetInteractions(
+            @RequestBody List<UUID> referenceIds) {
+        if (referenceIds == null || referenceIds.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        // 1 DB query: all likes for all requested references
+        Map<UUID, Long> likeCountByRef = likeRepository
+                .findAllByReferenceIdIn(referenceIds)
+                .stream()
+                .collect(Collectors.groupingBy(CustomLike::getReferenceId, Collectors.counting()));
+
+        // 1 DB query: all comments for all requested references
+        Map<UUID, List<Comment>> commentsByRef = commentRepository
+                .findAllByReferenceIdIn(referenceIds)
+                .stream()
+                .collect(Collectors.groupingBy(Comment::getReferenceId));
+
+        List<BatchInteractionDTO> result = referenceIds.stream()
+                .map(id -> new BatchInteractionDTO(
+                        id,
+                        likeCountByRef.getOrDefault(id, 0L).intValue(),
+                        commentsByRef.getOrDefault(id, List.of())
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Bulk check: which of a given set of reference IDs has a specific user liked?
+     * Returns the set of referenceIds the user has liked — 1 DB query regardless of batch size.
+     * Called by the gateway to populate the "liked" state for every post on the feed in one shot.
+     */
+    @PostMapping("/likes/batch")
+    public ResponseEntity<Set<UUID>> batchDoesUserLike(
+            @RequestParam("userId") UUID userId,
+            @RequestBody List<UUID> referenceIds) {
+        if (referenceIds == null || referenceIds.isEmpty()) {
+            return ResponseEntity.ok(Set.of());
+        }
+        Set<UUID> liked = likeRepository
+                .findAllByUserIdAndReferenceIdIn(userId, referenceIds)
+                .stream()
+                .map(CustomLike::getReferenceId)
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok(liked);
     }
 
     /**
