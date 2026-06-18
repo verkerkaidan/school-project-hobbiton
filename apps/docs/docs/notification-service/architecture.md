@@ -81,6 +81,44 @@ sequenceDiagram
   Notification-->>Caller: 200 { created, skipped }
 ```
 
+### Self-Service Notification Deletion
+
+```mermaid
+sequenceDiagram
+  participant Client as Authenticated user
+  participant Notification as Notification Service
+  participant DB as PostgreSQL
+
+  Client->>Notification: DELETE /notifications/users/me
+  Notification->>Notification: Validate Bearer JWT
+  alt Invalid token
+    Notification-->>Client: 401 Unauthorized
+  else Valid token
+    Notification->>DB: DELETE WHERE user_id = me OR actor_id = me
+    Notification-->>Client: 200 { "deleted": N }
+  end
+```
+
+### Admin Notification Deletion
+
+```mermaid
+sequenceDiagram
+  participant Admin as Admin caller
+  participant Notification as Notification Service
+  participant DB as PostgreSQL
+
+  Admin->>Notification: DELETE /notifications/users/{userId}
+  Notification->>Notification: Validate Bearer JWT
+  alt Invalid token
+    Notification-->>Admin: 401 Unauthorized
+  else Valid token, missing ROLE_ADMIN
+    Notification-->>Admin: 403 Forbidden
+  else Valid admin token
+    Notification->>DB: DELETE WHERE user_id = userId OR actor_id = userId
+    Notification-->>Admin: 200 { "deleted": N }
+  end
+```
+
 ### WebSocket Registration
 
 ```mermaid

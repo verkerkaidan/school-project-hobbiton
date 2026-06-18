@@ -16,6 +16,8 @@ sidebar_position: 3
 | `PATCH` | `/notifications/{id}/read` | bearer token | Mark one notification as read for the authenticated user. |
 | `POST` | `/notifications/read-all` | bearer token | Mark all unread notifications as read for the authenticated user. |
 | `GET` | `/notifications/unread-count` | bearer token | Return `{ "count": number }`. |
+| `DELETE` | `/notifications/users/me` | bearer token | Hard-delete all notifications where the authenticated user is the recipient or actor. |
+| `DELETE` | `/notifications/users/{userId}` | bearer token (admin) | Hard-delete all notifications for the given user. Requires `ROLE_ADMIN` in the token. |
 | `GET` | `/notification-preferences` | bearer token | Return all known notification type preferences, defaulting missing rows to enabled. |
 | `PUT` | `/notification-preferences/{type}` | bearer token | Upsert `{ "enabled": boolean }` for a notification type. |
 | `GET` | `/user-post-subscriptions/{authorId}` | bearer token | Return whether the authenticated user subscribes to an author's posts. |
