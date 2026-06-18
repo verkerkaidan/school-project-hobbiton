@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: 'apigateway'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets:
+          - middleware-service:23738
+        labels:
+          service: apigateway
+
+  - job_name: 'recognition-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets:
+          - recognition-service:27088
+        labels:
+          service: recognition
+
+  - job_name: 'authentication-service'
+    metrics_path: '/api/auth/metrics'
+    static_configs:
+      - targets:
+          - authentication-service-c:21525
+        labels:
+          service: auth
+
+  - job_name: 'profile-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets:
+          - profile-service:21526
+        labels:
+          service: profile
