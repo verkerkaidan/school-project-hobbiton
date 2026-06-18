@@ -17,6 +17,7 @@ The **Profile Service** stores and serves user profile data, including bios, ava
 - CRUD for user profiles
 - Avatar and profile image management
 - Hobby and interest tags
+- Profile creation is called by the API Gateway's registration consumer as part of the RabbitMQ-based registration saga
 
 ## Environment Variables
 
