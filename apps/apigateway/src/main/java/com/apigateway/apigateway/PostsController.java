@@ -127,11 +127,16 @@ public class PostsController {
      *   profile-service   × 1  (all unique author usernames)
      */
     @QueryMapping
-    public List<Post> getPosts(@Argument Integer page, @Argument Integer size) {
+    public List<Post> getPosts(@Argument Integer page, @Argument Integer size, @Argument UUID currentUserId) {
         int p = page != null ? page : 0;
         int s = size != null ? size : DEFAULT_PAGE_SIZE;
 
-        List<Post> posts = new ArrayList<>(postService.getPagedPosts(p, s));
+        List<Post> posts;
+        if (currentUserId != null) {
+            posts = new ArrayList<>(postService.getPagedPostsForUser(p, s, currentUserId));
+        } else {
+            posts = new ArrayList<>(postService.getPagedPosts(p, s));
+        }
         if (posts.isEmpty()) return posts;
 
         batchEnrichPosts(posts);

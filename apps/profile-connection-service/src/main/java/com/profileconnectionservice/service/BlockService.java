@@ -98,6 +98,19 @@ public class BlockService {
     }
 
     /**
+     * Get all profiles that have blocked this profile.
+     *
+     * @param profileId the profile to check
+     * @return Set of profile IDs that have blocked this profile
+     */
+    public Set<UUID> getBlockedBy(UUID profileId) {
+        return blockRepository.findByBlocked(profileId)
+                .stream()
+                .map(Block::getBlocker)
+                .collect(Collectors.toSet());
+    }
+
+    /**
      * Delete all block records associated with a user (both as initiator and
      * target).
      * This is used for GDPR compliance and right-to-be-forgotten requests.

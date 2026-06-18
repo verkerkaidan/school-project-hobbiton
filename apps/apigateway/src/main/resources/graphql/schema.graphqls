@@ -12,7 +12,7 @@ type Mutation {
 type Query {
   getPostsByHobbyType(hobbyType: HobbyType): [Post]
   getPostById(id: ID): Post
-  getPosts(page: Int, size: Int): [Post]
+  getPosts(page: Int, size: Int, currentUserId: ID): [Post]
   getProfile(userId: ID!): User
   getProfileByUsername(username: String!): User
   getUserPosts(userId: ID!): [Post]

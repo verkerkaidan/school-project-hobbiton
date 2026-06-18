@@ -43,6 +43,10 @@ public interface ProfileConnectionClient {
     @GetMapping("/blocks/{profileId}/blocked")
     Set<UUID> getBlockedIds(@PathVariable UUID profileId);
 
+    // Returns the set of profile IDs that have blocked the given profileId
+    @GetMapping("/blocks/{profileId}/blocked-by")
+    Set<UUID> getBlockedByIds(@PathVariable UUID profileId);
+
     // Submits a new abuse report to the profile-connection-service
     @PostMapping("/reports")
     void createReport(@RequestBody CreateReportRequest request);

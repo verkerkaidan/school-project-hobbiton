@@ -3,69 +3,61 @@
 import { getPagedPosts } from "@/queries/getPosts";
 import { batchDoesLikeExist } from "@/lib/interactionClient";
 import { FeedCard } from "./FeedCard";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Post } from "@/types/posts";
 import Masonry from "react-masonry-css";
 import { breakpointColumns } from "@/constants/breakpointColumns";
-import Cookies from "js-cookie";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+export const FEED_QUERY_KEY = "feed";
 
 const PAGE_SIZE = 16;
 
 export const Feed = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const currentUser = useCurrentUser();
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-  const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-
-  // Sentinel element at the bottom of the feed — when it enters the viewport,
-  // we load the next page.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const loadPage = useCallback(async (pageIndex: number) => {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const newPosts = await getPagedPosts(pageIndex, PAGE_SIZE);
-      if (newPosts.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: [FEED_QUERY_KEY, currentUser?.id],
+    queryFn: ({ pageParam }) =>
+      getPagedPosts(pageParam as number, PAGE_SIZE, currentUser?.id),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.length,
+    enabled: currentUser !== undefined,
+  });
 
-      const userId = Cookies.get("userId");
-      let newLiked = new Set<string>();
-      if (userId && newPosts.length > 0) {
-        newLiked = await batchDoesLikeExist(userId, newPosts.map((p) => p.id));
-      }
+  const posts: Post[] = data?.pages.flat() ?? [];
 
-      setPosts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const deduped = newPosts.filter((p) => !existingIds.has(p.id));
-        return [...prev, ...deduped];
-      });
-      setLikedIds((prev) => new Set([...prev, ...newLiked]));
-    } catch (err) {
-      console.error("[Feed] Failed to load posts:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading]);
-
-  // Load the first page on mount.
+  // Fetch liked state for any newly loaded posts.
   useEffect(() => {
-    loadPage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!currentUser || !data) return;
+    const lastPage = data.pages.at(-1);
+    if (!lastPage || lastPage.length === 0) return;
+    const newIds = lastPage.map((p) => p.id);
+    batchDoesLikeExist(currentUser.id, newIds)
+      .then((liked) => setLikedIds((prev) => new Set([...prev, ...liked])))
+      .catch(console.error);
+  }, [data?.pages.length, currentUser]);
 
-  // Observe the sentinel — when it appears, increment the page counter.
+  // Infinite scroll sentinel.
   useEffect(() => {
-    if (!hasMore) return;
+    if (!hasNextPage) return;
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading && hasMore) {
-          setPage((prev) => prev + 1);
+        if (entries[0].isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { rootMargin: "200px" }
@@ -73,14 +65,9 @@ export const Feed = () => {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loading]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // When the page counter increments, fetch the next page.
-  useEffect(() => {
-    if (page === 0) return;
-    loadPage(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  const loading = isFetching || isFetchingNextPage;
 
   return (
     <div>
@@ -104,7 +91,7 @@ export const Feed = () => {
         {loading && (
           <span className="text-xs text-accent animate-pulse">Loading…</span>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!hasNextPage && posts.length > 0 && (
           <span className="text-xs text-accent opacity-40">You've seen it all.</span>
         )}
       </div>

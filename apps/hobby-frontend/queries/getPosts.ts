@@ -4,8 +4,8 @@ import { gqlRequest } from "@/lib/graphQlClient";
 import { PostResponse } from "@/types/posts";
 
 const GET_PAGED_POSTS_QUERY = `
-query GetPosts($page: Int, $size: Int) {
-  getPosts(page: $page, size: $size) {
+query GetPosts($page: Int, $size: Int, $currentUserId: ID) {
+  getPosts(page: $page, size: $size, currentUserId: $currentUserId) {
     id
     title
     description
@@ -59,8 +59,8 @@ query GetPosts($page: Int, $size: Int) {
 }
 `;
 
-export async function getPagedPosts(page: number, size: number = 16): Promise<PostResponse[]> {
-  const data = await gqlRequest<{ getPosts: PostResponse[] }>(GET_PAGED_POSTS_QUERY, { page, size });
+export async function getPagedPosts(page: number, size: number = 16, currentUserId?: string): Promise<PostResponse[]> {
+  const data = await gqlRequest<{ getPosts: PostResponse[] }>(GET_PAGED_POSTS_QUERY, { page, size, currentUserId });
   return data.getPosts.map((post) => ({
     ...post,
     hobbyType: post.hobbyType || "UNKNOWN",

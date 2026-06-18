@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.46.0] - 2026-06-18
+
+### Added
+- **feat**: Added caching in frontend feed
+- **feat**: Blocked users don't appear in feed anymore.
+
 ## [1.45.0] - 2026-06-18
 
 ### Added
