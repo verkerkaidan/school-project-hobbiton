@@ -14,6 +14,8 @@ import Cookies from "js-cookie";
 import HobbyType from "@/types/enums";
 import { motion, AnimatePresence } from "framer-motion";
 import {useErrorToast} from "@/components/ui/ErrorToastProvider";
+import { useQueryClient } from "@tanstack/react-query";
+import { FEED_QUERY_KEY } from "@/components/feed/Feed";
 import {UUID} from "node:crypto";
 
 type QueryType = "exercise" | "book" | "movie";
@@ -76,6 +78,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // ── Linked items ─────────────────────────────────────────────────────────────
   const [linkedItems, setLinkedItems] = useState<LinkedItem[]>([]);
@@ -268,6 +271,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         showErrorToast("Error uploading", "One or more of the uploaded files could not be attached because they are banned on the Hobbiton platform", "error");
       }
 
+      queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
       router.push("/profile");
       onClose();
     } catch (err) {

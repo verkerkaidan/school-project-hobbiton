@@ -71,6 +71,23 @@ public class BlockController {
     }
 
     /**
+     * Get all profiles that have blocked this profile.
+     * GET /api/blocks/{profileId}/blocked-by
+     */
+    @GetMapping("/{profileId}/blocked-by")
+    public ResponseEntity<Set<UUID>> getBlockedBy(@PathVariable UUID profileId) {
+        log.debug("Received GET /blocks/{}/blocked-by", profileId);
+        try {
+            Set<UUID> blockedBy = blockService.getBlockedBy(profileId);
+            log.debug("getBlockedBy returned {} profiles that have blocked this profile", blockedBy.size());
+            return ResponseEntity.ok(blockedBy);
+        } catch (Exception e) {
+            log.error("Error during getBlockedBy: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
      * Delete all block records for a user (GDPR compliance).
      * DELETE /api/blocks/user/{userUUID}
      * 

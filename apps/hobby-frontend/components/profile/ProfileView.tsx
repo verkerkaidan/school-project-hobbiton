@@ -12,7 +12,6 @@ import {
   getFollowers,
   getFollowing,
   toggleFollow,
-  toggleBlock,
   createReport,
   checkIsFollowing,
   checkIsBlocking,
@@ -24,6 +23,7 @@ import {
 } from "@/lib/notificationClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { User } from "@/types/profile";
+import { useToggleBlock } from "@/hooks/useToggleBlock";
 
 interface ProfileViewProps {
   userId?: string;
@@ -38,6 +38,7 @@ export function ProfileView({
 }: ProfileViewProps) {
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id ?? "";
+  const toggleBlock = useToggleBlock();
   // Resolved after the initial profile load when navigating by username
   const [resolvedUserId, setResolvedUserId] = useState(userId ?? "");
 

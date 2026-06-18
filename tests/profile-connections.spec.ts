@@ -91,8 +91,8 @@ test.describe('Profile Connection Service', () => {
     await expect(followButton).toBeVisible({ timeout: 8000 });
     await followButton.click();
 
-    // Wait for optimistic update
-    await page.waitForTimeout(500);
+    // Wait for the button to change to "Unfollow" — confirms the follow completed and state updated
+    await expect(page.getByRole('button', { name: /^unfollow$/i })).toBeVisible({ timeout: 8000 });
 
     const afterText = await followersButton.locator('span').first().textContent();
     const countAfter = parseInt(afterText ?? '0', 10);
@@ -214,5 +214,89 @@ test.describe('Profile Connection Service', () => {
     await expect(page2.getByText(/posts are hidden because you have blocked/i)).toBeVisible({ timeout: 8000 });
 
     await ctx2.close();
+  });
+
+  /** Helper: creates a minimal "Other" post from the home feed and waits for the profile redirect. */
+  async function createPost(page: import('@playwright/test').Page, title: string): Promise<void> {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    const createButton = page.getByRole('button', { name: /create new post/i });
+    await expect(createButton).toBeVisible({ timeout: 10000 });
+    await createButton.click();
+
+    await page.waitForSelector('text=Create Post', { timeout: 10000 });
+
+    // Open the custom post-type dropdown and select "Other"
+    await page.locator('label:has-text("Post Type") + button').click();
+    await page.getByRole('button', { name: /other/i }).click();
+
+    await page.locator('input[name="title"]').fill(title);
+    await page.locator('textarea[name="description"]').fill('E2E test post – feed block filter');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 30000 });
+  }
+
+  test('blocker cannot see blocked user\'s posts in the feed', async ({ browser }) => {
+    const ctxA = await browser.newContext();
+    const ctxB = await browser.newContext();
+    const pageA = await ctxA.newPage();
+    const pageB = await ctxB.newPage();
+
+    const userA = await register(pageA);
+    const userB = await register(pageB);
+
+    const postTitle = `E2E-block-feed-${Date.now()}`;
+
+    await createPost(pageA, postTitle);
+
+    // Post should appear in User B's feed before blocking
+    await pageB.goto('/');
+    await pageB.waitForLoadState('networkidle');
+    await expect(pageB.getByText(postTitle)).toBeVisible({ timeout: 15000 });
+
+    // User B blocks User A
+    await blockUser(pageB, userA.username);
+
+    // Post must no longer appear in User B's feed
+    await pageB.goto('/');
+    await pageB.waitForLoadState('networkidle');
+    await pageB.waitForTimeout(2000);
+    await expect(pageB.getByText(postTitle)).not.toBeVisible();
+
+    await ctxA.close();
+    await ctxB.close();
+  });
+
+  test('blocked user cannot see blocker\'s posts in the feed', async ({ browser }) => {
+    const ctxA = await browser.newContext();
+    const ctxB = await browser.newContext();
+    const pageA = await ctxA.newPage();
+    const pageB = await ctxB.newPage();
+
+    const userA = await register(pageA);
+    const userB = await register(pageB);
+
+    const postTitle = `E2E-blocked-feed-${Date.now()}`;
+
+    await createPost(pageA, postTitle);
+
+    // Post should appear in User B's feed before blocking
+    await pageB.goto('/');
+    await pageB.waitForLoadState('networkidle');
+    await expect(pageB.getByText(postTitle)).toBeVisible({ timeout: 15000 });
+
+    // User A blocks User B
+    await blockUser(pageA, userB.username);
+
+    // Post must no longer appear in User B's feed
+    await pageB.goto('/');
+    await pageB.waitForLoadState('networkidle');
+    await pageB.waitForTimeout(2000);
+    await expect(pageB.getByText(postTitle)).not.toBeVisible();
+
+    await ctxA.close();
+    await ctxB.close();
   });
 });

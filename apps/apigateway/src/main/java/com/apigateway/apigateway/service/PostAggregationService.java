@@ -68,6 +68,26 @@ public class PostAggregationService {
         return postClient.getPagedPosts(page, size);
     }
 
+    public List<Post> getPagedPostsForUser(int page, int size, UUID currentUserId) {
+        Set<UUID> excluded = new HashSet<>();
+        try {
+            Set<UUID> blocked = profileConnectionClient.getBlockedIds(currentUserId);
+            if (blocked != null) excluded.addAll(blocked);
+        } catch (Exception e) {
+            logger.warn("[PostAggregationService] Could not fetch blocked IDs for userId={}: {}", currentUserId, e.getMessage());
+        }
+        try {
+            Set<UUID> blockedBy = profileConnectionClient.getBlockedByIds(currentUserId);
+            if (blockedBy != null) excluded.addAll(blockedBy);
+        } catch (Exception e) {
+            logger.warn("[PostAggregationService] Could not fetch blocked-by IDs for userId={}: {}", currentUserId, e.getMessage());
+        }
+        if (excluded.isEmpty()) {
+            return postClient.getPagedPosts(page, size);
+        }
+        return postClient.getPagedPostsExcluding(page, size, excluded);
+    }
+
     /**
      * retrieve all mediaFiles from a list of instances
      * Retrieves the same file multiple times, if the instances refer to the same

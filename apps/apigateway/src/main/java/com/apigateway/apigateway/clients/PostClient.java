@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,11 @@ public interface PostClient {
     /** Paginated list — use page=0,size=16 for the feed. */
     @GetMapping("/posts")
     List<Post> getPagedPosts(@RequestParam("page") int page, @RequestParam("pagesize") int pagesize);
+
+    /** Paginated list excluding posts from the given user IDs. */
+    @GetMapping("/posts")
+    List<Post> getPagedPostsExcluding(@RequestParam("page") int page, @RequestParam("pagesize") int pagesize,
+                                      @RequestParam("excludeUserIds") Collection<UUID> excludeUserIds);
 
     @GetMapping("/posts/users/{user_id}")
     List<Post> getUserPosts(@PathVariable("user_id") UUID userId);
