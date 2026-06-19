@@ -12,8 +12,18 @@ public static class NotificationWebSocketHandler
         {
             var userId = context.Request.RouteValues["userId"]?.ToString();
 
-            if (string.IsNullOrEmpty(userId)) { context.Response.StatusCode = 400; return; }
-            if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; return; }
+            if (string.IsNullOrEmpty(userId))
+            {
+                AppLogger.Warn($"userId was empty for fetching notifications");
+                context.Response.StatusCode = 400;
+                return;
+            }
+            if (!context.WebSockets.IsWebSocketRequest)
+            {
+                AppLogger.Warn($"Websocket connection not connected");
+                context.Response.StatusCode = 400;
+                return;
+            }
 
             var webSocket = await context.WebSockets.AcceptWebSocketAsync();
             notificationSockets[userId] = webSocket;
@@ -44,6 +54,7 @@ public static class NotificationWebSocketHandler
 
             if (result.MessageType == WebSocketMessageType.Close)
             {
+                AppLogger.Info($"Closing notification websocket");
                 await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                 break;
             }
