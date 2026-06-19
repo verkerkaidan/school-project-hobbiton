@@ -24,7 +24,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
-    profiles: [tools]
+    profiles: [pgadmin]
     ports:
       - "15050:80"
     environment:
@@ -265,7 +265,7 @@ services:
   docs:
     image: ${CI_REGISTRY_IMAGE}/docs:latest
     restart: always
-    profiles: [tools]
+    profiles: [docs]
     cpus: 0.5
     mem_limit: 128m
     networks:
@@ -274,7 +274,7 @@ services:
   docs-proxy:
     image: ${CI_REGISTRY_IMAGE}/docs-proxy:latest
     restart: always
-    profiles: [tools]
+    profiles: [docs]
     ports:
       - "13001:13001"
     environment:

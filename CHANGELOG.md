@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.50.4] - 2026-06-19
+
+### Changed
+- **chore**: CI improvements - split logging, docs, etc.
+
 ## [1.50.3] - 2026-06-19
 
 ### Fixed
