@@ -17,6 +17,8 @@ defmodule MediaServiceElxWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  import Plug.Conn
+
   using do
     quote do
       # The default endpoint for testing
@@ -34,5 +36,24 @@ defmodule MediaServiceElxWeb.ConnCase do
   setup tags do
     MediaServiceElx.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
+  end
+
+  def valid_jwt(user_id \\ Ecto.UUID.generate(), roles \\ ["ROLE_USER"]) do
+    claims = %{
+      "userId" => user_id,
+      "role"   => roles,
+      "iss"    => "test-issuer",
+      "exp"    => System.system_time(:second) + 3600
+    }
+
+    jwk = JOSE.JWK.from_oct("test-secret")
+    {_, token} = JOSE.JWT.sign(jwk, %{"alg" => "HS256"}, claims) |> JOSE.JWS.compact()
+    token
+  end
+
+  def authed_conn(conn, opts \\ []) do
+    user_id = Keyword.get(opts, :user_id, Ecto.UUID.generate())
+    roles   = Keyword.get(opts, :roles, ["ROLE_USER"])
+    put_req_header(conn, "authorization", "Bearer #{valid_jwt(user_id, roles)}")
   end
 end

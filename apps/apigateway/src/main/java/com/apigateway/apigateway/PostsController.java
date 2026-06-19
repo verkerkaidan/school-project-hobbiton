@@ -156,9 +156,10 @@ public class PostsController {
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Set<UUID>> createPost(
             @RequestPart("data") PostDTO dto,
-            @RequestPart(value = "files[]", required = false) List<MultipartFile> files) {
+            @RequestPart(value = "files[]", required = false) List<MultipartFile> files,
+            @RequestHeader("Authorization") String authorization) {
         dto.mediaInstanceDTOSet = files;
-        Set<UUID> response = postService.forwardCreatePost(dto);
+        Set<UUID> response = postService.forwardCreatePost(dto, authorization);
         return ResponseEntity.ok(response);
     }
 

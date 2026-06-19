@@ -12,7 +12,7 @@ export interface ProfileSummary {
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
 
-function authHeaders(extra?: Record<string, string>): Record<string, string> {
+export function authHeaders(extra?: Record<string, string>): Record<string, string> {
   const token = Cookies.get("token") ?? "";
   return { Authorization: `Bearer ${token}`, ...extra };
 }
@@ -28,7 +28,9 @@ export async function getReportsByStatus(
 ): Promise<Report[]> {
   const res = await fetch(
     `${MIDDLEWARE_URL}/api/admin/reports/status/${status}`,
-    { headers: authHeaders() },
+    {
+      headers: authHeaders()
+    },
   );
   if (!res.ok) throw new Error("Failed to fetch reports");
   return res.json();

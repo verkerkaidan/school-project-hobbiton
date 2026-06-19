@@ -39,4 +39,6 @@ config :phoenix,
 config :media_service_elx, :media_service, MediaServiceElx.MediaServiceMock
 config :media_service_elx, :report_service, MediaServiceElx.ReportServiceMock
 
-
+config :media_service_elx,
+       jwt_secret: "test-secret",
+       jwt_issuer: "test-issuer"

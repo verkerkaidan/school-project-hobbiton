@@ -108,7 +108,7 @@ export function AccountSettings() {
     setSaving(true);
     try {
       const field = key === "bio" ? "biography" : key;
-      await updateProfile({ [field]: draft }, token);
+      await updateProfile({ [field]: draft });
       setValues((prev) => ({ ...prev, [key]: draft }));
       setEditing(null);
       setDraft("");

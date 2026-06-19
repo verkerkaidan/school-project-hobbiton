@@ -1,3 +1,5 @@
+import {authHeaders} from "@/lib/adminClient";
+
 const GATEWAY_URL =
   process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
 
@@ -13,14 +15,10 @@ export interface UpdateProfileFields {
 
 export async function updateProfile(
   fields: UpdateProfileFields,
-  token: string
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/profile/update`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeaders({"Content-Type": "application/json"}),
     body: JSON.stringify(fields),
   });
 
@@ -46,9 +44,7 @@ export async function postChangeProfilePicture(
 
   const res = await fetch(API_BASE + "/change-profile-picture", {
     method: 'POST',
-    headers: {
-      Authorization:  `Bearer ${token}`,
-    },
+    headers: authHeaders(),
     body: formData,
   });
 
@@ -65,9 +61,10 @@ export async function searchProfiles(
 ) {
   const res = await fetch(API_BASE + "/search-profiles/" + query, {
     method: 'GET',
+    headers: authHeaders()
   });
 
   if (!res.ok) throw new Error("Failed to fetch results");
-  const data = await res.json();
-  return data
+
+  return await res.json();
 }

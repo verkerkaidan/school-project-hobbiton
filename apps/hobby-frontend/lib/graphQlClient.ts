@@ -1,5 +1,6 @@
 import { CreatePost } from "@/types/interfaces";
 import {UUID} from "node:crypto";
+import {authHeaders} from "@/lib/adminClient";
 
 // lib/graphqlClient.ts
 const MIDDLEWARE_ENDPOINT_SERVERSIDE = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_SERVERSIDE;
@@ -9,7 +10,7 @@ export async function gqlRequest<T>(query: string, variables?: Record<string, un
   const endpoint: string = typeof window === 'undefined' ? MIDDLEWARE_ENDPOINT_SERVERSIDE! : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
   const res = await fetch(endpoint + "/api/graphql", {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({"Content-Type": "application/json"}),
     body: JSON.stringify({ query, variables }),
   });
 
@@ -48,6 +49,7 @@ export async function postCreateRequest<T>(post: CreatePost): Promise<UUID[]> {
 
   const res = await fetch(endpoint + "/api/create-post", {
     method: 'POST',
+    headers: authHeaders(),
     body: formData,
   });
 
