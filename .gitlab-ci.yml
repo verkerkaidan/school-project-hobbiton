@@ -274,7 +274,8 @@ deploy:
     - echo -e "Host $DEPLOY_HOST\n  StrictHostKeyChecking accept-new" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
-    - scp -r docker-compose-prod.yml init-db.sh monitoring "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - tar czf - monitoring | ssh "$DEPLOY_USER@$DEPLOY_HOST" "rm -rf ~/monitoring 2>/dev/null; sudo rm -rf ~/monitoring 2>/dev/null; tar xzf - -C ~"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
