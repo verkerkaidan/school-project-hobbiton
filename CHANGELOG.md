@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **feat**: Users can now delete their own posts from their profile page; gateway enforces ownership check; E2E test added
+
 ### Changed
 - **refactor**: Added loki url to gitlab-ci.yml
 

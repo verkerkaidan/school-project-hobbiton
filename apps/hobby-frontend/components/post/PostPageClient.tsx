@@ -3,6 +3,11 @@
 import React, { useState } from "react";
 import { Post, Gym, Reading, LinkedHobbyItem } from "@/types/posts";
 import ResultDetailModal from "@/components/discover/ResultDetailModal";
+import { DeletePostModal } from "@/components/post/DeletePostModal";
+import { deleteOwnPost } from "@/lib/postClient";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
+import { Trash2, Pencil } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 
 type ResultItem =
@@ -34,16 +39,16 @@ const itemVariants: Variants = {
 };
 
 export default function PostPageClient({ post, isGym, isReading, gymPost, readingPost, children }: Props) {
-    console.log("=== POSTPAGECLIENT PROPS ===");
-    console.log("De basis post:", post);
-    console.log("Booleans -> isGym:", isGym, "| isReading:", isReading);
-    console.log("Gecaste gymPost:", gymPost);
-    console.log("Gecaste readingPost:", readingPost);
     const childArray = Array.isArray(children) ? children : [children];
     const [slider, authorCard, interaction] = childArray;
 
+    const currentUser = useCurrentUser();
+    const router = useRouter();
+    const isOwner = !!currentUser && currentUser.id === post.userId;
+
     const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
     const [loadingItem, setLoadingItem] = useState<string | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const hobbySlug = post.hobbyType?.toLowerCase() as "gym" | "reading" | "other";
 
@@ -126,6 +131,24 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                                 <span>{hobbySlug === "gym" ? "🏋️" : hobbySlug === "reading" ? "📚" : "✨"}</span>
                                 <span className="opacity-80">{post.hobbyType}</span>
                             </span>
+                            {isOwner && (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => router.push(`/posts/${post.id}/edit`)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-accent/70 hover:text-accent border border-accent/15 hover:border-accent/30 hover:bg-accent/5 transition-all"
+                                    >
+                                        <Pencil className="w-3 h-3" />
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteModal(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400/80 hover:text-rose-400 border border-rose-500/15 hover:border-rose-500/30 hover:bg-rose-500/5 transition-all"
+                                    >
+                                        <Trash2 className="w-3 h-3" />
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">
@@ -222,6 +245,16 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
             {selectedResult && (
                 <ResultDetailModal result={selectedResult} onClose={() => setSelectedResult(null)} />
             )}
+
+            <DeletePostModal
+                isOpen={showDeleteModal}
+                postTitle={post.title}
+                onConfirm={async () => {
+                    await deleteOwnPost(post.id);
+                    router.push("/profile");
+                }}
+                onClose={() => setShowDeleteModal(false)}
+            />
         </motion.main>
     );
 }
