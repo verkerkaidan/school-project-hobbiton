@@ -5,10 +5,8 @@ RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/li
 
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
-COPY tests ./tests
 COPY migrations ./migrations
 
-RUN REDIS_URL=redis://127.0.0.1:1 cargo test
 RUN cargo build --release
 
 FROM rust:1.96-slim

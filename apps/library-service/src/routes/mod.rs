@@ -1,5 +1,3 @@
-// src/routes/mod.rs
-
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -39,7 +37,6 @@ pub fn library_routes() -> Router<AppState> {
         .route("/lists/{list_id}/items/reorder", post(reorder_items))
         // ── Convenience ──────────────────────────────────────────────────────
         .route("/lists/{list_id}/search-and-add", post(search_and_add))
-        .route("/ping", get(|| async { "pong" }))
 }
 
 // ─── Request bodies ───────────────────────────────────────────────────────────
@@ -314,7 +311,6 @@ async fn search_and_add(
     let service = LibraryService::new(s.factory.clone(), s.cache.clone());
 
     let item_id = if let Some(id) = body.item_id {
-        // Direct add by ID — verify it exists
         match service.find_by_id(search_type, &id).await? {
             None => return Err(AppError::NotFound(format!(
                 "{} with id '{}' not found", item_type, id
@@ -322,7 +318,6 @@ async fn search_and_add(
             Some(_) => id,
         }
     } else if let Some(query) = body.query {
-        // Search and pick first result
         let req = SearchRequest {
             search_type,
             query: query.clone(),

@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use crate::dto::request::SearchType;
 use crate::error::AppError;
 
-pub const CACHE_TTL_SECONDS: usize = 30 * 24 * 60 * 60;
+pub const CACHE_TTL_SECONDS: usize = 2592000;
 
 #[derive(Clone)]
 pub struct CacheService {
