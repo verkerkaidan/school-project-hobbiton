@@ -402,6 +402,7 @@ deploy:
       export PROMETHEUS_PORT='$PROMETHEUS_PORT'
       export LOKI_PORT='$LOKI_PORT'
       export TZ='$TZ'
+      export LOKI_URL='$LOKI_URL'
 
       # Pull all images (core + optional)
       docker compose -f docker-compose-prod.yml --profile logging-monitor --profile tools pull
