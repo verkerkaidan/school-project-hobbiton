@@ -54,9 +54,20 @@ export async function postChangeProfilePicture(
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    console.log("Error body:", body);
     throw new Error(body?.message ?? "Could not update content flag");
   }
 
   return;
+}
+
+export async function searchProfiles(
+    query: string,
+) {
+  const res = await fetch(API_BASE + "/search-profiles/" + query, {
+    method: 'GET',
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch results");
+  const data = await res.json();
+  return data
 }

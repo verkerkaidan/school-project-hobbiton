@@ -5,6 +5,10 @@ import SearchBar from "@/components/discover/SearchBar";
 import ResultsList from "@/components/discover/ResultsList";
 import ResultDetailModal from "@/components/discover/ResultDetailModal";
 import Loading from "../loading";
+import {searchLibrary} from "@/lib/libraryClient";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
+import {searchProfiles} from "@/lib/profileClient";
+import {ProfileSummary} from "@/lib/adminClient";
 
 type BookResult = {
     id?: string;
@@ -50,7 +54,11 @@ type MovieResult = {
     mediaType: string;
     resultType: "movie";
 };
-type ResultItem = BookResult | ExerciseResult | MovieResult;
+
+type UserResult = ProfileSummary & {
+    resultType: "user";
+}
+type ResultItem = BookResult | ExerciseResult | MovieResult | UserResult;
 
 export default function DiscoverPage() {
     const [step, setStep] = useState<"select" | "search" | "results">("select");
@@ -59,6 +67,7 @@ export default function DiscoverPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
+    const {showErrorToast} = useErrorToast();
 
     const handleSelect = (type: string) => {
         setQueryType(type);
@@ -72,23 +81,21 @@ export default function DiscoverPage() {
         setError("");
         setResults([]);
         try {
-            // Adjust port if needed; default Spring Boot is 8080
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
-                {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({type: queryType, query, maxResults: 10}),
-                }
-            );
-            if (!res.ok) throw new Error("Failed to fetch results");
-            const data = await res.json();
-            if (!data.success) throw new Error(data.message || "Unknown error");
-            setResults(data.data || []);
+            let data;
+            if (queryType == "USER") {
+                data = await searchProfiles(query);
+                const users: UserResult[] = (data as ProfileSummary[]).map(p => ({ ...p, resultType: "user" }));
+                setResults(users);
+            } else {
+                data = await searchLibrary(queryType, query);
+                setResults(data.data! || []);
+            }
+
             setStep("results");
         } catch (e: unknown) {
             if (e instanceof Error) setError(e.message);
             else setError("Error searching");
+            showErrorToast("Unfortunately", "We couldn't find what you were looking for", "error");
         } finally {
             setLoading(false);
         }
@@ -119,9 +126,10 @@ export default function DiscoverPage() {
                     error={error}
                     onBackAction={handleBack}
                     onSelectAction={setSelectedResult}
+                    mode={queryType == "USER" ? "user" : "discover"}
                 />
             )}
-            {selectedResult && (
+            {selectedResult && selectedResult.resultType != "user" && (
                 <ResultDetailModal result={selectedResult} onClose={() => setSelectedResult(null)}/>
             )}
         </div>

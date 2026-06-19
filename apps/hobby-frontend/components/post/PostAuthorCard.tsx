@@ -13,7 +13,6 @@ import {
 import { useToggleBlock } from "@/hooks/useToggleBlock";
 import { ReportModal } from "@/components/profile/ReportModal";
 import {MediaSet} from "@/types/posts";
-import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
 interface PostAuthorCardProps {
   authorId: string;
@@ -39,7 +38,6 @@ export function PostAuthorCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const {imageSrc: contextImageSrc} = useProfilePic();
 
   const imageSrc = profilePicture?.fileData
           ? `data:${profilePicture.contentType};base64,${profilePicture.fileData}`

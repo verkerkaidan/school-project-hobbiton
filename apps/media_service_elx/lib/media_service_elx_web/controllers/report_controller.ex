@@ -6,12 +6,9 @@ defmodule MediaServiceElxWeb.ReportController do
 
   use MediaServiceElxWeb, :controller
 
-  defp media_service do
-    Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
-  end
-  defp report_service do
-    Application.get_env(:media_service_elx, :report_service, MediaServiceElx.ReportService)
-  end
+  @media_service Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
+
+  @report_service Application.get_env(:media_service_elx, :report_service, MediaServiceElx.ReportService)
 
   alias MediaServiceElx.FileReports.FileReport
   alias MediaServiceElx.MediaFiles.MediaFile
@@ -23,9 +20,9 @@ defmodule MediaServiceElxWeb.ReportController do
     @returns: {:ok, report_id: uuid}
   """
   def create_file_report(conn, %{"user_id" => user_id, "instance_id" => instance_id} = _params) do
-    case media_service().retrieve_media_file(instance_id) do
+    case @media_service.retrieve_media_file(instance_id) do
       {:ok, %MediaFile{} = media_file} ->
-        case report_service().create_file_report(user_id, media_file) do
+        case @report_service.create_file_report(user_id, media_file) do
           {:ok, %FileReport{} = file_report} ->
 
             IO.inspect(file_report, label: "Report created")
@@ -45,7 +42,7 @@ defmodule MediaServiceElxWeb.ReportController do
     @returns: {:ok, uuid} || {error, "reason"}
   """
   def delete_single_report(conn, %{"report_id" => report_id}) do
-    case report_service().delete_single_report(report_id) do
+    case @report_service.delete_single_report(report_id) do
       {:ok, report_id} -> json(conn, %{status: "ok", report_id: report_id})
       {:error, reason} -> json(conn, %{status: "error", reason: reason})
     end
@@ -57,8 +54,8 @@ defmodule MediaServiceElxWeb.ReportController do
     @returns: [%MediaFile{}]
   """
   def get_all_reported_files(conn, _params) do
-    result = report_service().retrieve_all_unique_reported_files()
-    |> media_service().retrieve_media_files_from_file_id
+    result = @report_service.retrieve_all_unique_reported_files()
+    |> @media_service.retrieve_media_files_from_file_id
     |> MediaFilesJSON.full_file_index
 
     IO.inspect(result.data, label: "Reported files retrieved")

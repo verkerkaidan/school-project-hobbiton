@@ -1,6 +1,9 @@
 "use client"
 
 import {motion} from "framer-motion";
+import {ProfileSummary} from "@/lib/adminClient";
+import {Result} from "postcss";
+import {useRouter} from "next/navigation";
 
 export type BookResult = {
     id?: string;
@@ -46,7 +49,11 @@ export type MovieResult = {
     mediaType: string;
     resultType: "movie";
 };
-export type ResultItem = BookResult | ExerciseResult | MovieResult;
+
+export type UserResult = ProfileSummary & {
+    resultType: "user";
+}
+export type ResultItem = BookResult | ExerciseResult | MovieResult | UserResult;
 
 export default function ResultsList({
                                         results,
@@ -64,18 +71,22 @@ export default function ResultsList({
     onBackAction?: () => void; // Nu optioneel gemaakt
     onSelectAction?: (result: ResultItem) => void;
     onAddAction?: (result: ResultItem) => void;
-    mode?: "discover" | "select";
+    mode?: "discover" | "select" | "user";
     showBackButton?: boolean; // Type toegevoegd
 }) {
+    const router = useRouter();
     const handleClick = (item: ResultItem) => {
         if (mode === "select") {
             onAddAction?.(item);
+        } else if (mode === "user" && item.resultType === "user") {
+            router.push(`/profile/${item.username}`)
         } else {
             onSelectAction?.(item);
         }
     };
 
     const getTitle = (item: ResultItem) => {
+        if (item.resultType === "user") return item.username;
         if (item.resultType === "exercise") return item.name;
         return item.title;
     };
@@ -84,6 +95,11 @@ export default function ResultsList({
         if (item.resultType === "book") return item.thumbnailUrl;
         if (item.resultType === "exercise") return item.gifUrl;
         if (item.resultType === "movie") return item.poster;
+        if (item.resultType === "user") {
+            return item.profilePicture
+            ? `data:${item.profilePicture.contentType};base64,${item.profilePicture.fileData}`
+            : "/jpeg.png";
+        }
         return undefined;
     };
 

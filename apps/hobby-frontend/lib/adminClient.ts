@@ -2,9 +2,11 @@ import Cookies from "js-cookie";
 import type { Report, ReportStatus } from "@/types/reports";
 import type { MediaSet } from "@/types/posts";
 
-export interface AdminProfileSummary {
+export interface ProfileSummary {
+  userId?: string
   username: string;
-  profilePicture?: MediaSet;
+  profilePicture?: MediaSet | null;
+  profilePictureUrl?: string | null;
 }
 
 /** Base URL for the API gateway — same origin used by the rest of the app. */
@@ -67,7 +69,7 @@ export async function deleteAllUserPosts(userId: string): Promise<void> {
 }
 
 /** Fetch all user profiles (username + profile picture only) in a single call. */
-export async function getAllAdminProfiles(): Promise<AdminProfileSummary[]> {
+export async function getAllAdminProfiles(): Promise<ProfileSummary[]> {
   const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`, {
     headers: authHeaders(),
   });

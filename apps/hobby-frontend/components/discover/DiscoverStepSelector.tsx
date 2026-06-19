@@ -4,6 +4,7 @@ const HOBBIES = [
   { label: "Book", value: "BOOK", icon: "📚" },
   { label: "Exercise", value: "EXERCISE", icon: "🏋️" },
   { label: "Movie", value: "MOVIE", icon: "🎬" },
+  { label: "Hobbiist", value: "USER", icon: "🙋‍♂️" },
 ];
 
 export default function DiscoverStepSelector({ onSelect }: { onSelect: (type: string) => void }) {

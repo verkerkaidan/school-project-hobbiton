@@ -5,12 +5,12 @@ import Link from "next/link";
 import { RefreshCw, Users } from "lucide-react";
 import {
   getAllAdminProfiles,
-  type AdminProfileSummary,
+  type ProfileSummary,
 } from "@/lib/adminClient";
 
 const DEFAULT_PROFILE_IMAGE = "/jpeg.png";
 
-function UserImage({ profile }: { profile: AdminProfileSummary }) {
+function UserImage({ profile }: { profile: ProfileSummary }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   const imageSrc = profile.profilePicture?.fileData
@@ -31,7 +31,7 @@ function UserImage({ profile }: { profile: AdminProfileSummary }) {
 }
 
 export function UsersOverview() {
-  const [profiles, setProfiles] = useState<AdminProfileSummary[]>([]);
+  const [profiles, setProfiles] = useState<ProfileSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");

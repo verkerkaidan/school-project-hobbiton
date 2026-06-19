@@ -4,7 +4,6 @@ import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
 import com.apigateway.apigateway.models.CreateProfileRequest;
 import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
 import com.apigateway.apigateway.models.ProfileResponse;
-import com.apigateway.apigateway.models.User;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +25,9 @@ public interface ProfileClient {
     // Fetches all profiles with only username and profile picture URL.
     @GetMapping("/profile/all")
     List<AdminProfileSummaryResponse> getAllProfiles();
+
+    @GetMapping("/profile/search-profiles/{query}")
+    List<AdminProfileSummaryResponse> fuzzySearchProfilesByUsername(@PathVariable("query") String query);
 
     // Bulk-fetch lightweight profile summaries for a specific set of user IDs.
     // Used by the gateway to enrich report data with usernames in a single request.

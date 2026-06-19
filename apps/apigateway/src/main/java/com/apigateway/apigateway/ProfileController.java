@@ -2,6 +2,7 @@ package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
+import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
 import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.Post;
@@ -215,5 +216,11 @@ public class ProfileController {
     ) {
         profileAggregationService.updateProfilePicture(userId, files, authorization, oldId);
         return ResponseEntity.ok("Profile picture was updated");
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/search-profiles/{query}")
+    public List<AdminProfileSummaryResponse> fuzzySearchProfilesByUsername(@PathVariable String query) {
+        return profileAggregationService.fuzzySearchProfilesByUsername(query);
     }
 }

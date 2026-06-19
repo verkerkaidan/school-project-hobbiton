@@ -97,14 +97,23 @@ defmodule MediaServiceElx.MediaFilesTest do
   # ---------------------------------------------------------------------------
 
   describe "update_media_file/2" do
+    # "video/mp4" is invalid, so update should FAIL → use refute with {:ok}
+    # or better, assert {:error}
+    test "updates a media file with invalid attributes" do
+      media_file = MediaFilesFixtures.insert_media_file()
+
+      assert {:error, %Ecto.Changeset{}} =
+               MediaFiles.update_media_file(media_file, %{content_type: "video/mp4"})
+    end
+
+    # "image/webp" is valid, so update should SUCCEED → assert {:ok}
     test "updates a media file with valid attributes" do
       media_file = MediaFilesFixtures.insert_media_file()
-      new_content_type = "video/mp4"
 
       assert {:ok, updated} =
-               MediaFiles.update_media_file(media_file, %{content_type: new_content_type})
+               MediaFiles.update_media_file(media_file, %{content_type: "image/webp"})
 
-      assert updated.content_type == new_content_type
+      assert updated.content_type == "image/webp"
     end
 
     test "updates admin_approved flag" do
