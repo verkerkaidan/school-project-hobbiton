@@ -17,7 +17,7 @@ export const ReadingFields = ({ form, onChange }: ReadingFieldsProps) => {
                         placeholder="The Pragmatic Programmer"
                         value={form.bookTitle}
                         onChange={onChange}
-                        className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="border border-none rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand bg-brand/5"
                     />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -29,7 +29,7 @@ export const ReadingFields = ({ form, onChange }: ReadingFieldsProps) => {
                         placeholder="25"
                         value={form.pagesRead || ""}
                         onChange={onChange}
-                        className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="border rounded border-none bg-brand/5 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                     />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -41,7 +41,7 @@ export const ReadingFields = ({ form, onChange }: ReadingFieldsProps) => {
                         placeholder="100"
                         value={form.totalPagesRead || ""}
                         onChange={onChange}
-                        className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                        className="border rounded border-none bg-brand/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                     />
                 </div>
             </div>

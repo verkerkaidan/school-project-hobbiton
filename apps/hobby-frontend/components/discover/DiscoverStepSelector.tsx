@@ -32,7 +32,9 @@ export default function DiscoverStepSelector({ onSelect }: { onSelect: (type: st
             aria-label={hobby.label}
           >
             <span className="text-4xl mb-2">{hobby.icon}</span>
-            {hobby.label}
+            <p>
+              {hobby.label}
+            </p>
           </motion.button>
         ))}
       </div>

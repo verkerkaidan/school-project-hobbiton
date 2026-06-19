@@ -85,7 +85,7 @@ export default function NewChatModal({
                 >
                     Chat title
                 </label>
-                <p className="text-xs font-small text-brand">Required</p>
+                <p className="text-xs font-small text-brand">Required, at least 5 characters</p>
                 <input
                     id="create-chat-title"
                     name="title"
@@ -107,7 +107,7 @@ export default function NewChatModal({
                 >
                     Select users
                 </label>
-                <p className="text-xs font-small text-brand">Required</p>
+                <p className="text-xs font-small text-brand">Required, at least 1 other user required</p>
                 <div className="grid gap-3">
                     {users.map((user) => {
                         const selected = selectedUsers.includes(user.id);
@@ -115,12 +115,13 @@ export default function NewChatModal({
                             <button
                                 key={user.id}
                                 onClick={() => toggle(user.id)}
-                                className={`cursor-pointer rounded-2xl border p-4 text-left ${selected ? "bg-brand border-background" : "border-brand bg-background"
+                                className={`cursor-pointer rounded-2xl border p-4 text-left ${selected ? "bg-brand/20 border-background" : "border-brand bg-background"
                                     }`}
                             >
-                                <p>
-                                    {user.username}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    {selected && <img src="/svgs/checkmark.svg" alt="selected" className="w-5 h-5" />}
+                                    <p>{user.username}</p>
+                                </div>
                             </button>
                         );
                     })}

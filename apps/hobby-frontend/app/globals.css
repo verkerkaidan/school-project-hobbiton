@@ -103,7 +103,6 @@ h1, h2, h3, h4, h5, h6, #text, label, input, textarea, select, p, .light-mode-te
 }
 
 .np-input, .np-textarea {
-    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 0.75rem 1rem;
