@@ -289,8 +289,7 @@ deploy:
     - echo -e "Host $DEPLOY_HOST\n  StrictHostKeyChecking accept-new" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
-    - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
-    - tar czf - monitoring | ssh "$DEPLOY_USER@$DEPLOY_HOST" "rm -rf ~/monitoring 2>/dev/null; sudo rm -rf ~/monitoring 2>/dev/null; tar xzf - -C ~"
+    - scp -r docker-compose-prod.yml init-db.sh monitoring "$DEPLOY_USER@$DEPLOY_HOST:~/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
@@ -381,8 +380,8 @@ deploy:
       export LOKI_PORT='$LOKI_PORT'
       export TZ='$TZ'
 
-      # Pull all images (core + all profiles)
-      docker compose -f docker-compose-prod.yml --profile pgadmin --profile docs --profile monitoring pull
+      # Pull all images (core + optional)
+      docker compose -f docker-compose-prod.yml --profile logging-monitor --profile tools pull
 
       # 1. Core services — essential, must succeed
       CORE_EXIT=0

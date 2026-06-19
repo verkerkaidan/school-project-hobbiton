@@ -366,11 +366,11 @@ services:
   loki:
     image: grafana/loki:latest
     restart: unless-stopped
-    profiles: [monitoring]
+    profiles: [logging-monitor]
     ports:
       - "21528"
     volumes:
-      - ./monitoring/loki/loki.yml:/etc/loki/loki.yml:ro
+      - ./logging-monitor/loki/loki.yml:/etc/loki/loki.yml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/loki.yml
     environment:
@@ -383,9 +383,9 @@ services:
   promtail:
     image: grafana/promtail:latest
     restart: unless-stopped
-    profiles: [monitoring]
+    profiles: [logging-monitor]
     volumes:
-      - ./monitoring/loki/promtail.yml:/etc/promtail/promtail.yml:ro
+      - ./logging-monitor/loki/promtail.yml:/etc/promtail/promtail.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: -config.file=/etc/promtail/promtail.yml
     environment:
@@ -400,11 +400,11 @@ services:
   prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
-    profiles: [monitoring]
+    profiles: [logging-monitor]
     ports:
       - "21528"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./logging-monitor/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     environment:
       - TZ=UTC
@@ -418,13 +418,13 @@ services:
   grafana:
     image: grafana/grafana:latest
     restart: unless-stopped
-    profiles: [monitoring]
+    profiles: [logging-monitor]
     ports:
       - "11527"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./logging-monitor/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./logging-monitor/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
