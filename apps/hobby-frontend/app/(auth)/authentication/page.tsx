@@ -45,15 +45,15 @@ export default function Authentication() {
         <div className="flex gap-4 justify-center">
           <button
             onClick={() => setLoginOpen(true)}
-            className="px-6 py-2.5 rounded-lg border border-white/20 text-white text-sm font-medium hover:bg-white/10 transition-colors duration-200"
+            className="px-6 py-2.5 rounded-lg border bg-brand border-white/20 cursor-pointer text-sm font-medium hover:bg-brand/50 transition-colors duration-200"
           >
-            Login
+            <p>Login</p>
           </button>
           <button
             onClick={() => setRegisterOpen(true)}
-            className="px-6 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:opacity-90 transition-opacity duration-200"
+            className="px-6 py-2.5 rounded-lg bg-brand/50 hover:bg-brand cursor-pointer text-white text-sm font-medium transition-colors duration-200"
           >
-            Register
+            <p>Register</p>
           </button>
 
           <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />

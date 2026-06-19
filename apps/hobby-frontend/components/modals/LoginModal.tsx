@@ -94,9 +94,9 @@ export function LoginModal({ isOpen, onClose }: ModalProps) {
         </div>
 
         {submitError && (
-          <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+          <div className="text-sm bg-red-200 border border-red-300 rounded px-3 py-2 text-red-600">
             {submitError}
-          </p>
+          </div>
         )}
 
         <button

@@ -112,26 +112,6 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
             )}
           </div>
 
-          {/* Remove DisplayName (temporarily) */}
-          {/* <div className="flex flex-col gap-1">
-              <label
-                  htmlFor="register-name"
-                  className="text-sm font-medium text-white"
-              >
-                Display name{" "}
-                <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <input
-                  id="register-name"
-                  name="name"
-                  type="text"
-                  placeholder="e.g. John Doe"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-              />
-            </div> */}
-
           <div className="flex flex-col gap-1">
             <label
               htmlFor="register-email"
@@ -214,11 +194,11 @@ export function RegisterModal({ isOpen, onClose }: ModalProps) {
             )}
           </div>
 
-          {submitError && (
-            <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
-              {submitError}
-            </p>
-          )}
+        {submitError && (
+          <div className="text-sm bg-red-200 border border-red-300 rounded px-3 py-2 text-red-600">
+            {submitError}
+          </div>
+        )}
 
           <button
             type="submit"
