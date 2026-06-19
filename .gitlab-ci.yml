@@ -275,6 +275,8 @@ deploy:
     - chmod 600 ~/.ssh/config
   script:
     - scp docker-compose-prod.yml init-db.sh "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" mkdir -p monitoring/loki monitoring/grafana/datasources monitoring/grafana/dashboards
+    - scp -r monitoring/* "$DEPLOY_USER@$DEPLOY_HOST:~/monitoring/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
