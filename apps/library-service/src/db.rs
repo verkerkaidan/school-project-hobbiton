@@ -110,6 +110,15 @@ impl DbService {
         Ok(result.rows_affected() > 0)
     }
 
+    pub async fn delete_lists_for_user(&self, user_id: &str) -> Result<u64, AppError> {
+        let result = sqlx::query("DELETE FROM lists WHERE user_id = $1")
+            .bind(user_id)
+            .execute(&self.pool)
+            .await
+            .map_err(|e| AppError::Internal(anyhow::anyhow!(e)))?;
+        Ok(result.rows_affected())
+    }
+
     // ── List items ────────────────────────────────────────────────────────────
 
     pub async fn add_item(&self, list_id: Uuid, item_type: &str, item_id: &str, notes: Option<&str>) -> Result<ListItem, AppError> {

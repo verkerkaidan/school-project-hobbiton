@@ -28,7 +28,7 @@ pub fn library_routes() -> Router<AppState> {
         // ── Single item lookup ───────────────────────────────────────────────
         .route("/{type}/{id}", get(find_by_id))
         // ── Lists ────────────────────────────────────────────────────────────
-        .route("/users/{user_id}/lists", get(get_lists).post(create_list))
+        .route("/users/{user_id}/lists", get(get_lists).post(create_list).delete(delete_user_lists))
         .route("/users/{user_id}/lists/{list_id}", get(get_list).put(rename_list).delete(delete_list))
         // ── List items ───────────────────────────────────────────────────────
         .route("/lists/{list_id}/items", get(get_items).post(add_item))
@@ -186,6 +186,15 @@ async fn delete_list(
         return Err(AppError::NotFound(format!("List {} not found", list_id)));
     }
     Ok(Json(ApiResponse::success(true, 1, "Deleted")))
+}
+
+/// DELETE /users/:user_id/lists — delete all lists for a user (cascades to items)
+async fn delete_user_lists(
+    State(s): State<AppState>,
+    Path(user_id): Path<String>,
+) -> Result<Json<ApiResponse<u64>>, AppError> {
+    let count = s.db.delete_lists_for_user(&user_id).await?;
+    Ok(Json(ApiResponse::success(count, 1, "Deleted")))
 }
 
 // ─── Item handlers ────────────────────────────────────────────────────────────
