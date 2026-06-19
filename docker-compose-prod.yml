@@ -82,7 +82,9 @@ services:
       DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
       DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
-      SECRET_KEY_BASE: XZWm7Xx0Qo+2qqha+uhLYQXlqMVNV6vy+6VCsCB4Ot4Ekv9n1/47gipDu08ufQ9Q
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -246,6 +248,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
+
   chat-service:
     image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always

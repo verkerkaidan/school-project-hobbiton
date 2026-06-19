@@ -101,6 +101,8 @@
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/websock_adapter" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/mox" />
       <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/jose" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/logger_json" />
+      <excludeFolder url="file://$MODULE_DIR$/_build/test/lib/logger_json" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="phoenix" level="project" />
@@ -206,5 +208,6 @@
     <orderEntry type="library" name="poison" level="project" />
     <orderEntry type="library" name="thoas" level="project" />
     <orderEntry type="library" name="earmark" level="project" />
+    <orderEntry type="library" name="logger_json" level="project" />
   </component>
 </module>

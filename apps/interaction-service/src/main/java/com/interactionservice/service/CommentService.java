@@ -9,12 +9,17 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class CommentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
     @Autowired
     private CommentDAO commentDAO;
 
@@ -36,7 +41,9 @@ public class CommentService {
                 commentDTO.userId,
                 commentDTO.comment
         );
-        return commentDAO.createComment(commentObject);
+        Comment created = commentDAO.createComment(commentObject);
+        logger.info("Comment '{}' created by user {} on reference {}", created.getComment(), created.getUserId(), created.getReferenceId());
+        return created;
     }
 
     /**
@@ -51,6 +58,7 @@ public class CommentService {
         commentDAO.deleteComment(commentId);
         likeDAO.deleteAllByReference(commentId);
         eventPublisher.publishEvent(new CommentDeletedEvent(commentId));
+        logger.info("Comment {} deleted and CommentDeletedEvent published", commentId);
         return commentId;
     }
 
@@ -61,14 +69,15 @@ public class CommentService {
     /**
      * Deletes all comments that are connected to a given post
      *
-     * @param postId, identifier of the post to be deleted
+     * @param postIds, identifiers of the posts to be deleted
      */
     @Transactional
-    public void deleteAllByReference(UUID postId) {
-        List<Comment> comments = commentDAO.getAllComments(postId);
+    public void deleteAllByReferences(List<UUID> postIds) {
+        List<Comment> comments = commentDAO.getAllComments(postIds);
         for (Comment comment : comments) {
             deleteComment(comment.getId());
         }
+        logger.warn("All {} comments deleted for references {}", comments.size(), postIds);
     }
 
     /**
@@ -79,5 +88,6 @@ public class CommentService {
     public void deleteAllByUser(UUID userId) {
         List<Comment> comments = commentDAO.retrieveCommentsByUser(userId);
         comments.forEach(comment -> deleteComment(comment.getId()));
+        logger.warn("All {} comments deleted for user {}", comments.size(), userId);
     }
 }

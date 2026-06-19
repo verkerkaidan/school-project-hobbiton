@@ -5,12 +5,17 @@ import com.interactionservice.model.CustomLike;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class LikeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LikeService.class);
+
     @Autowired
     private LikeDAO likeDAO;
 
@@ -26,10 +31,12 @@ public class LikeService {
     public boolean toggleLike(UUID userId, UUID referenceId) {
         if (likeDAO.doesExist(userId, referenceId)) {
             likeDAO.deleteLike(userId, referenceId);
+            logger.info("Like removed by user {} on reference {}", userId, referenceId);
             return false;
         }
         else {
             likeDAO.saveLike(new CustomLike(referenceId, userId));
+            logger.info("Like added by user {} on reference {}", userId, referenceId);
             return true;
         }
     }
@@ -54,23 +61,26 @@ public class LikeService {
      * Maps that to a list of user identifiers
      *
      * @param referenceId, identifier of the post or comment
-     * @return list pf user identifiers that are connected via like to the reference
+     * @return list of user identifiers that are connected via like to the reference
      */
     public List<UUID> getUsersThatLiked(UUID referenceId) {
         List<UUID> usersList = likeDAO.getLikesByReference(referenceId)
                 .stream().map(
                         (like -> like.getUserId())
                 ).toList();
+        logger.info("Reference {} has {} users that liked it", referenceId, usersList.size());
         return usersList;
     }
 
     @Transactional
     public void deleteAllByReference(UUID referenceId) {
         likeDAO.deleteAllByReference(referenceId);
+        logger.warn("All likes deleted for reference {}", referenceId);
     }
 
     @Transactional
     public void deleteAllByUser(UUID userId) {
         likeDAO.deleteAllByUser(userId);
+        logger.warn("All likes deleted for user {}", userId);
     }
 }

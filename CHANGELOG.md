@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.50.11] - 2026-06-19
+
+### Changed
+- **chore**: Logging for media/interaction/recongition
+
 ### Added
 - **feat**: Users can now delete their own posts from their profile page; gateway enforces ownership check; E2E test added
 

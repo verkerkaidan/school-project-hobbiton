@@ -8,6 +8,7 @@ defmodule MediaServiceElxWeb.UserController do
   ]}
 
   use MediaServiceElxWeb, :controller
+  require Logger
 
   @media_service Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
 
@@ -30,9 +31,12 @@ defmodule MediaServiceElxWeb.UserController do
         {:ok, %MediaFile{} = media_file} ->
           %{instance_id: instance.id, status: "ok", media_file: MediaFilesJSON.partial_file_show(%{file: media_file}).data}
         {:error, reason} ->
+          Logger.error("Media file could not be retrieved for instance", instance_id: instance.id, owner: owner_id, reason: reason)
           %{status: "error", reason: reason}
       end
     end)
+
+    Logger.info("Media retrieved by owner", owner: owner_id, results: results)
 
     json(conn, %{results: results})
   end
@@ -49,12 +53,16 @@ defmodule MediaServiceElxWeb.UserController do
     reports = @report_service.retrieve_reports_by_owner(owner_id)
     report_results = @report_service.remove_all_reports(reports)
 
+    Logger.info("Owner deleted", owner: owner_id, instances: instance_results, reports: report_results)
+
     json(conn, %{instances: instance_results, reports: report_results})
   end
 
   def retrieve_reports_by_owner(conn, %{"owner_id" => owner_id}) do
     reports = @report_service.retrieve_reports_by_owner(owner_id)
               |> Enum.map(fn report -> %{id: report.id, file_id: report.file_id, user_id: report.user_id} end)
+
+    Logger.info("Reports retrieved by owner", owner: owner_id, results: reports)
 
     json(conn, %{reports: reports})
   end

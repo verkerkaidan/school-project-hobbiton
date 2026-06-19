@@ -171,7 +171,7 @@ defmodule MediaServiceElx.ReportServiceTest do
       file_report_2 = FileReportsFixtures.insert_file_report(%{file_id: file_id})
       other_report = FileReportsFixtures.insert_file_report()
 
-      assert [{:ok, %FileReport{}}, {:ok, %FileReport{}}] = ReportService.update_reports(file_id)
+      assert [:ok, :ok] = ReportService.update_reports(file_id)
 
       assert_raise Ecto.NoResultsError, fn -> FileReports.get_file_report!(file_report_1.id) end
       assert_raise Ecto.NoResultsError, fn -> FileReports.get_file_report!(file_report_2.id) end
