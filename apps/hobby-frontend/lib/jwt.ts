@@ -44,3 +44,10 @@ export function getJwtRoles(token: string): string[] {
 export function isAdminToken(token: string): boolean {
   return getJwtRoles(token).includes("ROLE_ADMIN");
 }
+
+/** True when the JWT `exp` claim is in the past (or the token is malformed). */
+export function isTokenExpired(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  if (!payload || typeof payload["exp"] !== "number") return true;
+  return Date.now() >= payload["exp"] * 1000;
+}

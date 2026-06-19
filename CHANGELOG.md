@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.49.1] - 2026-06-19
+
+### Added
+- **feat**: JWT expiry and redirection in FE
+
 ## [1.49.0] - 2026-06-19
 
 ### Added

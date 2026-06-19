@@ -2,7 +2,22 @@
 
 import { LoginModal } from "@/components/modals/LoginModal";
 import { RegisterModal } from "@/components/modals/RegisterModal";
-import { useState } from "react";
+import { useErrorToast } from "@/components/ui/ErrorToastProvider";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+
+function SessionExpiredToast() {
+  const searchParams = useSearchParams();
+  const { showErrorToast } = useErrorToast();
+
+  useEffect(() => {
+    if (searchParams.get("expired") === "true") {
+      showErrorToast("Session expired", "Please log in again to continue.", "error");
+    }
+  }, [searchParams, showErrorToast]);
+
+  return null;
+}
 
 export default function Authentication() {
   const [loginOpen, setLoginOpen] = useState(false);
@@ -10,6 +25,9 @@ export default function Authentication() {
 
   return (
     <div className="flex flex-1 min-h-screen items-center justify-center">
+      <Suspense>
+        <SessionExpiredToast />
+      </Suspense>
       <main className="max-w-2xl w-full mx-auto px-6 py-20">
         <header className="mb-8 space-y-4 text-center">
           <h1 className="text-5xl md:text-7xl font-serif italic text-white">
