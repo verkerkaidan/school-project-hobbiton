@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **refactor**: Added unit testing to production for post-service
 - **refactor**: Added grafana testing for chats
 
 ## [1.49.6] - 2026-06-19
