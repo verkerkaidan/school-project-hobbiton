@@ -107,7 +107,7 @@ test:chat-service:
   artifacts:
     when: always
     expire_in: 30 days
-    
+
 # Test media-service-elx
 test:media-service:
   stage: test
@@ -289,7 +289,7 @@ deploy:
     - echo -e "Host $DEPLOY_HOST\n  StrictHostKeyChecking accept-new" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
-    - scp -r docker-compose-prod.yml init-db.sh monitoring "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - scp -r docker-compose-prod.yml init-db.sh logging-monitor "$DEPLOY_USER@$DEPLOY_HOST:~/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
@@ -400,12 +400,12 @@ deploy:
       docker compose -f docker-compose-prod.yml --profile docs up -d || DOCS_EXIT=\$?
       [ \$DOCS_EXIT -ne 0 ] && echo "ERROR: docs/docs-proxy failed to start (exit \$DOCS_EXIT)."
 
-      # 4. Monitoring (Grafana, Loki, Prometheus, Promtail)
-      MONITORING_EXIT=0
-      docker compose -f docker-compose-prod.yml --profile monitoring up -d || MONITORING_EXIT=\$?
-      [ \$MONITORING_EXIT -ne 0 ] && echo "ERROR: monitoring services failed to start (exit \$MONITORING_EXIT)."
+      # 4. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
+      LOGGING_EXIT=0
+      docker compose -f docker-compose-prod.yml --profile logging-monitor up -d || LOGGING_EXIT=\$?
+      [ \$LOGGING_EXIT -ne 0 ] && echo "ERROR: logging-monitor services failed to start (exit \$LOGGING_EXIT)."
 
       # Fail the pipeline if any group failed
-      COMBINED_EXIT=\$((CORE_EXIT + PGADMIN_EXIT + DOCS_EXIT + MONITORING_EXIT))
+      COMBINED_EXIT=\$((CORE_EXIT + PGADMIN_EXIT + DOCS_EXIT + LOGGING_EXIT))
       [ \$COMBINED_EXIT -ne 0 ] && exit 1 || true
       EOF
