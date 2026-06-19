@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.48.6] - 2026-06-19
+
+### Added
+- **feat**: make sure there is an authentication check for admin functionality in the apigateway
+
 ## [1.48.5] - 2026-06-18
 
 ### Changed

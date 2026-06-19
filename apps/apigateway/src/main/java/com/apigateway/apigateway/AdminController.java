@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 /**
  * Admin-only REST endpoints exposed by the API Gateway.
  * The gateway forwards calls to the appropriate microservices via Feign.
+ * These endpoints should all be behind an Admin
  *
  * All paths are relative to the gateway's context-path (/api), so the
  * full client-side URLs are:
