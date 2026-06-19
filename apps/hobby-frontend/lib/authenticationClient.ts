@@ -58,6 +58,58 @@ export function getCurrentUserEmail(): string | null {
 }
 
 /**
+ * Updates the email address for the currently authenticated user.
+ */
+export async function updateEmail(newEmail: string): Promise<void> {
+  const token = Cookies.get("token");
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${BASE_URL}/api/auth/email`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ email: newEmail }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    const message =
+      (data as AuthError)?.message ?? `Email update failed (${res.status})`;
+    throw new Error(message);
+  }
+}
+
+/**
+ * Changes the password for the currently authenticated user.
+ * Requires the current password and a new password.
+ */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const token = Cookies.get("token");
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${BASE_URL}/api/auth/password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    const message =
+      (data as AuthError)?.message ?? `Password change failed (${res.status})`;
+    throw new Error(message);
+  }
+}
+
+/**
  * Saves token, userId, and email into cookies for 2 days
  * @param res total result of auth requests
  * @param email the email used to authenticate

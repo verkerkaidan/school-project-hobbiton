@@ -485,36 +485,91 @@ static void handle_client_fd(int client) {
             send_response(client, 200, "OK", out, "application/json");
             free(token);
         }
-
         free(email);
         free(password);
     }
-     else if (strcmp(method, "DELETE") == 0 && strcmp(path, "/api/auth/delete") == 0) {
+    else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/email") == 0) {
         char *token = extract_bearer_token(headers);
-        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
-        else {
-            char *userId = NULL; char *roles_csv = NULL;
-            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
-            else {
-                char *email = json_get_string_local(body, "email");
-                char *password = json_get_string_local(body, "password");
-                if (!email || !password) { send_response(client, 400, "Bad Request", "{\"error\":\"email and password required\"}", "application/json"); }
-                else {
-                    char id[37]; char hash[512]; char roles[512]; int enabled;
-                    if (find_user_by_email_db(email, id, sizeof(id), hash, sizeof(hash), roles, sizeof(roles), &enabled) != 0) { send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json"); }
-                    else {
-                        char auth_id[37]; char roles2[512];
-                        if (authenticate_user_db(email, password, auth_id, sizeof(auth_id), roles2, sizeof(roles2)) != 0 || strcmp(auth_id, userId) != 0) {
-                            send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json");
-                        } else {
-                            if (delete_user_by_id_db(auth_id) != 0) send_response(client, 500, "Internal Server Error", "{\"error\":\"Could not delete user\"}", "application/json");
-                            else send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");
-                        }
+        if (!token) {
+            send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");
+        } else {
+            char *userId = NULL, *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {
+                send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json");
+            } else if (!body) {
+                send_response(client, 400, "Bad Request", "{\"error\":\"missing body\"}", "application/json");
+            } else {
+                char *newEmail = json_get_string_local(body, "email");
+                if (!newEmail) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"missing email field\"}", "application/json");
+                } else if (!is_valid_email(newEmail)) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"invalid email format\"}", "application/json");
+                } else {
+                    int rc = update_email_db(userId, newEmail);
+                    if (rc != 0) {
+                        send_response(client, 500, "Internal Server Error", "{\"error\":\"email update failed\"}", "application/json");
+                    } else {
+                        send_response(client, 200, "OK", "{\"result\":\"email updated\"}", "application/json");
                     }
                 }
-                free(email); free(password);
+                free(newEmail);
             }
-            free(token); free(userId); free(roles_csv);
+            free(token);
+            free(userId);
+            free(roles_csv);
+        }
+    }
+    else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/password") == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) {
+            send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");
+        } else {
+            char *userId = NULL, *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {
+                send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json");
+            } else if (!body) {
+                send_response(client, 400, "Bad Request", "{\"error\":\"missing body\"}", "application/json");
+            } else {
+                char *currentPassword = json_get_string_local(body, "currentPassword");
+                char *newPassword = json_get_string_local(body, "newPassword");
+                if (!currentPassword || !newPassword) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"missing fields\"}", "application/json");
+                } else if (!is_valid_password(newPassword)) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"new password must be at least 8 characters with upper, lower, digit, and special character\"}", "application/json");
+                } else {
+                    int rc = update_password_db(userId, currentPassword, newPassword);
+                    if (rc == -2) {
+                        send_response(client, 403, "Forbidden", "{\"error\":\"current password is incorrect\"}", "application/json");
+                    } else if (rc != 0) {
+                        send_response(client, 500, "Internal Server Error", "{\"error\":\"password change failed\"}", "application/json");
+                    } else {
+                        send_response(client, 200, "OK", "{\"result\":\"password updated\"}", "application/json");
+                    }
+                }
+                free(currentPassword);
+                free(newPassword);
+            }
+            free(token);
+            free(userId);
+            free(roles_csv);
+        }
+    }
+    else if (strcmp(method, "DELETE") == 0 && strncmp(path, "/api/auth/delete/", 16) == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");}
+        else {
+            char *userId = NULL; char *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {send_response(client, 401, "Unauthorized", "\"error\":\"Invalid token\"}", "application/json");}
+            else {
+                char *targetId = path + 16; int is_self = strcmp(userId, targetId) == 0; int is_admin = 0;
+                if (roles_csv && strstr(roles_csv, "ADMIN") != NULL) { is_admin = 1;}
+                if (!is_self && !is_admin) {send_response(client, 403, "Forbidden",  "{\"error\":\"Not authorized\"}", "application/json"); }
+                else {
+                    if (delete_user_by_id_db(targetId) != 0) { send_response(client, 500, "Internal Server Error", "{\"error\":\"Could not delete user\"}", "application/json");}
+                    else {send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");}
+                }
+            }
+            free(userId); free(roles_csv); free(token);
         }
     }
     else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/new/", 16) == 0) {

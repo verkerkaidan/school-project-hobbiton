@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Cookies from "js-cookie";
 import { getProfile } from "@/queries/getProfile";
 import { isAdminToken } from "@/lib/jwt";
 import { getCurrentUserEmail } from "@/lib/authenticationClient";
-import {MediaSet} from "@/types/posts";
+import { MediaSet } from "@/types/posts";
 
 interface CurrentUser {
   id: string;
@@ -21,36 +21,54 @@ interface CurrentUser {
   isAdmin: boolean;
 }
 
-// Module-level cache so the profile is only fetched once per session
 let cachedUser: CurrentUser | null = null;
+const listeners = new Set<() => void>();
+
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+  return () => listeners.delete(callback);
+}
+
+function getSnapshot() {
+  return cachedUser;
+}
+
+function setCachedUser(user: CurrentUser | null) {
+  cachedUser = user;
+  listeners.forEach((l) => l());
+}
 
 export function clearCurrentUser(): void {
-  cachedUser = null;
+  setCachedUser(null);
+}
+
+export function updateUsername(name: string): CurrentUser | null {
+  if (!cachedUser) return null;
+  setCachedUser({ ...cachedUser, username: name });
+  return cachedUser;
 }
 
 export function useCurrentUser(): CurrentUser | null {
-  const [user, setUser] = useState<CurrentUser | null>(cachedUser);
+  const user = useSyncExternalStore(subscribe, getSnapshot, () => null);
 
   useEffect(() => {
     const userId = Cookies.get("userId") ?? "";
     if (!userId) return;
-    // Invalidate cache if a different user is now logged in (e.g. after re-login)
     if (cachedUser && cachedUser.id !== userId) {
-      cachedUser = null;
+      setCachedUser(null);
     }
     if (cachedUser) return;
     getProfile(userId)
       .then((profile) => {
         const token = Cookies.get("token") ?? "";
-        cachedUser = {
+        setCachedUser({
           id: profile.id,
           username: profile.username,
           profilePicture: profile.profilePicture,
           email: getCurrentUserEmail(),
           isAdmin: isAdminToken(token),
           token: token,
-        };
-        setUser(cachedUser);
+        });
       })
       .catch(console.error);
   }, []);
