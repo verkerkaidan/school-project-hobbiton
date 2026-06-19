@@ -1,6 +1,50 @@
 import { test, expect } from '@playwright/test';
 import { register } from './helpers/auth';
 
+test.describe('Post Deletion', () => {
+  test.beforeEach(async ({ page }) => {
+    await register(page);
+  });
+
+  test('should delete own post from the post detail page', async ({ page }) => {
+    // Create a post first
+    const createButton = page.getByRole('button', { name: /create new post/i });
+    await expect(createButton).toBeVisible();
+    await createButton.click();
+
+    await page.waitForSelector('text=Create Post');
+
+    const postTypeSelect = page.locator('select');
+    await postTypeSelect.selectOption('GYM');
+
+    await page.locator('input[name="title"]').fill('Post To Be Deleted');
+    await page.locator('textarea[name="description"]').fill('This post will be deleted in the test.');
+    await page.locator('input[name="totalDuration"]').fill('30');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 10000 });
+
+    // Navigate into the post detail page
+    await page.locator('text=Post To Be Deleted').first().click();
+    await page.waitForURL('**/posts/**', { timeout: 10000 });
+
+    // Delete button should be visible for the post owner
+    const deleteButton = page.getByRole('button', { name: /^Delete$/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
+
+    // Confirm modal should appear
+    await expect(page.locator('text=Are you sure')).toBeVisible({ timeout: 5000 });
+
+    // Click the confirm delete button in the modal
+    await page.getByRole('button', { name: /Delete Post/i }).click();
+
+    // Should be redirected back to profile after deletion
+    await page.waitForURL('**/profile', { timeout: 10000 });
+    await expect(page.locator('text=Post To Be Deleted')).not.toBeVisible({ timeout: 5000 });
+  });
+});
+
 test.describe('Post Creation', () => {
   test.beforeEach(async ({ page }) => {
     // Register a new test user before each test
