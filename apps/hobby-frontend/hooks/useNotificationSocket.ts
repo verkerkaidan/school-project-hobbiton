@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { buildWebSocketUrl } from "@/lib/notificationClient";
 import { Notification } from "@/types/notifications";
-import { useCurrentUser } from "./useCurrentUser";
 
 export interface UseNotificationSocketOptions {
   onNotification?: (notification: Notification) => void;
@@ -22,8 +21,6 @@ export function useNotificationSocket({
   const reconnectDelay = useRef(1000);
   const isMounted = useRef(true);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const currentUser = useCurrentUser();
 
   const onNotificationRef = useRef(onNotification);
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
@@ -94,7 +91,7 @@ export function useNotificationSocket({
     } catch {
       // SSR safety
     }
-  }, [enabled, currentUser]);
+  }, [enabled]);
 
   useEffect(() => {
     isMounted.current = true;
