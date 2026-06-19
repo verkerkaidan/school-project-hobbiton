@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/recognition")
 public class RecognitionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(RecognitionController.class);
     private final RecognitionService recognitionService;
 
     public RecognitionController(RecognitionService recognitionService) {
@@ -40,12 +43,8 @@ public class RecognitionController {
                         ContentFlag contentFlag = recognitionService.flagFile(
                             file
                         );
-                        System.out.println(
-                            "Assigned content flag: " +
-                                contentFlag.toString() +
-                                " to file: " +
-                                dto.hash
-                        );
+                        logger.info("Assigned content flag {} to file {}", contentFlag.toString(), dto.hash);
+
                         return new ContentFlagUpdateDTO(
                             dto.hash,
                             contentFlag,

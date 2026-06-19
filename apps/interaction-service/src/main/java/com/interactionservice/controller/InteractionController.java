@@ -12,6 +12,8 @@ import com.interactionservice.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/interaction")
 public class InteractionController {
+
+    private static final Logger logger = LoggerFactory.getLogger(InteractionController.class);
+
     @Autowired
     private LikeService likeService;
     @Autowired
@@ -63,7 +68,7 @@ public class InteractionController {
         int likes = likeService.countLikesOfReference(referenceId);
         List<Comment> commentList = commentService.getAllComments(referenceId);
         InteractionReturnDTO dto = new InteractionReturnDTO(likes, commentList);
-        System.out.println("Interaction was fetched for reference: " + referenceId);
+        logger.info("Interaction was fetched for reference {}: \n- Likes: {}\n- Comments: {}", referenceId, dto.likes, dto.comments.size());
         return ResponseEntity.ok(dto);
     }
 
@@ -76,19 +81,36 @@ public class InteractionController {
     @PostMapping
     public ResponseEntity<UUID> createComment(@RequestBody CommentDTO commentDTO) {
         Comment commentObject = commentService.createComment(commentDTO);
+        logger.info("Comment '{}' was created by user {}", commentObject.getComment(), commentObject.getUserId());
         return ResponseEntity.ok(commentObject.getId());
     }
 
     /**
-     * Deleting a comment or post
+     * Deleting a Comment
      *
-     * @param referenceId, The identifier of the comment or post itself
-     * @return UUID of the deleted comment or post
+     * @param referenceId, The identifier of the comment  itself
+     * @return UUID of the deleted comment
      */
     @DeleteMapping("/{referenceId}")
     public ResponseEntity<UUID> deleteReference(@PathVariable UUID referenceId) {
         UUID deletedCommentId = commentService.deleteComment(referenceId);
+        logger.info("Comment {} was deleted", deletedCommentId);
         return ResponseEntity.ok(deletedCommentId);
+    }
+
+    /**
+     * Deleting a post
+     *
+     * @param uuids, The identifier of the posts to be deleted
+     * @return UUID of the deleted post
+     */
+    @DeleteMapping("/post")
+    public ResponseEntity<List<UUID>> deleteAllByReferences(
+            @RequestBody List<UUID> uuids
+    ) {
+        commentService.deleteAllByReferences(uuids);
+        logger.info("Posts {} were deleted", uuids);
+        return ResponseEntity.ok(uuids);
     }
 
     /**
@@ -103,6 +125,7 @@ public class InteractionController {
     @GetMapping("likes/{referenceId}")
     public ResponseEntity<List<UUID>> getUsersThatLiked(@PathVariable UUID referenceId) {
         List<UUID> users = likeService.getUsersThatLiked(referenceId);
+        logger.info("Reference {} was liked by {} users", referenceId, users.size());
         return ResponseEntity.ok(users);
     }
 
@@ -138,6 +161,8 @@ public class InteractionController {
                 ))
                 .collect(Collectors.toList());
 
+        logger.info("Fetched interaction for {} references", referenceIds.size());
+
         return ResponseEntity.ok(result);
     }
 
@@ -158,6 +183,9 @@ public class InteractionController {
                 .stream()
                 .map(CustomLike::getReferenceId)
                 .collect(Collectors.toSet());
+
+        logger.info("Fetched {} positive userLike for {} references", liked.size(), referenceIds.size());
+
         return ResponseEntity.ok(liked);
     }
 
@@ -173,6 +201,7 @@ public class InteractionController {
     public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId) {
         likeService.deleteAllByUser(userId);
         commentService.deleteAllByUser(userId);
+        logger.warn("User {}'s likes and comments have been deleted", userId);
         return ResponseEntity.ok(userId);
     }
 }

@@ -1,8 +1,10 @@
 defmodule MediaServiceElx.MediaService do
   @moduledoc """
-Handles most logic regarding actions with media files and media instances
-"""
+  Handles most logic regarding actions with media files and media instances
+  """
   @behaviour MediaServiceElx.MediaServiceBehaviour
+
+  require Logger
 
   alias MediaServiceElx.Repo
   alias MediaServiceElx.MediaFiles.MediaFile
@@ -60,9 +62,11 @@ Handles most logic regarding actions with media files and media instances
           %MediaFile{} = media_file ->
             {:ok, media_file}
           nil ->
+            Logger.error("MediaFile not found for instance", instance_id: instance_id, file_id: media_instance.file_id)
             {:error, "MediaFile not found"}
         end
       nil ->
+        Logger.error("MediaInstance not found", instance_id: instance_id)
         {:error, "MediaInstance not found"}
     end
   end
@@ -78,8 +82,12 @@ Handles most logic regarding actions with media files and media instances
       do: Repo.delete(instance)
     )
     case Repo.delete(media_file) do
-      {:ok, _} -> {:ok, media_file.id}
-      {:error, reason} -> {:error, reason}
+      {:ok, _} ->
+        Logger.info("MediaFile deleted", file_id: media_file.id)
+        {:ok, media_file.id}
+      {:error, reason} ->
+        Logger.error("MediaFile could not be deleted", file_id: media_file.id, reason: reason)
+        {:error, reason}
     end
   end
 
@@ -94,15 +102,18 @@ Handles most logic regarding actions with media files and media instances
         case Repo.delete(media_instance) do
           {:ok, _} ->
             if Repo.exists?(MediaInstance, file_id: media_instance.file_id) do
+              Logger.info("MediaInstance deleted", instance_id: media_instance.id)
               {:ok, media_instance.id}
             else
               Repo.get_by(MediaFile, id: media_instance.file_id)
               |> delete_file
             end
           {:error, _} = err ->
+            Logger.error("MediaInstance could not be deleted", instance_id: instance_id)
             err
         end
       nil ->
+        Logger.error("MediaInstance not found for deletion", instance_id: instance_id)
         {:error, "MediaInstance not found"}
     end
   end
@@ -145,7 +156,9 @@ Handles most logic regarding actions with media files and media instances
       case Repo.get_by(MediaFile, id: id) do
         %MediaFile{} = media_file ->
           [media_file | acc]
-        nil -> acc
+        nil ->
+          Logger.warning("MediaFile not found for file_id", file_id: id)
+          acc
       end
     end)
     %{files: files}
@@ -162,10 +175,10 @@ Handles most logic regarding actions with media files and media instances
 
     case Repo.get_by(MediaFile, hash: binary_hash) do
       nil ->
+        Logger.error("MediaFile not found for content flag update", file_hash: file_hash)
         {:error, :not_found}
 
       %MediaFile{} = media_file ->
-        # Normalise: apply admin approval before the update
         media_file =
           if note == "Admin driven change" do
             %{media_file | admin_approved: true}
@@ -174,10 +187,7 @@ Handles most logic regarding actions with media files and media instances
           end
 
         if media_file.admin_approved && note == "AI driven change" do
-          IO.inspect(
-            "MediaFile for hash: #{media_file.id} already approved by admin",
-            label: "contentFlagUpdate"
-          )
+          Logger.info("MediaFile already approved by admin, skipping AI driven flag update", file_id: media_file.id)
           {:ok, media_file.id}
         else
           media_file
@@ -186,39 +196,23 @@ Handles most logic regarding actions with media files and media instances
           |> case do
                {:ok, updated_file} ->
                  ReportService.update_reports(updated_file.id)
-                 IO.inspect(
-                   "MediaFile with id: #{updated_file.id} updated",
-                   label: "contentFlagUpdate"
-                 )
+                 Logger.info("MediaFile content flag updated", file_id: updated_file.id, content_flag: content_flag, note: note)
                  {:ok, updated_file.id}
 
                {:error, reason} ->
-                 IO.inspect(
-                   "MediaFile update didn't succeed for id: #{media_file.id}",
-                   label: "contentFlagUpdate"
-                 )
+                 Logger.error("MediaFile content flag could not be updated", file_id: media_file.id, content_flag: content_flag, note: note, reason: reason)
                  {:error, reason}
              end
         end
     end
   end
 
-#  @doc """
-#    Generates a hash from a given file
-#    @params: tempPath from %Plug.Upload{}
-#    @returns: binary
-#  """
   defp compute_hash(path) do
     File.stream!(path, [], 2048)
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
   end
 
-#  @doc """
-#    Generates a MediaFile and saves to db
-#    @params: form-data file, binary hash
-#    @returns: {:ok, MediaFile}
-#  """
   defp create_media_file(upload, hash) do
     binary = File.read!(upload.path)
 
@@ -232,11 +226,6 @@ Handles most logic regarding actions with media files and media instances
     |> Repo.insert()
   end
 
-#  @doc """
-#    Generates a MediaInstance and saves to db
-#    @params: uuid file_id, uuid owner_id
-#    @returns: {:ok, MediaInstance}
-#  """
   defp create_media_instance(media_file_id, owner_id) do
     %MediaInstance{}
     |> MediaInstance.changeset(%{

@@ -41,4 +41,8 @@ public interface InteractionClient {
     /** Which of the given reference IDs has userId liked? Returns the liked subset — 1 DB query. */
     @PostMapping("/interaction/likes/batch")
     Set<UUID> batchDoesUserLike(@RequestParam("userId") UUID userId, @RequestBody List<UUID> referenceIds);
+
+    /** For each of the given post Ids, all interaction is deleted*/
+    @DeleteMapping("/interaction/post")
+    List<UUID> deleteAllByReferences(@RequestBody List<UUID> uuids);
 }

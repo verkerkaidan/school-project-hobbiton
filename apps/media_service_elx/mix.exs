@@ -54,8 +54,9 @@ defmodule MediaServiceElx.MixProject do
       {:bandit, "~> 1.5"},
       {:ex_doc, "~>0.12"},
       {:mox, "~>0.5.2", only: :test},
-      {:jose, "~> 1.11"}
-    ]
+      {:jose, "~> 1.11"},
+      {:logger_json, "~> 6.0"}
+]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.

@@ -403,6 +403,7 @@ deploy:
       export LOKI_PORT='$LOKI_PORT'
       export TZ='$TZ'
       export LOKI_URL='$LOKI_URL'
+      export SECRET_KEY_BASE='$SECRET_KEY_BASE'
 
       # Pull all images (core + optional)
       docker compose -f docker-compose-prod.yml --profile logging-monitor --profile tools pull
