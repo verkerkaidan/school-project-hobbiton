@@ -25,6 +25,8 @@ public static class ChatWebSocketHandler
             var sockets = lobbies.GetOrAdd(chatId, _ => new List<WebSocket>());
             lock (sockets) sockets.Add(webSocket);
 
+            AppLogger.Info($"Socket: {webSocket}, {userId}:{chatId} connected");
+
             var history = db.GetChatHistory(chatId);
             foreach (var msgBytes in history)
                 await webSocket.SendAsync(new ArraySegment<byte>(msgBytes), WebSocketMessageType.Binary, true, CancellationToken.None);
@@ -59,6 +61,7 @@ public static class ChatWebSocketHandler
                 }
 
                 var msgBytes = buffer[..result.Count];
+                AppLogger.Info($"Socket: {webSocket}, sending chat");
                 db.SaveMessage(chatId, msgBytes);
                 db.MarkChatAsRead(userId, chatId);
 
@@ -86,6 +89,7 @@ public static class ChatWebSocketHandler
         finally
         {
             lock (sockets) sockets.Remove(webSocket);
+            AppLogger.Info($"Socket: {webSocket}, disconnected");
             userSockets.TryRemove($"{userId}:{chatId}", out _);
         }
     }

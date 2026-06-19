@@ -336,6 +336,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ISSUER=${JWT_ISSUER}
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
+      - LOKI_URL=${LOKI_URL}
 
 
   docs:

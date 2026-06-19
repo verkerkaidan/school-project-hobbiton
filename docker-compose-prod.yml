@@ -260,6 +260,7 @@ services:
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ISSUER=${JWT_ISSUER}
+      - LOKI_URL=${LOKI_URL}
 
   docs:
     image: ${CI_REGISTRY_IMAGE}/docs:latest

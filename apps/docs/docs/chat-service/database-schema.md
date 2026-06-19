@@ -19,7 +19,6 @@ The chat-service stores chat metadata, membership, messages, and read state in P
 - `chat_id` UUID REFERENCES `chat`
 - `protobuf` bytea
 - `created_at` timestamptz NOT NULL DEFAULT NOW()
-- `user_id` UUID
 
 Notes:
 - chat messages are stored as raw binary `protobuf` payloads.

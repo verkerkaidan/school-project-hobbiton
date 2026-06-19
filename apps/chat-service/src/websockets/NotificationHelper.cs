@@ -33,11 +33,12 @@ public static class NotificationHelper
             {
                 try
                 {
+                    AppLogger.Info($"fetching notifications for {user}");
                     await SendUnreadCounts(notifSocket, db.GetUnreadCountsForUser(user));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error sending notification to user {user}: {ex.Message}");
+                    AppLogger.Error($"Error sending notification to user {user}: {ex.Message}");
                 }
             }
         }
