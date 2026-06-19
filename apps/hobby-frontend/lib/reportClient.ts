@@ -1,5 +1,5 @@
-import {ContentFlag} from "@/types/enums";
 import {FileReport} from "@/types/reports";
+import {authHeaders} from "@/lib/adminClient";
 
 const GATEWAY_URL =
     process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
@@ -8,6 +8,7 @@ const API_BASE = `${GATEWAY_URL}/api`;
 export async function reportFile(userId: string, instanceId: string): Promise<string> {
     const res = await fetch(`${API_BASE}/media/report/${userId}/${instanceId}`, {
         method: "POST",
+        headers: authHeaders()
     });
 
     if (!res.ok) {
@@ -21,9 +22,7 @@ export async function reportFile(userId: string, instanceId: string): Promise<st
 export async function updateContentFlag(report: FileReport) {
     const res = await fetch(`${API_BASE}/media/report`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: authHeaders({"Content-Type": "application/json"}),
         body: JSON.stringify(report)
     });
 
@@ -38,9 +37,7 @@ export async function updateContentFlag(report: FileReport) {
 export async function deleteMediaFile(hash: string) {
     const res = await fetch(`${API_BASE}/media`, {
         method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: authHeaders({"Content-Type": "application/json"}),
         body: JSON.stringify({ "hash": hash })
     });
 

@@ -1,5 +1,6 @@
 package com.apigateway.apigateway.clients;
 
+import com.apigateway.apigateway.config.FeignConfig;
 import com.apigateway.apigateway.modelDtos.media.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "media-service", url="${media.service.url}")
+@FeignClient(name = "media-service", url="${media.service.url}", configuration = FeignConfig.class)
 public interface MediaClient {
     @GetMapping("/media/file")
     List<MediaDTO> getMediaByInstanceIds(@RequestParam("instances[]") List<UUID> instances);

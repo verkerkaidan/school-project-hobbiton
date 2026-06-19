@@ -330,7 +330,7 @@ public class ProfileAggregationService {
     private void updateProfilePicturePipeline(List<MultipartFile> files, UUID userId, String authorization, UUID oldId) {
         Set<UUID> updatedProfile = new HashSet<UUID>();
         try {
-            updatedProfile = mediaService.uploadMedia(files, userId);
+            updatedProfile = mediaService.uploadMedia(files, userId, authorization);
         } catch (Exception e) {
             logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not upload file --- \n{}", e.getMessage());
             throw new RuntimeException("One of the responsible services offline");

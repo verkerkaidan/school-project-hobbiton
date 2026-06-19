@@ -53,7 +53,8 @@ defmodule MediaServiceElx.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:ex_doc, "~>0.12"},
-      {:mox, "~>0.5.2", only: :test}
+      {:mox, "~>0.5.2", only: :test},
+      {:jose, "~> 1.11"}
     ]
   end
 

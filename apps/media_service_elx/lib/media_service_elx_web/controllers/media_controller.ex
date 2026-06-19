@@ -111,13 +111,20 @@ Home of the first functions that are called when a request is coming in from api
   @returns: {id: uuid}
   """
   def delete_media_file(conn, %{"hash" => hash}) do
-    case @report_service.ban_file(hash) do
-      {:ok, file_id} ->
-        json(conn, %{id: file_id})
-      {:error, _reason} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "Invalid id"})
+    if "ROLE_ADMIN" in conn.assigns.current_user.roles do
+      case @report_service.ban_file(hash) do
+        {:ok, file_id} ->
+          json(conn, %{id: file_id})
+        {:error, _reason} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> json(%{error: "Invalid id"})
+      end
+    else
+      conn |> put_status(:forbidden) |> json(%{error: "admin only"}) |> halt()
     end
+  end
+  def delete_media_file(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "hash is required"})
   end
 end

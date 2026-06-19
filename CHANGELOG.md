@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.50.9] - 2026-06-19
+
+### Security
+- **security**: Added jwt validation for media-service-elx
+
 ## [1.50.8] - 2026-06-19
 
 ### Fixed

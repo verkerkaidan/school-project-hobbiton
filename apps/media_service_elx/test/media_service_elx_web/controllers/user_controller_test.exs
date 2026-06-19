@@ -7,6 +7,9 @@ defmodule MediaServiceElxWeb.UserControllerTest do
   alias MediaServiceElx.MediaInstances.MediaInstance
   alias MediaServiceElx.FileReports.FileReport
 
+  setup %{conn: conn} do
+    {:ok, conn: authed_conn(conn)}
+  end
   setup :verify_on_exit!
 
   # ---------------------------------------------------------------------------

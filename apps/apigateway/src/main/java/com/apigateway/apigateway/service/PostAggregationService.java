@@ -125,7 +125,7 @@ public class PostAggregationService {
      * @param dto PostDTO with a list of datauri's for media
      * @return Set of instance uuids for media
      */
-    public Set<UUID> forwardCreatePost(PostDTO dto) {
+    public Set<UUID> forwardCreatePost(PostDTO dto, String authorization) {
 
         // -----------------------------
         // 1. FIX: ensure type consistency
@@ -144,7 +144,7 @@ public class PostAggregationService {
         Set<UUID> mediaInstanceSet = new HashSet<>();
 
         if (dto.mediaInstanceDTOSet != null && !dto.mediaInstanceDTOSet.isEmpty()) {
-            mediaInstanceSet = mediaService.uploadMedia(dto.mediaInstanceDTOSet, dto.userId);
+            mediaInstanceSet = mediaService.uploadMedia(dto.mediaInstanceDTOSet, dto.userId, authorization);
             recognitionService.startRecognitionPipeline(dto.mediaInstanceDTOSet);
         } else {
             dto.mediaInstanceDTOSet = new ArrayList<>();

@@ -31,7 +31,8 @@ public class ReportController {
     @PostMapping("/media/report/{user_id}/{instance_id}")
     public ResponseEntity<UUID> reportFile(
         @PathVariable("user_id") UUID userId,
-        @PathVariable("instance_id") UUID instanceId
+        @PathVariable("instance_id") UUID instanceId,
+        @RequestHeader("Authorization") String authorization
     ) {
         try {
             ReportCreationDTO dto = mediaClient.reportFile(userId, instanceId);
@@ -45,7 +46,8 @@ public class ReportController {
     @ResponseBody
     @PutMapping("/media/report")
     public ResponseEntity<String> assignContentFlag(
-        @RequestBody ContentFlagUpdateDTO contentFlagUpdateDTO
+        @RequestBody ContentFlagUpdateDTO contentFlagUpdateDTO,
+        @RequestHeader("Authorization") String authorization
     ) {
         List<ContentFlagUpdateDTO> contentFlags = new ArrayList<>();
         contentFlags.add(contentFlagUpdateDTO);
@@ -60,7 +62,8 @@ public class ReportController {
 
     @DeleteMapping("/media")
     public ResponseEntity<String> deleteMediaFile(
-        @RequestBody DeleteMediaRequestDTO request
+        @RequestBody DeleteMediaRequestDTO request,
+        @RequestHeader("Authorization") String authorization
     ) {
         try {
             mediaClient.deleteMediaFile(request);
@@ -72,7 +75,8 @@ public class ReportController {
     }
 
     @QueryMapping
-    public List<FullMediaFile> getReportedFiles() {
+    public List<FullMediaFile> getReportedFiles(
+            @RequestHeader("Authorization") String authorization) {
         try {
             return mediaClient.getReportedFiles();
         } catch (Exception e) {

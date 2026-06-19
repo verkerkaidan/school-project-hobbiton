@@ -36,7 +36,7 @@ public class MediaService {
     /**
      * Handles the uploading of media and returns the list of instances Id's
      */
-    public Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id) {
+    public Set<UUID> uploadMedia(List<MultipartFile> files, UUID owner_id, String authorization) {
         Set<UUID> mediaInstanceSet = new HashSet<>();
 
         MultiValueMap<String, HttpEntity<?>> multipartBody = new LinkedMultiValueMap<>();
@@ -51,6 +51,7 @@ public class MediaService {
 
         MediaUploadResponse response = webClient.post()
                 .uri(mediaServiceUrl + "/media/")
+                .header("Authorization", authorization)  // add this
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .bodyValue(multipartBody)
                 .retrieve()

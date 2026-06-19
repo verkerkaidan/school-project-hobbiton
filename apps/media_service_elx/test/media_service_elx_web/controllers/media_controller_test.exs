@@ -6,6 +6,9 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
   alias MediaServiceElx.MediaFiles.MediaFile
 
   # Ensure mocks are verified after each test
+  setup %{conn: conn} do
+    {:ok, conn: authed_conn(conn)}
+  end
   setup :verify_on_exit!
 
   # ---------------------------------------------------------------------------
@@ -222,10 +225,30 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
   # ---------------------------------------------------------------------------
 
   describe "delete_media_file/2" do
+    test "admin can delete media file", %{conn: conn} do
+      expect(MediaServiceElx.ReportServiceMock, :ban_file, fn "any-hash" -> {:ok, "any-hash"} end)
+
+      conn =
+        conn
+        |> authed_conn(roles: ["ROLE_ADMIN"])
+        |> delete(~p"/api/media/admin", %{hash: "any-hash"})
+
+      assert json_response(conn, 200)
+    end
+
+    test "returns 401 without token", %{conn: _conn} do
+      conn = Phoenix.ConnTest.build_conn()
+      conn = delete(conn, ~p"/api/media/admin")
+      assert json_response(conn, 401)
+    end
+
     test "returns file id on successful ban", %{conn: conn} do
       expect(MediaServiceElx.ReportServiceMock, :ban_file, fn "file-1" -> {:ok, "file-1"} end)
 
-      conn = delete(conn, ~p"/api/media/admin", %{hash: "file-1"})
+      conn =
+        conn
+        |> authed_conn(roles: ["ROLE_ADMIN"])
+        |> delete(~p"/api/media/admin", %{hash: "file-1"})
 
       assert %{"id" => "file-1"} = json_response(conn, 200)
     end
@@ -233,7 +256,10 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
     test "returns 422 with generic error message when ban fails", %{conn: conn} do
       expect(MediaServiceElx.ReportServiceMock, :ban_file, fn "file-bad" -> {:error, :not_found} end)
 
-      conn = delete(conn, ~p"/api/media/admin", %{hash: "file-bad"})
+      conn =
+        conn
+        |> authed_conn(roles: ["ROLE_ADMIN"])
+        |> delete(~p"/api/media/admin", %{hash: "file-bad"})
 
       assert %{"error" => "Invalid id"} = json_response(conn, 422)
     end

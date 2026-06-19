@@ -24,6 +24,10 @@ if config_env() == :prod do
 
   config :media_service_elx, :media_service, MediaServiceElx.MediaService
   config :media_service_elx, :report_service, MediaServiceElx.ReportService
+
+  config :media_service_elx,
+         jwt_secret: System.get_env("JWT_SECRET") || raise("JWT_SECRET is not set"),
+         jwt_issuer: System.get_env("JWT_ISSUER") || raise("JWT_ISSUER is not set")
 end
 
 if System.get_env("PHX_SERVER") do
