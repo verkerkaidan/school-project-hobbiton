@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 function generateTestCredentials() {
   const timestamp = Date.now();
@@ -11,7 +11,7 @@ function generateTestCredentials() {
 }
 
 export async function register(
-    page: Page
+  page: Page
 ): Promise<{ username: string; email: string; password: string }> {
   const credentials = generateTestCredentials();
 
@@ -70,21 +70,24 @@ export async function register(
  * @param email The test email
  * @param password The test password
  */
-export async function login(
-    page: Page,
-    email: string,
-    password: string
-): Promise<void> {
+export async function login(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/authentication', {
     waitUntil: 'domcontentloaded',
     timeout: 60000
   });
 
-  await page.locator('input[name="email"]').waitFor({ state: 'visible' });
-  await page.locator('input[name="email"]').fill(email);
+  const emailInput = page.locator('input[name="email"]');
+
+  // Only click Login tab if the form isn't already open
+  if (!await emailInput.isVisible()) {
+    await page.getByRole('button', { name: /^Login$/ }).first().click();
+  }
+
+  await emailInput.waitFor({ state: 'visible' });
+  await emailInput.fill(email);
   await page.locator('input[name="password"]').fill(password);
 
-  await page.getByRole('button', { name: /^Login$/ }).click();
+  await page.locator('form').getByRole('button', { name: /^Login$/ }).click();
 
   await page.waitForURL('/', { timeout: 10000 });
 }
