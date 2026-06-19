@@ -8,9 +8,9 @@ import {
   checkIsFollowing,
   checkIsBlocking,
   toggleFollow,
-  toggleBlock,
   createReport,
 } from "@/queries/getProfile";
+import { useToggleBlock } from "@/hooks/useToggleBlock";
 import { ReportModal } from "@/components/profile/ReportModal";
 import {MediaSet} from "@/types/posts";
 import {useProfilePic} from "@/components/ui/ProfilePicProvider";
@@ -28,6 +28,7 @@ export function PostAuthorCard({
 }: PostAuthorCardProps) {
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id ?? "";
+  const toggleBlock = useToggleBlock();
 
   const isOwnPost = currentUserId !== "" && currentUserId === authorId;
 

@@ -10,10 +10,24 @@ import (
 // Claims holds the validated JWT payload.
 type Claims struct {
 	UserID uuid.UUID
+	// Roles contains the values from the "role" array claim, e.g. ["ROLE_ADMIN"].
+	Roles []string
 }
 
-// ValidateToken validates an HMAC256-signed JWT and returns the userId claim.
-// This mirrors the validation logic in the authentication-service (JWTUtil.java).
+// HasRole reports whether the claims contain the given role string.
+func (c *Claims) HasRole(role string) bool {
+	for _, r := range c.Roles {
+		if r == role {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidateToken validates an HMAC256-signed JWT and returns the userId and role
+// claims. The "role" claim is a JSON array produced by the authentication-service
+// (e.g. ["ROLE_ADMIN", "ROLE_USER"]). Missing or non-array role claims are
+// treated as an empty role list rather than an error.
 func ValidateToken(tokenString, secret string) (*Claims, error) {
 	if tokenString == "" {
 		return nil, errors.New("token is empty")
@@ -44,5 +58,14 @@ func ValidateToken(tokenString, secret string) (*Claims, error) {
 		return nil, errors.New("userId claim is not a valid UUID")
 	}
 
-	return &Claims{UserID: userID}, nil
+	var roles []string
+	if raw, ok := mapClaims["role"].([]interface{}); ok {
+		for _, v := range raw {
+			if s, ok := v.(string); ok {
+				roles = append(roles, s)
+			}
+		}
+	}
+
+	return &Claims{UserID: userID, Roles: roles}, nil
 }

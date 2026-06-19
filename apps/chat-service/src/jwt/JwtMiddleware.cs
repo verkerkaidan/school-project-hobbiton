@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Trace;
 
 public class JwtMiddleware
 {
@@ -22,10 +23,9 @@ public class JwtMiddleware
         if (string.IsNullOrWhiteSpace(token))
         {
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Unauthorized");
+            await errorMessage(401, "Unauthorized", context);
             return;
         }
-        Console.WriteLine($"[JWT] Auth header received: '{token}'");
 
         try
         {
@@ -35,25 +35,28 @@ public class JwtMiddleware
         }
         catch (SecurityTokenExpiredException)
         {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Token expired");
+            await errorMessage(401, "Token expired", context);
             return;
         }
         catch (SecurityTokenException ex)
         {
-            Console.WriteLine($"INVALID: {ex.Message}");
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Invalid token");
+            await errorMessage(401, "Invalid token", context);
             return;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"OTHER: {ex.GetType().Name}: {ex.Message}");
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Unauthorized");
+            await errorMessage(401, "Unauthorized", context);
             return;
         }
 
         await _next(context);
+    }
+
+    private async Task errorMessage(int statuscode, string errorMessage, HttpContext context)
+    {
+        AppLogger.Error($"JWT: INVALID: {statuscode}{errorMessage}");
+        context.Response.StatusCode = statuscode;
+        await context.Response.WriteAsync(errorMessage);
+        return;
     }
 }

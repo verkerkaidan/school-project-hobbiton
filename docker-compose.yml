@@ -314,6 +314,8 @@ services:
       BUG_REPORT_SERVICE_URL: ${BUG_REPORT_SERVICE_URL}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
 
   chat-service:
     build:
@@ -334,6 +336,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ISSUER=${JWT_ISSUER}
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}
+      - LOKI_URL=${LOKI_URL}
 
 
   docs:
@@ -341,12 +344,27 @@ services:
       context: ./apps/docs
     container_name: docs
     restart: unless-stopped
-    ports:
-      - "3001:3001"
     cpus: 0.25
     mem_limit: 128m
     networks:
       - microservices-network
+
+  docs-proxy:
+    build:
+      context: ./docker/docs-auth
+    container_name: docs-proxy
+    restart: unless-stopped
+    ports:
+      - "13001:13001"
+    environment:
+      DOCS_USER: ${DOCS_USER}
+      DOCS_PASSWORD: ${DOCS_PASSWORD}
+    cpus: 0.25
+    mem_limit: 64m
+    networks:
+      - microservices-network
+    depends_on:
+      - docs
 
   redis:
     image: redis:7-alpine
@@ -385,6 +403,72 @@ services:
     networks:
       - microservices-network
 
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./monitoring/loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/loki.yml
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - microservices-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/loki/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/promtail.yml
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - microservices-network
+    depends_on:
+      - loki
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - microservices-network
+    depends_on:
+      - middleware-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-23333}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ${GRAFANA_PLUGINS:-}
+      TZ: ${TZ:-UTC}
+    networks:
+      - microservices-network
+    depends_on:
+      - prometheus
+
 networks:
   microservices-network:
     name: hobbithon-network
@@ -393,3 +477,6 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:

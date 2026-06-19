@@ -12,10 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
@@ -120,8 +121,12 @@ public class PostController {
     @GetMapping()
     public ResponseEntity<List<? extends Post>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pagesize) {
+            @RequestParam(defaultValue = "20") int pagesize,
+            @RequestParam(required = false) List<UUID> excludeUserIds) {
         Pageable pageable = PageRequest.of(page, pagesize);
+        if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
+            return ResponseEntity.ok(this.postDAO.getPostsExcluding(excludeUserIds, pageable));
+        }
         return ResponseEntity.ok(this.postDAO.getPosts(pageable));
     }
 

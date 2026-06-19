@@ -4,6 +4,7 @@ import com.postservice.postservice.models.Post;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Pageable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,5 +67,9 @@ public class PostDAO {
 
     public List<? extends Post> getPosts(Pageable pageable) {
         return this.postRepository.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    public List<? extends Post> getPostsExcluding(Collection<UUID> excludeIds, Pageable pageable) {
+        return this.postRepository.findAllExcludingUsersOrderByCreatedAtDesc(excludeIds, pageable);
     }
 }

@@ -1,12 +1,11 @@
 // queries/getPosts.ts
 
 import { gqlRequest } from "@/lib/graphQlClient";
-import HobbyType from "@/types/enums";
-import { Post, Gym, Reading, PostResponse } from "@/types/posts";
+import { PostResponse } from "@/types/posts";
 
-const GET_POSTS_QUERY = `
-query {
-  getPosts {
+const GET_PAGED_POSTS_QUERY = `
+query GetPosts($page: Int, $size: Int, $currentUserId: ID) {
+  getPosts(page: $page, size: $size, currentUserId: $currentUserId) {
     id
     title
     description
@@ -14,6 +13,7 @@ query {
     createdAt
     updatedAt
     hobbyType
+    authorUsername
     ... on Gym {
       totalDuration
       exercises {
@@ -59,12 +59,10 @@ query {
 }
 `;
 
-
-export async function getAllPosts(): Promise<Post[]> {
-  const data = await gqlRequest<{ getPosts: PostResponse[] }>(GET_POSTS_QUERY);
-
+export async function getPagedPosts(page: number, size: number = 16, currentUserId?: string): Promise<PostResponse[]> {
+  const data = await gqlRequest<{ getPosts: PostResponse[] }>(GET_PAGED_POSTS_QUERY, { page, size, currentUserId });
   return data.getPosts.map((post) => ({
     ...post,
-    hobbyType: post.hobbyType || "UNKNOWN", // fallback if GraphQL doesn’t send it
+    hobbyType: post.hobbyType || "UNKNOWN",
   }));
 }

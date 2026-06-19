@@ -12,7 +12,7 @@ type Mutation {
 type Query {
   getPostsByHobbyType(hobbyType: HobbyType): [Post]
   getPostById(id: ID): Post
-  getPosts: [Post]
+  getPosts(page: Int, size: Int, currentUserId: ID): [Post]
   getProfile(userId: ID!): User
   getProfileByUsername(username: String!): User
   getUserPosts(userId: ID!): [Post]
@@ -35,6 +35,7 @@ interface Post {
   hobbyType: String
   interaction: Interaction
   linkedItems: [LinkedHobbyItem]
+  authorUsername: String
 }
 
 type Gym implements Post {
@@ -50,6 +51,7 @@ type Gym implements Post {
   exercises: [GymExercise]
   interaction: Interaction
   linkedItems: [LinkedHobbyItem]
+  authorUsername: String
 }
 
 type Reading implements Post {
@@ -67,6 +69,7 @@ type Reading implements Post {
   bookFinished: Boolean
   interaction: Interaction
   linkedItems: [LinkedHobbyItem]
+  authorUsername: String
 }
 
 # Other post — no hobby-specific fields, just title/description + linked items
@@ -81,6 +84,7 @@ type Other implements Post {
   hobbyType: String
   interaction: Interaction
   linkedItems: [LinkedHobbyItem]
+  authorUsername: String
 }
 
 type LinkedHobbyItem {

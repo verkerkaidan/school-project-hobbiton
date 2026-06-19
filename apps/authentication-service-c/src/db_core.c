@@ -310,6 +310,47 @@ int update_user_role_db(const char *id, const char *role_name) {
     return 0;
 }
 
+int update_email_db(const char *id, const char *new_email) {
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
+
+    const char *params[2] = { new_email, id };
+    PGresult *upd = PQexecParams(conn,
+        "UPDATE custom_user SET email = $1 WHERE id = $2::uuid AND enabled = true",
+        2, NULL, params, NULL, NULL, 0);
+    if (!upd) return -1;
+    if (PQresultStatus(upd) != PGRES_COMMAND_OK) { PQclear(upd); return -1; }
+    if (PQcmdTuples(upd) == NULL || atoi(PQcmdTuples(upd)) == 0) { PQclear(upd); return -1; }
+    PQclear(upd);
+    return 0;
+}
+
+int update_password_db(const char *id, const char *current_password, const char *new_password) {
+    PGconn *conn = db_conn();
+    if (!conn) return -1;
+
+    const char *verifyParams[2] = { id, current_password };
+    PGresult *ver = PQexecParams(conn,
+        "SELECT 1 FROM custom_user WHERE id = $1::uuid AND password = crypt($2, password)",
+        2, NULL, verifyParams, NULL, NULL, 0);
+    if (!ver) return -1;
+    if (PQresultStatus(ver) != PGRES_TUPLES_OK || PQntuples(ver) < 1) {
+        PQclear(ver);
+        return -2;
+    }
+    PQclear(ver);
+
+    const char *updateParams[2] = { new_password, id };
+    PGresult *upd = PQexecParams(conn,
+        "UPDATE custom_user SET password = crypt($1, gen_salt('bf', 12)) WHERE id = $2::uuid",
+        2, NULL, updateParams, NULL, NULL, 0);
+    if (!upd) return -1;
+    if (PQresultStatus(upd) != PGRES_COMMAND_OK) { PQclear(upd); return -1; }
+    PQclear(upd);
+
+    return 0;
+}
+
 static int exec_sql(const char *sql)
 {
     PGconn *conn = db_conn();

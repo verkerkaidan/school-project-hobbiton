@@ -3,18 +3,23 @@ using System.Net.WebSockets;
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
+AppLogger.Init();
+AppLogger.Info("Chat service starting");
+
 var migrationRunner = new MigrationRunner(
     Environment.GetEnvironmentVariable("CHAT_DB_CONNECTION_STRING")
     ?? throw new InvalidOperationException("CHAT_DB_CONNECTION_STRING is not set")
 );
+AppLogger.Info("Running database migrations");
 migrationRunner.Run();
+AppLogger.Info("Database migrations completed");
 
 var chatAllowedOrigins = GetAllowedOrigins(
     Environment.GetEnvironmentVariable("CHAT_ALLOWED_ORIGINS")
     ?? "https://hobbiton.student.inf.st.hsleiden.nl,http://localhost:23738"
 );
+AppLogger.Info($"Allowed origins: {string.Join(", ", chatAllowedOrigins)}");
 
-// ... rest of your app startup
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
@@ -24,7 +29,9 @@ builder.Services.AddCors(options =>
         policy.SetIsOriginAllowed(origin =>
         {
             var normalizedOrigin = NormalizeOrigin(origin);
-            return normalizedOrigin != null && chatAllowedOrigins.Contains(normalizedOrigin);
+            var allowed = normalizedOrigin != null && chatAllowedOrigins.Contains(normalizedOrigin);
+            if (!allowed) AppLogger.Warn($"Rejected CORS request from origin: {origin}");
+            return allowed;
         })
         .AllowAnyHeader()
         .AllowAnyMethod();
@@ -47,6 +54,7 @@ ChatWebSocketHandler.Map(app, lobbies, userSockets, notificationSockets, db);
 NotificationWebSocketHandler.Map(app, notificationSockets, db);
 ChatEndpoints.Map(app, userSockets, db);
 
+AppLogger.Info("Chat service started, listening for requests");
 app.Run();
 
 static HashSet<string> GetAllowedOrigins(string csvOrigins)

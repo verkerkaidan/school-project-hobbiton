@@ -42,6 +42,90 @@ static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 static FILE *log_file = NULL;
 static conn_queue_t queue;
 
+/* ---------------- Metrics ---------------- */
+
+#define MAX_METRICS_ENTRIES 256
+
+typedef struct {
+    char method[16];
+    char path[256];
+    int status;
+    volatile long long count;
+} metrics_entry_t;
+
+static metrics_entry_t metrics_entries[MAX_METRICS_ENTRIES];
+static int metrics_entry_count = 0;
+static pthread_mutex_t metrics_mutex = PTHREAD_MUTEX_INITIALIZER;
+static volatile long long metrics_total_requests = 0;
+static volatile long long metrics_active_connections = 0;
+
+static __thread const char *tl_method = NULL;
+static __thread const char *tl_path = NULL;
+
+static void metrics_increment(const char *method, const char *path, int status) {
+    __sync_add_and_fetch(&metrics_total_requests, 1);
+    pthread_mutex_lock(&metrics_mutex);
+    for (int i = 0; i < metrics_entry_count; i++) {
+        if (strcmp(metrics_entries[i].method, method) == 0 &&
+            strcmp(metrics_entries[i].path, path) == 0 &&
+            metrics_entries[i].status == status) {
+            __sync_add_and_fetch(&metrics_entries[i].count, 1);
+            pthread_mutex_unlock(&metrics_mutex);
+            return;
+        }
+    }
+    if (metrics_entry_count < MAX_METRICS_ENTRIES) {
+        strncpy(metrics_entries[metrics_entry_count].method, method, sizeof(metrics_entries[metrics_entry_count].method) - 1);
+        strncpy(metrics_entries[metrics_entry_count].path, path, sizeof(metrics_entries[metrics_entry_count].path) - 1);
+        metrics_entries[metrics_entry_count].status = status;
+        metrics_entries[metrics_entry_count].count = 1;
+        metrics_entry_count++;
+    }
+    pthread_mutex_unlock(&metrics_mutex);
+}
+
+static void handle_metrics(int client) {
+    char buf[16384];
+    int n = 0;
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_requests_total Total HTTP requests\n"
+        "# TYPE auth_requests_total counter\n"
+        "auth_requests_total %lld\n\n",
+        (long long)metrics_total_requests);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_active_connections Current active connections\n"
+        "# TYPE auth_active_connections gauge\n"
+        "auth_active_connections %lld\n\n",
+        (long long)metrics_active_connections);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_route_requests_total Requests per route\n"
+        "# TYPE auth_route_requests_total counter\n");
+
+    pthread_mutex_lock(&metrics_mutex);
+    for (int i = 0; i < metrics_entry_count; i++) {
+        n += snprintf(buf + n, sizeof(buf) - n,
+            "auth_route_requests_total{method=\"%s\",path=\"%s\",status=\"%d\"} %lld\n",
+            metrics_entries[i].method,
+            metrics_entries[i].path,
+            metrics_entries[i].status,
+            (long long)metrics_entries[i].count);
+    }
+    pthread_mutex_unlock(&metrics_mutex);
+
+    char header[1024];
+    snprintf(header, sizeof(header),
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/plain; charset=UTF-8\r\n"
+        "Content-Length: %d\r\n"
+        "Connection: close\r\n"
+        "\r\n", n);
+    send(client, header, strlen(header), 0);
+    send(client, buf, n, 0);
+}
+
 /* ---------------- Queue ---------------- */
 
 static void queue_init(conn_queue_t *q) {
@@ -116,6 +200,9 @@ static void log_msg(log_level_t level, const char *fmt, ...) {
 
 static void send_response(int client, int status, const char *status_text,
                           const char *body, const char *ctype) {
+    if (tl_method && tl_path) {
+        metrics_increment(tl_method, tl_path, status);
+    }
     char header[1024];
     int len = body ? (int)strlen(body) : 0;
 
@@ -240,6 +327,10 @@ static void handle_client_fd(int client) {
         close(client);
         return;
     }
+
+    tl_method = method;
+    tl_path = path;
+    __sync_add_and_fetch(&metrics_active_connections, 1);
 
     char *headers = strndup(buffer, headers_len);
 
@@ -394,36 +485,91 @@ static void handle_client_fd(int client) {
             send_response(client, 200, "OK", out, "application/json");
             free(token);
         }
-
         free(email);
         free(password);
     }
-     else if (strcmp(method, "DELETE") == 0 && strcmp(path, "/api/auth/delete") == 0) {
+    else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/email") == 0) {
         char *token = extract_bearer_token(headers);
-        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json"); }
-        else {
-            char *userId = NULL; char *roles_csv = NULL;
-            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
-            else {
-                char *email = json_get_string_local(body, "email");
-                char *password = json_get_string_local(body, "password");
-                if (!email || !password) { send_response(client, 400, "Bad Request", "{\"error\":\"email and password required\"}", "application/json"); }
-                else {
-                    char id[37]; char hash[512]; char roles[512]; int enabled;
-                    if (find_user_by_email_db(email, id, sizeof(id), hash, sizeof(hash), roles, sizeof(roles), &enabled) != 0) { send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json"); }
-                    else {
-                        char auth_id[37]; char roles2[512];
-                        if (authenticate_user_db(email, password, auth_id, sizeof(auth_id), roles2, sizeof(roles2)) != 0 || strcmp(auth_id, userId) != 0) {
-                            send_response(client, 403, "Forbidden", "{\"error\":\"Invalid credentials\"}", "application/json");
-                        } else {
-                            if (delete_user_by_id_db(auth_id) != 0) send_response(client, 500, "Internal Server Error", "{\"error\":\"Could not delete user\"}", "application/json");
-                            else send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");
-                        }
+        if (!token) {
+            send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");
+        } else {
+            char *userId = NULL, *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {
+                send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json");
+            } else if (!body) {
+                send_response(client, 400, "Bad Request", "{\"error\":\"missing body\"}", "application/json");
+            } else {
+                char *newEmail = json_get_string_local(body, "email");
+                if (!newEmail) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"missing email field\"}", "application/json");
+                } else if (!is_valid_email(newEmail)) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"invalid email format\"}", "application/json");
+                } else {
+                    int rc = update_email_db(userId, newEmail);
+                    if (rc != 0) {
+                        send_response(client, 500, "Internal Server Error", "{\"error\":\"email update failed\"}", "application/json");
+                    } else {
+                        send_response(client, 200, "OK", "{\"result\":\"email updated\"}", "application/json");
                     }
                 }
-                free(email); free(password);
+                free(newEmail);
             }
-            free(token); free(userId); free(roles_csv);
+            free(token);
+            free(userId);
+            free(roles_csv);
+        }
+    }
+    else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/password") == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) {
+            send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");
+        } else {
+            char *userId = NULL, *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {
+                send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json");
+            } else if (!body) {
+                send_response(client, 400, "Bad Request", "{\"error\":\"missing body\"}", "application/json");
+            } else {
+                char *currentPassword = json_get_string_local(body, "currentPassword");
+                char *newPassword = json_get_string_local(body, "newPassword");
+                if (!currentPassword || !newPassword) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"missing fields\"}", "application/json");
+                } else if (!is_valid_password(newPassword)) {
+                    send_response(client, 400, "Bad Request", "{\"error\":\"new password must be at least 8 characters with upper, lower, digit, and special character\"}", "application/json");
+                } else {
+                    int rc = update_password_db(userId, currentPassword, newPassword);
+                    if (rc == -2) {
+                        send_response(client, 403, "Forbidden", "{\"error\":\"current password is incorrect\"}", "application/json");
+                    } else if (rc != 0) {
+                        send_response(client, 500, "Internal Server Error", "{\"error\":\"password change failed\"}", "application/json");
+                    } else {
+                        send_response(client, 200, "OK", "{\"result\":\"password updated\"}", "application/json");
+                    }
+                }
+                free(currentPassword);
+                free(newPassword);
+            }
+            free(token);
+            free(userId);
+            free(roles_csv);
+        }
+    }
+    else if (strcmp(method, "DELETE") == 0 && strncmp(path, "/api/auth/delete/", 16) == 0) {
+        char *token = extract_bearer_token(headers);
+        if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");}
+        else {
+            char *userId = NULL; char *roles_csv = NULL;
+            if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {send_response(client, 401, "Unauthorized", "\"error\":\"Invalid token\"}", "application/json");}
+            else {
+                char *targetId = path + 16; int is_self = strcmp(userId, targetId) == 0; int is_admin = 0;
+                if (roles_csv && strstr(roles_csv, "ADMIN") != NULL) { is_admin = 1;}
+                if (!is_self && !is_admin) {send_response(client, 403, "Forbidden",  "{\"error\":\"Not authorized\"}", "application/json"); }
+                else {
+                    if (delete_user_by_id_db(targetId) != 0) { send_response(client, 500, "Internal Server Error", "{\"error\":\"Could not delete user\"}", "application/json");}
+                    else {send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");}
+                }
+            }
+            free(userId); free(roles_csv); free(token);
         }
     }
     else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/new/", 16) == 0) {
@@ -508,6 +654,9 @@ static void handle_client_fd(int client) {
         free(roles);
     }
 
+    else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/auth/metrics") == 0) {
+        handle_metrics(client);
+    }
     else {
         send_response(client, 404, "Not Found",
                       "{\"error\":\"not found\"}", "application/json");
@@ -515,6 +664,7 @@ static void handle_client_fd(int client) {
 
     goto cleanup;
     cleanup:
+        __sync_sub_and_fetch(&metrics_active_connections, 1);
         free(headers);
         if (body) {
             free(body);
@@ -553,8 +703,7 @@ static void *accept_loop(void *arg) {
 int main() {
     db_init();
 
-    log_file = fopen("server.log", "a");
-    if (!log_file) log_file = stdout;
+    log_file = stdout;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 

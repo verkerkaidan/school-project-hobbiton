@@ -10,8 +10,10 @@ import {
   Check,
   Loader2,
 } from "lucide-react";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import {updateUsername, useCurrentUser} from "@/hooks/useCurrentUser";
 import { getProfile } from "@/queries/getProfile";
+import { updateProfile } from "@/lib/profileClient";
+import Cookies from "js-cookie";
 
 interface ProfileField {
   key: "username" | "bio";
@@ -43,6 +45,9 @@ export function AccountSettings() {
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
 
   // Pre-populate username from the cached hook value immediately
   useEffect(() => {
@@ -88,10 +93,32 @@ export function AccountSettings() {
     setDraft("");
   };
 
-  const saveEdit = (key: ProfileField["key"]) => {
-    setValues((prev) => ({ ...prev, [key]: draft }));
-    setEditing(null);
-    setDraft("");
+  const saveEdit = async (key: ProfileField["key"]) => {
+    setSaveError("");
+    setSaveSuccess("");
+    const token = Cookies.get("token");
+    if (!token) {
+      setSaveError("Not authenticated");
+      return;
+    }
+    if (!draft.trim()) {
+      setSaveError(`${key === "username" ? "Username" : "Bio"} cannot be empty`);
+      return;
+    }
+    setSaving(true);
+    try {
+      const field = key === "bio" ? "biography" : key;
+      await updateProfile({ [field]: draft }, token);
+      setValues((prev) => ({ ...prev, [key]: draft }));
+      setEditing(null);
+      setDraft("");
+      setSaveSuccess(`${key === "username" ? "Username" : "Bio"} updated`);
+      if (key == "username") {updateUsername(draft)}
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -122,6 +149,12 @@ export function AccountSettings() {
             <div className="flex justify-center py-4">
               <Loader2 className="w-5 h-5 animate-spin text-brand" />
             </div>
+          )}
+          {saveError && (
+            <p className="text-xs text-red-400 px-1">{saveError}</p>
+          )}
+          {saveSuccess && (
+            <p className="text-xs text-green-400 px-1">{saveSuccess}</p>
           )}
           {!loading &&
             PROFILE_FIELDS.map(({ key, label, placeholder, multiline }) => (
@@ -172,10 +205,15 @@ export function AccountSettings() {
                       </button>
                       <button
                         onClick={() => saveEdit(key)}
-                        className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 transition-opacity px-3 py-1.5 rounded-lg"
+                        disabled={saving}
+                        className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 disabled:opacity-50 transition-opacity px-3 py-1.5 rounded-lg"
                       >
-                        <Check size={12} />
-                        Save
+                        {saving ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <Check size={12} />
+                        )}
+                        {saving ? "Saving..." : "Save"}
                       </button>
                     </div>
                   </div>

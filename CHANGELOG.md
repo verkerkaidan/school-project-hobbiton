@@ -12,6 +12,122 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **fix**: auth helper for e2e tests fix
 
 ### Changed
+- **refactor**: Added unit testing to production for post-service
+- **refactor**: Added grafana testing for chats
+
+## [1.49.6] - 2026-06-19
+
+### Fixed
+- **fix**: Grafana fixing
+
+## [1.49.5] - 2026-06-19
+
+### Fixed
+- **fix**: admin token fix bug reports
+
+## [1.49.4] - 2026-06-19
+
+### Fixed
+- **fix**: fix admin tokens from frontend
+
+## [1.49.3] - 2026-06-19
+
+### Changed
+- **refactor**: Page size to 8 to reduce amount of posts loaded
+## [1.49.2] - 2026-06-19
+
+### Added
+- **feat**: profile & password changes
+- 
+## [1.49.1] - 2026-06-19
+
+### Added
+- **feat**: JWT expiry and redirection in FE
+
+## [1.49.0] - 2026-06-19
+
+### Added
+- **feat**: Added the ability to remove everything from a user from the chats.
+
+## [1.48.6] - 2026-06-19
+
+### Added
+- **feat**: make sure there is an authentication check for admin functionality in the apigateway
+
+## [1.48.5] - 2026-06-18
+
+### Changed
+- **chore**: remove scps for now to fix prod
+
+## [1.48.4] - 2026-06-18
+
+### Changed
+- **chore**: ci
+
+## [1.48.3] - 2026-06-18
+
+### Changed
+- **docs**: Docs for Auth, Profile and RabbitMQ
+
+## [1.48.2] - 2026-06-18
+
+### Changed
+- **chore**: fix ci
+
+## [1.48.1] - 2026-06-18
+
+### Changed
+- **chore**: improve cicd to not die if monitoring breaks
+
+## [1.48.0] - 2026-06-18
+
+### Security
+- **security**: Release docs to prod, but protect them by password
+
+## [1.47.2] - 2026-06-18
+
+### Changed
+- **refactor**: Adjust content on landing page
+- **docs**: Notification docs update
+- **chore**: add agent md files to services
+
+## [1.47.1] - 2026-06-18
+
+### Fixed
+- **fix**: Container names where sometimes explicitly set, now they are dynamic
+
+## [1.47.0] - 2026-06-18
+
+### Added
+- **feat**: Grafana
+
+## [1.46.0] - 2026-06-18
+
+### Added
+- **feat**: Added caching in frontend feed
+- **feat**: Blocked users don't appear in feed anymore.
+
+## [1.45.0] - 2026-06-18
+
+### Added
+- **feat**: Allow user to delete all mentions in notification service
+
+### Changed
+- **chore**: Move changelog job to validate stage
+- **chore**: E2E tests: Notifications, Bug Report, Profile Connections
+
+## [1.44.0] - 2026-06-18
+
+### Changed
+- **refactor**: Add pagination to feed, make admin scrollable, improve request handling by batches
+
+## [1.43.8] - 2026-06-17
+
+### Fixed
+- **fix**: auth helper for e2e tests fix
+
+### Changed
+- **chore**: Tests for Bug Report service
 - **chore**: tests for notification service
 - **chore**: Tests for media-service-elx/mediaService en media-service-elx/reportService
 

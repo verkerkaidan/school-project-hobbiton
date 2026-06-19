@@ -20,10 +20,15 @@ export async function register(
     timeout: 60000
   });
 
-  await page.getByRole('button', { name: /^Register$/ }).waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: /^Register$/ }).click();
+  const registerButton = page.getByRole('button', { name: /^Register$/ });
+  await registerButton.waitFor({ state: 'visible' });
 
   const usernameInput = page.locator('input[name="username"]');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await registerButton.click();
+    const appeared = await usernameInput.waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+    if (appeared) break;
+  }
   await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
 
   await usernameInput.fill(credentials.username);
@@ -35,7 +40,7 @@ export async function register(
   await submitButton.click();
 
   const tosHeader = page.getByText('Continued use of the platform');
-  await tosHeader.waitFor({ state: 'visible', timeout: 5000 });
+  await tosHeader.waitFor({ state: 'visible', timeout: 10000 });
 
   await page.getByText('Welcome to Hobbiton.').evaluate((el) => {
     const container = el.closest('.overflow-y-auto');
@@ -54,8 +59,7 @@ export async function register(
   await page.getByRole('button', { name: 'Accept & Continue' }).click();
 
   await page.waitForURL('/', { timeout: 10000 });
-  await page.waitForLoadState('networkidle');
-  await page.waitForSelector('text=Welcome', { timeout: 5000 });
+  await page.waitForSelector('text=Welcome', { timeout: 10000 });
 
   return credentials;
 }

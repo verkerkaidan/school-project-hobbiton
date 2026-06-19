@@ -299,4 +299,17 @@ public class DatabaseConnection : IDatabaseConnection
 
         cmd.ExecuteNonQuery();
     }
+
+    public bool RemoveAllUserInformation(Guid userIdToDelete)
+    {
+        using var conn = _dataSource.OpenConnection();
+
+        using (var cmd1 = new NpgsqlCommand("DELETE FROM allowed_users WHERE user_id = @userId", conn))
+        {
+            cmd1.Parameters.AddWithValue("@userId", userIdToDelete);
+            cmd1.ExecuteNonQuery();
+        }
+
+        return true;
+    }
 }

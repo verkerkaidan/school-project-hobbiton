@@ -3,21 +3,24 @@
 import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import {doesLikeExist, toggleLike} from "@/lib/interactionClient";
-import {useErrorToast} from "@/components/ui/ErrorToastProvider";
+import { doesLikeExist, toggleLike } from "@/lib/interactionClient";
+import { useErrorToast } from "@/components/ui/ErrorToastProvider";
 
 interface LikeButtonProps {
-    itemId: string; // The id of the item to like/unlike
-    initialLikes: number; // Initial number of likes
+    itemId: string;
+    initialLikes: number;
+    /** Pre-fetched liked state from the feed batch call — skips the per-mount request. */
+    initialLiked?: boolean;
 }
 
-const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
-    const [liked, setLiked] = useState(false);
+const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes, initialLiked }) => {
+    const [liked, setLiked] = useState(initialLiked ?? false);
     const [likes, setLikes] = useState(initialLikes);
     const { showErrorToast } = useErrorToast();
 
-    // Check if the user has already liked the item on mount
+    // Only fetch individually when initialLiked was NOT provided (e.g. single-post page).
     useEffect(() => {
+        if (initialLiked !== undefined) return;
         async function fetchLike() {
             const userId = Cookies.get("userId");
             if (!userId) return;
@@ -25,13 +28,19 @@ const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
             setLiked(exists);
         }
         fetchLike();
-    }, [itemId]);
+    }, [itemId, initialLiked]);
 
     useEffect(() => {
         setLikes(initialLikes);
     }, [initialLikes]);
 
-    // Toggle the like status and update likes count
+    // Sync liked state when the pre-fetched value changes (new page loaded).
+    useEffect(() => {
+        if (initialLiked !== undefined) {
+            setLiked(initialLiked);
+        }
+    }, [initialLiked]);
+
     const onToggleLike = async () => {
         setLiked((prev) => !prev);
         try {
@@ -57,7 +66,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({ itemId, initialLikes }) => {
                         : "text-accent"
                 }`}
             />
-            {/* Small textbox showing number of likes */}
             <span className="text-sm font-medium text-stone-700">{likes}</span>
         </div>
     );

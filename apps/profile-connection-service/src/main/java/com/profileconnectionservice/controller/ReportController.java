@@ -78,6 +78,14 @@ public class ReportController {
         return ResponseEntity.ok(reports);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Report>> getAllReports() {
+        log.debug("Received GET /reports/all");
+        List<Report> reports = reportService.getAllReports();
+        log.debug("Found {} total reports", reports.size());
+        return ResponseEntity.ok(reports);
+    }
+
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Report>> getReportsByStatus(@PathVariable Report.ReportStatus status) {
         log.debug("Received GET /reports/status/{}", status);

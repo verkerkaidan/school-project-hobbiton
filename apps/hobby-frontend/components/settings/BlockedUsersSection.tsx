@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, ChevronDown, UserX, Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { getBlockedUsers, toggleBlock } from "@/queries/getProfile";
+import { getBlockedUsers } from "@/queries/getProfile";
+import { useToggleBlock } from "@/hooks/useToggleBlock";
 import type { User } from "@/types/profile";
 import {useProfilePic} from "@/components/ui/ProfilePicProvider";
 
@@ -19,6 +20,7 @@ export function BlockedUsersSection() {
   const [unblockingIds, setUnblockingIds] = useState<Set<string>>(new Set());
   const [fetched, setFetched] = useState(false);
   const {imageSrc: contextImageSrc} = useProfilePic();
+  const toggleBlock = useToggleBlock();
 
   const fetchBlocked = useCallback(async () => {
     if (fetched) return;

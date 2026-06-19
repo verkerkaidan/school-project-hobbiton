@@ -61,7 +61,31 @@ public class PostAggregationService {
     }
 
     public List<Post> getAllPosts() {
-        return postClient.getAllPosts();
+        return postClient.getPagedPosts(0, Integer.MAX_VALUE);
+    }
+
+    public List<Post> getPagedPosts(int page, int size) {
+        return postClient.getPagedPosts(page, size);
+    }
+
+    public List<Post> getPagedPostsForUser(int page, int size, UUID currentUserId) {
+        Set<UUID> excluded = new HashSet<>();
+        try {
+            Set<UUID> blocked = profileConnectionClient.getBlockedIds(currentUserId);
+            if (blocked != null) excluded.addAll(blocked);
+        } catch (Exception e) {
+            logger.warn("[PostAggregationService] Could not fetch blocked IDs for userId={}: {}", currentUserId, e.getMessage());
+        }
+        try {
+            Set<UUID> blockedBy = profileConnectionClient.getBlockedByIds(currentUserId);
+            if (blockedBy != null) excluded.addAll(blockedBy);
+        } catch (Exception e) {
+            logger.warn("[PostAggregationService] Could not fetch blocked-by IDs for userId={}: {}", currentUserId, e.getMessage());
+        }
+        if (excluded.isEmpty()) {
+            return postClient.getPagedPosts(page, size);
+        }
+        return postClient.getPagedPostsExcluding(page, size, excluded);
     }
 
     /**

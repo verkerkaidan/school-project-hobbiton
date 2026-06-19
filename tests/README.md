@@ -6,6 +6,7 @@ This directory contains end-to-end (E2E) tests for the Hobbithon social media ap
 
 - **posts.spec.ts** - Tests for creating posts (both gym and reading posts)
 - **profile.spec.ts** - Tests for viewing user profiles
+- **profile-edit.spec.ts** - Tests for editing profile (username, bio, email, password)
 - **helpers/auth.ts** - Authentication helper functions
 
 ## Prerequisites
@@ -88,6 +89,23 @@ npx playwright test -g "should create a gym post successfully"
 3. **Validation - empty title** - Verifies title validation
 4. **Validation - missing duration** - Verifies duration validation
 5. **Cancel post creation** - Tests the cancel functionality
+
+### Profile Editing Tests (profile-edit.spec.ts)
+1. **Edit username** - Tests updating the username via settings
+2. **Edit bio** - Tests updating the bio via settings
+3. **Validation - empty username** - Verifies empty username validation
+4. **Cancel editing username** - Tests cancel reverts to original value
+5. **Edit email** - Tests updating the email address
+6. **Validation - empty email** - Verifies empty email validation
+7. **Change password** - Tests successful password change
+8. **Validation - password mismatch** - Verifies mismatch error
+9. **Validation - incorrect current password** - Verifies wrong current password rejected
+10. **Validation - new password too short** - Verifies minimum length requirement
+11. **Validation - missing special character** - Verifies special character requirement
+12. **Validation - missing digit** - Verifies digit requirement
+13. **Validation - missing uppercase** - Verifies uppercase requirement
+14. **Login with new password** - Verifies new password works for authentication
+15. **Cancel password change** - Tests cancel closes the form
 
 ### Profile Viewing Tests (profile.spec.ts)
 1. **View own profile** - Tests accessing the user's own profile page

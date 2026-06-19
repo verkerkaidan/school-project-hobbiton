@@ -16,7 +16,6 @@ import { getReportsByStatus, updateReportStatus } from "@/lib/adminClient";
 import { getReportedFiles } from "@/queries/getReportedFiles";
 import type { Report, ReportedFile, ReportStatus } from "@/types/reports";
 import { ALL_STATUSES, REASON_LABELS, STATUS_CONFIG } from "@/types/reports";
-import { getProfile } from "@/queries/getProfile";
 import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
 import { ImageReportCard } from "@/components/admin/ImageReportCard";
 
@@ -32,38 +31,10 @@ const TABS: { value: FilterTab; label: string }[] = [
   { value: "ACTION_TAKEN", label: "Action Taken" },
 ];
 
-interface EnrichedReport extends Report {
-  initiatorUsername?: string;
-  targetUsername?: string;
-}
-
-async function enrichReports(reports: Report[]): Promise<EnrichedReport[]> {
-  const uniqueIds = [
-    ...new Set([
-      ...reports.map((r) => r.initiator),
-      ...reports.map((r) => r.target),
-    ]),
-  ];
-
-  const profileMap: Record<string, string> = {};
-  await Promise.allSettled(
-    uniqueIds.map(async (id) => {
-      const p = await getProfile(id);
-      profileMap[id] = p.username;
-    }),
-  );
-
-  return reports.map((r) => ({
-    ...r,
-    initiatorUsername: profileMap[r.initiator] ?? r.initiator.slice(0, 8) + "…",
-    targetUsername: profileMap[r.target] ?? r.target.slice(0, 8) + "…",
-  }));
-}
-
 export const ReportsTable = () => {
   const [reportType, setReportType] = useState<ReportTypeTab>("users");
   const [tab, setTab] = useState<FilterTab>("PENDING");
-  const [reports, setReports] = useState<EnrichedReport[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -88,9 +59,8 @@ export const ReportsTable = () => {
     setLoading(true);
     setError(null);
     try {
-      const raw = await getReportsByStatus(tab);
-      const enriched = await enrichReports(raw);
-      setReports(enriched);
+      const reports = await getReportsByStatus(tab);
+      setReports(reports);
     } catch {
       setError("Failed to load reports. Check your admin service URLs.");
     } finally {
@@ -402,7 +372,7 @@ export const ReportsTable = () => {
 /* ─────────────────────────────────────────────────────────── */
 
 interface ReportRowProps {
-  report: EnrichedReport;
+  report: Report;
   isUpdating: boolean;
   onStatusChange: (id: string, status: ReportStatus) => void;
   onDeletePosts: () => void;

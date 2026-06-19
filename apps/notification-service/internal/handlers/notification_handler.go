@@ -263,6 +263,93 @@ func (h *Handler) unreadCount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]int{"count": count})
 }
 
+// deleteUserNotifications hard-deletes every notification row where the
+// authenticated user is either the recipient (user_id) or the actor (actor_id).
+// This is intended for self-service account deletion — a user may only purge
+// their own notification data.
+//
+// Constraints:
+//   - Requires a valid JWT Bearer token in the Authorization header.
+//   - The target user is always the token holder; there is no way to delete
+//     another user's notifications via this endpoint.
+//
+// Example:
+//
+//	DELETE /notifications/users/me
+//	Authorization: Bearer <jwt>
+//
+// Response: { "deleted": 12 }
+func (h *Handler) deleteUserNotifications(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.extractClaims(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	result, err := h.db.Exec(
+		`DELETE FROM notifications WHERE user_id = $1 OR actor_id = $1`,
+		claims.UserID,
+	)
+	if err != nil {
+		http.Error(w, "failed to delete notifications", http.StatusInternalServerError)
+		return
+	}
+
+	deleted, _ := result.RowsAffected()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]int64{"deleted": deleted})
+}
+
+// adminDeleteUserNotifications hard-deletes every notification row where the
+// given user is either the recipient (user_id) or the actor (actor_id).
+// This is an admin-only endpoint for use during account deletion flows where
+// the acting principal is an administrator, not the target user themselves.
+//
+// Constraints:
+//   - Requires a valid JWT Bearer token in the Authorization header.
+//   - The token must contain "ROLE_ADMIN" in its "role" claim array; requests
+//     from non-admin tokens are rejected with 403 Forbidden.
+//   - The target userId is taken from the URL path, not from the token.
+//
+// Example:
+//
+//	DELETE /notifications/users/123e4567-e89b-12d3-a456-426614174000
+//	Authorization: Bearer <admin-jwt>
+//
+// Response: { "deleted": 7 }
+func (h *Handler) adminDeleteUserNotifications(w http.ResponseWriter, r *http.Request) {
+	claims, err := h.extractClaims(r)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if !claims.HasRole("ROLE_ADMIN") {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	targetID, err := uuid.Parse(r.PathValue("userId"))
+	if err != nil {
+		http.Error(w, "invalid userId", http.StatusBadRequest)
+		return
+	}
+
+	result, err := h.db.Exec(
+		`DELETE FROM notifications WHERE user_id = $1 OR actor_id = $1`,
+		targetID,
+	)
+	if err != nil {
+		http.Error(w, "failed to delete notifications", http.StatusInternalServerError)
+		return
+	}
+
+	deleted, _ := result.RowsAffected()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]int64{"deleted": deleted})
+}
+
 // isNotificationEnabled checks the user's preference for a given notification type.
 // Returns true (enabled) when no explicit preference record exists (default-on behaviour).
 func (h *Handler) isNotificationEnabled(userID uuid.UUID, notifType models.NotificationTypeValue) bool {

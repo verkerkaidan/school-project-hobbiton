@@ -2,31 +2,43 @@
 
 import { LoginModal } from "@/components/modals/LoginModal";
 import { RegisterModal } from "@/components/modals/RegisterModal";
-import { useState } from "react";
+import { useErrorToast } from "@/components/ui/ErrorToastProvider";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
-interface LoginForm {
-  email: string;
-  password: string;
+function SessionExpiredToast() {
+  const searchParams = useSearchParams();
+  const { showErrorToast } = useErrorToast();
+
+  useEffect(() => {
+    if (searchParams.get("expired") === "true") {
+      showErrorToast("Session expired", "Please log in again to continue.", "error");
+    }
+  }, [searchParams, showErrorToast]);
+
+  return null;
 }
 
-interface RegisterForm {
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
 export default function Authentication() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
 
   return (
     <div className="flex flex-1 min-h-screen items-center justify-center">
+      <Suspense>
+        <SessionExpiredToast />
+      </Suspense>
       <main className="max-w-2xl w-full mx-auto px-6 py-20">
         <header className="mb-8 space-y-4 text-center">
           <h1 className="text-5xl md:text-7xl font-serif italic text-white">
-            Welcome <span className="text-brand">Hobbiist</span>
+            <span className="text-brand">Welcome, Hobiist</span>
           </h1>
-          <p className="text-accent text-lg">
-            Jouw persoonlijke stroom van literatuur, cinema en beweging.
+          <p className="text-white/90 text-xl font-light tracking-wide">
+            Track what you read, watch, and do.
+          </p>
+          <p className="text-accent text-base max-w-sm mx-auto">
+            A personal space to log your hobbies and share them with people who
+            get it.
           </p>
         </header>
 

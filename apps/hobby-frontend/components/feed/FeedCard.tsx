@@ -10,7 +10,7 @@ import LikeButton from "@/components/interaction/LikeButton";
 import {FeedCardAuthor} from "@/components/feed/FeedCardAuthor";
 import {ContentFlag} from "@/types/enums";
 
-export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
+export const FeedCard = ({ item, index, liked }: { item: Post; index: number; liked?: boolean }) => {
   const [revealed, setRevealed] = useState(false);
 
   const aspectRatios = {
@@ -91,7 +91,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
 
       {/* Content Area */}
       <div className="p-6 space-y-3 cursor-pointer">
-        <FeedCardAuthor userId={item.userId} />
+        <FeedCardAuthor username={item.authorUsername ?? ""} />
         <div className="flex items-center gap-3">
           <span
             className={`w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-current/50`}
@@ -115,7 +115,7 @@ export const FeedCard = ({ item, index }: { item: Post; index: number }) => {
         <span className="text-[10px] text-stone-600 uppercase font-bold tracking-widest">
           View Post
         </span>
-        <LikeButton itemId={item.id} initialLikes={item.interaction.likes} />
+        <LikeButton itemId={item.id} initialLikes={item.interaction.likes} initialLiked={liked} />
       </div>
     </motion.div>
   );

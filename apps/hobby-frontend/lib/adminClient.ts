@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import type { Report, ReportStatus } from "@/types/reports";
 import type { MediaSet } from "@/types/posts";
 
@@ -9,30 +10,23 @@ export interface AdminProfileSummary {
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
 
-/** Fetch reports filtered by status. Pass "ALL" to fetch every status in parallel. */
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  const token = Cookies.get("token") ?? "";
+  return { Authorization: `Bearer ${token}`, ...extra };
+}
+
+/**
+ * Fetch reports filtered by status.
+ * Pass "ALL" to retrieve every report regardless of status — the gateway
+ * handles this in a single call to the profile-connection-service and enriches
+ * each report with initiatorUsername / targetUsername before responding.
+ */
 export async function getReportsByStatus(
   status: ReportStatus | "ALL",
 ): Promise<Report[]> {
-  if (status === "ALL") {
-    const statuses: ReportStatus[] = [
-      "PENDING",
-      "UNDER_REVIEW",
-      "RESOLVED",
-      "DISMISSED",
-      "ACTION_TAKEN",
-    ];
-    const results = await Promise.all(
-      statuses.map((s) =>
-        fetch(`${MIDDLEWARE_URL}/api/admin/reports/status/${s}`)
-          .then((r) => (r.ok ? (r.json() as Promise<Report[]>) : []))
-          .catch(() => [] as Report[]),
-      ),
-    );
-    return results.flat();
-  }
-
   const res = await fetch(
     `${MIDDLEWARE_URL}/api/admin/reports/status/${status}`,
+    { headers: authHeaders() },
   );
   if (!res.ok) throw new Error("Failed to fetch reports");
   return res.json();
@@ -47,7 +41,7 @@ export async function updateReportStatus(
     `${MIDDLEWARE_URL}/api/admin/reports/${reportId}/status`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ status }),
     },
   );
@@ -58,6 +52,7 @@ export async function updateReportStatus(
 export async function deletePost(postId: string): Promise<void> {
   const res = await fetch(`${MIDDLEWARE_URL}/api/admin/posts/${postId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to delete post");
 }
@@ -66,13 +61,16 @@ export async function deletePost(postId: string): Promise<void> {
 export async function deleteAllUserPosts(userId: string): Promise<void> {
   const res = await fetch(`${MIDDLEWARE_URL}/api/admin/posts/users/${userId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to delete all user posts");
 }
 
 /** Fetch all user profiles (username + profile picture only) in a single call. */
 export async function getAllAdminProfiles(): Promise<AdminProfileSummary[]> {
-  const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`);
+  const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`, {
+    headers: authHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch profiles");
   return res.json();
 }

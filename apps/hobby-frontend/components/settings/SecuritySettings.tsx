@@ -8,58 +8,11 @@ import {
   Pencil,
   X,
   Check,
-  Monitor,
-  Smartphone,
-  Globe,
+  Loader2,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { changePassword, updateEmail } from "@/lib/authenticationClient";
 
-// ── mock data ─────────────────────────────────────────────────────────────────
-
-interface MockSession {
-  id: string;
-  device: string;
-  location: string;
-  lastSeen: string;
-  isCurrent: boolean;
-  icon: "desktop" | "mobile" | "web";
-}
-
-const MOCK_SESSIONS: MockSession[] = [
-  {
-    id: "1",
-    device: "Chrome on macOS",
-    location: "Amsterdam, NL",
-    lastSeen: "Now",
-    isCurrent: true,
-    icon: "desktop",
-  },
-  {
-    id: "2",
-    device: "Safari on iPhone",
-    location: "Amsterdam, NL",
-    lastSeen: "2 hours ago",
-    isCurrent: false,
-    icon: "mobile",
-  },
-  {
-    id: "3",
-    device: "Firefox on Windows",
-    location: "Rotterdam, NL",
-    lastSeen: "3 days ago",
-    isCurrent: false,
-    icon: "web",
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-function SessionIcon({ type }: { type: MockSession["icon"] }) {
-  if (type === "mobile")
-    return <Smartphone size={14} className="text-accent" />;
-  if (type === "web") return <Globe size={14} className="text-accent" />;
-  return <Monitor size={14} className="text-accent" />;
-}
 
 export function SecuritySettings() {
   const currentUser = useCurrentUser();
@@ -70,6 +23,9 @@ export function SecuritySettings() {
   const [emailInitialised, setEmailInitialised] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [emailDraft, setEmailDraft] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [emailSuccess, setEmailSuccess] = useState("");
 
   // Seed the email state once the hook resolves
   React.useEffect(() => {
@@ -84,22 +40,37 @@ export function SecuritySettings() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
-  // 2FA (mocked off)
-  const [twoFaEnabled, setTwoFaEnabled] = useState(false);
-
-  // Sessions
-  const [sessions, setSessions] = useState<MockSession[]>(MOCK_SESSIONS);
 
   const cancelEmail = () => {
     setEditingEmail(false);
     setEmailDraft("");
+    setEmailError("");
+    setEmailSuccess("");
   };
 
-  const saveEmail = () => {
-    setEmail(emailDraft);
-    setEditingEmail(false);
-    setEmailDraft("");
+  const saveEmail = async () => {
+    setEmailError("");
+    setEmailSuccess("");
+    if (!emailDraft.trim()) {
+      setEmailError("Email cannot be empty");
+      return;
+    }
+    setEmailSaving(true);
+    try {
+      await updateEmail(emailDraft);
+      setEmail(emailDraft);
+      setEditingEmail(false);
+      setEmailDraft("");
+      setEmailSuccess("Email updated");
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : "Failed to update email");
+    } finally {
+      setEmailSaving(false);
+    }
   };
 
   const cancelPassword = () => {
@@ -107,13 +78,40 @@ export function SecuritySettings() {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    setPasswordError("");
+    setPasswordSuccess("");
   };
 
-  const revokeSession = (id: string) =>
-    setSessions((prev) => prev.filter((s) => s.id !== id));
-
-  const revokeAll = () =>
-    setSessions((prev) => prev.filter((s) => s.isCurrent));
+  const savePassword = async () => {
+    setPasswordError("");
+    setPasswordSuccess("");
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("All fields are required");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setPasswordSuccess("Password updated successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setPasswordError(
+        err instanceof Error ? err.message : "Failed to change password"
+      );
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden">
@@ -160,6 +158,12 @@ export function SecuritySettings() {
 
             {editingEmail ? (
               <div className="flex flex-col gap-2 mt-1">
+                {emailError && (
+                  <p className="text-xs text-red-400">{emailError}</p>
+                )}
+                {emailSuccess && (
+                  <p className="text-xs text-green-400">{emailSuccess}</p>
+                )}
                 <input
                   type="email"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-accent focus:outline-none focus:border-brand"
@@ -178,10 +182,15 @@ export function SecuritySettings() {
                   </button>
                   <button
                     onClick={saveEmail}
-                    className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 transition-opacity px-3 py-1.5 rounded-lg"
+                    disabled={emailSaving}
+                    className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 disabled:opacity-50 transition-opacity px-3 py-1.5 rounded-lg"
                   >
-                    <Check size={12} />
-                    Save
+                    {emailSaving ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <Check size={12} />
+                    )}
+                    {emailSaving ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>
@@ -209,6 +218,12 @@ export function SecuritySettings() {
 
             {changingPassword ? (
               <div className="flex flex-col gap-2 mt-1">
+                {passwordError && (
+                  <p className="text-xs text-red-400">{passwordError}</p>
+                )}
+                {passwordSuccess && (
+                  <p className="text-xs text-green-400">{passwordSuccess}</p>
+                )}
                 <input
                   type="password"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-accent focus:outline-none focus:border-brand"
@@ -239,9 +254,17 @@ export function SecuritySettings() {
                     <X size={12} />
                     Cancel
                   </button>
-                  <button className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 transition-opacity px-3 py-1.5 rounded-lg">
-                    <Check size={12} />
-                    Save
+                  <button
+                    onClick={savePassword}
+                    disabled={passwordLoading}
+                    className="flex items-center gap-1 text-xs text-white bg-brand hover:opacity-80 disabled:opacity-50 transition-opacity px-3 py-1.5 rounded-lg"
+                  >
+                    {passwordLoading ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <Check size={12} />
+                    )}
+                    {passwordLoading ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>
@@ -251,76 +274,6 @@ export function SecuritySettings() {
               </p>
             )}
           </div>
-
-          {/* ── Two-factor authentication (out of scope) ────────────────────────────────── */}
-          {/* <div className="px-6 py-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-xs text-accent uppercase tracking-wide">
-                  Two-factor authentication
-                </span>
-                <p className="text-sm text-white/80 mt-1">
-                  {twoFaEnabled ? "Enabled" : "Disabled"}
-                </p>
-              </div>
-              <button
-                onClick={() => setTwoFaEnabled((prev) => !prev)}
-                aria-label="Toggle two-factor authentication"
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none
-                  ${twoFaEnabled ? "bg-brand" : "bg-white/20"}`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition duration-200
-                    ${twoFaEnabled ? "translate-x-5" : "translate-x-0"}`}
-                />
-              </button>
-            </div>
-          </div> */}
-
-          {/* ── Active sessions (Out of scope for now) ──────────────────────────────────────────── */}
-          {/* <div className="px-6 py-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-accent uppercase tracking-wide">
-                Active sessions
-              </span>
-              {sessions.some((s) => !s.isCurrent) && (
-                <button
-                  onClick={revokeAll}
-                  className="text-xs text-red-400 hover:opacity-75 transition-opacity"
-                >
-                  Sign out all others
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="flex items-center gap-3 py-2 px-3 rounded-lg bg-white/3"
-                >
-                  <SessionIcon type={session.icon} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white/80 truncate">
-                      {session.device}
-                    </p>
-                    <p className="text-xs text-accent">
-                      {session.location} · {session.lastSeen}
-                    </p>
-                  </div>
-                  {session.isCurrent ? (
-                    <span className="text-xs text-brand">Current</span>
-                  ) : (
-                    <button
-                      onClick={() => revokeSession(session.id)}
-                      className="text-xs text-red-400 hover:opacity-75 transition-opacity"
-                    >
-                      Sign out
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div> */}
         </div>
       )}
     </div>

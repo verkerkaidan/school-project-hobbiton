@@ -17,6 +17,7 @@ The chat-service exposes REST endpoints for chat metadata and membership managem
 | PUT | `/add-user-to-chat` | `{ "userId": "...", "chatId": "..." }` | Add a user to an existing chat. |
 | PUT | `/delete-user-from-chat` | `{ "userId": "...", "chatId": "..." }` | Remove a user from a chat and close their active socket if connected. |
 | GET | `/allowed-users/{chatId}` | none | Retrieve the list of user IDs allowed in a chat. |
+| DELETE | `delete-user?deleteUserId={userId}` | none | Delete user connection to all chats |
 
 ## Payload models
 
