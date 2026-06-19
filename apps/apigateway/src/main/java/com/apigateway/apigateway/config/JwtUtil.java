@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import java.util.List;
 
 @Component
 public class JwtUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     private final SecretKey key;
     private final String issuer;
@@ -40,10 +44,16 @@ public class JwtUtil {
         try {
             Claims claims = validateToken(token);
             List<String> roles = claims.get("role", List.class);
-            return roles != null && roles.contains("ROLE_ADMIN");
+            if (roles == null || !roles.contains("ROLE_ADMIN")) {
+                logger.warn("[JwtUtil] Token validated but ROLE_ADMIN not present. roles={}", roles);
+                return false;
+            }
+            return true;
         } catch (ExpiredJwtException e) {
+            logger.warn("[JwtUtil] Token rejected: expired");
             return false;
         } catch (JwtException e) {
+            logger.warn("[JwtUtil] Token rejected: JWT validation failed — {}", e.getMessage());
             return false;
         }
     }

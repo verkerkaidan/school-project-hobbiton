@@ -11,7 +11,7 @@ export interface AdminProfileSummary {
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
 
 function authHeaders(extra?: Record<string, string>): Record<string, string> {
-  const token = Cookies.get("token");
+  const token = Cookies.get("token") ?? "";
   return { Authorization: `Bearer ${token}`, ...extra };
 }
 
