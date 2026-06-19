@@ -12,28 +12,23 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 export const FEED_QUERY_KEY = "feed";
 
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 8;
 
 export const Feed = () => {
   const currentUser = useCurrentUser();
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-  } = useInfiniteQuery({
-    queryKey: [FEED_QUERY_KEY, currentUser?.id],
-    queryFn: ({ pageParam }) =>
-      getPagedPosts(pageParam as number, PAGE_SIZE, currentUser?.id),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length < PAGE_SIZE ? undefined : allPages.length,
-    enabled: currentUser !== undefined,
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
+    useInfiniteQuery({
+      queryKey: [FEED_QUERY_KEY, currentUser?.id],
+      queryFn: ({ pageParam }) =>
+        getPagedPosts(pageParam as number, PAGE_SIZE, currentUser?.id),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage.length < PAGE_SIZE ? undefined : allPages.length,
+      enabled: currentUser !== undefined,
+    });
 
   const posts: Post[] = data?.pages.flat() ?? [];
 
@@ -60,7 +55,7 @@ export const Feed = () => {
           fetchNextPage();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     observer.observe(sentinel);
@@ -92,7 +87,9 @@ export const Feed = () => {
           <span className="text-xs text-accent animate-pulse">Loading…</span>
         )}
         {!hasNextPage && posts.length > 0 && (
-          <span className="text-xs text-accent opacity-40">You've seen it all.</span>
+          <span className="text-xs text-accent opacity-40">
+            You've seen it all.
+          </span>
         )}
       </div>
     </div>

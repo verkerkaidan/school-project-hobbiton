@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+## [1.49.3] - 2026-06-19
+
+### Changed
+- **refactor**: Page size to 8 to reduce amount of posts loaded
 ## [1.49.2] - 2026-06-19
 
 ### Added
