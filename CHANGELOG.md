@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.49.7] - 2026-06-19
+
+### Fixed
+- **fix**: Grafana fixing
+
 ### Changed
 - **refactor**: Added unit testing to production for post-service
 - **refactor**: Added grafana testing for chats
@@ -14,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - **fix**: Grafana fixing
+
 
 ## [1.49.5] - 2026-06-19
 
