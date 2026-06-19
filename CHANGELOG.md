@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.49.4] - 2026-06-19
+
+### Fixed
+- **fix**: fix admin tokens from frontend
+
 ## [1.49.3] - 2026-06-19
 
 ### Changed
