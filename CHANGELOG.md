@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - **chore**: Fix grafana ports
+- **refactor**: Documentation for posts
 
 ## [1.50.6] - 2026-06-19
 
