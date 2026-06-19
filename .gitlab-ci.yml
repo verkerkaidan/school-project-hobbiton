@@ -366,19 +366,32 @@ deploy:
       export LOKI_PORT='$LOKI_PORT'
       export TZ='$TZ'
 
-      # Pull all images (core + optional)
-      docker compose -f docker-compose-prod.yml --profile monitoring --profile tools pull
+      # Pull all images (core + all profiles)
+      docker compose -f docker-compose-prod.yml --profile pgadmin --profile docs --profile monitoring pull
 
-      # Deploy core prod services — failure here fails the pipeline
+      # 1. Core services — essential, must succeed
+      CORE_EXIT=0
       docker compose -f docker-compose-prod.yml stop frontend || true
       docker compose -f docker-compose-prod.yml rm -f frontend || true
-      docker compose -f docker-compose-prod.yml up -d --remove-orphans
+      docker compose -f docker-compose-prod.yml up -d --remove-orphans || CORE_EXIT=\$?
+      [ \$CORE_EXIT -ne 0 ] && echo "ERROR: Core services failed to start (exit \$CORE_EXIT)."
 
-      # Deploy optional services — capture failure but don't abort core deploy
-      OPTIONAL_EXIT=0
-      docker compose -f docker-compose-prod.yml --profile monitoring --profile tools up -d || OPTIONAL_EXIT=\$?
-      if [ \$OPTIONAL_EXIT -ne 0 ]; then
-        echo "WARNING: One or more optional services (monitoring/docs/pgadmin) failed to start. Core services are unaffected."
-        exit \$OPTIONAL_EXIT
-      fi
+      # 2. PgAdmin
+      PGADMIN_EXIT=0
+      docker compose -f docker-compose-prod.yml --profile pgadmin up -d || PGADMIN_EXIT=\$?
+      [ \$PGADMIN_EXIT -ne 0 ] && echo "ERROR: pgadmin failed to start (exit \$PGADMIN_EXIT)."
+
+      # 3. Docs & docs-proxy
+      DOCS_EXIT=0
+      docker compose -f docker-compose-prod.yml --profile docs up -d || DOCS_EXIT=\$?
+      [ \$DOCS_EXIT -ne 0 ] && echo "ERROR: docs/docs-proxy failed to start (exit \$DOCS_EXIT)."
+
+      # 4. Monitoring (Grafana, Loki, Prometheus, Promtail)
+      MONITORING_EXIT=0
+      docker compose -f docker-compose-prod.yml --profile monitoring up -d || MONITORING_EXIT=\$?
+      [ \$MONITORING_EXIT -ne 0 ] && echo "ERROR: monitoring services failed to start (exit \$MONITORING_EXIT)."
+
+      # Fail the pipeline if any group failed
+      COMBINED_EXIT=\$((CORE_EXIT + PGADMIN_EXIT + DOCS_EXIT + MONITORING_EXIT))
+      [ \$COMBINED_EXIT -ne 0 ] && exit 1 || true
       EOF
