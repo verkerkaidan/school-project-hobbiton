@@ -13,7 +13,7 @@ public static class ChatEndpoints
             var chatId = Guid.NewGuid();
             db.createChat(chatId, chatModel.title);
             db.AllowUsers(chatId.ToString(), chatModel.userIds);
-            return Results.Ok(chatId );
+            return Results.Ok(chatId);
         });
 
         app.MapGet("/get-chats/{userId}", (string userId) =>
@@ -45,7 +45,12 @@ public static class ChatEndpoints
             return Results.Ok(wasRemoved);
         });
 
-        app.MapGet("/allowed-users/{chatId}", (string chatId) =>
-            db.chatUserList(chatId));
+        app.MapGet("/allowed-users/{chatId}", (string chatId) => db.chatUserList(chatId));
+
+        app.MapDelete("/delete-user", async (Guid deleteUserId) =>
+        {
+            bool wasRemoved = db.RemoveAllUserInformation(deleteUserId);
+            return Results.Ok(wasRemoved);
+        });
     }
 }

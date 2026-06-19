@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.49.0] - 2026-06-19
+
+### Added
+- **feat**: Added the ability to remove everything from a user from the chats.
+
 ## [1.48.6] - 2026-06-19
 
 ### Added
