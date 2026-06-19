@@ -180,6 +180,7 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
               message={msg}
               own={msg.userId === currentUser.id}
               username={chatUsersById[msg.userId]?.username ?? "User no longer in chat"}
+              deleted={!chatUsersById[msg.userId]}
             />
           ))}
         </div>
