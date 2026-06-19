@@ -33,19 +33,24 @@ export async function createBugReport(
 export async function getAllBugReports(
   status?: "OPEN" | "CLOSED",
 ): Promise<BugReport[]> {
+  const token = Cookies.get("token") ?? "";
   const url = new URL(`${MIDDLEWARE_URL}/api/admin/bug-reports`);
   if (status) url.searchParams.set("status", status);
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   if (!res.ok) throw new Error("Failed to fetch bug reports");
   return res.json();
 }
 
 /** Close a bug report by ID. */
 export async function closeBugReport(id: string): Promise<BugReport> {
+  const token = Cookies.get("token") ?? "";
   const res = await fetch(
     `${MIDDLEWARE_URL}/api/admin/bug-reports/${id}/close`,
     {
       method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
     },
   );
   if (!res.ok) throw new Error("Failed to close bug report");
