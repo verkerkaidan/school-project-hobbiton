@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import type { Report, ReportStatus } from "@/types/reports";
 import type { MediaSet } from "@/types/posts";
 
@@ -8,6 +9,11 @@ export interface AdminProfileSummary {
 
 /** Base URL for the API gateway — same origin used by the rest of the app. */
 const MIDDLEWARE_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "";
+
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  const token = Cookies.get("token");
+  return { Authorization: `Bearer ${token}`, ...extra };
+}
 
 /**
  * Fetch reports filtered by status.
@@ -20,6 +26,7 @@ export async function getReportsByStatus(
 ): Promise<Report[]> {
   const res = await fetch(
     `${MIDDLEWARE_URL}/api/admin/reports/status/${status}`,
+    { headers: authHeaders() },
   );
   if (!res.ok) throw new Error("Failed to fetch reports");
   return res.json();
@@ -34,7 +41,7 @@ export async function updateReportStatus(
     `${MIDDLEWARE_URL}/api/admin/reports/${reportId}/status`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ status }),
     },
   );
@@ -45,6 +52,7 @@ export async function updateReportStatus(
 export async function deletePost(postId: string): Promise<void> {
   const res = await fetch(`${MIDDLEWARE_URL}/api/admin/posts/${postId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to delete post");
 }
@@ -53,13 +61,16 @@ export async function deletePost(postId: string): Promise<void> {
 export async function deleteAllUserPosts(userId: string): Promise<void> {
   const res = await fetch(`${MIDDLEWARE_URL}/api/admin/posts/users/${userId}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to delete all user posts");
 }
 
 /** Fetch all user profiles (username + profile picture only) in a single call. */
 export async function getAllAdminProfiles(): Promise<AdminProfileSummary[]> {
-  const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`);
+  const res = await fetch(`${MIDDLEWARE_URL}/api/admin/profiles`, {
+    headers: authHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch profiles");
   return res.json();
 }
