@@ -353,7 +353,7 @@ services:
 
     ports:
       - "21527:5672"
-      - "11527:11527"
+      - "11528:15672"
 
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
@@ -420,7 +420,7 @@ services:
     restart: unless-stopped
     profiles: [logging-monitor]
     ports:
-      - "11527"
+      - "11527:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./logging-monitor/grafana/datasources:/etc/grafana/provisioning/datasources:ro
