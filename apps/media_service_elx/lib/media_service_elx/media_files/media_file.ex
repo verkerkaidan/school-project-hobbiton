@@ -13,6 +13,11 @@ Model for an uploaded media file
     "RISK" => 1,
     "UNASSIGNED" => 2
   }
+  @approved_content_types [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ]
 
   def content_flag(key), do: @content_flags[key]
 
@@ -31,5 +36,7 @@ Model for an uploaded media file
     |> validate_required([:content_flag, :content_type, :hash, :original])
     |> unique_constraint(:hash)
     |> validate_inclusion(:content_flag, Map.values(@content_flags))
+    |> validate_inclusion(:content_type, @approved_content_types)
+    |> validate_length(:hash, min: 1)
   end
 end

@@ -9,12 +9,9 @@ Home of the first functions that are called when a request is coming in from api
 
   use MediaServiceElxWeb, :controller
 
-  defp media_service do
-    Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
-  end
-  defp report_service do
-    Application.get_env(:media_service_elx, :report_service, MediaServiceElx.ReportService)
-  end
+  @media_service Application.get_env(:media_service_elx, :media_service, MediaServiceElx.MediaService)
+
+  @report_service Application.get_env(:media_service_elx, :report_service, MediaServiceElx.ReportService)
 
   alias MediaServiceElx.MediaFiles.MediaFile
 
@@ -25,7 +22,7 @@ Home of the first functions that are called when a request is coming in from api
   """
   def upload_media(conn, %{"owner_id" => owner_id, "files" => uploads}) when is_list(uploads) do
     results = Enum.map(uploads, fn upload ->
-      case media_service().upload_media_file(upload, owner_id) do
+      case @media_service.upload_media_file(upload, owner_id) do
         {:ok, instance_id} -> %{id: instance_id, status: "ok"}
         {:error, :banned}  -> %{status: "error", reason: "banned"}
         {:error, _reason}  -> %{status: "error", reason: "invalid file"}
@@ -44,7 +41,7 @@ Home of the first functions that are called when a request is coming in from api
     IO.inspect(instance_ids, label: "instance ids at upload")
 
     results = Enum.map(instance_ids, fn instance_id ->
-      case media_service().retrieve_media_file(instance_id) do
+      case @media_service.retrieve_media_file(instance_id) do
         {:ok, %MediaFile{} = media_file} ->
           %{relevantId: instance_id, fileData: Base.encode64(media_file.original), contentType: media_file.content_type, contentFlag: media_file.content_flag}
         {:error, _} ->
@@ -62,7 +59,7 @@ Home of the first functions that are called when a request is coming in from api
   @returns: {id: uuid} or {error: :error}
   """
   def delete_instance(conn, %{"instance_id" => instance_id}) do
-    case media_service().delete_single_instance(instance_id) do
+    case @media_service.delete_single_instance(instance_id) do
       {:ok, _id} ->
         json(conn, %{id: instance_id})
       {:error, reason} ->
@@ -85,7 +82,7 @@ Home of the first functions that are called when a request is coming in from api
       note         = Map.get(update, "note", "")
 
       flag = MediaFile.content_flag(content_flag)
-      case media_service().update_content_flag(flag, file_hash, note) do
+      case @media_service.update_content_flag(flag, file_hash, note) do
         {:ok, id}         -> %{file_id: id, status: "ok"}
         {:error, reason}  -> %{status: "error", reason: reason}
       end
@@ -100,7 +97,7 @@ Home of the first functions that are called when a request is coming in from api
   @returns: [{id: uuid, file: base64}]
   """
   def get_unassigned_media_files(conn, _params) do
-    result = media_service().retrieve_unassigned()
+    result = @media_service.retrieve_unassigned()
     |> Enum.map(fn %MediaFile{} = media_file ->
       %{file: Base.encode64(media_file.original), hash: Base.encode64(media_file.hash)}
     end)
@@ -114,7 +111,7 @@ Home of the first functions that are called when a request is coming in from api
   @returns: {id: uuid}
   """
   def delete_media_file(conn, %{"hash" => hash}) do
-    case report_service().ban_file(hash) do
+    case @report_service.ban_file(hash) do
       {:ok, file_id} ->
         json(conn, %{id: file_id})
       {:error, _reason} ->

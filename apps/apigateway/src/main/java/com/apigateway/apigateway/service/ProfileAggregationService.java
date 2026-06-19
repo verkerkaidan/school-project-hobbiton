@@ -88,37 +88,13 @@ public class ProfileAggregationService {
 
     public List<AdminProfileSummaryResponse> getAllProfiles() {
         List<AdminProfileSummaryResponse> response = profileClient.getAllProfiles();
-        List<MediaInstance> mediaPointers = response.stream()
-                .filter(profile -> profile.profilePictureUrl != null && !profile.profilePictureUrl.isEmpty())
-                .map(profile -> new MediaInstance(
-                        UUID.fromString(profile.profilePictureUrl)
-                ))
-                .collect(Collectors.toList());
-        if (!mediaPointers.isEmpty()) {
-            try {
-                List<MediaDTO> media = mediaService.getMedia(mediaPointers);
-                Map<String, MediaDTO> mediaByRelevantId = media.stream()
-                        .collect(Collectors.toMap(
-                                m -> m.relevantId.toString(),
-                                m -> m
-                        ));
+        return finaliseProfiles(response);
+    }
 
-                // Enrich each profile with its matching MediaDTO
-                response.forEach(profile -> {
-                    if (profile.profilePictureUrl != null) {
-                        profile.profilePicture = mediaByRelevantId.get(profile.profilePictureUrl);
-                    }
-                });
-            } catch (RuntimeException e) {
-                logger.error("[PROFILEAGGREGATIONSERVICE getAllProfiles] Could not send request to mediaServiceElx --- \n, {}", e.getMessage());
-                response.forEach(profile -> {
-                    if (profile.profilePictureUrl != null) {
-                        profile.profilePicture = null;
-                    }
-                });
-            }
-        }
-        return response;
+    public List<AdminProfileSummaryResponse> fuzzySearchProfilesByUsername(String query) {
+        List<AdminProfileSummaryResponse> response = profileClient.fuzzySearchProfilesByUsername(query);
+        logger.error("[PROFILEaGGREGATIONsERVICE fuzzySearch] retrieved profiles: {}", response.size());
+        return finaliseProfiles(response);
     }
 
     public List<User> getFollowers(UUID userId) {
@@ -382,5 +358,40 @@ public class ProfileAggregationService {
             logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not update profile --- \n{}", e.getMessage());
             throw new RuntimeException("One of the responsible services offline");
         }
+    }
+
+    private List<AdminProfileSummaryResponse> finaliseProfiles(List<AdminProfileSummaryResponse> response) {
+        List<MediaInstance> mediaPointers = response.stream()
+                .filter(profile -> profile.profilePictureUrl != null && !profile.profilePictureUrl.isEmpty())
+                .map(profile -> new MediaInstance(
+                        UUID.fromString(profile.profilePictureUrl)
+                ))
+                .collect(Collectors.toList());
+        if (!mediaPointers.isEmpty()) {
+            try {
+                List<MediaDTO> media = mediaService.getMedia(mediaPointers);
+                Map<String, MediaDTO> mediaByRelevantId = media.stream()
+                        .collect(Collectors.toMap(
+                                m -> m.relevantId.toString(),
+                                m -> m
+                        ));
+
+                // Enrich each profile with its matching MediaDTO
+                response.forEach(profile -> {
+                    if (profile.profilePictureUrl != null) {
+                        profile.profilePicture = mediaByRelevantId.get(profile.profilePictureUrl);
+                    }
+                });
+            } catch (RuntimeException e) {
+                logger.error("[PROFILEAGGREGATIONSERVICE getAllProfiles] Could not send request to mediaServiceElx --- \n, {}", e.getMessage());
+                response.forEach(profile -> {
+                    if (profile.profilePictureUrl != null) {
+                        profile.profilePicture = null;
+                    }
+                });
+            }
+        }
+
+        return response;
     }
 }

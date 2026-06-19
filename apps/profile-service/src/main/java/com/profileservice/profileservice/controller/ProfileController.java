@@ -108,4 +108,18 @@ public class ProfileController {
         return ResponseEntity.ok(profiles);
     }
 
+    @GetMapping("/search-profiles/{query}")
+    public ResponseEntity<List<ProfileSummaryDTO>> fuzzySearchProfilesByUsername(
+            @PathVariable String query
+    ) {
+        List<ProfileSummaryDTO> profiles = StreamSupport
+                .stream(profileRepository.findByUsernameContaining(query).spliterator(), false)
+                .map(profile -> new ProfileSummaryDTO(
+                        profile.getUserId().toString(),
+                        profile.getUsername(),
+                        profile.getMediaPointer()))
+                .toList();
+        return ResponseEntity.ok(profiles);
+    }
+
 }

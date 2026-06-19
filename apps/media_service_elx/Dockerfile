@@ -26,7 +26,7 @@ RUN mix compile
 RUN mix release
 
 # Runtime stage
-FROM elixir:1.19.5-otp-27-alpine
+FROM elixir:1.19.5-otp-27-alpine as runner
 WORKDIR /app
 
 RUN apk add --no-cache libstdc++ openssl ncurses-libs

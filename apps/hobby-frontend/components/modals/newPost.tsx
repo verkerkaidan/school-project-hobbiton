@@ -187,7 +187,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
       linkedItem = {title: item.title, imageUrl: item.thumbnailUrl || "", externalId: item.id || "", type: "BOOK"};
     } else if (item.resultType === "exercise") {
       linkedItem = {title: item.name, imageUrl: item.gifUrl || "", externalId: item.exerciseId, type: "EXERCISE"};
-    } else {
+    } else if (item.resultType === "movie"){
       linkedItem = {title: item.title, imageUrl: item.poster || "", externalId: item.id, type: "MOVIE"};
     }
 
