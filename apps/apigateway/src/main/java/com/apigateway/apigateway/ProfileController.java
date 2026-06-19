@@ -1,9 +1,12 @@
 package com.apigateway.apigateway;
 
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
+import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
 import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.models.User;
 import com.apigateway.apigateway.models.Post;
+import com.apigateway.apigateway.models.ProfileResponse;
+import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.service.MediaService;
 import com.apigateway.apigateway.service.ProfileAggregationService;
 import org.slf4j.Logger;
@@ -28,11 +31,13 @@ public class ProfileController {
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
     private final ProfileAggregationService profileAggregationService;
     private final MediaService mediaService;
+    private final ProfileClient profileClient;
 
 
-    public ProfileController(ProfileAggregationService profileAggregationService, MediaService mediaService) {
+    public ProfileController(ProfileAggregationService profileAggregationService, MediaService mediaService, ProfileClient profileClient) {
         this.profileAggregationService = profileAggregationService;
         this.mediaService = mediaService;
+        this.profileClient = profileClient;
     }
 
     @SchemaMapping(typeName = "User", field = "profilePicture")
@@ -186,6 +191,17 @@ public class ProfileController {
             logger.error("[getUserPosts] Error retrieving posts for userId: {}", userId, e);
             throw e;
         }
+    }
+
+    // REST endpoint to update the authenticated user's profile fields
+    @ResponseBody
+    @PutMapping("/profile/update")
+    public ResponseEntity<ProfileResponse> updateProfile(
+            @RequestBody UpdateProfileDTO update,
+            @RequestHeader("Authorization") String authorization
+    ) {
+        ProfileResponse profile = profileClient.updateProfile(update, authorization);
+        return ResponseEntity.ok(profile);
     }
 
     // Handles the changing of a users profile picture
