@@ -37,6 +37,12 @@ public class ListController {
         return ResponseEntity.ok(libraryClient.deleteList(headers, userId, listId));
     }
 
+    @DeleteMapping("/users/{userId}/lists")
+    public ResponseEntity<Object> deleteUserLists(@RequestHeader Map<String, String> headers,
+                                                  @PathVariable UUID userId) {
+        return ResponseEntity.ok(libraryClient.deleteUserLists(headers, userId));
+    }
+
     @PostMapping("/lists/{listId}/items")
     public ResponseEntity<Object> addItem(@RequestHeader Map<String, String> headers,
                                           @PathVariable String listId,

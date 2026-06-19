@@ -39,6 +39,10 @@ public interface LibraryClient {
                       @PathVariable("userId") UUID userId,
                       @PathVariable("listId") String listId);
 
+    @DeleteMapping(path = "/api/library/users/{userId}/lists")
+    Object deleteUserLists(@RequestHeader Map<String, String> headers,
+                           @PathVariable("userId") UUID userId);
+
     @PostMapping(path = "/api/library/lists/{listId}/items", consumes = "application/json")
     Object addItem(@RequestHeader Map<String, String> headers,
                    @PathVariable("listId") String listId,
