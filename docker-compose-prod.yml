@@ -244,6 +244,8 @@ services:
       BUG_REPORT_SERVICE_URL: ${BUG_REPORT_SERVICE_URL}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
   chat-service:
     image: ${CI_REGISTRY_IMAGE}/chat-service:latest
     restart: always
