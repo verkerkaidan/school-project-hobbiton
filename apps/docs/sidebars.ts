@@ -103,6 +103,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Library Service",
+      collapsible: true,
+      items: [
+        "library-service/index",
+        "library-service/architecture",
+        "library-service/http-api",
+        "library-service/deployment",
+        "library-service/database-schema",
+      ],
+    },
+    {
+      type: "category",
       label: "Infrastructure",
       collapsible: false,
       items: [

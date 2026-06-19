@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.50.6] - 2026-06-19
+
+### Fixed
+- **fix**: E2E tests and docusaurus documentation for library service
+
 ## [1.50.5] - 2026-06-19
 
 ### Fixed
