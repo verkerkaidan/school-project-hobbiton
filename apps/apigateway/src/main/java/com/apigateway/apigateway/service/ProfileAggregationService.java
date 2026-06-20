@@ -40,11 +40,29 @@ public class ProfileAggregationService {
         this.mediaService = mediaService;
     }
 
+    private Set<UUID> safeGetFollowerIds(UUID userId) {
+        try {
+            return profileConnectionClient.getFollowerIds(userId);
+        } catch (Exception e) {
+            logger.warn("[ProfileAggregationService] Failed to fetch follower IDs for {}: {}", userId, e.getMessage());
+            return Set.of();
+        }
+    }
+
+    private Set<UUID> safeGetFollowingIds(UUID userId) {
+        try {
+            return profileConnectionClient.getFollowingIds(userId);
+        } catch (Exception e) {
+            logger.warn("[ProfileAggregationService] Failed to fetch following IDs for {}: {}", userId, e.getMessage());
+            return Set.of();
+        }
+    }
+
     public User getProfileByUsername(String username) {
         ProfileResponse profileResponse = profileClient.getProfileByUsername(username);
         UUID userId = profileResponse.getUserId();
-        Set<UUID> followers = profileConnectionClient.getFollowerIds(userId);
-        Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
+        Set<UUID> followers = safeGetFollowerIds(userId);
+        Set<UUID> following = safeGetFollowingIds(userId);
 
         return new User(
                 profileResponse.getUserId(),
@@ -64,8 +82,8 @@ public class ProfileAggregationService {
                     profileResponse.getBiography());
 
             logger.debug("[getProfile] Fetching follower and following counts");
-            Set<UUID> followers = profileConnectionClient.getFollowerIds(userId);
-            Set<UUID> following = profileConnectionClient.getFollowingIds(userId);
+            Set<UUID> followers = safeGetFollowerIds(userId);
+            Set<UUID> following = safeGetFollowingIds(userId);
             logger.debug("[getProfile] Follower count: {}, Following count: {}", followers.size(), following.size());
 
             // Map ProfileResponse to User

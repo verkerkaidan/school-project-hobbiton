@@ -183,7 +183,7 @@ int find_user_by_email_db(const char *email, char *out_id, size_t idlen, char *o
     char *enabled_s = PQgetvalue(res, 0, 3);
     if (out_id && id) snprintf(out_id, idlen, "%s", id);
     if (out_hash && password) snprintf(out_hash, hashlen, "%s", password);
-    if (out_roles_csv && roles) strncpy(out_roles_csv, roles, roleslen);
+    if (out_roles_csv && roles) snprintf(out_roles_csv, roleslen, "%s", roles);
     if (enabled) *enabled = enabled_s ? atoi(enabled_s) : 1;
     PQclear(res);
     return 0;
@@ -197,8 +197,8 @@ int authenticate_user_db(const char *email, const char *password, char *out_id, 
     PGresult *res = PQexecParams(conn, sql, 2, NULL, paramValues, NULL, NULL, 0);    if (!res) return -1;
     if (PQresultStatus(res) != PGRES_TUPLES_OK) { PQclear(res); return -1; }
     if (PQntuples(res) < 1) { PQclear(res); return -1; }
-    if (out_id) strncpy(out_id, PQgetvalue(res, 0, 0), idlen);
-    if (out_roles_csv) strncpy(out_roles_csv, PQgetvalue(res, 0, 1), roleslen);
+    if (out_id) snprintf(out_id, idlen, "%s", PQgetvalue(res, 0, 0));
+    if (out_roles_csv) snprintf(out_roles_csv, roleslen, "%s", PQgetvalue(res, 0, 1));
     PQclear(res);
     return 0;
 }
@@ -230,7 +230,7 @@ int add_user_db_with_hash(const char *email, const char *hash, const char *roles
              rnd[0],rnd[1],rnd[2],rnd[3],rnd[4],rnd[5],(rnd[6]&0x0F)|0x40,rnd[7],(rnd[8]&0x3F)|0x80,rnd[9],rnd[10],rnd[11],rnd[12],rnd[13],rnd[14],rnd[15]);
     const char *params[4]; params[0] = id; params[1] = email; params[2] = hash; params[3] = "t";
     PGresult *res = PQexecParams(conn, "BEGIN", 0, NULL, NULL, NULL, NULL, 0); if (!res) return -1; PQclear(res);
-    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1, $2, crypt($3, gen_salt('bf', 12)), $4) ON CONFLICT (email) DO UPDATE SET email = custom_user.email RETURNING id;";
+    const char *sql = "INSERT INTO custom_user (id, email, password, enabled) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO UPDATE SET email = custom_user.email RETURNING id;";
     PGresult *ins = PQexecParams(conn, sql, 4, NULL, params, NULL, NULL, 0);
     if (!ins) { PQexec(conn, "ROLLBACK"); return -1; }
     if (PQresultStatus(ins) != PGRES_COMMAND_OK) { PQclear(ins); PQexec(conn, "ROLLBACK"); return -1; }
