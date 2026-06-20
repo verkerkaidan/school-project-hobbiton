@@ -8,6 +8,7 @@ import (
 	"notification-service/internal/db"
 	"notification-service/internal/handlers"
 	"notification-service/internal/hub"
+	"notification-service/internal/metrics"
 )
 
 func main() {
@@ -20,6 +21,7 @@ func main() {
 	go wsHub.Run()
 
 	mux := http.NewServeMux()
+	mux.Handle("GET /metrics", metrics.Handler())
 	h := handlers.New(database, wsHub, cfg)
 	h.Register(mux)
 

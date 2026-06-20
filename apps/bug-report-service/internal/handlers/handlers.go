@@ -8,6 +8,7 @@ import (
 
 	"bug-report-service/internal/auth"
 	"bug-report-service/internal/config"
+	"bug-report-service/internal/metrics"
 )
 
 // Handler bundles all HTTP handler dependencies.
@@ -24,16 +25,16 @@ func New(db *sql.DB, cfg *config.Config) *Handler {
 // Register wires all routes onto mux.
 // Go 1.22 method+path patterns are used (e.g. "GET /foo").
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /health", withCORS(h.cfg, h.health))
+	mux.HandleFunc("GET /health", metrics.Wrap(withCORS(h.cfg, h.health), metrics.ExtractPath("GET /health")))
 
 	// User-facing: submit a new bug report (requires valid JWT)
-	mux.HandleFunc("POST /bug-reports", withCORS(h.cfg, h.createBugReport))
+	mux.HandleFunc("POST /bug-reports", metrics.Wrap(withCORS(h.cfg, h.createBugReport), metrics.ExtractPath("POST /bug-reports")))
 
 	// Admin: list all reports, optionally filtered by ?status=OPEN|CLOSED
-	mux.HandleFunc("GET /bug-reports", withCORS(h.cfg, h.listBugReports))
+	mux.HandleFunc("GET /bug-reports", metrics.Wrap(withCORS(h.cfg, h.listBugReports), metrics.ExtractPath("GET /bug-reports")))
 
 	// Admin: close (archive) a report
-	mux.HandleFunc("PUT /bug-reports/{id}/close", withCORS(h.cfg, h.closeBugReport))
+	mux.HandleFunc("PUT /bug-reports/{id}/close", metrics.Wrap(withCORS(h.cfg, h.closeBugReport), metrics.ExtractPath("PUT /bug-reports/{id}/close")))
 
 	// Handle OPTIONS pre-flight for all paths
 	mux.HandleFunc("OPTIONS /", withCORS(h.cfg, func(w http.ResponseWriter, r *http.Request) {
