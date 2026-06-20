@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: Reduce playwright tests for Aidan's services
+
 ## [1.51.0] - 2026-06-19
 
 ### Added
