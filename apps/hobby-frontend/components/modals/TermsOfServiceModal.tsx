@@ -131,53 +131,56 @@ export function TermsOfServiceModal({
             </p>
 
             {/* Scrollable TOS sections */}
-            <div
-                ref={scrollRef}
-                onScroll={handleScroll}
-                className="border border-gray-600 rounded-md h-56 overflow-y-auto p-3 text-sm text-gray-300 leading-relaxed bg-gray-900 mb-4 flex flex-col gap-4"
-            >
-                {TOS_SECTIONS.map((section, i) => {
-                    // Split body into prose lines and bullet lines
-                    const lines = section.body.split("\n");
-                    const blocks: { type: "text" | "bullet"; content: string }[] = [];
-                    for (const line of lines) {
-                        const bullet = line.match(/^\s*-\s+(.*)/);
-                        if (bullet) {
-                            blocks.push({ type: "bullet", content: bullet[1] });
-                        } else if (line.trim()) {
-                            blocks.push({ type: "text", content: line });
+            <div className="relative mb-4">
+                <div
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                    className="border border-gray-600 rounded-md h-56 overflow-y-auto p-3 text-sm text-gray-300 leading-relaxed bg-gray-900 flex flex-col gap-4"
+                >
+                    {TOS_SECTIONS.map((section, i) => {
+                        // Split body into prose lines and bullet lines
+                        const lines = section.body.split("\n");
+                        const blocks: { type: "text" | "bullet"; content: string }[] = [];
+                        for (const line of lines) {
+                            const bullet = line.match(/^\s*-\s+(.*)/);
+                            if (bullet) {
+                                blocks.push({ type: "bullet", content: bullet[1] });
+                            } else if (line.trim()) {
+                                blocks.push({ type: "text", content: line });
+                            }
                         }
-                    }
 
-                    return (
-                        <div key={i}>
-                            {section.title && (
-                                <p className="font-semibold text-white mb-1">{section.title}</p>
-                            )}
-                            {blocks.map((block, j) =>
-                                block.type === "bullet" ? null : (
-                                    <p key={j} className="mb-1">{block.content}</p>
-                                )
-                            )}
-                            {blocks.some((b) => b.type === "bullet") && (
-                                <ul className="list-disc list-outside ml-4 flex flex-col gap-0.5 mt-1">
-                                    {blocks
-                                        .filter((b) => b.type === "bullet")
-                                        .map((b, j) => (
-                                            <li key={j}>{b.content}</li>
-                                        ))}
-                                </ul>
-                            )}
-                        </div>
-                    );
-                })}
+                        return (
+                            <div key={i}>
+                                {section.title && (
+                                    <p className="font-semibold text-white mb-1">{section.title}</p>
+                                )}
+                                {blocks.map((block, j) =>
+                                    block.type === "bullet" ? null : (
+                                        <p key={j} className="mb-1">{block.content}</p>
+                                    )
+                                )}
+                                {blocks.some((b) => b.type === "bullet") && (
+                                    <ul className="list-disc list-outside ml-4 flex flex-col gap-0.5 mt-1">
+                                        {blocks
+                                            .filter((b) => b.type === "bullet")
+                                            .map((b, j) => (
+                                                <li key={j}>{b.content}</li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {!hasScrolledToBottom && (
+                    <div className="absolute bottom-0 left-0 right-0 pointer-events-none flex flex-col items-center pb-2">
+                        <div className="w-full h-8 bg-gradient-to-t from-gray-900 to-transparent" />
+                        <span className="text-amber-400 text-lg animate-bounce">↓</span>
+                    </div>
+                )}
             </div>
-
-            {!hasScrolledToBottom && (
-                <p className="text-xs text-amber-400 mb-3 flex items-center gap-1">
-                    <span>↓</span> Scroll to the bottom to continue
-                </p>
-            )}
 
             <p className="italic text-xs text-gray-500 mb-4">
                 Last updated: {EDIT_DATE}
