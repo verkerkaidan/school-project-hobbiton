@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.54.1] - 2026-06-20
+
+### Changed
+- **docs**: fix docs vulnerability
+
 ### Fixed
 - **hotfix**: fix grafana dashboards on prod
 
