@@ -552,7 +552,7 @@ deploy:
       export SECRET_KEY_BASE='$SECRET_KEY_BASE'
 
       # Pull all images (core + optional)
-      docker compose -f docker-compose-prod.yml --profile logging-monitor --profile tools pull
+      docker compose -f docker-compose-prod.yml --profile docs --profile logging-monitor --profile tools pull
 
       # 1. Core services — essential, must succeed
       CORE_EXIT=0
