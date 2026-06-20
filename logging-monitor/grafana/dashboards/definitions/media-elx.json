@@ -11,11 +11,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate({container=\"media-service-elx\"} |= `error` [1m]))",
+          "expr": "sum(rate({container=\"media-service\"} |= `error` [1m]))",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum(rate({container=\"media-service-elx\"} |= `warning` [1m]))",
+          "expr": "sum(rate({container=\"media-service\"} |= `warning` [1m]))",
           "legendFormat": "WARN"
         }
       ],
@@ -33,7 +33,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "{container=\"media-service-elx\"} |=~ `(?i)(error|warning|warn|exception|EXIT|badarg|undef|noproc|shutdown|refused|denied|timeout|crashed)`",
+          "expr": "{container=\"media-service\"} |=~ `(?i)(error|warning|warn|exception|EXIT|badarg|undef|noproc|shutdown|refused|denied|timeout|crashed)`",
           "legendFormat": ""
         }
       ],
@@ -51,7 +51,7 @@
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "{container=\"media-service-elx\"} |=~ `(?i)(GenServer|Supervisor|terminated|child.*terminated|maximum restart|EXIT from)`",
+          "expr": "{container=\"media-service\"} |=~ `(?i)(GenServer|Supervisor|terminated|child.*terminated|maximum restart|EXIT from)`",
           "legendFormat": ""
         }
       ],
@@ -69,7 +69,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 30 },
       "targets": [
         {
-          "expr": "{container=\"media-service-elx\"}",
+          "expr": "{container=\"media-service\"}",
           "legendFormat": ""
         }
       ],
