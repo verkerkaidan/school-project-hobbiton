@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.52.0] - 2026-06-20
+
+### Added
+- **feat**: Added not found page
+
 ### Changed
 - **chore**: Reduce playwright tests for Aidan's services
 
