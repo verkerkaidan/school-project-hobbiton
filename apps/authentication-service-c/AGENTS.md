@@ -26,7 +26,8 @@ Makefile       — build rules
 
 ```bash
 make            # build server binary
-make test       # compile and run test_jwt + test_db
+make test       # compile (test_jwt + test_db)
+make valgrind   # compile with -g -O0 and run tests under Valgrind memcheck
 make clean      # remove object files and binaries
 ```
 

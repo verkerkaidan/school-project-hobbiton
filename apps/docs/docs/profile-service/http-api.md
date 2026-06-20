@@ -4,6 +4,8 @@ sidebar_position: 3
 
 # HTTP API
 
+All endpoints are under the `/api/profile` base path.
+
 ## Service Endpoints
 
 | Method | Path | Auth | Description |
@@ -13,18 +15,13 @@ sidebar_position: 3
 | `DELETE` | `/api/profile/delete/{userId}` | bearer token | Delete a profile by user ID. |
 | `GET` | `/api/profile/{userId}` | none | Get a profile by user ID. |
 | `GET` | `/api/profile/by-username/{username}` | none | Get a profile by username. |
-| `GET` | `/api/profile/all` | none | List all profiles (username and profile picture URL only). |
+| `GET` | `/api/profile/all` | none | List all profiles (userId, username, mediaPointer). |
+| `POST` | `/api/profile/batch` | none | Get profile summaries by a list of UUIDs. |
+| `GET` | `/api/profile/search-profiles/{query}` | none | Fuzzy search profiles by username. |
 
 ## Gateway Routes
 
-| Gateway method | Gateway path | Service path |
-| --- | --- | --- |
-| `POST` | `/api/profile/create` | `POST /api/profile/create` |
-| `PUT` | `/api/profile/update` | `PUT /api/profile/update` |
-| `DELETE` | `/api/profile/delete/{userId}` | `DELETE /api/profile/delete/{userId}` |
-| `GET` | `/api/profile/{userId}` | `GET /api/profile/{userId}` |
-| `GET` | `/api/profile/by-username/{username}` | `GET /api/profile/by-username/{username}` |
-| `GET` | `/api/profile/all` | `GET /api/profile/all` |
+The API Gateway forwards requests directly to the same paths (`/api/profile/*`).
 
 ## Payloads
 
@@ -62,6 +59,37 @@ List all profiles response:
 ```json
 [
   {
+    "userId": "a1b2c3d4-...",
+    "username": "johndoe",
+    "profilePictureUrl": "https://example.com/avatar.jpg"
+  }
+]
+```
+
+Batch request:
+
+```json
+["a1b2c3d4-...", "e5f6-7890-abcd-ef1234567890"]
+```
+
+Batch response:
+
+```json
+[
+  {
+    "userId": "a1b2c3d4-...",
+    "username": "johndoe",
+    "profilePictureUrl": "https://example.com/avatar.jpg"
+  }
+]
+```
+
+Search response:
+
+```json
+[
+  {
+    "userId": "a1b2c3d4-...",
     "username": "johndoe",
     "profilePictureUrl": "https://example.com/avatar.jpg"
   }
@@ -72,7 +100,8 @@ List all profiles response:
 
 - Create and update extract the user ID from the JWT token, not from the request body.
 - Username must be unique (database constraint).
-- `GET /profile/**` endpoints are publicly accessible without authentication.
+- `GET /api/profile/**` endpoints are publicly accessible without authentication.
+- `POST /api/profile/create` and `POST /api/profile/update` require a valid JWT Bearer token.
 - The `mediaPointer` field is validated for allowed media URL patterns.
 - The `location` field is validated for allowed location formats.
 - Delete requires the target `userId` as a path parameter and can be performed by any authenticated caller.

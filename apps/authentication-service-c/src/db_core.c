@@ -149,7 +149,10 @@ static PGconn *db_conn(void) {
     return pg_conn;
 }
 
-void db_close(void) { if (pg_conn) { PQfinish(pg_conn); pg_conn = NULL; } }
+void db_close(void) {
+    if (pg_conn) { PQfinish(pg_conn); pg_conn = NULL; }
+    free(g_conninfo); g_conninfo = NULL;
+}
 
 int db_test_connect(void)
 {

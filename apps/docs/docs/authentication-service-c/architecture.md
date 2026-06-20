@@ -16,22 +16,18 @@ sidebar_position: 2
 
 - `server.c`
   - HTTP server entry point: socket creation, accept loop, request parsing, routing, response writing.
-  - Handles OPTIONS preflight, register, login, delete, admin/staff promotion, dashboard, and `/me` endpoints.
-  - Thread pool with 8 worker threads consuming from a bounded producer-consumer queue.
+  - Handles OPTIONS preflight, register, login, email/password update, delete, admin/staff promotion, dashboard, `/me`, and metrics endpoints.
+  - Thread pool with 8 worker threads consuming from a bounded producer-consumer queue (all inlined in `server.c`).
 - `crypto_core.c`
   - Pure C SHA-256, HMAC-SHA256, base64 and base64url encoding/decoding.
   - JWT generation and validation (HS256, custom JSON parsing).
   - Email and password format validators.
 - `db_core.c`
   - PostgreSQL connection pooling (one thread-local `PGconn` per worker).
-  - User CRUD: insert with `crypt()` hashing, authenticate with `crypt()` comparison, delete, role update.
+  - User CRUD: insert with `crypt()` hashing, authenticate with `crypt()` comparison, delete, role update, email/password update.
   - Schema migration: creates `pgcrypto` extension, renames legacy tables, creates `custom_user`, `role`, `users_roles`, seeds `ROLE_USER` and `ROLE_ADMIN`.
 - `auth_core.h`
   - Public API header declaring all database and JWT functions.
-- `request_queue.c`
-  - Bounded, thread-safe FIFO queue backed by a fixed-size array with condition variables.
-- `worker_pool.c`
-  - Thin wrapper that spawns the worker threads.
 
 ## General Flow
 

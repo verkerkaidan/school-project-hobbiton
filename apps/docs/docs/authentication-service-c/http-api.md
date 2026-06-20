@@ -8,25 +8,18 @@ sidebar_position: 3
 
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
-| `POST` | `/auth/register` | none | Register a new user with email and password. |
-| `POST` | `/auth/login` | none | Authenticate and receive a JWT. |
-| `DELETE` | `/auth/delete` | bearer token | Delete own account (requires email + password in body). |
-| `PUT` | `/auth/admin/new/{userId}` | admin bearer token | Promote a user to `ROLE_ADMIN`. |
-| `PUT` | `/auth/staff/new/{userId}` | admin bearer token | Promote a user to `ROLE_STAFF`. |
-| `GET` | `/Oauth/dashboard` | bearer token | Protected dashboard returning welcome message. |
-| `GET` | `/Oauth/me` | bearer token | Return current user ID and roles from the JWT. |
-| `DELETE` | `/auth/{userId}` | service-internal | Delete a user by ID (used by the gateway for rollback). |
-| `GET` | `/auth/{userId}` | service-internal | Retrieve authentication data by user ID. |
+| `POST` | `/api/auth/register` | none | Register a new user with email and password. |
+| `POST` | `/api/auth/login` | none | Authenticate and receive a JWT. |
+| `PUT` | `/api/auth/email` | bearer token | Update the authenticated user's email. |
+| `PUT` | `/api/auth/password` | bearer token | Update the authenticated user's password. |
+| `DELETE` | `/api/auth/delete/{userId}` | bearer token | Delete a user by ID (self or ADMIN). |
+| `PUT` | `/api/auth/admin/new/{userId}` | admin bearer token | Promote a user to `ROLE_ADMIN`. |
+| `PUT` | `/api/auth/staff/new/{userId}` | admin bearer token | Promote a user to `ROLE_STAFF`. |
+| `GET` | `/api/Oauth/dashboard` | bearer token | Protected dashboard returning welcome message. |
+| `GET` | `/api/Oauth/me` | bearer token | Return current user ID and roles from the JWT. |
+| `GET` | `/api/auth/metrics` | none | Prometheus-style metrics (request counts, active connections). |
 
-## Gateway Routes
-
-| Gateway method | Gateway path | Service path |
-| --- | --- | --- |
-| `POST` | `/api/auth/register` | `POST /auth/register` |
-| `POST` | `/api/auth/login` | `POST /auth/login` |
-| `DELETE` | `/api/auth/delete` | `DELETE /auth/delete` |
-| `PUT` | `/api/auth/admin/new/{userId}` | `PUT /auth/admin/new/{userId}` |
-| `PUT` | `/api/auth/staff/new/{userId}` | `PUT /auth/staff/new/{userId}` |
+All service paths use the `/api/` prefix. The gateway forwards requests directly to the same paths.
 
 ## Payloads
 
@@ -45,6 +38,23 @@ Register/Login response:
 {
   "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+Email update request:
+
+```json
+{
+  "email": "newemail@example.com"
+}
+```
+
+Password update request:
+
+```json
+{
+  "currentPassword": "OldPass1!",
+  "newPassword": "NewPass2!"
 }
 ```
 
@@ -97,3 +107,4 @@ Me response:
 - The JWT expires 6 hours after issuance.
 - Admin and staff promotion endpoints verify that the caller's JWT contains `ROLE_ADMIN`.
 - The delete endpoint validates the JWT, then re-authenticates the user with email and password before deleting.
+- The `/api/auth/metrics` endpoint exposes Prometheus-formatted counters for total requests, active connections, and per-route request counts.
