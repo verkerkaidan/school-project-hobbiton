@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
+import java.util.List;
 
 @Service
 public class PostAggregationService {
@@ -238,6 +240,46 @@ public class PostAggregationService {
         }
 
         notificationClient.batchCreateNotifications(payload);
+    }
+
+    /**
+     * Uploads any new files, runs the recognition pipeline, merges the resulting
+     * UUIDs with the existing ones that the frontend wants to keep, then forwards
+     * a PUT to the post-service.
+     */
+    public Post forwardUpdatePost(UUID postId, PostDTO dto, List<MultipartFile> files, String authorization) {
+        // 1. Ensure hobbyType is consistent
+        if (dto.hobbyType == null || dto.hobbyType.isBlank()) {
+            dto.hobbyType = dto.getClass().getSimpleName().replace("DTO", "").toUpperCase();
+        }
+
+        // 2. Upload new files and run recognition
+        Set<UUID> newMediaUuids = new HashSet<>();
+        if (files != null && !files.isEmpty()) {
+            newMediaUuids = mediaService.uploadMedia(files, dto.userId, authorization);
+            recognitionService.startRecognitionPipeline(files);
+        }
+
+        // 3. Merge: existing UUIDs the frontend wants to keep + newly uploaded
+        Set<UUID> combined = new HashSet<>();
+        if (dto.mediaInstanceSet != null) combined.addAll(dto.mediaInstanceSet);
+        combined.addAll(newMediaUuids);
+        dto.mediaInstanceSet = combined;
+
+        // 4. Build payload and send PUT to post-service
+        Map<String, Object> payload = objectMapper.convertValue(
+                dto, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {}
+        );
+        payload.put("type", dto.hobbyType);
+        payload.put("id", postId.toString());
+
+        return webClient.put()
+                .uri(postServiceUrl + "/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(Post.class)
+                .block();
     }
 
     public Post getPostById(UUID id) {
