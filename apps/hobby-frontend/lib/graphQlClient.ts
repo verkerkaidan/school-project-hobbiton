@@ -8,18 +8,31 @@ const MIDDLEWARE_ENDPOINT_SERVERSIDE =
 const MIDDLEWARE_ENDPOINT_CLIENTSIDE =
   process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE;
 
+async function serverAuthHeaders(extra?: Record<string, string>): Promise<Record<string, string>> {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value ?? "";
+  return { Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...extra };
+}
+
 export async function gqlRequest<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const endpoint: string =
-    typeof window === "undefined"
-      ? MIDDLEWARE_ENDPOINT_SERVERSIDE!
-      : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
+  const isServer = typeof window === "undefined";
+  const endpoint: string = isServer
+    ? MIDDLEWARE_ENDPOINT_SERVERSIDE!
+    : MIDDLEWARE_ENDPOINT_CLIENTSIDE!;
+
+  const headers = isServer
+    ? await serverAuthHeaders({ "Content-Type": "application/json" })
+    : authHeaders({ "Content-Type": "application/json" });
+
   const res = await fetch(endpoint + "/api/graphql", {
     method: "POST",
-    headers: authHeaders({ "Content-Type": "application/json" }),
+    headers,
     body: JSON.stringify({ query, variables }),
+    cache: "no-store",
   });
 
   const json = await res.json();

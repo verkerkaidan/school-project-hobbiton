@@ -9,6 +9,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
 import { Trash2, Pencil } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
+import { FEED_QUERY_KEY } from "@/components/feed/Feed";
 
 type ResultItem =
     | { resultType: "book";     title: string; authors?: string[]; publishers?: string[]; publishedDate?: string; isbn?: string[]; pageCount?: number; languages?: string[]; coverId?: string; thumbnailUrl?: string; id?: string }
@@ -44,6 +46,7 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
 
     const currentUser = useCurrentUser();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const isOwner = !!currentUser && currentUser.id === post.userId;
 
     const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
@@ -127,22 +130,22 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
 
                     <motion.div variants={itemVariants} className="space-y-4 p-6 glass-card rounded-2xl">
                         <div className="flex items-center justify-between">
-                            <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 uppercase tracking-wider`}>
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 uppercase tracking-wider text-accent/80">
                                 <span>{hobbySlug === "gym" ? "🏋️" : hobbySlug === "reading" ? "📚" : "✨"}</span>
-                                <span className="opacity-80">{post.hobbyType}</span>
+                                <span>{post.hobbyType}</span>
                             </span>
                             {isOwner && (
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => router.push(`/posts/${post.id}/edit`)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-accent/70 hover:text-accent border border-accent/15 hover:border-accent/30 hover:bg-accent/5 transition-all"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-accent/60 hover:text-accent border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all"
                                     >
                                         <Pencil className="w-3 h-3" />
                                         Edit
                                     </button>
                                     <button
                                         onClick={() => setShowDeleteModal(true)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400/80 hover:text-rose-400 border border-rose-500/15 hover:border-rose-500/30 hover:bg-rose-500/5 transition-all"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400/80 hover:text-rose-400 border border-rose-500/20 hover:border-rose-500/40 hover:bg-rose-500/5 transition-all"
                                     >
                                         <Trash2 className="w-3 h-3" />
                                         Delete
@@ -151,11 +154,11 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                             )}
                         </div>
 
-                        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">
+                        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-accent">
                             {post.title}
                         </h1>
 
-                        <p className="text-sm md:text-base opacity-70 leading-relaxed font-normal whitespace-pre-wrap">
+                        <p className="text-sm md:text-base text-accent/75 leading-relaxed font-normal whitespace-pre-wrap">
                             {post.description}
                         </p>
                     </motion.div>
@@ -163,12 +166,12 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                     {/* EXERCISE DATA INTEGRATION */}
                     {(isGym || resolvedExercises) && resolvedExercises && resolvedExercises.length > 0 && (
                         <motion.section variants={itemVariants} className="p-6 glass-card rounded-2xl space-y-4">
-                            <p className="text-xs font-bold tracking-widest uppercase opacity-40">Exercises Tracked</p>
+                            <p className="text-xs font-bold tracking-widest uppercase text-accent/55">Exercises Tracked</p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {resolvedExercises.map((ex, i) => (
-                                    <div key={i} className="flex flex-col justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
-                                        <span className="font-semibold text-white mb-2">{ex.title}</span>
-                                        <span className="text-xs opacity-60 font-mono bg-white/5 px-2 py-1 rounded-md w-fit">
+                                    <div key={i} className="flex flex-col justify-between p-4 rounded-xl bg-white/[0.02] border border-white/8 hover:border-white/12 transition-colors">
+                                        <span className="font-semibold text-accent mb-2">{ex.title}</span>
+                                        <span className="text-xs text-accent/60 font-mono bg-white/5 px-2 py-1 rounded-md w-fit">
                                             {ex.reps} reps · {ex.weight}kg · RPE {ex.rpe}
                                         </span>
                                     </div>
@@ -183,12 +186,12 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl shadow-inner">📚</div>
                                 <div>
-                                    <p className="text-xs font-bold tracking-widest uppercase opacity-40 mb-0.5">Currently Reading</p>
-                                    <span className="font-bold text-white text-lg">{resolvedBookTitle}</span>
-                                    end</div>
+                                    <p className="text-xs font-bold tracking-widest uppercase text-accent/55 mb-0.5">Currently Reading</p>
+                                    <span className="font-bold text-accent text-lg">{resolvedBookTitle}</span>
+                                </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="text-sm font-mono opacity-80 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                                <span className="text-sm font-mono text-accent/80 bg-white/5 px-3 py-1.5 rounded-xl border border-white/8">
                                     {resolvedPagesRead} / {resolvedTotalPages} pages
                                 </span>
                                 {resolvedBookFinished && (
@@ -205,7 +208,7 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                 <div className="lg:col-span-4 lg:sticky lg:top-8 flex flex-col gap-6">
                     {post.linkedItems?.length > 0 && (
                         <motion.aside variants={itemVariants} className="glass-card rounded-2xl p-5 space-y-4">
-                            <p className="text-xs font-bold tracking-widest uppercase opacity-40">Linked References</p>
+                            <p className="text-xs font-bold tracking-widest uppercase text-accent/55">Linked References</p>
                             <div className="space-y-3"> {/* Vergroot van space-y-2 naar space-y-3 */}
                                 {post.linkedItems.map((item) => {
                                     const isLoading = loadingItem === item.externalId;
@@ -224,7 +227,7 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                                                 </div>
                                             )}
                                             <div className="flex-1 min-w-0 space-y-1.5">
-                                                <p className="text-base font-semibold truncate text-white group-hover:text-[var(--color-brand-light)] transition-colors">{item.displayName}</p> {/* Vergroot van text-sm naar text-base */}
+                                                <p className="text-base font-semibold truncate text-accent group-hover:text-[var(--color-brand-light)] transition-colors">{item.displayName}</p> {/* Vergroot van text-sm naar text-base */}
                                                 <span className={linkedBadgeClass(item.hobbyType)}>{item.hobbyType}</span>
                                             </div>
                                             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs pr-1">⚡</span>
@@ -251,6 +254,7 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
                 postTitle={post.title}
                 onConfirm={async () => {
                     await deleteOwnPost(post.id);
+                    queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
                     router.push("/profile");
                 }}
                 onClose={() => setShowDeleteModal(false)}

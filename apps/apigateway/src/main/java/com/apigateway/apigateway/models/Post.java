@@ -73,6 +73,7 @@ public abstract class Post {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public List<MediaInstance> getMediaInstanceSet() { return mediaInstanceSet; }
+    public void setMediaInstanceSet(List<MediaInstance> mediaInstanceSet) { this.mediaInstanceSet = mediaInstanceSet; }
     public String getHobbyType() { return hobbyType; }
     public void setHobbyType(String hobbyType) { this.hobbyType = hobbyType; }
     public List<MediaDTO> getMediaSet() { return mediaDTOSet; }

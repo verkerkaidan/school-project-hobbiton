@@ -43,11 +43,24 @@ public class PostController {
         Post post;
 
         if (postDTO.id != null) {
-            // UPDATE: only update basic fields
+            // UPDATE: update basic fields and replace linked items
             post = this.postDAO.getPostById(postDTO.id);
             post.setTitle(postDTO.title);
             post.setDescription(postDTO.description);
             post.setUserId(postDTO.userId);
+
+            post.getLinkedItems().clear();
+            if (postDTO.linkedItems != null) {
+                for (LinkedHobbyItemDTO dto : postDTO.linkedItems) {
+                    LinkedHobbyItem item = new LinkedHobbyItem();
+                    item.setDisplayName(dto.displayName);
+                    item.setImageUrl(dto.imageUrl);
+                    item.setExternalId(dto.externalId);
+                    item.setHobbyType(dto.hobbyType);
+                    item.setPost(post);
+                    post.getLinkedItems().add(item);
+                }
+            }
         } else {
             // CREATE: use constructor — it already maps linkedItems correctly
             // (sets displayName, imageUrl, externalId, hobbyType, post reference)
@@ -70,7 +83,12 @@ public class PostController {
             post.setLinkedItems(linked);
         }
 
-        Set<MediaInstance> mediaInstanceSet = new HashSet<>();
+        // For updates, pass the existing Hibernate-managed collection so it is
+        // mutated in-place. Replacing it with a new HashSet detaches the
+        // PersistentSet and triggers an "orphan collection" error.
+        Set<MediaInstance> mediaInstanceSet = postDTO.id != null
+                ? post.getMediaInstanceSet()
+                : new HashSet<>();
         post.setMediaInstanceSet(
                 this.postService.saveAsSetMediaInstanceFromSetUUID(
                         mediaInstanceSet, postDTO.mediaInstanceSet, post
