@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <time.h>
+#include <sys/resource.h>
+#include <stddef.h>
 
 #include "auth_core.h"
 
@@ -42,11 +44,49 @@ static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 static FILE *log_file = NULL;
 static conn_queue_t queue;
 
+/* ---------------- Heap tracking ---------------- */
+
+static volatile long long heap_allocated = 0;
+static volatile long long heap_total_allocated = 0;
+
+typedef struct {
+    size_t size;
+    char data[];
+} heap_hdr_t;
+
+static void *tracked_malloc(size_t size) {
+    heap_hdr_t *h = (heap_hdr_t *)(malloc)(sizeof(heap_hdr_t) + size);
+    if (!h) return NULL;
+    h->size = size;
+    __sync_add_and_fetch(&heap_allocated, (long long)size);
+    __sync_add_and_fetch(&heap_total_allocated, (long long)size);
+    return h->data;
+}
+
+static void tracked_free(void *ptr) {
+    if (!ptr) return;
+    heap_hdr_t *h = (heap_hdr_t *)((char *)ptr - offsetof(heap_hdr_t, data));
+    __sync_sub_and_fetch(&heap_allocated, (long long)h->size);
+    (free)(h);
+}
+
+static char *tracked_strndup(const char *s, size_t n) {
+    size_t len = strnlen(s, n);
+    char *p = (char *)tracked_malloc(len + 1);
+    if (!p) return NULL;
+    memcpy(p, s, len);
+    p[len] = '\0';
+    return p;
+}
+
+#define malloc(sz)     tracked_malloc(sz)
+#define free(p)        tracked_free(p)
+
 /* ---------------- Memory /proc helpers ---------------- */
 
 static long long proc_status_value(const char *key) {
     FILE *f = fopen("/proc/self/status", "r");
-    if (!f) return -1;
+    if (!f) return 0;
 
     char line[256];
     long long val = -1;
@@ -62,8 +102,22 @@ static long long proc_status_value(const char *key) {
     }
 
     fclose(f);
-    return val >= 0 ? val * 1024 : -1; /* kB -> bytes */
+    return val >= 0 ? val * 1024 : 0; /* kB -> bytes, 0 on not found */
 }
+
+#if defined(__APPLE__)
+static long long get_rss_via_getrusage(void) {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
+    return (long long)usage.ru_maxrss; /* macOS returns bytes directly */
+}
+#else
+static long long get_rss_via_getrusage(void) {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
+    return (long long)usage.ru_maxrss * 1024; /* Linux returns kB */
+}
+#endif
 
 /* ---------------- Metrics ---------------- */
 
@@ -127,6 +181,9 @@ static void handle_metrics(int client) {
     long long vm_size = proc_status_value("VmSize");
     long long vm_peak = proc_status_value("VmPeak");
 
+    /* Fallback to getrusage when /proc is not available (macOS, containers) */
+    if (vm_rss == 0) vm_rss = get_rss_via_getrusage();
+
     n += snprintf(buf + n, sizeof(buf) - n,
         "# HELP auth_memory_VmRSS Resident set size (bytes)\n"
         "# TYPE auth_memory_VmRSS gauge\n"
@@ -144,6 +201,18 @@ static void handle_metrics(int client) {
         "# TYPE auth_memory_VmPeak gauge\n"
         "auth_memory_VmPeak %lld\n\n",
         (long long)vm_peak);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_heap_in_use_bytes Currently allocated heap memory (bytes)\n"
+        "# TYPE auth_heap_in_use_bytes gauge\n"
+        "auth_heap_in_use_bytes %lld\n\n",
+        (long long)heap_allocated);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_heap_allocated_total Total bytes allocated since startup\n"
+        "# TYPE auth_heap_allocated_total counter\n"
+        "auth_heap_allocated_total %lld\n\n",
+        (long long)heap_total_allocated);
 
     n += snprintf(buf + n, sizeof(buf) - n,
         "# HELP auth_route_requests_total Requests per route\n"
@@ -315,7 +384,7 @@ static char *extract_bearer_token(const char *headers) {
     const char *end = strstr(tok, "\r\n");
     if (!end) end = tok + strlen(tok);
 
-    return strndup(tok, end - tok);
+    return tracked_strndup(tok, end - tok);
 }
 
 static void handle_client_fd(int client) {
@@ -377,7 +446,7 @@ static void handle_client_fd(int client) {
     tl_path = path;
     __sync_add_and_fetch(&metrics_active_connections, 1);
 
-    char *headers = strndup(buffer, headers_len);
+    char *headers = tracked_strndup(buffer, headers_len);
 
     /* Parse Content-Length */
     int content_length = 0;

@@ -1,7 +1,7 @@
 {
-  "title": "API Gateway / Spring Boot",
-  "uid": "apigateway",
-  "tags": ["spring", "boot", "micrometer", "apigateway"],
+  "title": "Profile Service",
+  "uid": "profileservice",
+  "tags": ["spring", "boot", "micrometer", "profile"],
   "timezone": "browser",
   "panels": [
     {
@@ -11,11 +11,11 @@
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{area=\"heap\", application=\"middleware-service\"})",
+          "expr": "sum(jvm_memory_used_bytes{area=\"heap\", application=\"profile-service\"})",
           "legendFormat": "Heap Used"
         },
         {
-          "expr": "sum(jvm_memory_max_bytes{area=\"heap\", application=\"middleware-service\"})",
+          "expr": "sum(jvm_memory_max_bytes{area=\"heap\", application=\"profile-service\"})",
           "legendFormat": "Heap Max"
         }
       ],
@@ -34,7 +34,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
-          "expr": "process_cpu_usage{application=\"middleware-service\"}",
+          "expr": "process_cpu_usage{application=\"profile-service\"}",
           "legendFormat": "CPU"
         }
       ],
@@ -53,7 +53,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "process_uptime_seconds{application=\"middleware-service\"}",
+          "expr": "process_uptime_seconds{application=\"profile-service\"}",
           "legendFormat": "Uptime"
         }
       ],
@@ -71,14 +71,14 @@
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
-          "expr": "jvm_threads_live_threads{application=\"middleware-service\"}",
+          "expr": "jvm_threads_live_threads{application=\"profile-service\"}",
           "legendFormat": "Live"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 100, "color": "orange" }, { "value": 200, "color": "red" }] }
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 50, "color": "orange" }, { "value": 100, "color": "red" }] }
         }
       }
     },
@@ -89,15 +89,15 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{application=\"middleware-service\"}[1m])",
+          "expr": "rate(http_server_requests_seconds_count{application=\"profile-service\"}[1m])",
           "legendFormat": "All Requests"
         },
         {
-          "expr": "rate(http_server_requests_seconds_count{application=\"middleware-service\", status=~\"4..\"}[1m])",
+          "expr": "rate(http_server_requests_seconds_count{application=\"profile-service\", status=~\"4..\"}[1m])",
           "legendFormat": "4xx"
         },
         {
-          "expr": "rate(http_server_requests_seconds_count{application=\"middleware-service\", status=~\"5..\"}[1m])",
+          "expr": "rate(http_server_requests_seconds_count{application=\"profile-service\", status=~\"5..\"}[1m])",
           "legendFormat": "5xx"
         }
       ],
@@ -110,21 +110,13 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "HTTP Response Time (p50, p95, p99)",
+      "title": "HTTP Response Time (p95)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, rate(http_server_requests_seconds_bucket{application=\"middleware-service\"}[1m]))",
-          "legendFormat": "p50"
-        },
-        {
-          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{application=\"middleware-service\"}[1m]))",
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{application=\"profile-service\"}[1m]))",
           "legendFormat": "p95"
-        },
-        {
-          "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{application=\"middleware-service\"}[1m]))",
-          "legendFormat": "p99"
         }
       ],
       "fieldConfig": {
@@ -141,11 +133,11 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "targets": [
         {
-          "expr": "rate(logback_events_total{application=\"middleware-service\", level=\"error\"}[1m])",
+          "expr": "rate(logback_events_total{application=\"profile-service\", level=\"error\"}[1m])",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "rate(logback_events_total{application=\"middleware-service\", level=\"warn\"}[1m])",
+          "expr": "rate(logback_events_total{application=\"profile-service\", level=\"warn\"}[1m])",
           "legendFormat": "WARN"
         }
       ],
@@ -163,7 +155,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{application=\"middleware-service\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{application=\"profile-service\"}[5m])",
           "legendFormat": "{{status}} {{method}} {{uri}}"
         }
       ],
@@ -172,6 +164,49 @@
           "unit": "rps",
           "color": { "mode": "palette-classic" }
         }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Logs",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "collapsed": false
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Error & Warning Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 21 },
+      "targets": [
+        {
+          "expr": "sum by (level) (rate({container=\"profile-service\"} |=~ `(?i)(error|warn|fail|exception)` [1m]))",
+          "legendFormat": "{{level}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Profile Service Logs",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 12, "x": 12, "y": 21 },
+      "targets": [
+        {
+          "expr": "{container=\"profile-service\"}",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogs": false
       }
     }
   ],
@@ -182,5 +217,5 @@
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "schemaVersion": 39,
-  "version": 2
+  "version": 3
 }
