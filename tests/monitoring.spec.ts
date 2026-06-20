@@ -94,6 +94,48 @@ test.describe('Monitoring infrastructure', () => {
       expect(results.length).toBeGreaterThanOrEqual(1);
       expect(Number(results[0].value[1])).toBe(1);
     });
+
+    test('profile-connection-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="profile-connection"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
+
+    test('notification-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="notification"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
+
+    test('bug-report-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="bug-report"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
   });
 
   test.describe('Grafana', () => {
@@ -225,6 +267,42 @@ test.describe('Monitoring infrastructure', () => {
       expect(body).toHaveProperty('dashboard');
       expect(body.dashboard).toHaveProperty('title', 'Recognition Service');
       expect(body.dashboard).toHaveProperty('uid', 'recognitionservice');
+    });
+
+    test('Profile Connection dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/profileconnectionservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Profile Connection Service');
+      expect(body.dashboard).toHaveProperty('uid', 'profileconnectionservice');
+    });
+
+    test('Notification dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/notificationservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Notification Service');
+      expect(body.dashboard).toHaveProperty('uid', 'notificationservice');
+    });
+
+    test('Bug Report dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/bugreportservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Bug Report Service');
+      expect(body.dashboard).toHaveProperty('uid', 'bugreportservice');
     });
   });
 });

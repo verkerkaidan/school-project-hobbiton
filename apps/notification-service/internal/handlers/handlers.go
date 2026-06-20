@@ -9,6 +9,7 @@ import (
 	"notification-service/internal/auth"
 	"notification-service/internal/config"
 	"notification-service/internal/hub"
+	"notification-service/internal/metrics"
 )
 
 // Handler bundles all HTTP handler dependencies.
@@ -26,28 +27,28 @@ func New(db *sql.DB, h *hub.Hub, cfg *config.Config) *Handler {
 // Register wires all routes onto mux.
 // Note: Go 1.22 method+path patterns are used (e.g. "GET /foo").
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /health", withCORS(h.cfg, h.health))
+	mux.HandleFunc("GET /health", metrics.Wrap(withCORS(h.cfg, h.health), metrics.ExtractPath("GET /health")))
 
 	// WebSocket upgrade — JWT via ?token= query param
-	mux.HandleFunc("GET /ws", withCORS(h.cfg, h.webSocketUpgrade))
+	mux.HandleFunc("GET /ws", metrics.Wrap(withCORS(h.cfg, h.webSocketUpgrade), metrics.ExtractPath("GET /ws")))
 
 	// Notification CRUD — JWT via Authorization header
-	mux.HandleFunc("POST /notifications", withCORS(h.cfg, h.createNotification))
-	mux.HandleFunc("POST /notifications/batch", withCORS(h.cfg, h.batchCreateNotifications))
-	mux.HandleFunc("DELETE /notifications/users/me", withCORS(h.cfg, h.deleteUserNotifications))
-	mux.HandleFunc("DELETE /notifications/users/{userId}", withCORS(h.cfg, h.adminDeleteUserNotifications))
-	mux.HandleFunc("GET /notifications", withCORS(h.cfg, h.listNotifications))
-	mux.HandleFunc("PATCH /notifications/{id}/read", withCORS(h.cfg, h.markAsRead))
-	mux.HandleFunc("POST /notifications/read-all", withCORS(h.cfg, h.markAllRead))
-	mux.HandleFunc("GET /notifications/unread-count", withCORS(h.cfg, h.unreadCount))
+	mux.HandleFunc("POST /notifications", metrics.Wrap(withCORS(h.cfg, h.createNotification), metrics.ExtractPath("POST /notifications")))
+	mux.HandleFunc("POST /notifications/batch", metrics.Wrap(withCORS(h.cfg, h.batchCreateNotifications), metrics.ExtractPath("POST /notifications/batch")))
+	mux.HandleFunc("DELETE /notifications/users/me", metrics.Wrap(withCORS(h.cfg, h.deleteUserNotifications), metrics.ExtractPath("DELETE /notifications/users/me")))
+	mux.HandleFunc("DELETE /notifications/users/{userId}", metrics.Wrap(withCORS(h.cfg, h.adminDeleteUserNotifications), metrics.ExtractPath("DELETE /notifications/users/{userId}")))
+	mux.HandleFunc("GET /notifications", metrics.Wrap(withCORS(h.cfg, h.listNotifications), metrics.ExtractPath("GET /notifications")))
+	mux.HandleFunc("PATCH /notifications/{id}/read", metrics.Wrap(withCORS(h.cfg, h.markAsRead), metrics.ExtractPath("PATCH /notifications/{id}/read")))
+	mux.HandleFunc("POST /notifications/read-all", metrics.Wrap(withCORS(h.cfg, h.markAllRead), metrics.ExtractPath("POST /notifications/read-all")))
+	mux.HandleFunc("GET /notifications/unread-count", metrics.Wrap(withCORS(h.cfg, h.unreadCount), metrics.ExtractPath("GET /notifications/unread-count")))
 
 	// Notification preferences
-	mux.HandleFunc("GET /notification-preferences", withCORS(h.cfg, h.getPreferences))
-	mux.HandleFunc("PUT /notification-preferences/{type}", withCORS(h.cfg, h.updatePreference))
+	mux.HandleFunc("GET /notification-preferences", metrics.Wrap(withCORS(h.cfg, h.getPreferences), metrics.ExtractPath("GET /notification-preferences")))
+	mux.HandleFunc("PUT /notification-preferences/{type}", metrics.Wrap(withCORS(h.cfg, h.updatePreference), metrics.ExtractPath("PUT /notification-preferences/{type}")))
 
 	// Per-user post subscription toggle — JWT via Authorization header
-	mux.HandleFunc("GET /user-post-subscriptions/{authorId}", withCORS(h.cfg, h.getPostSubscription))
-	mux.HandleFunc("PUT /user-post-subscriptions/{authorId}", withCORS(h.cfg, h.togglePostSubscription))
+	mux.HandleFunc("GET /user-post-subscriptions/{authorId}", metrics.Wrap(withCORS(h.cfg, h.getPostSubscription), metrics.ExtractPath("GET /user-post-subscriptions/{authorId}")))
+	mux.HandleFunc("PUT /user-post-subscriptions/{authorId}", metrics.Wrap(withCORS(h.cfg, h.togglePostSubscription), metrics.ExtractPath("PUT /user-post-subscriptions/{authorId}")))
 
 	// Handle OPTIONS pre-flight for all paths
 	mux.HandleFunc("OPTIONS /", withCORS(h.cfg, func(w http.ResponseWriter, r *http.Request) {

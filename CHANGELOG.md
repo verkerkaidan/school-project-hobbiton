@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.54.3] - 2026-06-20
+
+### Changed
+- **chore**: implement dashboards
+
 ## [1.54.2] - 2026-06-20
 
 ### Changed

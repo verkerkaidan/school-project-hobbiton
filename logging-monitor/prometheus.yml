@@ -34,13 +34,6 @@ scrape_configs:
           - profile-service:21526
         labels:
           service: profile
-  - job_name: 'media-service'
-    metrics_path: '/api/actuator/prometheus'
-    static_configs:
-      - targets:
-          - media-service-elx:27086
-        labels:
-          service: media
 
   - job_name: 'interaction-service'
     metrics_path: '/api/actuator/prometheus'
@@ -49,6 +42,30 @@ scrape_configs:
           - interaction-service:27087
         labels:
           service: interaction
+
+  - job_name: 'profile-connection-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets:
+          - profile-connection-service:29574
+        labels:
+          service: profile-connection
+
+  - job_name: 'notification-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - notification-service:29555
+        labels:
+          service: notification
+
+  - job_name: 'bug-report-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - bug-report-service:29556
+        labels:
+          service: bug-report
 
   - job_name: 'library-service'
     metrics_path: '/api/library/metrics'

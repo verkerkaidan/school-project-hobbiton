@@ -7,6 +7,7 @@ import (
 	"bug-report-service/internal/config"
 	"bug-report-service/internal/db"
 	"bug-report-service/internal/handlers"
+	"bug-report-service/internal/metrics"
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	db.RunMigrations(database)
 
 	mux := http.NewServeMux()
+	mux.Handle("GET /metrics", metrics.Handler())
 	h := handlers.New(database, cfg)
 	h.Register(mux)
 
