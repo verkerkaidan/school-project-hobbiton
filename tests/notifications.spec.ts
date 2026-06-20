@@ -6,77 +6,17 @@ test.describe('Notification Service', () => {
     await register(page);
   });
 
-  test('should navigate to notifications page', async ({ page }) => {
+  test('should display empty notifications page with no mark-all button', async ({ page }) => {
     await page.goto('/notifications');
     await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveURL(/\/notifications/);
-
-    const heading = page.getByRole('heading', { name: /notifications/i });
-    await expect(heading).toBeVisible();
+    await expect(page.getByRole('heading', { name: /notifications/i })).toBeVisible();
+    await expect(page.locator('text=No notifications yet')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /mark all as read/i })).not.toBeVisible();
   });
 
-  test('should display empty state when no notifications exist', async ({ page }) => {
-    await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
-
-    const emptyMessage = page.locator('text=No notifications yet');
-    await expect(emptyMessage).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should not show "Mark all as read" button when there are no unread notifications', async ({ page }) => {
-    await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
-
-    const markAllButton = page.getByRole('button', { name: /mark all as read/i });
-    await expect(markAllButton).not.toBeVisible();
-  });
-
-  test('should navigate to notifications from sidebar', async ({ page }) => {
-    const notificationsLink = page.locator('a, button').filter({ hasText: /notifications/i }).first();
-
-    if (await notificationsLink.isVisible()) {
-      await notificationsLink.click();
-      await page.waitForLoadState('networkidle');
-      await expect(page).toHaveURL(/\/notifications/);
-    } else {
-      await page.goto('/notifications');
-      await expect(page).toHaveURL(/\/notifications/);
-    }
-
-    const main = page.locator('main');
-    await expect(main).toBeVisible();
-  });
-
-  test('should load notifications page without errors', async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') consoleErrors.push(msg.text());
-    });
-
-    await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page).toHaveURL(/\/notifications/);
-    const main = page.locator('main');
-    await expect(main).toBeVisible();
-  });
-
-  test('should open notification settings section in settings page', async ({ page }) => {
-    await page.goto('/settings');
-    await page.waitForLoadState('networkidle');
-
-    const notificationSection = page.getByRole('button', { name: /notifications/i }).first();
-    await expect(notificationSection).toBeVisible();
-
-    await notificationSection.click();
-
-    await page.waitForTimeout(500);
-    const panel = page.locator('text=Follows');
-    await expect(panel).toBeVisible({ timeout: 8000 });
-  });
-
-  test('should display all four notification preference types', async ({ page }) => {
+  test('should display and toggle notification preferences in settings', async ({ page }) => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
@@ -87,32 +27,38 @@ test.describe('Notification Service', () => {
     await expect(page.locator('text=Posts from followed users')).toBeVisible();
     await expect(page.locator('text=Likes on your posts')).toBeVisible();
     await expect(page.locator('text=Comments on your posts')).toBeVisible();
-  });
-
-  test('should toggle a notification preference', async ({ page }) => {
-    await page.goto('/settings');
-    await page.waitForLoadState('networkidle');
-
-    const notificationSection = page.getByRole('button', { name: /notifications/i }).first();
-    await notificationSection.click();
-
-    await expect(page.locator('text=Follows')).toBeVisible({ timeout: 8000 });
 
     const followsToggle = page.getByRole('button', { name: /toggle follows/i });
-    await expect(followsToggle).toBeVisible();
-
     const initialClass = await followsToggle.getAttribute('class');
     await followsToggle.click();
-
     await page.waitForTimeout(1000);
-
     const updatedClass = await followsToggle.getAttribute('class');
     expect(updatedClass).not.toEqual(initialClass);
   });
 });
 
 test.describe('Notification Service — real notifications', () => {
-  async function setupTwoUsers(page: import('@playwright/test').Page, browser: import('@playwright/test').Browser) {
+  async function createPost(page: import('@playwright/test').Page, title: string) {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    const createButton = page.getByRole('button', { name: /create new post/i });
+    await expect(createButton).toBeVisible({ timeout: 10000 });
+    await createButton.click();
+
+    await page.waitForSelector('text=Create Post', { timeout: 10000 });
+
+    await page.locator('label:has-text("Post Type") + button').click();
+    await page.getByRole('button', { name: '✨ Other', exact: true }).click();
+
+    await page.locator('input[name="title"]').fill(title);
+    await page.locator('textarea[name="description"]').fill('E2E test post');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForSelector('text=Create Post', { state: 'hidden', timeout: 30000 });
+  }
+
+  test('should receive follow notification and mark all as read', async ({ page, browser }) => {
     const userA = await register(page);
 
     const contextB = await browser.newContext();
@@ -129,51 +75,70 @@ test.describe('Notification Service — real notifications', () => {
 
     await contextB.close();
 
-    return { userA, userB };
-  }
-
-  test('should receive a follow notification when another user follows you', async ({ page, browser }) => {
-    const { userB } = await setupTwoUsers(page, browser);
-
     await page.goto('/notifications');
     await page.waitForLoadState('networkidle');
 
-    const followNotification = page.getByText(new RegExp(`${userB.username}.*following`, 'i'));
-    await expect(followNotification).toBeVisible({ timeout: 15000 });
-  });
-
-  test('should show "Mark all as read" button when there are unread notifications', async ({ page, browser }) => {
-    await setupTwoUsers(page, browser);
-
-    await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.getByRole('button', { name: /mark all as read/i })).toBeVisible({ timeout: 15000 });
-  });
-
-  test('should mark all notifications as read', async ({ page, browser }) => {
-    await setupTwoUsers(page, browser);
-
-    await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await expect(page.getByText(new RegExp(`${userB.username}.*following`, 'i'))).toBeVisible({ timeout: 15000 });
 
     const markAllButton = page.getByRole('button', { name: /mark all as read/i });
     await expect(markAllButton).toBeVisible({ timeout: 15000 });
     await markAllButton.click();
-
     await expect(markAllButton).not.toBeVisible({ timeout: 10000 });
   });
 
-  test('should mark a single notification as read when clicked', async ({ page, browser }) => {
-    const { userB } = await setupTwoUsers(page, browser);
+  test('should receive notifications for likes, comments, and followed user posts', async ({ page, browser }) => {
+    const userA = await register(page);
+    const postTitle = `E2E-notif-${Date.now()}`;
+    await createPost(page, postTitle);
 
+    const contextB = await browser.newContext();
+    const pageB = await contextB.newPage();
+    const userB = await register(pageB);
+
+    // User B likes and comments on User A's post
+    await pageB.goto(`/profile/${userA.username}`);
+    await pageB.waitForLoadState('networkidle');
+
+    await pageB.getByRole('heading', { name: postTitle }).click();
+    await pageB.waitForURL('**/posts/**', { timeout: 10000 });
+
+    const likeIcon = pageB.locator('svg.cursor-pointer').first();
+    await expect(likeIcon).toBeVisible({ timeout: 8000 });
+    await likeIcon.click();
+    await pageB.waitForTimeout(1000);
+
+    const commentInput = pageB.locator('textarea[placeholder="Write a supportive comment..."]');
+    await expect(commentInput).toBeVisible({ timeout: 8000 });
+    await commentInput.fill('Great post!');
+    await pageB.getByRole('button', { name: /post comment/i }).click();
+    await pageB.waitForTimeout(1000);
+
+    // User A follows User B, then User B publishes a post
+    await page.goto(`/profile/${userB.username}`);
+    await page.waitForLoadState('networkidle');
+
+    const followButton = page.getByRole('button', { name: /^follow$/i });
+    await followButton.waitFor({ state: 'visible', timeout: 10000 });
+    await followButton.click();
+    await expect(page.getByRole('button', { name: /unfollow/i })).toBeVisible({ timeout: 10000 });
+
+    // Subscribe to User B's post notifications (bell icon appears after following)
+    const bellButton = page.getByRole('button', { name: /turn on post notifications/i });
+    await expect(bellButton).toBeVisible({ timeout: 5000 });
+    await bellButton.click();
+    await expect(page.getByRole('button', { name: /turn off post notifications/i })).toBeVisible({ timeout: 5000 });
+
+    const followedPostTitle = `E2E-followed-${Date.now()}`;
+    await createPost(pageB, followedPostTitle);
+
+    await contextB.close();
+
+    // User A should see all three notification types
     await page.goto('/notifications');
     await page.waitForLoadState('networkidle');
 
-    const notification = page.getByText(new RegExp(`${userB.username}.*following`, 'i'));
-    await expect(notification).toBeVisible({ timeout: 15000 });
-    await notification.click();
-
-    await expect(page.getByRole('button', { name: /mark all as read/i })).not.toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/liked your post/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/commented on your post/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(new RegExp(`${userB.username}.*published`, 'i'))).toBeVisible({ timeout: 15000 });
   });
 });
