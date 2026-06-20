@@ -42,6 +42,29 @@ static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 static FILE *log_file = NULL;
 static conn_queue_t queue;
 
+/* ---------------- Memory /proc helpers ---------------- */
+
+static long long proc_status_value(const char *key) {
+    FILE *f = fopen("/proc/self/status", "r");
+    if (!f) return -1;
+
+    char line[256];
+    long long val = -1;
+    size_t klen = strlen(key);
+
+    while (fgets(line, sizeof(line), f)) {
+        if (strncmp(line, key, klen) == 0 && line[klen] == ':') {
+            const char *p = line + klen + 1;
+            while (*p == ' ' || *p == '\t') p++;
+            val = atoll(p);
+            break;
+        }
+    }
+
+    fclose(f);
+    return val >= 0 ? val * 1024 : -1; /* kB -> bytes */
+}
+
 /* ---------------- Metrics ---------------- */
 
 #define MAX_METRICS_ENTRIES 256
@@ -99,6 +122,28 @@ static void handle_metrics(int client) {
         "# TYPE auth_active_connections gauge\n"
         "auth_active_connections %lld\n\n",
         (long long)metrics_active_connections);
+
+    long long vm_rss  = proc_status_value("VmRSS");
+    long long vm_size = proc_status_value("VmSize");
+    long long vm_peak = proc_status_value("VmPeak");
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_memory_VmRSS Resident set size (bytes)\n"
+        "# TYPE auth_memory_VmRSS gauge\n"
+        "auth_memory_VmRSS %lld\n\n",
+        (long long)vm_rss);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_memory_VmSize Virtual memory size (bytes)\n"
+        "# TYPE auth_memory_VmSize gauge\n"
+        "auth_memory_VmSize %lld\n\n",
+        (long long)vm_size);
+
+    n += snprintf(buf + n, sizeof(buf) - n,
+        "# HELP auth_memory_VmPeak Peak virtual memory (bytes)\n"
+        "# TYPE auth_memory_VmPeak gauge\n"
+        "auth_memory_VmPeak %lld\n\n",
+        (long long)vm_peak);
 
     n += snprintf(buf + n, sizeof(buf) - n,
         "# HELP auth_route_requests_total Requests per route\n"

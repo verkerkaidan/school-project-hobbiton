@@ -6,9 +6,9 @@
   "panels": [
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "JVM Memory",
+      "title": "JVM Heap Memory",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
           "expr": "sum(jvm_memory_used_bytes{area=\"heap\", application=\"profile-service\"})",
@@ -31,7 +31,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "CPU Usage",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
           "expr": "process_cpu_usage{application=\"profile-service\"}",
@@ -50,7 +50,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Uptime",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
           "expr": "process_uptime_seconds{application=\"profile-service\"}",
@@ -68,7 +68,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Active Threads",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
           "expr": "jvm_threads_live_threads{application=\"profile-service\"}",
@@ -128,27 +128,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "GC Pause Duration",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
-      "targets": [
-        {
-          "expr": "rate(jvm_gc_pause_seconds_sum{application=\"profile-service\"}[1m])",
-          "legendFormat": "{{gc}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Error Log Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "targets": [
         {
           "expr": "rate(logback_events_total{application=\"profile-service\", level=\"error\"}[1m])",
@@ -170,7 +152,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "HTTP Requests by Status",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
       "targets": [
         {
           "expr": "rate(http_server_requests_seconds_count{application=\"profile-service\"}[5m])",
@@ -192,5 +174,5 @@
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "schemaVersion": 39,
-  "version": 1
+  "version": 2
 }

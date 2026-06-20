@@ -6,9 +6,9 @@
   "panels": [
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "JVM Memory",
+      "title": "JVM Heap Memory",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
           "expr": "sum(jvm_memory_used_bytes{area=\"heap\", application=\"middleware-service\"})",
@@ -29,36 +29,13 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "JVM Non-Heap Memory",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
-      "targets": [
-        {
-          "expr": "sum(jvm_memory_used_bytes{area=\"nonheap\", application=\"middleware-service\"})",
-          "legendFormat": "Non-Heap Used"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 200000000, "color": "orange" }, { "value": 350000000, "color": "red" }] }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "CPU Usage",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
-          "expr": "system_cpu_usage{application=\"middleware-service\"}",
-          "legendFormat": "System CPU"
-        },
-        {
           "expr": "process_cpu_usage{application=\"middleware-service\"}",
-          "legendFormat": "Process CPU"
+          "legendFormat": "CPU"
         }
       ],
       "fieldConfig": {
@@ -73,7 +50,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Uptime",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
           "expr": "process_uptime_seconds{application=\"middleware-service\"}",
@@ -89,39 +66,13 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "File Descriptors",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
-      "targets": [
-        {
-          "expr": "process_files_open_files{application=\"middleware-service\"}",
-          "legendFormat": "Open"
-        },
-        {
-          "expr": "process_files_max_files{application=\"middleware-service\"}",
-          "legendFormat": "Max"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 5000, "color": "orange" }, { "value": 8000, "color": "red" }] }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Active Threads",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
           "expr": "jvm_threads_live_threads{application=\"middleware-service\"}",
-          "legendFormat": "Live Threads"
-        },
-        {
-          "expr": "jvm_threads_daemon_threads{application=\"middleware-service\"}",
-          "legendFormat": "Daemon Threads"
+          "legendFormat": "Live"
         }
       ],
       "fieldConfig": {
@@ -185,45 +136,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "GC Duration",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
-      "targets": [
-        {
-          "expr": "rate(jvm_gc_pause_seconds_sum{application=\"middleware-service\"}[1m])",
-          "legendFormat": "{{gc}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "GC Count",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
-      "targets": [
-        {
-          "expr": "rate(jvm_gc_pause_seconds_count{application=\"middleware-service\"}[1m])",
-          "legendFormat": "{{gc}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "cps",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "Error Log Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "targets": [
         {
           "expr": "rate(logback_events_total{application=\"middleware-service\", level=\"error\"}[1m])",
@@ -243,27 +158,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
-      "title": "JVM Memory Pool (Heap)",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
-      "targets": [
-        {
-          "expr": "jvm_memory_used_bytes{application=\"middleware-service\", area=\"heap\"}",
-          "legendFormat": "{{id}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": { "mode": "palette-classic" }
-        }
-      }
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "title": "HTTP Requests by Status",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
       "targets": [
         {
           "expr": "rate(http_server_requests_seconds_count{application=\"middleware-service\"}[5m])",
@@ -285,5 +182,5 @@
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "schemaVersion": 39,
-  "version": 1
+  "version": 2
 }

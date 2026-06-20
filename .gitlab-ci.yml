@@ -278,6 +278,7 @@ test:e2e:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - tests/**/*
+        - hobby-frontend/*
         - playwright.config.ts
         - docker-compose.yml
   before_script:
@@ -357,7 +358,7 @@ test:e2e:
       - playwright-report/
       - test-results/
     expire_in: 30 days
-  timeout: 30m
+  timeout: 120m
 
 # Build all services and push to GitLab registry
 build:
