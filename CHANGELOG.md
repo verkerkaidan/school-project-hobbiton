@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.53.3] - 2026-06-20
+
+### Changed
+- **chore**: grafana dashboard improvement
+
 ## [1.53.2] - 2026-06-20
 
 ### Added
