@@ -387,16 +387,25 @@ build:
   script:
     - |
       set -e
-      if git diff --name-only HEAD~1 HEAD | grep -q "^docker/docs-auth/"; then
-        echo "Changes detected in docs-proxy, building..."
+      CHANGED=$(git diff --name-only HEAD~1 HEAD)
+      DOCS_CHANGED=false
+      echo "$CHANGED" | grep -q "^apps/docs/" && DOCS_CHANGED=true
+      echo "$CHANGED" | grep -q "^docker/docs-auth/" && DOCS_CHANGED=true
+      if [ "$DOCS_CHANGED" = "true" ]; then
+        echo "Changes detected in docs or docs-proxy, building docs-proxy..."
         docker build -t "$CI_REGISTRY_IMAGE/docs-proxy:latest" docker/docs-auth
         docker push "$CI_REGISTRY_IMAGE/docs-proxy:latest"
         docker rmi "$CI_REGISTRY_IMAGE/docs-proxy:latest"
       else
-        echo "No changes in docs-proxy, skipping."
+        echo "No changes in docs or docs-proxy, skipping docs-proxy build."
       fi
       for SERVICE_NAME in apigateway authentication-service-c chat-service docs interaction-service library-service media_service_elx notification-service bug-report-service post-service profile-connection-service profile-service recognition-service; do
-        if git diff --name-only HEAD~1 HEAD | grep -q "^apps/$SERVICE_NAME/"; then
+        if [ "$SERVICE_NAME" = "docs" ] && [ "$DOCS_CHANGED" = "true" ]; then
+          FORCE_BUILD=true
+        else
+          FORCE_BUILD=false
+        fi
+        if [ "$FORCE_BUILD" = "true" ] || echo "$CHANGED" | grep -q "^apps/$SERVICE_NAME/"; then
           echo "Changes detected in $SERVICE_NAME, building service from scratch..."
           docker build --quiet -t "$CI_REGISTRY_IMAGE/$SERVICE_NAME:latest" "apps/$SERVICE_NAME"
           echo "Pushing $SERVICE_NAME..."
