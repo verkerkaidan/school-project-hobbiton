@@ -6,6 +6,7 @@ use crate::adapters::exercise_adapter::{adapt_search_item, exercise_to_search_re
 use crate::dto::request::SearchType;
 use crate::dto::response::SearchResult;
 use crate::error::AppError;
+use crate::metrics::{EXTERNAL_API_DURATION_SECONDS, EXTERNAL_API_REQUESTS_TOTAL};
 use crate::strategy::SearchStrategy;
 
 const BASE_URL: &str = "https://oss.exercisedb.dev/api/v1";
@@ -35,6 +36,8 @@ impl SearchStrategy for ExerciseDBStrategy {
         let url = format!("{}/exercises/search", BASE_URL);
         info!("ExerciseDB search: query='{}' max={}", query, max_results);
 
+        EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["exercisedb"]).inc();
+        let start = tokio::time::Instant::now();
         let resp = self
             .client
             .get(&url)
@@ -42,6 +45,7 @@ impl SearchStrategy for ExerciseDBStrategy {
             .send()
             .await?
             .error_for_status()?;
+        EXTERNAL_API_DURATION_SECONDS.with_label_values(&["exercisedb"]).observe(start.elapsed().as_secs_f64());
 
         let body: Value = resp.json().await?;
 
@@ -88,11 +92,14 @@ impl SearchStrategy for ExerciseDBStrategy {
     async fn find_by_id(&self, exercise_id: &str) -> Result<Option<SearchResult>, AppError> {
         info!("ExerciseDB detail: exerciseId={}", exercise_id);
 
+        EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["exercisedb"]).inc();
+        let start = tokio::time::Instant::now();
         let resp = self
             .client
             .get(format!("{}/exercises/{}", BASE_URL, exercise_id))
             .send()
             .await?;
+        EXTERNAL_API_DURATION_SECONDS.with_label_values(&["exercisedb"]).observe(start.elapsed().as_secs_f64());
 
         // 404 = exercise doesn't exist, not an error
         if resp.status() == reqwest::StatusCode::NOT_FOUND {

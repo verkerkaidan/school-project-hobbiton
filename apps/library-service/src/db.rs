@@ -3,6 +3,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use crate::error::AppError;
+use crate::metrics::DB_REQUESTS_TOTAL;
 
 #[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
 pub struct List {
@@ -53,6 +54,7 @@ impl DbService {
     // ── Lists ─────────────────────────────────────────────────────────────────
 
     pub async fn create_list(&self, user_id: &str, name: &str, description: Option<&str>) -> Result<List, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["create_list"]).inc();
         sqlx::query_as(
             "INSERT INTO lists (user_id, name, description)
              VALUES ($1, $2, $3)
@@ -65,6 +67,7 @@ impl DbService {
     }
 
     pub async fn get_list(&self, list_id: Uuid, user_id: &str) -> Result<Option<List>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["get_list"]).inc();
         sqlx::query_as(
             "SELECT id, user_id, name, description, created_at, updated_at
              FROM lists WHERE id = $1 AND user_id = $2",
@@ -76,6 +79,7 @@ impl DbService {
     }
 
     pub async fn get_lists_for_user(&self, user_id: &str) -> Result<Vec<List>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["get_lists_for_user"]).inc();
         sqlx::query_as(
             "SELECT id, user_id, name, description, created_at, updated_at
              FROM lists WHERE user_id = $1 ORDER BY created_at DESC",
@@ -87,6 +91,7 @@ impl DbService {
     }
 
     pub async fn update_list(&self, list_id: Uuid, user_id: &str, name: Option<&str>, description: Option<&str>) -> Result<Option<List>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["update_list"]).inc();
         sqlx::query_as(
             "UPDATE lists
              SET name        = COALESCE($3, name),
@@ -102,6 +107,7 @@ impl DbService {
     }
 
     pub async fn delete_list(&self, list_id: Uuid, user_id: &str) -> Result<bool, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["delete_list"]).inc();
         let result = sqlx::query("DELETE FROM lists WHERE id = $1 AND user_id = $2")
             .bind(list_id).bind(user_id)
             .execute(&self.pool)
@@ -111,6 +117,7 @@ impl DbService {
     }
 
     pub async fn delete_lists_for_user(&self, user_id: &str) -> Result<u64, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["delete_lists_for_user"]).inc();
         let result = sqlx::query("DELETE FROM lists WHERE user_id = $1")
             .bind(user_id)
             .execute(&self.pool)
@@ -122,6 +129,7 @@ impl DbService {
     // ── List items ────────────────────────────────────────────────────────────
 
     pub async fn add_item(&self, list_id: Uuid, item_type: &str, item_id: &str, notes: Option<&str>) -> Result<ListItem, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["add_item"]).inc();
         let pos: i32 = sqlx::query_scalar(
             "SELECT COALESCE(MAX(position), -1) FROM list_items WHERE list_id = $1",
         )
@@ -143,6 +151,7 @@ impl DbService {
     }
 
     pub async fn get_items(&self, list_id: Uuid) -> Result<Vec<ListItem>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["get_items"]).inc();
         sqlx::query_as(
             "SELECT id, list_id, item_type, item_id, position, notes, added_at
              FROM list_items WHERE list_id = $1 ORDER BY position ASC",
@@ -154,6 +163,7 @@ impl DbService {
     }
 
     pub async fn remove_item(&self, list_id: Uuid, item_id: &str) -> Result<bool, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["remove_item"]).inc();
         let result = sqlx::query("DELETE FROM list_items WHERE list_id = $1 AND item_id = $2")
             .bind(list_id).bind(item_id)
             .execute(&self.pool)
@@ -163,6 +173,7 @@ impl DbService {
     }
 
     pub async fn update_item_notes(&self, list_id: Uuid, item_id: &str, notes: Option<&str>) -> Result<Option<ListItem>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["update_item_notes"]).inc();
         sqlx::query_as(
             "UPDATE list_items SET notes = $3
              WHERE list_id = $1 AND item_id = $2
@@ -177,6 +188,7 @@ impl DbService {
     /// Reorder items by providing item_ids in the new desired order.
     /// Position 0 = first. Items not in the list are ignored.
     pub async fn reorder_items(&self, list_id: Uuid, item_ids: &[String]) -> Result<Vec<ListItem>, AppError> {
+        DB_REQUESTS_TOTAL.with_label_values(&["reorder_items"]).inc();
         let mut tx = self.pool.begin().await
             .map_err(|e| AppError::Internal(anyhow::anyhow!(e)))?;
 

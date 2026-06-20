@@ -7,6 +7,7 @@ use crate::dto::request::{SearchRequest, SearchType};
 use crate::dto::response::SearchResult;
 use crate::error::AppError;
 use crate::factory::ServiceFactory;
+use crate::metrics::{CACHE_HITS_TOTAL, CACHE_MISSES_TOTAL};
 
 /// **Service Layer**
 ///
@@ -60,9 +61,11 @@ impl LibraryService {
             self.cache.get::<Vec<SearchResult>>(&cache_key).await
         {
             info!("[CACHE HIT] {}", req.query);
+            CACHE_HITS_TOTAL.inc();
             cached
         } else {
             info!("[CACHE MISS] {}", req.query);
+            CACHE_MISSES_TOTAL.inc();
 
             let strategy = self.factory.get(req.search_type)?;
             let api_results =
@@ -110,6 +113,7 @@ impl LibraryService {
         // ── 1. Cache check ────────────────────────────────────────────────
         if let Some(cached) = self.cache.get::<SearchResult>(&cache_key).await {
             info!("[CACHE HIT] item id='{}' type={}", id, search_type);
+            CACHE_HITS_TOTAL.inc();
             return Ok(Some(cached));
         }
 
@@ -118,6 +122,7 @@ impl LibraryService {
             "[CACHE MISS] item id='{}' type={} — calling API",
             id, search_type
         );
+        CACHE_MISSES_TOTAL.inc();
 
         let strategy = self.factory.get(search_type)?;
         let result = strategy.find_by_id(id).await?;

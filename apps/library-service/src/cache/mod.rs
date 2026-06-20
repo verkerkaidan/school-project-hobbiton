@@ -7,6 +7,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::dto::request::SearchType;
 use crate::error::AppError;
+use crate::metrics::CACHE_ERRORS_TOTAL;
 
 pub const CACHE_TTL_SECONDS: usize = 2592000;
 
@@ -70,6 +71,7 @@ impl CacheService {
             }
             Err(e) => {
                 warn!("Redis GET error for key '{}': {}", key, e);
+                CACHE_ERRORS_TOTAL.inc();
                 self.disable_temporarily();
                 None
             }
@@ -93,6 +95,7 @@ impl CacheService {
 
                 if let Err(e) = result {
                     warn!("Redis SET error for key '{}': {}", key, e);
+                    CACHE_ERRORS_TOTAL.inc();
                     self.disable_temporarily();
                 }
             }

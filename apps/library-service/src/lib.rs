@@ -11,6 +11,7 @@ pub mod cache;
 pub mod dto;
 pub mod error;
 pub mod factory;
+pub mod metrics;
 pub mod models;
 pub mod routes;
 pub mod service;
