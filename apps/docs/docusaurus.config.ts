@@ -7,7 +7,7 @@ const config: Config = {
   tagline: "Documentation for all Hobbithon microservices",
   favicon: "img/Hobbitch.png",
 
-  url: "http://localhost",
+  url: "https://docs-hobbiton.student.inf.st.hsleiden.nl",
   baseUrl: "/",
 
   onBrokenLinks: "warn",
