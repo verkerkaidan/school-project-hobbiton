@@ -66,6 +66,34 @@ test.describe('Monitoring infrastructure', () => {
       expect(results.length).toBeGreaterThanOrEqual(1);
       expect(Number(results[0].value[1])).toBeGreaterThanOrEqual(0);
     });
+
+    test('interaction-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="interaction"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
+
+    test('recognition-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="recognition"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
   });
 
   test.describe('Grafana', () => {
@@ -174,6 +202,29 @@ test.describe('Monitoring infrastructure', () => {
       expect(titles).toContain('Error & Warning Rate');
       expect(titles).toContain('API Gateway Logs');
     });
-  });
 
+    test('Interaction Service dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/interactionservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Interaction Service');
+      expect(body.dashboard).toHaveProperty('uid', 'interactionservice');
+    });
+
+    test('Recognition Service dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/recognitionservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Recognition Service');
+      expect(body.dashboard).toHaveProperty('uid', 'recognitionservice');
+    });
+  });
 });
