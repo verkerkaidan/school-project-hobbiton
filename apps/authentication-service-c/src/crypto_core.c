@@ -190,9 +190,6 @@ static int base64val(char c) {
 
 static unsigned char *base64_decode_alloc(const char *in, size_t *outlen) {
     size_t len = strlen(in);
-    size_t padding = 0;
-    if (len >= 1 && in[len-1] == '=') padding++;
-    if (len >= 2 && in[len-2] == '=') padding++;
     size_t out_capacity = (len * 3) / 4 + 4;
     unsigned char *out = malloc(out_capacity);
     if (!out) return NULL;
@@ -253,5 +250,5 @@ static char *json_get_roles_csv(const char *json) { char *p = strstr(json, "\"ro
 
 int jwt_validate_and_extract(const char *token, char **out_userId, char **out_roles_csv) { if (!JWT_SECRET) JWT_SECRET = getenv("JWT_SECRET"); if (!JWT_SECRET) JWT_SECRET = "your-secret"; char *copy = strdup(token); char *p1 = strchr(copy, '.'); if (!p1) { free(copy); return -1; } *p1 = '\0'; char *h_enc = copy; char *rest = p1 + 1; char *p2 = strchr(rest, '.'); if (!p2) { free(copy); return -1; } *p2 = '\0'; char *p_enc = rest; char *s_enc = p2 + 1; size_t msglen = strlen(h_enc) + 1 + strlen(p_enc); char *msg = malloc(msglen + 1); snprintf(msg, msglen+1, "%s.%s", h_enc, p_enc); unsigned char sig[32]; hmac_sha256((unsigned char*)JWT_SECRET, strlen(JWT_SECRET), (unsigned char*)msg, strlen(msg), sig); char *calc_sig = base64url_encode(sig, 32); if (!calc_sig) { free(copy); free(msg); return -1; } if (strcmp(calc_sig, s_enc) != 0) { free(calc_sig); free(copy); free(msg); return -1; } free(calc_sig); size_t payload_len; unsigned char *payload_bin = base64_decode_alloc(p_enc, &payload_len); if (!payload_bin) { free(copy); free(msg); return -1; } char *payload = malloc(payload_len + 1); memcpy(payload, payload_bin, payload_len); payload[payload_len] = '\0'; free(payload_bin); long long exp = json_get_int(payload, "exp", 0); time_t now = time(NULL); if (exp <= now) { free(payload); free(copy); free(msg); return -1; } char *userId = json_get_string(payload, "userId"); char *roles = json_get_roles_csv(payload); *out_userId = userId; *out_roles_csv = roles; free(payload); free(copy); free(msg); return (userId ? 0 : -1); }
 
-int is_valid_email(const char *email) { if (!email) return 0; const char *at = strchr(email, '@'); if (!at) return 0; const char *dot = strchr(at, '.'); return dot != NULL; }
+int is_valid_email(const char *email) { if (!email || !*email) return 0; const char *at = strchr(email, '@'); if (!at || at == email) return 0; const char *dot = strchr(at, '.'); return dot != NULL; }
 int is_valid_password(const char *password) { if (!password) return 0; int len = strlen(password); if (len < 8) return 0; int hasDigit=0, hasLower=0, hasUpper=0, hasSpecial=0; for (int i=0;i<len;i++) { if (isdigit((unsigned char)password[i])) hasDigit=1; else if (islower((unsigned char)password[i])) hasLower=1; else if (isupper((unsigned char)password[i])) hasUpper=1; else if (isspace((unsigned char)password[i])) return 0; else hasSpecial=1; } return hasDigit && hasLower && hasUpper && hasSpecial; }

@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { type Page, type APIRequestContext } from '@playwright/test';
 
 function generateTestCredentials() {
   const timestamp = Date.now();
@@ -7,12 +7,13 @@ function generateTestCredentials() {
     username: `testuser_${timestamp}_${randomNum}`,
     email: `test_${timestamp}_${randomNum}@test.com`,
     password: '@TestPassword123',
+    name: `Test User ${timestamp}`,
   };
 }
 
 export async function register(
-  page: Page
-): Promise<{ username: string; email: string; password: string }> {
+    page: Page
+): Promise<{ username: string; email: string; password: string; name: string }> {
   const credentials = generateTestCredentials();
 
   await page.goto('/authentication', {
@@ -65,29 +66,63 @@ export async function register(
 }
 
 /**
+ * Registers a new test user via the API Gateway /api/register endpoint.
+ * Returns credentials plus token and userId.
+ */
+export async function registerViaAPI(
+    request: APIRequestContext
+): Promise<{ username: string; email: string; password: string; name: string; token: string; userId: string }> {
+  const credentials = generateTestCredentials();
+  const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:23738';
+
+  const res = await request.post(`${GATEWAY_URL}/api/register`, {
+    data: {
+      email: credentials.email,
+      password: credentials.password,
+      username: credentials.username,
+      name: credentials.name,
+    },
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const body = await res.json();
+
+  return {
+    ...credentials,
+    token: body.token,
+    userId: body.userId,
+  };
+}
+
+/**
  * Log's in user by navigating and filling out the email and password fields and
  * @param page The Playwright page object
  * @param email The test email
  * @param password The test password
  */
-export async function login(page: Page, email: string, password: string): Promise<void> {
+export async function login(
+    page: Page,
+    email: string,
+    password: string
+): Promise<void> {
   await page.goto('/authentication', {
     waitUntil: 'domcontentloaded',
     timeout: 60000
   });
 
-  const emailInput = page.locator('input[name="email"]');
+  const loginButton = page.getByRole('button', { name: /^Login$/ });
+  await loginButton.waitFor({ state: 'visible' });
 
-  // Only click Login tab if the form isn't already open
-  if (!await emailInput.isVisible()) {
-    await page.getByRole('button', { name: /^Login$/ }).first().click();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await loginButton.click();
+    const appeared = await page.locator('input[name="email"]').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+    if (appeared) break;
   }
 
-  await emailInput.waitFor({ state: 'visible' });
-  await emailInput.fill(email);
+  await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(password);
 
-  await page.locator('form').getByRole('button', { name: /^Login$/ }).click();
+  await page.getByRole('button', { name: /^Login$/ }).last().click();
 
   await page.waitForURL('/', { timeout: 10000 });
 }
@@ -110,4 +145,3 @@ export async function isLoggedIn(page: Page): Promise<boolean> {
   const cookies = await page.context().cookies();
   return cookies.some(cookie => cookie.name === 'token');
 }
-

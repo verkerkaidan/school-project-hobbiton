@@ -48,7 +48,7 @@ services:
     ports:
       - "5432:5432"
     cpus: 0.5
-    mem_limit: 256m
+    mem_limit: 512m
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
@@ -58,8 +58,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
       interval: 5s
       timeout: 5s
-      retries: 10
-      start_period: 10s
+      retries: 30
+      start_period: 60s
 
   post-service:
     build:
@@ -334,7 +334,7 @@ services:
       database:
         condition: service_healthy
     environment:
-      - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING}
+      - CHAT_DB_CONNECTION_STRING=${CHAT_DB_CONNECTION_STRING:-Host=database;Port=5432;Database=chat_db;Username=chat_user;Password=chat_pass}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ISSUER=${JWT_ISSUER}
       - CHAT_ALLOWED_ORIGINS=${CHAT_ALLOWED_ORIGINS}

@@ -60,9 +60,9 @@ test.describe('Post Creation', () => {
     // Wait for the modal to appear
     await page.waitForSelector('text=Create Post');
 
-    // Select Gym as post type (default)
-    const postTypeSelect = page.locator('select');
-    await postTypeSelect.selectOption('GYM');
+    // Select Gym as post type using custom dropdown
+    await page.locator('label:has-text("Post Type") + button').click();
+    await page.getByRole('button', { name: '🏋️ Gym', exact: true }).click();
 
     // Fill in the title
     const titleInput = page.locator('input[name="title"]');
@@ -77,41 +77,23 @@ test.describe('Post Creation', () => {
     await durationInput.fill('60.5');
 
     // Add an exercise
-    const addExerciseButton = page.getByRole('button', { name: /\+ Add exercise/i });
+    const addExerciseButton = page.getByRole('button', { name: /add exercise/i });
     await addExerciseButton.click();
 
-    // Fill in the exercise details (title, reps, weight, rpe)
-    const exerciseTitleInput = page.locator('input').filter({ hasText: '' }).first();
-    const inputs = page.locator('input[type="text"], input[type="number"]');
-
-    // Find and fill the exercise fields
-    const allInputs = await page.locator('input').all();
-
-    // Fill in exercise title (searching for text input after description)
-    for (let i = 0; i < allInputs.length; i++) {
-      const type = await allInputs[i].getAttribute('type');
-      if (type === 'text') {
-        // This is likely the exercise title field
-        await allInputs[i].fill('Bench Press');
-        break;
-      }
-    }
+    // Fill in exercise name
+    await page.locator('input[placeholder="Exercise name"]').fill('Bench Press');
 
     // Fill exercise reps, weight, and rpe
-    const numberInputs = await page.locator('input[type="number"]').all();
-    if (numberInputs.length >= 4) {
-      await numberInputs[numberInputs.length - 3].fill('10'); // reps
-      await numberInputs[numberInputs.length - 2].fill('225'); // weight
-      await numberInputs[numberInputs.length - 1].fill('8'); // rpe
-    }
+    await page.locator('input[placeholder="12"]').fill('10');
+    await page.locator('input[placeholder="40"]').fill('225');
+    await page.locator('input[placeholder="7"]').fill('8');
 
     // Submit the form
     const submitButton = page.getByRole('button', { name: /create post/i });
     await submitButton.click();
 
-    // Verify the post was created by checking if we're redirected to profile
-    await page.waitForURL('**/profile', { timeout: 100000 });
-    await expect(page).toHaveURL(/\/profile/);
+    // Wait for the modal to close (indicates the post was created)
+    await page.waitForSelector('text=Create Post', { state: 'hidden', timeout: 30000 });
   });
 
   test('should create a reading post successfully', async ({ page }) => {
@@ -122,9 +104,9 @@ test.describe('Post Creation', () => {
     // Wait for the modal to appear
     await page.waitForSelector('text=Create Post');
 
-    // Select Reading as post type
-    const postTypeSelect = page.locator('select');
-    await postTypeSelect.selectOption('READING');
+    // Select Reading as post type using custom dropdown
+    await page.locator('label:has-text("Post Type") + button').click();
+    await page.getByRole('button', { name: '📚 Reading', exact: true }).click();
 
     // Fill in the title
     const titleInput = page.locator('input[name="title"]');
@@ -154,9 +136,8 @@ test.describe('Post Creation', () => {
     const submitButton = page.getByRole('button', { name: /create post/i });
     await submitButton.click();
 
-    // Verify the post was created by checking if we're redirected to profile
-    await page.waitForURL('**/profile', { timeout: 10000 });
-    await expect(page).toHaveURL(/\/profile/);
+    // Wait for the modal to close (indicates the post was created)
+    await page.waitForSelector('text=Create Post', { state: 'hidden', timeout: 30000 });
   });
 
   test('should show validation error when title is empty', async ({ page }) => {

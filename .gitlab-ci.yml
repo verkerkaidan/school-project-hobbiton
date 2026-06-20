@@ -2,6 +2,7 @@ stages:
   - validate
   - test
   - build
+  - e2e
   - deploy
 
 # Enforce changelog update on every merge request
@@ -222,6 +223,141 @@ test:bug-report-service:
     paths:
       - apps/bug-report-service/
     expire_in: 30 days
+
+# Test profile-service
+test:profile-service:
+  <<: *maven_test_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/profile-service/**/*
+  script:
+    - cd apps/profile-service
+    - mvn clean test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - apps/profile-service/target/surefire-reports/TEST-*.xml
+    paths:
+      - apps/profile-service/target/surefire-reports/
+      - apps/profile-service/target/site/jacoco/
+    expire_in: 30 days
+
+# Test authentication-service-c
+test:authentication-service-c:
+  stage: test
+  image: debian:bookworm-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - apps/authentication-service-c/**/*
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq build-essential libpq-dev
+  script:
+    - cd apps/authentication-service-c
+    - make test
+  artifacts:
+    when: always
+    paths:
+      - apps/authentication-service-c/
+    expire_in: 30 days
+
+# E2E tests — build all services and run Playwright tests
+test:e2e:
+  stage: e2e
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    GIT_DEPTH: "1"
+    COMPOSE_PROJECT_NAME: hobbithon
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - tests/**/*
+        - playwright.config.ts
+        - docker-compose.yml
+  before_script:
+    - until docker info >/dev/null 2>&1; do sleep 2; done
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u gitlab-ci-token --password-stdin
+  script:
+    - |
+      {
+        grep -o '\${[^}]*}' docker-compose.yml \
+          | sed 's/[${}]//g; s/:-.*//' \
+          | sort -u \
+          | while IFS= read -r name; do
+              case "$name" in
+                -*|'') continue ;;
+              esac
+              if printenv "$name" >/dev/null 2>&1; then
+                printf '%s=%s\n' "$name" "$(printenv "$name")"
+              fi
+            done
+      } > .env
+    - |
+      set -e
+      echo "=== Building images ==="
+      set +e
+      docker compose build > /tmp/build.log 2>&1
+      build_exit=$?
+      set -e
+      tail -n 100 /tmp/build.log
+      if [ $build_exit -ne 0 ]; then exit $build_exit; fi
+    - |
+      set -e
+      echo "=== Starting database first ==="
+      docker compose up -d --no-build database
+      echo "=== Waiting for database to be healthy ==="
+      for i in $(seq 1 30); do
+        status=$(docker inspect db --format '{{.State.Health.Status}}' 2>/dev/null || echo "starting")
+        if [ "$status" = "healthy" ]; then
+          echo "Database is healthy after ${i}x5s"
+          break
+        fi
+        echo "  db status: $status (${i}/30)"
+        sleep 5
+      done
+      if [ "$status" != "healthy" ]; then
+        echo "Database failed to become healthy"
+        docker compose logs database
+        exit 1
+      fi
+    - |
+      set -e
+      echo "=== Starting all services ==="
+      docker compose up -d --no-build \
+      database redis rabbitmq \
+      frontend middleware-service \
+      post-service profile-connection-service media-service-elx recognition-service \
+      authentication-service-c profile-service library-service interaction-service \
+      notification-service bug-report-service chat-service; compose_exit=$?
+      docker compose ps
+      docker compose logs database 2>/dev/null | tail -20 || true
+      docker inspect db --format '{{json .State.Health}}' 2>/dev/null || true
+      if [ $compose_exit -ne 0 ]; then exit $compose_exit; fi
+
+    - |
+      docker run --rm \
+        --network hobbithon-network \
+        -v "$PWD":/e2e \
+        -w /e2e \
+        -e CI=true \
+        -e PLAYWRIGHT_BASE_URL=http://frontend:19293 \
+        -e GATEWAY_URL=http://apigateway-service:23738 \
+        mcr.microsoft.com/playwright:v1.60.0 \
+        sh -c "npm ci && mkdir -p test-results && npx playwright test"
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+    expire_in: 30 days
+  timeout: 30m
 
 # Build all services and push to GitLab registry
 build:

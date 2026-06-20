@@ -393,7 +393,11 @@ static void handle_client_fd(int client) {
     log_msg(LOG_INFO, "%s %s", method, path);
 
     if (body) {
-        log_msg(LOG_INFO, "BODY: %s", body);
+        if (strstr(body, "\"password\"")) {
+            log_msg(LOG_INFO, "BODY: <contains password, masked>");
+        } else {
+            log_msg(LOG_INFO, "BODY: %s", body);
+        }
     }
 
     if (strcmp(method, "OPTIONS") == 0) {
@@ -621,12 +625,7 @@ static void handle_client_fd(int client) {
             char *userId = NULL; char *roles = NULL;
             if (jwt_validate_and_extract(token, &userId, &roles) != 0) { send_response(client, 401, "Unauthorized", "{\"error\":\"Invalid token\"}", "application/json"); }
             else {
-                // read user from DB
-                char id[37]; char hash[512]; char roles_csv[512]; int enabled;
-                if (find_user_by_email_db("", id, sizeof(id), hash, sizeof(hash), roles_csv, sizeof(roles_csv), &enabled) == 0) {
-                    // we called with empty email, above returns not found; instead query by id is needed but not exposed; keep response generic
-                }
-                char body_out[512]; snprintf(body_out, sizeof(body_out), "{\"message\":\"Welcome, %s (%s)\"}", userId, userId);
+                char body_out[512]; snprintf(body_out, sizeof(body_out), "{\"message\":\"Welcome, %s\",\"roles\":\"%s\"}", userId, roles ? roles : "");
                 send_response(client, 200, "OK", body_out, "application/json");
             }
             free(token); free(userId); free(roles);
