@@ -20,22 +20,50 @@ The service is defined as `profile-service` in the local compose file.
 
 ## Environment Variables
 
-| Variable | Description |
-| --- | --- |
-| `SPRING_DATASOURCE_URL` | PostgreSQL JDBC connection string. In Docker: `jdbc:postgresql://database:5432/{db}`. |
-| `SPRING_DATASOURCE_USERNAME` | Service database username. |
-| `SPRING_DATASOURCE_PASSWORD` | Service database password. |
-| `DB_HOST` | PostgreSQL hostname. In Docker this is `database`. |
-| `DB_PORT` | PostgreSQL port, defaults to `5432`. |
-| `JWT_SECRET` | HMAC-SHA256 signing secret for JWT validation. |
-| `JWT_ISSUER` | JWT issuer claim. |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated CORS origin patterns, defaults to `http://localhost:23738`. |
-| `ADMIN_TEST_USER` | Seed admin username (reserved). |
-| `ADMIN_TEST_PASSWORD` | Seed admin password (reserved). |
+| Variable | Required | Description |
+| --- | --- | --- |
+| `SPRING_DATASOURCE_URL` | Yes | PostgreSQL JDBC connection string. In Docker: `jdbc:postgresql://database:5432/{db}`. |
+| `SPRING_DATASOURCE_USERNAME` | Yes | Service database username. |
+| `SPRING_DATASOURCE_PASSWORD` | Yes | Service database password. |
+| `JWT_SECRET` | Yes | HMAC-SHA256 signing secret for JWT validation. |
+| `JWT_ISSUER` | Yes | JWT issuer claim. |
+| `CORS_ALLOWED_ORIGINS` | No | Comma-separated CORS origins, defaults to `http://localhost:23738`. |
+| `ADMIN_TEST_USER` | No | Seed admin username (reserved). |
+| `ADMIN_TEST_PASSWORD` | No | Seed admin password (reserved). |
+
+## Build and run locally
+
+From `apps/profile-service`:
+
+```bash
+./mvnw spring-boot:run          # run with Maven
+./mvnw clean package -DskipTests   # build a JAR
+java -jar target/*.jar             # run the packaged JAR
+```
+
+## Docker Build
+
+Multi-stage Dockerfile:
+
+1. **Build stage** — `eclipse-temurin:21-jdk`, caches Maven dependencies, runs `mvn clean package -DskipTests`.
+2. **Runtime stage** — `eclipse-temurin:21-jre`, runs `java -jar app.jar`.
+
+## Actuator Endpoints
+
+| Endpoint | Path | Description |
+| --- | --- | --- |
+| Health | `/api/actuator/health` | Health check with detailed status. |
+| Prometheus | `/api/actuator/prometheus` | Prometheus metrics (enabled via Micrometer). |
+
+## Resource Limits
+
+| Environment | CPUs | Memory |
+| --- | --- | --- |
+| Local | 0.5 | 512m |
+| Production | 1 | 1024m |
 
 ## Runtime Notes
 
-- Build uses a multi-stage Dockerfile with `eclipse-temurin:21-jdk` for compilation and `eclipse-temurin:21-jre` for runtime.
-- Built with Maven (`mvnw`). Gradle (`gradlew`) is also available in the source directory.
 - Hibernate DDL auto-update (`spring.jpa.hibernate.ddl-auto=update`) synchronises the schema on startup.
 - The API Gateway uses `PROFILE_SERVICE_URL` configured as `http://profile-service:21526` to route profile actions.
+- CORS is configured to allow requests from the API Gateway origin (`http://localhost:23738` by default).

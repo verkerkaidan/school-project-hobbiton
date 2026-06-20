@@ -66,7 +66,24 @@ tests/test_db: src/crypto_core.o src/db_core.o tests/test_db.c
 	$(CC) $(CFLAGS) -o $@ tests/test_db.c src/crypto_core.o src/db_core.o -lpq
 endif
 
-clean:
-	rm -f src/*.o $(OUT) tests/test_jwt tests/test_db tests/test_crypto tests/test_request_queue
+# Valgrind — rebuilds tests with debug symbols and runs under memcheck
+VALGRIND ?= valgrind
+VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 --quiet --suppressions=tests/valgrind.supp
+VGCFLAGS = -Wall -Wextra -g -O0 -pthread -I./src
 
-.PHONY: all tests test clean
+valgrind: valgrind_test_jwt valgrind_test_db
+
+valgrind_test_jwt: tests/test_jwt.c src/crypto_core.c
+	$(CC) $(VGCFLAGS) -o tests/test_jwt_valgrind tests/test_jwt.c src/crypto_core.c
+	$(VALGRIND) $(VALGRIND_FLAGS) ./tests/test_jwt_valgrind
+	@echo "valgrind test_jwt: OK"
+
+valgrind_test_db: tests/test_db.c src/crypto_core.c src/db_core.c
+	$(CC) $(VGCFLAGS) -o tests/test_db_valgrind tests/test_db.c src/crypto_core.c src/db_core.c -lpq
+	$(VALGRIND) $(VALGRIND_FLAGS) ./tests/test_db_valgrind
+	@echo "valgrind test_db: OK"
+
+clean:
+	rm -f src/*.o $(OUT) tests/test_jwt tests/test_db tests/test_crypto tests/test_request_queue tests/test_jwt_valgrind tests/test_db_valgrind
+
+.PHONY: all tests clean valgrind valgrind_test_jwt valgrind_test_db
