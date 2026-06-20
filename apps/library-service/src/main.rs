@@ -2,7 +2,7 @@ use library_service::AppState;
 
 use std::sync::Arc;
 
-use axum::Router;
+use axum::{middleware, Router};
 use axum::http::{HeaderValue, Method};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
@@ -12,6 +12,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use library_service::cache::CacheService;
 use library_service::db::DbService;
 use library_service::factory::ServiceFactory;
+use library_service::metrics;
 use library_service::routes::library_routes;
 
 #[tokio::main]
@@ -104,6 +105,7 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api/library", library_routes())
+        .layer(middleware::from_fn(metrics::track_metrics))
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(state);

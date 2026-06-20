@@ -6,6 +6,7 @@ use crate::adapters::movie_adapter::{adapt_search_item, movie_to_search_result};
 use crate::dto::request::SearchType;
 use crate::dto::response::SearchResult;
 use crate::error::AppError;
+use crate::metrics::{EXTERNAL_API_DURATION_SECONDS, EXTERNAL_API_REQUESTS_TOTAL};
 use crate::strategy::SearchStrategy;
 
 const BASE_URL: &str = "https://www.omdbapi.com";
@@ -46,6 +47,8 @@ impl SearchStrategy for OmdbStrategy {
         let mut results: Vec<SearchResult> = Vec::new();
 
         for page in 1..=pages_needed {
+            EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["omdb"]).inc();
+            let start = tokio::time::Instant::now();
             let resp = self
                 .client
                 .get(BASE_URL)
@@ -57,6 +60,7 @@ impl SearchStrategy for OmdbStrategy {
                 .send()
                 .await?
                 .error_for_status()?;
+            EXTERNAL_API_DURATION_SECONDS.with_label_values(&["omdb"]).observe(start.elapsed().as_secs_f64());
 
             let body: Value = resp.json().await?;
 
@@ -107,6 +111,8 @@ impl SearchStrategy for OmdbStrategy {
     async fn find_by_id(&self, imdb_id: &str) -> Result<Option<SearchResult>, AppError> {
         info!("OMDB detail: imdbID={}", imdb_id);
 
+        EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["omdb"]).inc();
+        let start = tokio::time::Instant::now();
         let resp = self
             .client
             .get(BASE_URL)
@@ -114,6 +120,7 @@ impl SearchStrategy for OmdbStrategy {
             .send()
             .await?
             .error_for_status()?;
+        EXTERNAL_API_DURATION_SECONDS.with_label_values(&["omdb"]).observe(start.elapsed().as_secs_f64());
 
         let body: Value = resp.json().await?;
 

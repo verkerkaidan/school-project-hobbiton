@@ -16,6 +16,7 @@ use crate::{
         response::{ApiResponse, SearchResult},
     },
     error::AppError,
+    metrics,
     service::LibraryService,
     AppState,
 };
@@ -25,6 +26,7 @@ pub fn library_routes() -> Router<AppState> {
         // ── Search ──────────────────────────────────────────────────────────
         .route("/search", post(search_post).get(search_get))
         .route("/health", get(health))
+        .route("/metrics", get(metrics::metrics_handler))
         // ── Single item lookup ───────────────────────────────────────────────
         .route("/{type}/{id}", get(find_by_id))
         // ── Lists ────────────────────────────────────────────────────────────

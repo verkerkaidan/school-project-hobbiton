@@ -1,0 +1,347 @@
+{
+  "title": "Library Service",
+  "uid": "libraryservice",
+  "tags": ["library", "rust", "axum", "prometheus", "loki", "redis", "postgres"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Total Requests",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_http_requests_total{service=\"library\"}",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "none" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Cache Hits",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_cache_hits_total{service=\"library\"}",
+          "legendFormat": "Hits"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 100, "color": "green" }, { "value": 1000, "color": "orange" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Cache Misses",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_cache_misses_total{service=\"library\"}",
+          "legendFormat": "Misses"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 10, "color": "orange" }, { "value": 50, "color": "red" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Redis Errors",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_cache_errors_total{service=\"library\"}",
+          "legendFormat": "Errors"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 0, "color": "green" }, { "value": 1, "color": "red" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "External API Requests",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_external_api_requests_total{service=\"library\"}",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "none" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "DB Queries",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        {
+          "expr": "library_db_requests_total{service=\"library\"}",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "none" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "rate(library_http_requests_total{service=\"library\"}[1m])",
+          "legendFormat": "All"
+        },
+        {
+          "expr": "rate(library_http_requests_total{service=\"library\", status=~\"4..\"}[1m])",
+          "legendFormat": "4xx"
+        },
+        {
+          "expr": "rate(library_http_requests_total{service=\"library\", status=~\"5..\"}[1m])",
+          "legendFormat": "5xx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Response Time (p50, p95, p99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, rate(library_http_request_duration_seconds_bucket{service=\"library\"}[1m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(library_http_request_duration_seconds_bucket{service=\"library\"}[1m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(library_http_request_duration_seconds_bucket{service=\"library\"}[1m]))",
+          "legendFormat": "p99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Cache Hit / Miss Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(library_cache_hits_total{service=\"library\"}[1m])",
+          "legendFormat": "Hits"
+        },
+        {
+          "expr": "rate(library_cache_misses_total{service=\"library\"}[1m])",
+          "legendFormat": "Misses"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Cache Hit Ratio",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(library_cache_hits_total{service=\"library\"}[1m]) / (rate(library_cache_hits_total{service=\"library\"}[1m]) + rate(library_cache_misses_total{service=\"library\"}[1m])) > 0",
+          "legendFormat": "Hit Ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red" }, { "value": 0.5, "color": "orange" }, { "value": 0.8, "color": "green" }] },
+          "min": 0,
+          "max": 1
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "External API Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "rate(library_external_api_requests_total{service=\"library\"}[1m])",
+          "legendFormat": "{{api}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "External API Latency (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(library_external_api_duration_seconds_bucket{service=\"library\"}[1m]))",
+          "legendFormat": "{{api}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "DB Query Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        {
+          "expr": "rate(library_db_requests_total{service=\"library\"}[1m])",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "HTTP Requests by Path & Status",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "targets": [
+        {
+          "expr": "library_http_requests_total{service=\"library\"}",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Error & Warning Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
+      "targets": [
+        {
+          "expr": "sum(rate({container=\"library-service\"} |= `ERROR` [1m]))",
+          "legendFormat": "ERROR"
+        },
+        {
+          "expr": "sum(rate({container=\"library-service\"} |= `WARN` [1m]))",
+          "legendFormat": "WARN"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Errors & Warnings",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 44 },
+      "targets": [
+        {
+          "expr": "{container=\"library-service\"} |=~ `(?i)(error|warn|exception|failed|refused|denied|timeout|unhealthy|invalid)`",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogs": true
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "All Logs",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 56 },
+      "targets": [
+        {
+          "expr": "{container=\"library-service\"}",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogs": false
+      }
+    }
+  ],
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+  },
+  "schemaVersion": 39,
+  "version": 1
+}

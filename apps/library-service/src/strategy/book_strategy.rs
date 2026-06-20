@@ -7,6 +7,7 @@ use crate::adapters::book_adapter::{adapt_isbn_doc, adapt_search_doc, book_to_se
 use crate::dto::request::SearchType;
 use crate::dto::response::SearchResult;
 use crate::error::AppError;
+use crate::metrics::{EXTERNAL_API_DURATION_SECONDS, EXTERNAL_API_REQUESTS_TOTAL};
 use crate::strategy::SearchStrategy;
 
 const BASE_URL: &str = "https://openlibrary.org";
@@ -45,6 +46,8 @@ impl SearchStrategy for OpenLibraryStrategy {
 
         let fields = "key,title,author_name,publisher,isbn,language,first_publish_year,number_of_pages_median,cover_i,editions,editions.key,editions.isbn,editions.publish_date,editions.number_of_pages";
 
+        EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["openlibrary"]).inc();
+        let start = tokio::time::Instant::now();
         let resp = self
             .client
             .get(&url)
@@ -52,6 +55,7 @@ impl SearchStrategy for OpenLibraryStrategy {
             .send()
             .await?
             .error_for_status()?;
+        EXTERNAL_API_DURATION_SECONDS.with_label_values(&["openlibrary"]).observe(start.elapsed().as_secs_f64());
 
         let body: Value = resp.json().await?;
         let docs = body["docs"].as_array().cloned().unwrap_or_default();
@@ -100,6 +104,8 @@ impl SearchStrategy for OpenLibraryStrategy {
         let bibkey = format!("ISBN:{}", isbn);
         info!("OpenLibrary ISBN lookup: {}", bibkey);
 
+        EXTERNAL_API_REQUESTS_TOTAL.with_label_values(&["openlibrary"]).inc();
+        let start = tokio::time::Instant::now();
         let resp = self
             .client
             .get(&url)
@@ -111,6 +117,7 @@ impl SearchStrategy for OpenLibraryStrategy {
             .send()
             .await?
             .error_for_status()?;
+        EXTERNAL_API_DURATION_SECONDS.with_label_values(&["openlibrary"]).observe(start.elapsed().as_secs_f64());
 
         let body: Value = resp.json().await?;
 

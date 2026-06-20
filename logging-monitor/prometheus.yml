@@ -50,3 +50,11 @@ scrape_configs:
           - media-service-elx:27086
         labels:
           service: media
+
+  - job_name: 'library-service'
+    metrics_path: '/api/library/metrics'
+    static_configs:
+      - targets:
+          - library-service:28877
+        labels:
+          service: library

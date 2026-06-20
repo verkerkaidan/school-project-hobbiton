@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.54.0] - 2026-06-20
+
+### Added
+- **feat**: Grafan dashboard for Library service
+
 ## [1.53.3] - 2026-06-20
 
 ### Changed
