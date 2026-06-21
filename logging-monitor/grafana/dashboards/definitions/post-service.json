@@ -1,0 +1,254 @@
+{
+  "title": "Post Service",
+  "uid": "postservice",
+  "tags": ["spring", "boot", "micrometer", "logs", "loki", "post"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "JVM Memory",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(jvm_memory_used_bytes{area=\"heap\", application=\"post-service\"})",
+          "legendFormat": "Heap Used"
+        },
+        {
+          "expr": "sum(jvm_memory_max_bytes{area=\"heap\", application=\"post-service\"})",
+          "legendFormat": "Heap Max"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 250000000, "color": "orange" }, { "value": 400000000, "color": "red" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "CPU Usage",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage{application=\"post-service\"}",
+          "legendFormat": "CPU"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 0.8, "color": "orange" }, { "value": 0.95, "color": "red" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "process_uptime_seconds{application=\"post-service\"}",
+          "legendFormat": "Uptime"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dtdurations",
+          "color": { "mode": "none" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Active Threads",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{application=\"post-service\"}",
+          "legendFormat": "Live"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "value": 50, "color": "orange" }, { "value": 100, "color": "red" }] }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "HTTP Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{application=\"post-service\"}[1m])",
+          "legendFormat": "All Requests"
+        },
+        {
+          "expr": "rate(http_server_requests_seconds_count{application=\"post-service\", status=~\"4..\"}[1m])",
+          "legendFormat": "4xx"
+        },
+        {
+          "expr": "rate(http_server_requests_seconds_count{application=\"post-service\", status=~\"5..\"}[1m])",
+          "legendFormat": "5xx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "HTTP Response Time (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{application=\"post-service\"}[1m]))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "GC Pause Duration",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum{application=\"post-service\"}[1m])",
+          "legendFormat": "{{gc}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "Error Log Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(logback_events_total{application=\"post-service\", level=\"error\"}[1m])",
+          "legendFormat": "ERROR"
+        },
+        {
+          "expr": "rate(logback_events_total{application=\"post-service\", level=\"warn\"}[1m])",
+          "legendFormat": "WARN"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "title": "HTTP Requests by Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{application=\"post-service\"}[5m])",
+          "legendFormat": "{{status}} {{method}} {{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Error & Warning Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "sum(rate({container=\"post-service\"} |= `ERROR` [1m]))",
+          "legendFormat": "ERROR"
+        },
+        {
+          "expr": "sum(rate({container=\"post-service\"} |= `WARN` [1m]))",
+          "legendFormat": "WARN"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "Errors & Warnings",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 28 },
+      "targets": [
+        {
+          "expr": "{container=\"post-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogs": true
+      }
+    },
+    {
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "title": "All Logs",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 40 },
+      "targets": [
+        {
+          "expr": "{container=\"post-service\"}",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogs": false
+      }
+    }
+  ],
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+  },
+  "schemaVersion": 39,
+  "version": 1
+}

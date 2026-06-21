@@ -67,6 +67,14 @@ scrape_configs:
         labels:
           service: bug-report
 
+  - job_name: 'post-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets:
+          - post-service:29293
+        labels:
+          service: post
+
   - job_name: 'library-service'
     metrics_path: '/api/library/metrics'
     static_configs:

@@ -136,6 +136,20 @@ test.describe('Monitoring infrastructure', () => {
       expect(results.length).toBeGreaterThanOrEqual(1);
       expect(Number(results[0].value[1])).toBe(1);
     });
+
+    test('post-service target is being scraped', async ({ request }) => {
+      const res = await request.get(
+        `${PROMETHEUS_URL}/api/v1/query?query=up{service="post"}`
+      );
+      test.skip(!res.ok(), 'Prometheus is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body.status).toBe('success');
+      const results = body.data?.result;
+      expect(results).toBeDefined();
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(Number(results[0].value[1])).toBe(1);
+    });
   });
 
   test.describe('Grafana', () => {
@@ -303,6 +317,34 @@ test.describe('Monitoring infrastructure', () => {
       expect(body).toHaveProperty('dashboard');
       expect(body.dashboard).toHaveProperty('title', 'Bug Report Service');
       expect(body.dashboard).toHaveProperty('uid', 'bugreportservice');
+    });
+
+    test('Post Service dashboard is provisioned', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/postservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      expect(body).toHaveProperty('dashboard');
+      expect(body.dashboard).toHaveProperty('title', 'Post Service');
+      expect(body.dashboard).toHaveProperty('uid', 'postservice');
+    });
+
+    test('Post Service dashboard has panels', async ({ request }) => {
+      const res = await request.get(
+        `${GRAFANA_URL}/api/dashboards/uid/postservice`
+      );
+      test.skip(!res.ok(), 'Grafana is not available');
+      expect(res.ok()).toBeTruthy();
+      const body = await res.json();
+      const panels = body.dashboard?.panels;
+      expect(panels).toBeDefined();
+      expect(panels.length).toBeGreaterThanOrEqual(1);
+      const titles = panels.map(p => p.title);
+      expect(titles).toContain('JVM Memory');
+      expect(titles).toContain('HTTP Request Rate');
+      expect(titles).toContain('All Logs');
     });
   });
 });
