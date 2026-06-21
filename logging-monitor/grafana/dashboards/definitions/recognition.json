@@ -213,7 +213,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 28 },
       "targets": [
         {
-          "expr": "{container=\"recognition-service\"} |=~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
+          "expr": "{container=\"recognition-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
           "legendFormat": ""
         }
       ],

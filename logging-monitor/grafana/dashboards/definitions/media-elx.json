@@ -33,7 +33,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "{container=\"media-service\"} |=~ `(?i)(error|warning|warn|exception|EXIT|badarg|undef|noproc|shutdown|refused|denied|timeout|crashed)`",
+          "expr": "{container=\"media-service\"} |~ `(?i)(error|warning|warn|exception|EXIT|badarg|undef|noproc|shutdown|refused|denied|timeout|crashed)`",
           "legendFormat": ""
         }
       ],
@@ -51,7 +51,7 @@
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "{container=\"media-service\"} |=~ `(?i)(GenServer|Supervisor|terminated|child.*terminated|maximum restart|EXIT from)`",
+          "expr": "{container=\"media-service\"} |~ `(?i)(GenServer|Supervisor|terminated|child.*terminated|maximum restart|EXIT from)`",
           "legendFormat": ""
         }
       ],

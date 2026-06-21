@@ -306,7 +306,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 44 },
       "targets": [
         {
-          "expr": "{container=\"library-service\"} |=~ `(?i)(error|warn|exception|failed|refused|denied|timeout|unhealthy|invalid)`",
+          "expr": "{container=\"library-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout|unhealthy|invalid)`",
           "legendFormat": ""
         }
       ],
