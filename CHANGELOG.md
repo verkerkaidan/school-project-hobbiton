@@ -20,6 +20,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **feat**: Accounts can now be deleted by admin, and users can delete their own account
 
 ### Changed
+- **docs**: Bringing docusaurs and readme's up-to-date
+
+## [1.55.0] - 2026-06-21
+
+### Added
+- **feat**: Accounts can now be deleted by admin, and users can delete their own account
+
+### Changed
 - **chore**: Added delete mapping for mass delete of user to chatClient
 
 ### Fixed
