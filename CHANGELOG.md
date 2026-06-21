@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: Added delete mapping for mass delete of user to chatClient
+
 ### Fixed
 - **hotfix**: remove --remove-orphans
 
