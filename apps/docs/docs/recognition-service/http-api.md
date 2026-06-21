@@ -4,13 +4,13 @@ sidebar_position: 3
 
 # HTTP API
 
-The recognition service exposes a REST endpoint for media tagging
+The recognition service exposes a REST endpoint for media tagging.
 
 ## Endpoints
 
-| Method | Path          | Body                                  | Returns                                                                  | Description                                                               |
-|--------|---------------|---------------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `POST`  | `/recognition` | `{[{hash: string, file: string}]}` | `{[{hash: string, contentFlag: ContentFlag, note: "AI driven change"}]}` | Assigns a ContentFlag.SAFE or ContentFlag.RISK to each of the given files |
+| Method | Path               | Body                                    | Returns                                                                  | Description                                                               |
+|--------|--------------------|-----------------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `POST` | `/api/recognition` | `[{hash: string, file: base64-string}]` | `[{hash: string, contentFlag: ContentFlag, note: "AI driven change"}]`   | Assigns `ContentFlag.SAFE` or `ContentFlag.RISK` to each supplied image   |
 
 # Models
 
@@ -21,4 +21,5 @@ The recognition service exposes a REST endpoint for media tagging
 
 ## Notes
 
-- The service does not authenticate requests itself; it assumes the caller forwards valid user identifiers.
+- The service permits all requests at its own Spring Security layer and relies on the API gateway/internal callers to control access.
+- The `file` value must be a base64 encoded image. Invalid or unsupported image bytes cause inference to fail.

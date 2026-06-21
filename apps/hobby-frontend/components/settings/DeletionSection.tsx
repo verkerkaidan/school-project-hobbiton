@@ -8,17 +8,45 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import {clearCurrentUser, useCurrentUser} from "@/hooks/useCurrentUser";
+import {deleteOwnProfile} from "@/lib/profileClient";
+import {useErrorToast} from "@/components/ui/ErrorToastProvider";
+import Cookies from "js-cookie";
+import {useRouter} from "next/navigation";
 
 function ConfirmationModal({
   username,
+  userId,
   onClose,
 }: {
   username: string;
+  userId: string;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [typed, setTyped] = useState("");
   const confirmed = typed === username;
+  const { showErrorToast} = useErrorToast();
+
+  const handleLogout = () => {
+    Cookies.remove("token");
+    Cookies.remove("userId");
+    Cookies.remove("email");
+    clearCurrentUser();
+    router.push("/authentication");
+  };
+
+  async function handleDeletionConfirmed() {
+    try {
+      await deleteOwnProfile(userId);
+      onClose();
+      showErrorToast("Profile deleted", "", "success");
+      handleLogout();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      showErrorToast("Failed to delete profile", message, "error");
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -98,6 +126,7 @@ function ConfirmationModal({
             Cancel
           </button>
           <button
+            onClick={handleDeletionConfirmed}
             disabled={!confirmed}
             className="px-4 py-2 text-xs font-medium rounded-lg transition-opacity
               bg-red-500 text-white
@@ -166,6 +195,7 @@ export function DeletionSection() {
       {showModal && (
         <ConfirmationModal
           username={username}
+          userId={currentUser?.id ?? ""}
           onClose={() => setShowModal(false)}
         />
       )}

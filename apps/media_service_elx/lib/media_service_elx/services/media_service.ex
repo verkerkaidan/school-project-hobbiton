@@ -4,6 +4,8 @@ defmodule MediaServiceElx.MediaService do
   """
   @behaviour MediaServiceElx.MediaServiceBehaviour
 
+  import Ecto.Query
+
   require Logger
 
   alias MediaServiceElx.Repo
@@ -71,6 +73,7 @@ defmodule MediaServiceElx.MediaService do
     end
   end
 
+  def delete_file(nil), do: {:error, "MediaFile not found"}
   @doc """
     Handles the deletion of media files after a ban
     @params: media_file object
@@ -101,8 +104,9 @@ defmodule MediaServiceElx.MediaService do
       %MediaInstance{} = media_instance ->
         case Repo.delete(media_instance) do
           {:ok, _} ->
-            if Repo.exists?(MediaInstance, file_id: media_instance.file_id) do
-              Logger.info("MediaInstance deleted", instance_id: media_instance.id)
+            remaining = Repo.aggregate(from(m in MediaInstance, where: m.file_id == ^media_instance.file_id), :count)
+            Logger.info("MediaInstance deleted", instance_id: media_instance.id)
+            if remaining > 0 do
               {:ok, media_instance.id}
             else
               Repo.get_by(MediaFile, id: media_instance.file_id)
@@ -116,22 +120,6 @@ defmodule MediaServiceElx.MediaService do
         Logger.error("MediaInstance not found for deletion", instance_id: instance_id)
         {:error, "MediaInstance not found"}
     end
-  end
-
-  @doc """
-    Maps the deletion of all given instances
-    @params: [%MediaInstance{}]
-    @returns: [{status: "ok", instance_id} || {status: "error", reason: reason}]
-  """
-  def delete_all_instances(instances) do
-    Enum.map(instances, fn %MediaInstance{} = instance ->
-      case delete_single_instance(instance.id) do
-        {:ok, instance_id} ->
-          %{instance_id: instance_id, status: "ok"}
-        {:error, reason} ->
-          %{status: "error", reason: reason}
-      end
-    end)
   end
 
   @doc """
@@ -207,12 +195,22 @@ defmodule MediaServiceElx.MediaService do
     end
   end
 
+#  @doc """
+#    Generates a hash from a given file
+#    @params: tempPath from %Plug.Upload{}
+#    @returns: binary
+#  """
   defp compute_hash(path) do
     File.stream!(path, [], 2048)
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
   end
 
+#  @doc """
+#    Generates a MediaFile and saves to db
+#    @params: form-data file, binary hash
+#    @returns: {:ok, MediaFile}
+#  """
   defp create_media_file(upload, hash) do
     binary = File.read!(upload.path)
 
@@ -226,6 +224,11 @@ defmodule MediaServiceElx.MediaService do
     |> Repo.insert()
   end
 
+#  @doc """
+#    Generates a MediaInstance and saves to db
+#    @params: uuid file_id, uuid owner_id
+#    @returns: {:ok, MediaInstance}
+#  """
   defp create_media_instance(media_file_id, owner_id) do
     %MediaInstance{}
     |> MediaInstance.changeset(%{

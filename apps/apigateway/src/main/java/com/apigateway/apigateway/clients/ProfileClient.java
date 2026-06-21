@@ -47,4 +47,7 @@ public interface ProfileClient {
             @RequestBody UpdateProfileDTO update,
             @RequestHeader("Authorization") String authorization
     );
+
+    @DeleteMapping("/profile/delete/{userId}")
+    void deleteProfile(@PathVariable UUID userId);
 }

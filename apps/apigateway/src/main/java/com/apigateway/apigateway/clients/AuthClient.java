@@ -13,7 +13,7 @@ public interface AuthClient {
         @RequestBody AuthenticationRequest request
     );
 
-    @DeleteMapping("/auth/{userId}")
+    @DeleteMapping("/auth/delete/{userId}")
     void deleteAuthentication(@PathVariable UUID userId);
 
     @GetMapping("/auth/{userId}")

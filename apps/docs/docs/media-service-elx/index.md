@@ -37,6 +37,8 @@ The service requires the following environment variables for configuration:
 - `DB_USERNAME`: The username for connecting to the PostgreSQL database
 - `DB_PASSWORD`: The password for connecting to the PostgreSQL database
 - `SECRET_KEY_BASE`: A secret key for encrypting session data and other secrets in the Phoenix application
+- `JWT_SECRET`: HS256 secret used to validate Bearer tokens
+- `JWT_ISSUER`: Expected issuer claim in Bearer tokens
 
 <nl>
 These variables should be injected via environment variables at runtime

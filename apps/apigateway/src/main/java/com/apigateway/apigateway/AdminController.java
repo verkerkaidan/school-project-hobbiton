@@ -1,23 +1,20 @@
 package com.apigateway.apigateway;
 
-import com.apigateway.apigateway.clients.BugReportClient;
-import com.apigateway.apigateway.clients.PostClient;
-import com.apigateway.apigateway.clients.ProfileClient;
-import com.apigateway.apigateway.clients.ProfileConnectionClient;
+import com.apigateway.apigateway.clients.*;
+import com.apigateway.apigateway.enums.UserDeleteOrigin;
 import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
 import com.apigateway.apigateway.models.BugReportDTO;
+import com.apigateway.apigateway.models.Post;
 import com.apigateway.apigateway.models.ReportDTO;
+import com.apigateway.apigateway.models.media.MediaInstance;
 import com.apigateway.apigateway.service.ProfileAggregationService;
+import com.apigateway.apigateway.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,17 +42,26 @@ public class AdminController {
     private final PostClient postClient;
     private final BugReportClient bugReportClient;
     private final ProfileAggregationService profileAggregationService;
+    private final MediaClient mediaClient;
+    private final InteractionClient interactionClient;
+    private final UserService userService;
 
     public AdminController(ProfileConnectionClient profileConnectionClient,
                            ProfileClient profileClient,
                            PostClient postClient,
                            BugReportClient bugReportClient,
-                           ProfileAggregationService profileAggregationService) {
+                           ProfileAggregationService profileAggregationService,
+                           MediaClient mediaClient,
+                           InteractionClient interactionClient,
+                           UserService userService) {
         this.profileConnectionClient = profileConnectionClient;
         this.profileClient = profileClient;
         this.postClient = postClient;
         this.bugReportClient = bugReportClient;
         this.profileAggregationService = profileAggregationService;
+        this.mediaClient = mediaClient;
+        this.interactionClient = interactionClient;
+        this.userService = userService;
     }
 
     /**
@@ -123,14 +129,66 @@ public class AdminController {
     /** Hard-delete a single post by ID. */
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID postId) {
-        postClient.deletePost(postId);
+        Post post = null;
+        try {
+            post = postClient.getPostById(postId);
+            postClient.deletePost(postId);
+        } catch (Exception e) {
+            logger.error("[ADMINCONTROLLER deletePost] Post service could not be reached --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service unavailable");
+        }
+
+        try {
+            if (!post.equals(null)) {
+                List<UUID> instanceIds = post.getMediaInstanceSet().stream().map(
+                                (MediaInstance instance) -> instance.instanceId
+                        )
+                        .toList();
+                mediaClient.deleteMediaInstances(instanceIds);
+            }
+        } catch (Exception e) {
+            logger.error("[ADMINCONTROLLER deletePost] Media service could not be reached --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service unavailable");
+        }
+
+        try {
+            List<UUID> references = new ArrayList<>();
+            references.add(post.getId());
+            interactionClient.deleteAllByReferences(references);
+        } catch (Exception e) {
+            logger.error("[ADMINCONTROLLER deletePost] Interaction service could not be reached --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service unavailable");
+        }
+
         return ResponseEntity.noContent().build();
     }
 
     /** Hard-delete all posts belonging to a user. */
     @DeleteMapping("/posts/users/{userId}")
     public ResponseEntity<Void> deleteAllUserPosts(@PathVariable UUID userId) {
-        postClient.deleteAllUserPosts(userId);
+        List<Post> posts = null;
+        try {
+            posts = postClient.getUserPosts(userId);
+            postClient.deleteAllUserPosts(userId);
+        } catch (Exception e) {
+            logger.error("[ADMINCONTROLLER deleteAllUserPosts] Post service could not be reached --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service unavailable");
+        }
+
+        try {
+            if (!posts.equals(null)) {
+                List<UUID> instanceIds = posts.stream().flatMap(
+                        (Post post) -> post.getMediaInstanceSet().stream().map(
+                                (MediaInstance instance) -> instance.instanceId
+                        )
+                ).toList();
+                mediaClient.deleteMediaInstances(instanceIds);
+            }
+        } catch (Exception e) {
+            logger.error("[ADMINCONTROLLER deleteAllUserPosts] Media service could not be reached --- \n{}", e.getMessage());
+            throw new RuntimeException("Responsible service unavailable");
+        }
+
         return ResponseEntity.noContent().build();
     }
 
@@ -154,5 +212,13 @@ public class AdminController {
     public ResponseEntity<BugReportDTO> closeBugReport(@PathVariable String id) {
         BugReportDTO report = bugReportClient.closeBugReport(id);
         return ResponseEntity.ok(report);
+    }
+
+    @DeleteMapping("/delete-user/{userId}")
+    public ResponseEntity<Boolean> deleteUser(
+            @RequestHeader Map<String, String> headers,
+            @PathVariable UUID userId
+    ) {
+        return ResponseEntity.ok(userService.deleteUser(userId, headers, UserDeleteOrigin.ADMIN));
     }
 }

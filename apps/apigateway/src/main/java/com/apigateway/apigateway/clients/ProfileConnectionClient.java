@@ -66,4 +66,11 @@ public interface ProfileConnectionClient {
     // Admin: hard-delete a single report record
     @DeleteMapping("/reports/{reportId}")
     void deleteReport(@PathVariable UUID reportId);
+
+    @DeleteMapping("/follows/user/{userUUID}")
+    void deleteUserFollows(@PathVariable UUID userUUID);
+    @DeleteMapping("/blocks/user/{userUUID}")
+    void deleteUserBlocks(@PathVariable UUID userUUID);
+    @DeleteMapping("/reports/user/{userUUID}")
+    void deleteUserReports(@PathVariable UUID userUUID);
 }

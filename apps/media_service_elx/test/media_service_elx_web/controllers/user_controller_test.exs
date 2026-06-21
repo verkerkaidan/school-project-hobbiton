@@ -109,30 +109,32 @@ defmodule MediaServiceElxWeb.UserControllerTest do
     test "deletes all instances and reports for an owner", %{conn: conn} do
       instances = [build_instance()]
       reports = [build_file_report()]
-      instance_results = [%{id: "inst-uuid-1", status: "ok"}]
-      report_results = [%{report_id: "report-uuid-1", status: "ok"}]
 
       expect(MediaServiceElx.MediaServiceMock, :retrieve_instances_by_owner, fn "owner-1" -> instances end)
-      expect(MediaServiceElx.MediaServiceMock, :delete_all_instances, fn ^instances -> instance_results end)
+      expect(MediaServiceElx.MediaServiceMock, :delete_single_instance, fn _id ->
+        {:ok, "inst-uuid-1"}
+      end)
       expect(MediaServiceElx.ReportServiceMock, :retrieve_reports_by_owner, fn "owner-1" -> reports end)
-      expect(MediaServiceElx.ReportServiceMock, :remove_all_reports, fn ^reports -> report_results end)
+      expect(MediaServiceElx.ReportServiceMock, :remove_all_reports, fn ^reports ->
+        {:ok, [%{report_id: "report-uuid-1", status: "ok"}]}
+      end)
 
       conn = delete(conn, ~p"/api/user/owner-1")
 
       assert %{"instances" => instances_resp, "reports" => reports_resp} = json_response(conn, 200)
-      assert [%{"id" => "inst-uuid-1", "status" => "ok"}] = instances_resp
-      assert [%{"report_id" => "report-uuid-1", "status" => "ok"}] = reports_resp
+      assert [%{"id" => "inst-uuid-1", "status" => "deleted"}] = instances_resp
+      assert %{"status" => "deleted", "result" => [%{"report_id" => "report-uuid-1", "status" => "ok"}]} = reports_resp
     end
 
     test "returns empty results when owner has no instances or reports", %{conn: conn} do
       expect(MediaServiceElx.MediaServiceMock, :retrieve_instances_by_owner, fn "owner-1" -> [] end)
-      expect(MediaServiceElx.MediaServiceMock, :delete_all_instances, fn [] -> [] end)
       expect(MediaServiceElx.ReportServiceMock, :retrieve_reports_by_owner, fn "owner-1" -> [] end)
-      expect(MediaServiceElx.ReportServiceMock, :remove_all_reports, fn [] -> [] end)
+      expect(MediaServiceElx.ReportServiceMock, :remove_all_reports, fn [] -> {:ok, []} end)
 
       conn = delete(conn, ~p"/api/user/owner-1")
 
-      assert %{"instances" => [], "reports" => []} = json_response(conn, 200)
+      assert %{"instances" => [], "reports" => reports_resp} = json_response(conn, 200)
+      assert %{"status" => "deleted", "result" => []} = reports_resp
     end
   end
 

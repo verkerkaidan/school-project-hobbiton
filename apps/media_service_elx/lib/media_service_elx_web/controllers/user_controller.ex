@@ -42,16 +42,24 @@ defmodule MediaServiceElxWeb.UserController do
   end
 
   @doc """
-  Deletes all MediaInstance from the same owner
+  Deletes all MediaInstance and reports from the same owner
   @params: owner_id uuid
   @returns: {results: {instances: [{:ok, uuid}], reports: [{:ok, uuid}]}}
   """
   def delete_owner(conn, %{"owner_id" => owner_id}) do
     instances = @media_service.retrieve_instances_by_owner(owner_id)
-    instance_results = @media_service.delete_all_instances(instances)
+    instance_results = Enum.map(instances, fn instance ->
+      case @media_service.delete_single_instance(instance.id) do
+        {:ok, id}       -> %{id: id, status: "deleted"}
+        {:error, reason} -> %{id: instance.id, status: "error", reason: inspect(reason)}
+      end
+    end)
 
     reports = @report_service.retrieve_reports_by_owner(owner_id)
-    report_results = @report_service.remove_all_reports(reports)
+    report_results = case @report_service.remove_all_reports(reports) do
+      {:ok, result}    -> %{status: "deleted", result: result}
+      {:error, reason} -> %{status: "error", reason: inspect(reason)}
+    end
 
     Logger.info("Owner deleted", owner: owner_id, instances: instance_results, reports: report_results)
 

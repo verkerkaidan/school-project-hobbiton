@@ -473,7 +473,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
                         <div className="w-full">
                           <SearchBar
                             queryType={queryType}
-                            onSearch={handleSearch}
+                            onSearchAction={handleSearch}
                             showBackButton={false}
                           />
 
