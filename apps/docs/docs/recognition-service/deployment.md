@@ -5,13 +5,14 @@ sidebar_position: 4
 # Deployment & Configuration
 
 ## Environment variables
-- `MODEL_NAME`
-  - String that references the name of a car classification model saved in an external project of 
-    - Student at Hogeschool Leiden: [Matthijs Harteveld / s1147087](https://gitlab.inf-hsleiden.nl/s1147087/my-model-artifacts/-/tree/main/Hobbithon?ref_type=heads)
+- `MODEL_URL`
+  - URL for the PyTorch model artifact downloaded by `entrypoint.sh` into `/app/models/car_classifier.pt`
+  - GitLab `/blob/` URLs are rewritten to `/raw/` before download
 - `CORS_ALLOWED_ORIGINS`
     - String containing all origins that are allowed for CORS
 
-Model name has a fallback in application.properties
+If `MODEL_URL` is missing, `entrypoint.sh` logs an error and falls back to the hardcoded model artifact URL.
+The Spring property `ai.model.path` points DJL at `/app/models`.
 
 ## Docker Compose
 
@@ -29,7 +30,7 @@ recognition-service:
       context: ./apps/recognition-service
     container_name: recognition-service
     environment:
-      MODEL_NAME: ${RECOGNITION_MODEL_NAME}
+      MODEL_URL: ${RECOGNITION_MODEL_URL}
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
     ports:
       - "27088:27088"

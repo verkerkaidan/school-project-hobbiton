@@ -19,12 +19,16 @@ sidebar_position: 5
 - `DB_PASSWORD`
     - String used to get rights in to media_database
 - `SECRET_KEY_BASE`
-    - String used to set up Phoenix's connection to the database
+    - String used by the Phoenix endpoint for signing/encryption
+- `JWT_SECRET`
+    - HS256 secret used by authenticated routes
+- `JWT_ISSUER`
+    - Expected issuer claim for authenticated routes
 - `CORS_ALLOWED_ORIGINS`
   - String containing all origins that are allowed for CORS
 
 
-All variables except for secret_key_base have fallbacks for local development.
+Most database variables have fallbacks for local development. `SECRET_KEY_BASE`, `JWT_SECRET`, and `JWT_ISSUER` are required in production.
 
 ## Docker Compose
 
@@ -51,6 +55,8 @@ media-service-elx:
     DB_USERNAME: ${SPRING_DATASOURCE_USERNAME_MEDIA}
     DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_MEDIA}
     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    JWT_SECRET: ${JWT_SECRET}
+    JWT_ISSUER: ${JWT_ISSUER}
 ```
 
 ## Build and run locally
@@ -63,7 +69,7 @@ mix phx.server
 ```
 
 The service starts on the port configured by `config/runtime.exs` and is exposed as `27086` in the repository's Docker setup.
-If the environment variable for `PORT` is missing, the media-service-elx is exposed as `27089` in the repository's Docker setup.
+If the `PORT` environment variable is missing in production, Phoenix falls back to `27089`. The repository Docker Compose files set `PORT` to `27086`.
 
 ## Runtime behavior
 

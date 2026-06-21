@@ -11,28 +11,28 @@ The media-service stores media metadata, ownership and report information in Pos
 ### `media_files`
 
 - `id` binary_id PRIMARY KEY
-- `content_flag` content_flag
+- `content_flag` integer
 - `content_type` text
 - `hash` binary
 - `original` binary
 - `admin_approved` boolean, default: false
 
-:content_flag is an enum:
-- `SAFE`
-- `RISK`
-- `UNASSIGNED`
+`content_flag` values:
+- `0` = `SAFE`
+- `1` = `RISK`
+- `2` = `UNASSIGNED`
 
 ### `media_instances`
 
 - `id` binary_id PRIMARY KEY
-- `file_id` binary
-- `owner_id` binary
+- `file_id` binary_id
+- `owner_id` binary_id
 
 ### `file_report`
 
 - `id` binary_id PRIMARY KEY
-- `file_id` binary
-- `user_id` binary
+- `file_id` binary_id
+- `user_id` binary_id
 
 ### `reported_file`
 

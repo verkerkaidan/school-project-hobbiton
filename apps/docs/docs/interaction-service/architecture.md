@@ -9,8 +9,8 @@ The Interaction Service is a Java Springboot application that handles all likes 
 ## Startup flow
 
 1. Load `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` and `CORS_ALLOWED_ORIGINS` from environment variables
-2. Run PostgreSQL migrations if they are available and necessary
-3. Start the Springboot endpoint to listen for incoming HTTP requests from port `27087`
+2. Let Hibernate update the PostgreSQL schema with `spring.jpa.hibernate.ddl-auto=update`
+3. Start the Spring Boot endpoint on port `27087` with the `/api` context path
 
 ## Core components
 
@@ -20,7 +20,7 @@ The Interaction Service is a Java Springboot application that handles all likes 
     - Configures environment variables into local variables
     - Defines the service endpoint
 - `InteractionController`
-  - Handles interaction requests
+  - Handles like, comment, batch lookup, and delete requests
 - `Comment`
   - Defines the database structure for comments
 - `CustomLike`
@@ -29,10 +29,10 @@ The Interaction Service is a Java Springboot application that handles all likes 
 ## Concurrency and runtime behavior
 
 - The service leverages Java's multithreading capabilities and the Spring Boot framework to handle concurrent requests efficiently.
-- Each incoming HTTP request is handled in a separate process, allowing for high throughput and responsiveness.
+- Spring handles concurrent HTTP requests on request threads.
 
 ## Security considerations
 
-- The service validates and sanitizes all incoming data to prevent injection attacks and ensure data integrity.
+- The service disables CSRF and permits all requests in its own Spring Security configuration because it is intended to sit behind the gateway/internal network.
 - It uses CORS configuration to restrict access to trusted origins, reducing the risk of cross-origin attacks.
-- The service relies on Java Springboot built-in security features, such as CSRF protection and secure session management, to safeguard against common web vulnerabilities.
+- The service is designed for gateway/internal use and does not authenticate user ids itself.
