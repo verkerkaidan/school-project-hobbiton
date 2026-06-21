@@ -455,7 +455,7 @@ deploy:
     # Add host to known_hosts
     - ssh-keyscan -t ed25519 $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
     # Configure SSH
-    - echo -e "Host $DEPLOY_HOST\n  StrictHostKeyChecking accept-new" > ~/.ssh/config
+    - printf 'Host %s\n  StrictHostKeyChecking accept-new\n' "$DEPLOY_HOST" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
     - scp -r docker-compose-prod.yml init-db.sh logging-monitor "$DEPLOY_USER@$DEPLOY_HOST:~/"
@@ -574,9 +574,9 @@ deploy:
       # 4. Generate Promtail file_sd targets from running containers
       # (inline — the script file doesn't exist on the remote host)
       mkdir -p /tmp/promtail-targets
-      \$PY_CMD='python3'
-      command -v python3 >/dev/null 2>&1 || \$PY_CMD='python'
-      test -r /var/lib/docker/containers/ 2>/dev/null || \$PY_CMD="sudo \$PY_CMD"
+      PY_CMD='python3'
+      command -v python3 >/dev/null 2>&1 || PY_CMD='python'
+      test -r /var/lib/docker/containers/ 2>/dev/null || PY_CMD="sudo \$PY_CMD"
       \$PY_CMD -c "
       import json, os, glob
       t = []
