@@ -52,4 +52,9 @@ public interface ChatClient {
             @RequestBody AlterUserDTO alterUserDTO,
             @RequestHeader("Authorization") String authorization
     );
+
+    @DeleteMapping("/delete-user?deleteUserId={userId}")
+    void deleteUserFromAllChats(
+            @PathVariable("userId") String userId
+    );
 }
