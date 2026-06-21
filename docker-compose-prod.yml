@@ -2,7 +2,6 @@ name: gl_groep-01_hobithon
 
 services:
   frontend:
-    container_name: frontend
     image: ${CI_REGISTRY_IMAGE}/hobby-frontend:latest
     restart: always
     ports:
@@ -39,7 +38,6 @@ services:
       - hobbithon-network
 
   post-service:
-    container_name: post-service
     image: ${CI_REGISTRY_IMAGE}/post-service:latest
     restart: always
     ports:
@@ -55,7 +53,6 @@ services:
       - hobbithon-network
 
   profile-connection-service:
-    container_name: profile-connection-service
     image: ${CI_REGISTRY_IMAGE}/profile-connection-service:latest
     restart: always
     ports:
@@ -73,7 +70,6 @@ services:
       - hobbithon-network
 
   media-service-elx:
-    container_name: media-service
     image: ${CI_REGISTRY_IMAGE}/media_service_elx:latest
     restart: always
     ports:
@@ -95,7 +91,6 @@ services:
       - hobbithon-network
 
   recognition-service:
-    container_name: recognition-service
     image: ${CI_REGISTRY_IMAGE}/recognition-service:latest
     restart: always
     ports:
@@ -109,7 +104,6 @@ services:
       - hobbithon-network
 
   authentication-service-c:
-    container_name: authentication-service-c
     image: ${CI_REGISTRY_IMAGE}/authentication-service-c:latest
     restart: always
     ports:
@@ -130,7 +124,6 @@ services:
       - hobbithon-network
 
   profile-service:
-    container_name: profile-service
     image: ${CI_REGISTRY_IMAGE}/profile-service:latest
     restart: always
     ports:
@@ -152,7 +145,6 @@ services:
       - hobbithon-network
 
   library-service:
-    container_name: library-service
     image: ${CI_REGISTRY_IMAGE}/library-service:latest
     restart: always
     ports:
@@ -173,7 +165,6 @@ services:
       - hobbithon-network
 
   interaction-service:
-    container_name: interaction-service
     image: ${CI_REGISTRY_IMAGE}/interaction-service:latest
     restart: always
     ports:
@@ -189,7 +180,6 @@ services:
       - hobbithon-network
 
   notification-service:
-    container_name: notification-service
     image: ${CI_REGISTRY_IMAGE}/notification-service:latest
     restart: always
     ports:
@@ -210,7 +200,6 @@ services:
       - hobbithon-network
 
   bug-report-service:
-    container_name: bug-report-service
     image: ${CI_REGISTRY_IMAGE}/bug-report-service:latest
     restart: always
     ports:
@@ -233,7 +222,6 @@ services:
       - hobbithon-network
 
   middleware-service:
-    container_name: apigateway-service
     image: ${CI_REGISTRY_IMAGE}/apigateway:latest
     restart: always
     ports:
@@ -379,7 +367,6 @@ services:
       - hobbithon-network
 
   loki:
-    container_name: loki
     image: grafana/loki:latest
     restart: unless-stopped
     profiles: [logging-monitor]
@@ -397,7 +384,6 @@ services:
       - hobbithon-network
 
   promtail:
-    container_name: promtail
     image: grafana/promtail:latest
     restart: unless-stopped
     profiles: [logging-monitor]
@@ -416,7 +402,6 @@ services:
       - loki
 
   prometheus:
-    container_name: prometheus
     image: prom/prometheus:latest
     restart: unless-stopped
     profiles: [logging-monitor]
@@ -435,7 +420,6 @@ services:
       - middleware-service
 
   grafana:
-    container_name: grafana
     image: grafana/grafana:latest
     restart: unless-stopped
     profiles: [logging-monitor]
