@@ -9,6 +9,7 @@ sidebar_position: 3
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
 | `GET` | `/health` | none | Liveness check. |
+| `GET` | `/metrics` | none | Prometheus metrics endpoint. |
 | `POST` | `/bug-reports` | bearer token | Create an anonymous bug report. |
 | `GET` | `/bug-reports?status=OPEN` | gateway/admin caller | List all bug reports, optionally filtered by `OPEN` or `CLOSED`. |
 | `PUT` | `/bug-reports/{id}/close` | gateway/admin caller | Close an open report and return the updated record. |

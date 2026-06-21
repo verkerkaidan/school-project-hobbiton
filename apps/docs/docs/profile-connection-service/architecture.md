@@ -25,6 +25,8 @@ sidebar_position: 2
   - writes audit log records for right-to-be-forgotten deletion operations.
 - `DatabaseSeeder`
   - seeds local/demo profile graph data only when no profiles exist.
+- Spring Boot Actuator
+  - exposes `/actuator/health` and `/actuator/prometheus` endpoints for liveness checks and Prometheus metrics scraping.
 
 ## Relationship Rules
 

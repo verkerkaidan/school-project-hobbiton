@@ -37,6 +37,9 @@ The service is defined as `profile-connection-service` in both local and product
 | `server.servlet.context-path` | `/api` |
 | `spring.jpa.hibernate.ddl-auto` | `update` |
 | `spring.jpa.properties.hibernate.dialect` | `org.hibernate.dialect.PostgreSQLDialect` |
+| `management.endpoints.web.exposure.include` | `health,prometheus` |
+| `management.endpoints.web.base-path` | `/actuator` |
+| `management.metrics.tags.application` | `profile-connection-service` |
 
 ## Runtime Notes
 

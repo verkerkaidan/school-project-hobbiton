@@ -21,6 +21,7 @@ All routes are served under the `/api` context path.
 | --- | --- | --- | --- |
 | `PUT` | `/api/blocks/{targetProfileId}` | `X-Profile-Id: <currentProfileId>` | Toggle block/unblock. Returns `true` when now blocking, `false` when unblocked. |
 | `GET` | `/api/blocks/{profileId}/blocked` | none | Return profile IDs blocked by `profileId`. |
+| `GET` | `/api/blocks/{profileId}/blocked-by` | none | Return profile IDs that have blocked `profileId`. |
 | `DELETE` | `/api/blocks/user/{userUUID}` | none | Delete all block records where the user is blocker or target and write an audit log. |
 
 ## Report Endpoints
@@ -31,6 +32,7 @@ All routes are served under the `/api` context path.
 | `GET` | `/api/reports/{reportId}` | none | Fetch one report by ID. |
 | `GET` | `/api/reports/target/{targetId}` | none | Fetch reports about a target profile. |
 | `GET` | `/api/reports/initiator/{initiatorId}` | none | Fetch reports created by a profile. |
+| `GET` | `/api/reports/all` | none | Fetch all reports in the system. |
 | `GET` | `/api/reports/status/{status}` | none | Fetch reports by status. |
 | `GET` | `/api/reports/pending` | none | Fetch reports with `PENDING` status. |
 | `PUT` | `/api/reports/{reportId}/status` | `{ "status": "RESOLVED" }` | Update report status. |
