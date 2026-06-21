@@ -32,7 +32,7 @@ defmodule MediaServiceElxWeb.Router do
 
     post "/",                  MediaController, :upload_media
     get "/file",               MediaController, :retrieve_media
-    delete "/file/:instance_id", MediaController, :delete_instance
+    delete "/file/",           MediaController, :delete_instances
     delete "/admin",           MediaController, :delete_media_file
   end
 

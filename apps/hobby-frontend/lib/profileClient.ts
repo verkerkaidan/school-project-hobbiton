@@ -1,9 +1,15 @@
+import Cookies from "js-cookie";
 import {authHeaders} from "@/lib/adminClient";
 
 const GATEWAY_URL =
   process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
 
 const API_BASE = `${GATEWAY_URL}/api`;
+
+function headers(): HeadersInit {
+  const token = Cookies.get("token");
+  return token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json"} : {"Content-Type": "application/json"};
+}
 
 export interface UpdateProfileFields {
   username?: string;
@@ -44,7 +50,7 @@ export async function postChangeProfilePicture(
 
   const res = await fetch(API_BASE + "/change-profile-picture", {
     method: 'POST',
-    headers: authHeaders(),
+    headers: headers(),
     body: formData,
   });
 
@@ -67,4 +73,25 @@ export async function searchProfiles(
   if (!res.ok) throw new Error("Failed to fetch results");
 
   return await res.json();
+}
+
+export async function deleteOwnProfile(
+  userId: string,
+) {
+  const res = await fetch(API_BASE + "/delete-own-profile/" + userId, {
+    method: 'DELETE',
+    headers: headers()
+  })
+
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Could not delete your account");
+  }
+  const result = await res.json();
+  if (result == false) {
+    throw new Error("Could not finalize the deletion of your account");
+  }
+
+  return;
 }

@@ -398,7 +398,7 @@ export default function EditPostPageClient({ post }: Props) {
 
                     {queryType && (
                       <div className="w-full">
-                        <SearchBar queryType={queryType} onSearch={handleSearch} showBackButton={false} />
+                        <SearchBar queryType={queryType} onSearchAction={handleSearch} showBackButton={false} />
                         {(searchLoading || hasSearched) && (
                           <div className="np-results-wrap mt-2 max-w-full">
                             <ResultsList

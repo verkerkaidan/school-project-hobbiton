@@ -363,7 +363,9 @@ public class ProfileAggregationService {
 
         if (oldId != null) {
             try {
-                mediaClient.deleteMediaInstance(oldId);
+                List<UUID> id = new ArrayList<>();
+                id.add(oldId);
+                mediaClient.deleteMediaInstances(id);
             } catch (Exception e) {
                 logger.error("[PROFILEAGGREGATIONSERVICE updateProfilePicturePipeline] Could not delete file --- \n{}", e.getMessage());
                 throw new RuntimeException("One of the responsible services offline");

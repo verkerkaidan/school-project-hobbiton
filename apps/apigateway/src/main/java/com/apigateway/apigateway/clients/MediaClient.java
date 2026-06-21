@@ -28,6 +28,9 @@ public interface MediaClient {
     @DeleteMapping("/media/admin")
     DeleteMediaResponseDTO deleteMediaFile(@RequestBody DeleteMediaRequestDTO request);
 
-    @DeleteMapping("media/file/{instanceId}")
-    DeleteMediaResponseDTO deleteMediaInstance(@PathVariable UUID instanceId);
+    @DeleteMapping("/media/file")
+    List<DeleteMediaResponseDTO> deleteMediaInstances(@RequestParam("instances[]") List<UUID> instances);
+
+    @DeleteMapping("/user/{owner_id}")
+    void deleteUser(@PathVariable UUID owner_id);
 }

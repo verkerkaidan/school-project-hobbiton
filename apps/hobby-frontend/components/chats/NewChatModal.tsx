@@ -12,10 +12,10 @@ import { User } from "@/types/profile";
 import { Modal } from "../modals/Modal";
 export default function NewChatModal({
     open,
-    onClose,
+    onCloseAction,
 }: {
     open: boolean;
-    onClose: () => void;
+    onCloseAction: () => void;
 }) {
     const [selectedUsers, setSelectedUsers] =
         useState<string[]>([]);
@@ -65,14 +65,14 @@ export default function NewChatModal({
     if (!open) return null;
 
     return (
-        <Modal isOpen={open} onClose={onClose}>
+        <Modal isOpen={open} onClose={onCloseAction}>
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
                     New Chat
                 </h2>
 
                 <button
-                    onClick={onClose}
+                    onClick={onCloseAction}
                     className="rounded-xl bg-zinc-800 px-4 py-2"
                 >
                     Close

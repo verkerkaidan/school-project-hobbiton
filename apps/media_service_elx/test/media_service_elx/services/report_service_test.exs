@@ -104,10 +104,10 @@ defmodule MediaServiceElx.ReportServiceTest do
       file_report_1 = FileReportsFixtures.insert_file_report()
       file_report_2 = FileReportsFixtures.insert_file_report()
 
-      assert [
+      assert {:ok, [
                %{report_id: report_id_1, status: "ok"},
                %{report_id: report_id_2, status: "ok"}
-             ] = ReportService.remove_all_reports([file_report_1, file_report_2])
+             ]} = ReportService.remove_all_reports([file_report_1, file_report_2])
 
       assert report_id_1 == file_report_1.id
       assert report_id_2 == file_report_2.id

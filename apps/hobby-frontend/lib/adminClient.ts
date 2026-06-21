@@ -1,6 +1,6 @@
-import Cookies from "js-cookie";
 import type { Report, ReportStatus } from "@/types/reports";
 import type { MediaSet } from "@/types/posts";
+import Cookies from "js-cookie";
 
 export interface ProfileSummary {
   userId?: string
@@ -77,4 +77,24 @@ export async function getAllAdminProfiles(): Promise<ProfileSummary[]> {
   });
   if (!res.ok) throw new Error("Failed to fetch profiles");
   return res.json();
+}
+
+export async function deleteUserProfile(
+      userId: string,
+  ) {
+  const res = await fetch(MIDDLEWARE_URL + "/api/admin/delete-user/" + userId, {
+    method: 'DELETE',
+    headers: authHeaders()
+  })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message ?? "Could not delete requested account");
+  }
+  const result = await res.json();
+  if (result == false) {
+    throw new Error("Could not finalize the deletion of requested account");
+  }
+
+  return;
 }

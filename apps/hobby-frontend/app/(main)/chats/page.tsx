@@ -71,7 +71,7 @@ export default function ChatsPage() {
         </div>
       </div>
 
-      <NewChatModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <NewChatModal open={modalOpen} onCloseAction={() => setModalOpen(false)} />
     </div>
   );
 }
