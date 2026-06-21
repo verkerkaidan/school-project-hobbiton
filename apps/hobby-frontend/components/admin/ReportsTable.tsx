@@ -7,6 +7,7 @@ import {
   AlertCircle,
   ChevronDown,
   FileImage,
+  SquarePen,
   InboxIcon,
   RefreshCw,
   Trash2,
@@ -16,8 +17,9 @@ import { getReportsByStatus, updateReportStatus } from "@/lib/adminClient";
 import { getReportedFiles } from "@/queries/getReportedFiles";
 import type { Report, ReportedFile, ReportStatus } from "@/types/reports";
 import { ALL_STATUSES, REASON_LABELS, STATUS_CONFIG } from "@/types/reports";
-import { DeleteConfirmModal } from "@/components/admin/DeleteConfirmModal";
+import { DeletePostsConfirmModal } from "@/components/admin/DeletePostsConfirmModal";
 import { ImageReportCard } from "@/components/admin/ImageReportCard";
+import {DeleteUserConfirmModal} from "@/components/admin/DeleteUserConfirmModal";
 
 type ReportTypeTab = "users" | "posts";
 type FilterTab = ReportStatus | "ALL";
@@ -39,15 +41,11 @@ export const ReportsTable = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  // View media modal state
-  const [viewMediaOpen, setViewMediaOpen] = useState(false);
-  const [viewMediaItems, setViewMediaItems] = useState<ReportedFile[]>([]);
-  const [viewMediaLoading, setViewMediaLoading] = useState(false);
-
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<{
     userId: string;
     username: string;
+    type: "posts" | "account";
   } | null>(null);
 
   // Post reports (files) state
@@ -100,22 +98,6 @@ export const ReportsTable = () => {
       // silently revert if needed
     } finally {
       setUpdatingId(null);
-    }
-  };
-
-  const handleViewFiles = async () => {
-    setViewMediaLoading(true);
-    setViewMediaItems([]);
-    try {
-      const media = await getReportedFiles();
-      setViewMediaItems(media ?? []);
-      setViewMediaOpen(true);
-    } catch (e) {
-      console.error("Failed to fetch reported media", e);
-      setViewMediaItems([]);
-      setViewMediaOpen(true);
-    } finally {
-      setViewMediaLoading(false);
     }
   };
 
@@ -279,13 +261,20 @@ export const ReportsTable = () => {
                         report={report}
                         isUpdating={updatingId === report.id}
                         onStatusChange={handleStatusChange}
+                        onDeleteUser={() =>
+                          setDeleteTarget({
+                            userId: report.target,
+                            username: report.targetUsername ?? report.target,
+                            type: "account"
+                          })
+                        }
                         onDeletePosts={() =>
                           setDeleteTarget({
                             userId: report.target,
                             username: report.targetUsername ?? report.target,
+                            type: "posts"
                           })
                         }
-                        onViewFiles={handleViewFiles}
                       />
                     ))}
                   </motion.div>
@@ -352,9 +341,21 @@ export const ReportsTable = () => {
         )}
       </AnimatePresence>
 
-      {/* ─── Delete Modal ─── */}
-      <DeleteConfirmModal
-        isOpen={!!deleteTarget}
+      {/* ─── Delete Posts Modal ─── */}
+      <DeletePostsConfirmModal
+        isOpen={!!deleteTarget && deleteTarget.type == "posts"}
+        targetUserId={deleteTarget?.userId ?? ""}
+        targetUsername={deleteTarget?.username ?? ""}
+        onClose={() => setDeleteTarget(null)}
+        onActionComplete={() => {
+          setDeleteTarget(null);
+          fetchReports();
+        }}
+      />
+
+      {/* ─── Delete User Modal ─── */}
+      <DeleteUserConfirmModal
+        isOpen={!!deleteTarget && deleteTarget.type == "account"}
         targetUserId={deleteTarget?.userId ?? ""}
         targetUsername={deleteTarget?.username ?? ""}
         onClose={() => setDeleteTarget(null)}
@@ -375,16 +376,16 @@ interface ReportRowProps {
   report: Report;
   isUpdating: boolean;
   onStatusChange: (id: string, status: ReportStatus) => void;
+  onDeleteUser: () => void;
   onDeletePosts: () => void;
-  onViewFiles: () => void;
 }
 
 const ReportRow = ({
   report,
   isUpdating,
   onStatusChange,
+  onDeleteUser,
   onDeletePosts,
-  onViewFiles,
 }: ReportRowProps) => {
   const statusCfg = STATUS_CONFIG[report.status];
   const formattedDate = report.createdAt
@@ -473,19 +474,20 @@ const ReportRow = ({
           <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-accent/60 pointer-events-none" />
         </div>
 
-        <button
-          onClick={onViewFiles}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-accent hover:bg-accent/10 transition-colors"
-          title={`View files for report ${report.id}`}
-        >
-          <InboxIcon className="w-3.5 h-3.5" />
-        </button>
-
         {/* Delete posts button */}
         <button
           onClick={onDeletePosts}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-accent hover:bg-accent/10 transition-colors"
           title={`Delete posts by @${report.targetUsername}`}
+        >
+          <SquarePen className="w-3.5 h-3.5" />
+        </button>
+
+        {/* Delete user button */}
+        <button
+          onClick={onDeleteUser}
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-accent/60 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          title={`Delete user @${report.targetUsername}`}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

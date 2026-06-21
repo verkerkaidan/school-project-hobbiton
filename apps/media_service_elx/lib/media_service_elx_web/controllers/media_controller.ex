@@ -68,16 +68,19 @@ Home of the first functions that are called when a request is coming in from api
   @params: connection, uuid
   @returns: {id: uuid} or {error: :error}
   """
-  def delete_instance(conn, %{"instance_id" => instance_id}) do
-    case @media_service.delete_single_instance(instance_id) do
-      {:ok, _id} ->
-        json(conn, %{id: instance_id})
-      {:error, reason} ->
-        Logger.error("MediaInstance could not be deleted", id: instance_id, reason: reason)
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: reason})
-    end
+  def delete_instances(conn, %{"instances" => instance_ids}) when is_list(instance_ids) do
+    results = Enum.map(instance_ids, fn instance_id ->
+      case @media_service.delete_single_instance(instance_id) do
+        {:ok, _id} ->
+          %{id: instance_id}
+        {:error, reason} ->
+          Logger.error("MediaInstance could not be deleted", id: instance_id, reason: reason)
+          nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+
+    json(conn, results)
   end
 
   @doc """

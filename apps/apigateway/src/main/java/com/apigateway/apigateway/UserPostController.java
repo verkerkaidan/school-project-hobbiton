@@ -1,5 +1,6 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.clients.InteractionClient;
 import com.apigateway.apigateway.clients.MediaClient;
 import com.apigateway.apigateway.clients.PostClient;
 import com.apigateway.apigateway.config.JwtUtil;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,12 +37,14 @@ public class UserPostController {
     private final MediaClient mediaClient;
     private final JwtUtil jwtUtil;
     private final PostAggregationService postAggregationService;
+    private final InteractionClient interactionClient;
 
-    public UserPostController(PostClient postClient, MediaClient mediaClient, JwtUtil jwtUtil, PostAggregationService postAggregationService) {
+    public UserPostController(PostClient postClient, MediaClient mediaClient, JwtUtil jwtUtil, PostAggregationService postAggregationService, InteractionClient interactionClient) {
         this.postClient = postClient;
         this.mediaClient = mediaClient;
         this.jwtUtil = jwtUtil;
         this.postAggregationService = postAggregationService;
+        this.interactionClient = interactionClient;
     }
 
     @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -150,10 +154,19 @@ public class UserPostController {
         }
 
         try {
+            List<UUID> references = new ArrayList<>();
+            references.add(postId);
+            interactionClient.deleteAllByReferences(references);
+        } catch (Exception e) {
+            log.error("[USERpOSTcONTROLLER deleteOwnPost] Interaction service could not be reached --- \n{}", e.getMessage());
+        }
+
+        try {
             postClient.deletePost(postId);
             if (post.getMediaInstanceSet() != null) {
-                for (MediaInstance instance : post.getMediaInstanceSet()) {
-                    mediaClient.deleteMediaInstance(instance.instanceId);
+                List<UUID> uuids = post.getMediaInstanceSet().stream().map((MediaInstance instance) -> instance.instanceId).toList();
+                if (!uuids.isEmpty()) {
+                    mediaClient.deleteMediaInstances(uuids);
                 }
             }
             log.info("[UserPostController] Post {} deleted successfully", postId);

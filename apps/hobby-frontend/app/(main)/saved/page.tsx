@@ -319,7 +319,7 @@ export default function SavedPage() {
 
                                     <SearchBar
                                         queryType={queryType}
-                                        onSearch={handleSearch}
+                                        onSearchAction={handleSearch}
                                         showBackButton={false}
                                     />
 

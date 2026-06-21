@@ -9,8 +9,8 @@ Model for when a user has reported a file
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "file_report" do
-    field :file_id, :binary
-    field :user_id, :binary
+    field :file_id, :binary_id
+    field :user_id, :binary_id
   end
 
   @doc false

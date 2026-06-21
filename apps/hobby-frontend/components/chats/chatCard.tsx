@@ -6,20 +6,20 @@ type ChatCardProps = {
   chatId: string;
   title: string;
   unreadCount?: number;
-  onOpen?: () => void;
+  onOpenAction?: () => void;
 };
 
 export default function ChatCard({
   chatId,
   title,
   unreadCount = 0,
-  onOpen,
+  onOpenAction,
 }: ChatCardProps) {
   return (
     <Link
       href={`/chats/${chatId}`}
       className="rounded-3xl border bg-background p-5 transition hover:bg-brand relative"
-      onClick={() => onOpen?.()}
+      onClick={() => onOpenAction?.()}
     >
       <p className="text-sm text-zinc-500">
         Chat

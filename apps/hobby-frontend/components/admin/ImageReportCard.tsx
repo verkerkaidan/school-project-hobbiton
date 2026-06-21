@@ -41,10 +41,6 @@ export const ImageReportCard = ({
   const [deleteModalOpen, setDeleteModal] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });

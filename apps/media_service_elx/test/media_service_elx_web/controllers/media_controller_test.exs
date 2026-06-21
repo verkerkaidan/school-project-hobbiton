@@ -127,24 +127,33 @@ defmodule MediaServiceElxWeb.MediaControllerTest do
   end
 
   # ---------------------------------------------------------------------------
-  # delete_instance/2  DELETE /api/media/file/:instance_id
+  # delete_instance/2  DELETE /api/media/file/?instances[]
   # ---------------------------------------------------------------------------
 
-  describe "delete_instance/2" do
-    test "returns the instance id on successful deletion", %{conn: conn} do
+  describe "delete_instances/2" do
+    test "returns deleted instance ids on successful deletion", %{conn: conn} do
       expect(MediaServiceElx.MediaServiceMock, :delete_single_instance, fn "inst-1" -> {:ok, "inst-1"} end)
 
-      conn = delete(conn, ~p"/api/media/file/inst-1")
+      conn = delete(conn, ~p"/api/media/file", %{"instances" => ["inst-1"]})
 
-      assert %{"id" => "inst-1"} = json_response(conn, 200)
+      assert [%{"id" => "inst-1"}] = json_response(conn, 200)
     end
 
-    test "returns 422 with error reason when deletion fails", %{conn: conn} do
+    test "omits failed deletions from the response", %{conn: conn} do
+      expect(MediaServiceElx.MediaServiceMock, :delete_single_instance, fn "inst-1" -> {:ok, "inst-1"} end)
       expect(MediaServiceElx.MediaServiceMock, :delete_single_instance, fn "inst-bad" -> {:error, :not_found} end)
 
-      conn = delete(conn, ~p"/api/media/file/inst-bad")
+      conn = delete(conn, ~p"/api/media/file", %{"instances" => ["inst-1", "inst-bad"]})
 
-      assert %{"error" => "not_found"} = json_response(conn, 422)
+      assert [%{"id" => "inst-1"}] = json_response(conn, 200)
+    end
+
+    test "returns empty list when all deletions fail", %{conn: conn} do
+      expect(MediaServiceElx.MediaServiceMock, :delete_single_instance, fn "inst-bad" -> {:error, :not_found} end)
+
+      conn = delete(conn, ~p"/api/media/file", %{"instances" => ["inst-bad"]})
+
+      assert [] = json_response(conn, 200)
     end
   end
 

@@ -9,8 +9,8 @@ Model for an instance referencing a media file
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "media_instances" do
-    field :file_id, :binary
-    field :owner_id, :binary
+    field :file_id, :binary_id
+    field :owner_id, :binary_id
   end
 
   @doc false

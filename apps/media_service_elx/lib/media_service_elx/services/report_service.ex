@@ -87,13 +87,14 @@ defmodule MediaServiceElx.ReportService do
     end
   end
 
+  def remove_all_reports([]), do: {:ok, []}
   @doc """
     Handles the removal of all given reports
     @params: [%FileReport{}]
     @returns: [{status: "ok", report_id} || {status: "error", reason: reason}]
   """
   def remove_all_reports(reports) do
-    Enum.map(reports, fn %FileReport{} = report ->
+    results = Enum.map(reports, fn %FileReport{} = report ->
       case delete_single_report(report.id) do
         {:ok, report_id} ->
           %{report_id: report_id, status: "ok"}
@@ -101,6 +102,8 @@ defmodule MediaServiceElx.ReportService do
           %{status: "error", reason: reason}
       end
     end)
+
+    {:ok, results}
   end
 
   @doc """
