@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **chore**: Added delete mapping for mass delete of user to chatClient
 
 ### Fixed
+- **fix**: docker
 - **hotfix**: remove --remove-orphans
 
 ## [1.54.8] - 2026-06-21

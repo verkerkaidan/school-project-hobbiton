@@ -571,7 +571,11 @@ deploy:
       docker compose -f docker-compose-prod.yml --profile docs up -d || DOCS_EXIT=\$?
       [ \$DOCS_EXIT -ne 0 ] && echo "ERROR: docs/docs-proxy failed to start (exit \$DOCS_EXIT)."
 
-      # 4. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
+      # 4. Generate Promtail file_sd targets from running containers
+      mkdir -p /tmp/promtail-targets
+      bash logging-monitor/generate-promtail-targets.sh /tmp/promtail-targets
+
+      # 5. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
       LOGGING_EXIT=0
       docker compose -f docker-compose-prod.yml --profile logging-monitor up -d || LOGGING_EXIT=\$?
       [ \$LOGGING_EXIT -ne 0 ] && echo "ERROR: logging-monitor services failed to start (exit \$LOGGING_EXIT)."
