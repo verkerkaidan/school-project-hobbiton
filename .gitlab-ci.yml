@@ -573,7 +573,7 @@ deploy:
 
       # 4. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
       LOGGING_EXIT=0
-      docker compose -f docker-compose-prod.yml --profile logging-monitor up -d --remove-orphans || LOGGING_EXIT=\$?
+      docker compose -f docker-compose-prod.yml --profile logging-monitor up -d || LOGGING_EXIT=\$?
       [ \$LOGGING_EXIT -ne 0 ] && echo "ERROR: logging-monitor services failed to start (exit \$LOGGING_EXIT)."
 
       # Fail the pipeline if any group failed
