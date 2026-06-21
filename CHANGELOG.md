@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: aidan docs enhancements
+
 ## [1.54.5] - 2026-06-20
 
 ### Changed

@@ -24,6 +24,8 @@ sidebar_position: 2
   - connects to PostgreSQL and creates required tables/indexes.
 - `internal/auth`
   - validates JWTs used by user-facing HTTP endpoints and WebSocket connections.
+- `internal/metrics`
+  - registers Prometheus counters and histograms, wraps every handler to record request count and duration, and exposes a `/metrics` endpoint.
 
 ## General Flow
 

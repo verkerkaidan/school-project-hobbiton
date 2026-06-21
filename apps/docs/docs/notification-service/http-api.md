@@ -9,6 +9,7 @@ sidebar_position: 3
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
 | `GET` | `/health` | none | Liveness check. |
+| `GET` | `/metrics` | none | Prometheus metrics endpoint. |
 | `GET` | `/ws?token=<jwt>` | JWT query param or bearer header | Upgrade to a WebSocket for live notification delivery. |
 | `POST` | `/notifications` | internal caller | Create one notification and push it to the recipient if connected. |
 | `POST` | `/notifications/batch` | internal caller | Create multiple `USER_POST` notifications for subscribed recipients. |

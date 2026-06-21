@@ -24,6 +24,8 @@ sidebar_position: 2
   - validates JWTs for report submission.
 - `internal/models`
   - defines request and response structures.
+- `internal/metrics`
+  - registers Prometheus counters and histograms, wraps every handler to record request count and duration, and exposes a `/metrics` endpoint.
 
 ## General Flow
 
