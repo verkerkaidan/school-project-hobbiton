@@ -212,26 +212,6 @@ defmodule MediaServiceElx.MediaServiceTest do
   end
 
   # ---------------------------------------------------------------------------
-  # delete_all_instances/1
-  # ---------------------------------------------------------------------------
-
-  describe "delete_all_instances/1" do
-    test "returns ok status for each successfully deleted instance" do
-      media_file = MediaFilesFixtures.insert_media_file()
-      media_instance_1 = MediaInstancesFixtures.insert_media_instance(%{file_id: media_file.id})
-      media_instance_2 = MediaInstancesFixtures.insert_media_instance(%{file_id: media_file.id})
-
-      assert [
-               %{instance_id: instance_id_1, status: "ok"},
-               %{instance_id: instance_id_2, status: "ok"}
-             ] = MediaService.delete_all_instances([media_instance_1, media_instance_2])
-
-      assert instance_id_1 == media_instance_1.id
-      assert instance_id_2 == media_file.id
-    end
-  end
-
-  # ---------------------------------------------------------------------------
   # banned?/1
   # ---------------------------------------------------------------------------
 

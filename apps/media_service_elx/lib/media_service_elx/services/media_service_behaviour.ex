@@ -17,9 +17,6 @@ defmodule MediaServiceElx.MediaServiceBehaviour do
   @callback delete_single_instance(instance_id :: String.t()) ::
               {:ok, String.t()} | {:error, atom()}
 
-  @callback delete_all_instances(instances :: any()) ::
-              [{String.t(), String.t()}]
-
   @callback banned?(hash :: binary) ::
               true | false
 

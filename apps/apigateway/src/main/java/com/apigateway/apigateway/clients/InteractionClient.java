@@ -42,6 +42,9 @@ public interface InteractionClient {
     @PostMapping("/interaction/likes/batch")
     Set<UUID> batchDoesUserLike(@RequestParam("userId") UUID userId, @RequestBody List<UUID> referenceIds);
 
+    @DeleteMapping("/interaction/user/{userId}")
+    void deleteUser(@PathVariable UUID userId);
+
     /** For each of the given post Ids, all interaction is deleted*/
     @DeleteMapping("/interaction/post")
     List<UUID> deleteAllByReferences(@RequestBody List<UUID> uuids);

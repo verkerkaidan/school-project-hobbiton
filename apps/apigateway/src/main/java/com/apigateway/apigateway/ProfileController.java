@@ -1,5 +1,6 @@
 package com.apigateway.apigateway;
 
+import com.apigateway.apigateway.enums.UserDeleteOrigin;
 import com.apigateway.apigateway.modelDtos.media.MediaDTO;
 import com.apigateway.apigateway.modelDtos.profile.UpdateProfileDTO;
 import com.apigateway.apigateway.models.AdminProfileSummaryResponse;
@@ -10,6 +11,7 @@ import com.apigateway.apigateway.models.ProfileResponse;
 import com.apigateway.apigateway.clients.ProfileClient;
 import com.apigateway.apigateway.service.MediaService;
 import com.apigateway.apigateway.service.ProfileAggregationService;
+import com.apigateway.apigateway.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -33,11 +36,13 @@ public class ProfileController {
     private final ProfileAggregationService profileAggregationService;
     private final MediaService mediaService;
     private final ProfileClient profileClient;
+    private final UserService userService;
 
 
-    public ProfileController(ProfileAggregationService profileAggregationService, MediaService mediaService, ProfileClient profileClient) {
+    public ProfileController(ProfileAggregationService profileAggregationService, MediaService mediaService, UserService userService, ProfileClient profileClient) {
         this.profileAggregationService = profileAggregationService;
         this.mediaService = mediaService;
+        this.userService = userService;
         this.profileClient = profileClient;
     }
 
@@ -222,5 +227,13 @@ public class ProfileController {
     @GetMapping(value = "/search-profiles/{query}")
     public List<AdminProfileSummaryResponse> fuzzySearchProfilesByUsername(@PathVariable String query) {
         return profileAggregationService.fuzzySearchProfilesByUsername(query);
+    }
+
+    @DeleteMapping(value = "/delete-own-profile/{userId}")
+    public ResponseEntity<Boolean> deleteUser(
+            @RequestHeader Map<String, String> headers,
+            @PathVariable UUID userId
+    ) {
+        return ResponseEntity.ok(userService.deleteUser(userId, headers, UserDeleteOrigin.USER));
     }
 }

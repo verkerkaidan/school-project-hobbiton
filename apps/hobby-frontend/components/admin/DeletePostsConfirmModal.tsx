@@ -14,7 +14,7 @@ import { getUserPosts } from "@/queries/getProfile";
 import { deletePost, deleteAllUserPosts } from "@/lib/adminClient";
 import type { Post } from "@/types/posts";
 
-interface DeleteConfirmModalProps {
+interface DeletePostsConfirmModalProps {
   isOpen: boolean;
   targetUserId: string;
   targetUsername: string;
@@ -24,13 +24,13 @@ interface DeleteConfirmModalProps {
 
 type Stage = "list" | "confirm";
 
-export const DeleteConfirmModal = ({
+export const DeletePostsConfirmModal = ({
   isOpen,
   targetUserId,
   targetUsername,
   onClose,
   onActionComplete,
-}: DeleteConfirmModalProps) => {
+}: DeletePostsConfirmModalProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState<Stage>("list");

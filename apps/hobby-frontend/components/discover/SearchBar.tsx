@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function SearchBar({
-                                      onSearch,
+                                      onSearchAction,
                                       queryType,
-                                      onBack,
+                                      onBackAction,
                                       showBackButton = true, // Nieuwe prop met default op true
                                   }: {
-    onSearch: (query: string) => void;
+    onSearchAction: (query: string) => void;
     queryType: string;
-    onBack?: () => void; // Nu optioneel gemaakt
+    onBackAction?: () => void; // Nu optioneel gemaakt
     showBackButton?: boolean;
 }) {
     const [query, setQuery] = useState("");
@@ -23,7 +23,7 @@ export default function SearchBar({
             return;
         }
         setError("");
-        onSearch(query);
+        onSearchAction(query);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,7 +46,7 @@ export default function SearchBar({
                 <button
                     type="button"
                     className="self-start glass-card glass-card-hover px-6 py-2 rounded-xl shadow-lg text-base font-semibold focus:outline-none focus:ring-2 focus:ring-brand mb-2"
-                    onClick={onBack}
+                    onClick={onBackAction}
                 >
                     ← Back
                 </button>

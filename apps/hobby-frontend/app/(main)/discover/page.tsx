@@ -117,7 +117,7 @@ export default function DiscoverPage() {
             {loading && <Loading/>}
             {!loading && step === "select" && <DiscoverStepSelector onSelect={handleSelect}/>}
             {!loading && step === "search" && (
-                <SearchBar onSearch={handleSearch} queryType={queryType} onBack={handleBack}/>
+                <SearchBar onSearchAction={handleSearch} queryType={queryType} onBackAction={handleBack}/>
             )}
             {!loading && step === "results" && (
                 <ResultsList
