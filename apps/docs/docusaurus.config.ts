@@ -48,6 +48,12 @@ const config: Config = {
           position: "left",
           label: "Docs",
         },
+        {
+          href: "pathname:///hobbithon-docs.pdf",
+          label: "Download PDF",
+          position: "right",
+          target: "_self",
+        },
       ],
     },
     footer: {

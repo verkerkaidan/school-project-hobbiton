@@ -25,7 +25,7 @@ export default function Home(): JSX.Element {
         </p>
         <Link
           className="button button--primary button--lg"
-          to="/docs/api-gateway"
+          to="/docs"
         >
           Browse the docs
         </Link>

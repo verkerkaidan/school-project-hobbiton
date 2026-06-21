@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "npm",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["docusaurus", "serve"],
+      "port": 3001,
+      "cwd": "apps/docs",
+      "autoPort": true
+    }
+  ]
+}
