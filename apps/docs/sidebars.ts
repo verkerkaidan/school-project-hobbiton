@@ -2,6 +2,7 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 const sidebars: SidebarsConfig = {
   mainSidebar: [
+    "introduction",
     {
       type: "category",
       label: "Services",

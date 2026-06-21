@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.54.7] - 2026-06-21
+
+### Changed
+- **chore**: Docs to PDF export
+
 ## [1.54.6] - 2026-06-21
 
 ### Changed
