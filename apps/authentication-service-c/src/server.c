@@ -448,12 +448,19 @@ static void handle_client_fd(int client) {
 
     char *headers = tracked_strndup(buffer, headers_len);
 
-    /* Parse Content-Length */
+    /* Parse Content-Length (case-insensitive HTTP header) */
     int content_length = 0;
 
-    char *cl = strstr(headers, "Content-Length:");
+    char *cl = NULL;
+    for (int attempt = 0; attempt < 4; attempt++) {
+        const char *patterns[] = {"Content-Length:", "content-length:", "CONTENT-LENGTH:", "Content-length:"};
+        cl = strstr(headers, patterns[attempt]);
+        if (cl) break;
+    }
     if (cl) {
         sscanf(cl, "Content-Length: %d", &content_length);
+        /* also try as lower-case */
+        if (content_length == 0) sscanf(cl, "content-length: %d", &content_length);
     }
 
     char *body = NULL;
@@ -577,7 +584,7 @@ static void handle_client_fd(int client) {
                          new_id, token ? token : "");
 
                 send_response(client, 200, "OK", out, "application/json");
-                free(token);
+                (free)(token);
                 }
             }
         free(email);
@@ -601,7 +608,7 @@ static void handle_client_fd(int client) {
                      id, token ? token : "");
 
             send_response(client, 200, "OK", out, "application/json");
-            free(token);
+            (free)(token);
         }
         free(email);
         free(password);
@@ -633,8 +640,8 @@ static void handle_client_fd(int client) {
                 free(newEmail);
             }
             free(token);
-            free(userId);
-            free(roles_csv);
+            (free)(userId);
+            (free)(roles_csv);
         }
     }
     else if (strcmp(method, "PUT") == 0 && strcmp(path, "/api/auth/password") == 0) {
@@ -668,8 +675,8 @@ static void handle_client_fd(int client) {
                 free(newPassword);
             }
             free(token);
-            free(userId);
-            free(roles_csv);
+            (free)(userId);
+            (free)(roles_csv);
         }
     }
     else if (strcmp(method, "DELETE") == 0 && strncmp(path, "/api/auth/delete/", 17) == 0) {
@@ -687,7 +694,7 @@ static void handle_client_fd(int client) {
                     else {send_response(client, 200, "OK", "{\"result\":\"Successfully removed user\"}", "application/json");}
                 }
             }
-            free(userId); free(roles_csv); free(token);
+            (free)(userId); (free)(roles_csv); free(token);
         }
     }
     else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/admin/new/", 16) == 0) {
@@ -708,7 +715,7 @@ static void handle_client_fd(int client) {
                     }
                 }
             }
-            free(token); free(callerId); free(caller_roles);
+            free(token); (free)(callerId); (free)(caller_roles);
         }
     }
     else if (strcmp(method, "PUT") == 0 && strncmp(path, "/api/auth/staff/new/", 16) == 0) {
@@ -729,7 +736,7 @@ static void handle_client_fd(int client) {
                     }
                 }
             }
-            free(token); free(callerId); free(caller_roles);
+            free(token); (free)(callerId); (free)(caller_roles);
         }
     }
     else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/Oauth/dashboard") == 0) {
@@ -742,7 +749,7 @@ static void handle_client_fd(int client) {
                 char body_out[512]; snprintf(body_out, sizeof(body_out), "{\"message\":\"Welcome, %s\",\"roles\":\"%s\"}", userId, roles ? roles : "");
                 send_response(client, 200, "OK", body_out, "application/json");
             }
-            free(token); free(userId); free(roles);
+            free(token); (free)(userId); (free)(roles);
         }
     }
     else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/Oauth/me") == 0) {
@@ -763,8 +770,8 @@ static void handle_client_fd(int client) {
         }
 
         free(token);
-        free(id);
-        free(roles);
+        (free)(id);
+        (free)(roles);
     }
 
     else if (strcmp(method, "GET") == 0 && strcmp(path, "/api/auth/metrics") == 0) {

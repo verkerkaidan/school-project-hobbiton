@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { authHeaders } from "@/lib/adminClient";
 import {
     getLists,
     createList,
@@ -113,7 +114,7 @@ export default function SavedPage() {
                 `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: authHeaders({ "Content-Type": "application/json" }),
                     body: JSON.stringify({ type: queryType.toUpperCase(), query, maxResults: 10 }),
                 }
             );

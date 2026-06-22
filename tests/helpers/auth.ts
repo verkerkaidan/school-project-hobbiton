@@ -218,9 +218,9 @@ export async function loginViaAPI(
   email: string,
   password: string
 ): Promise<{ token: string; userId: string } | null> {
-  const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:23738';
+  const AUTH_URL = process.env.NEXT_PUBLIC_AUTHENTICATION_URL || 'http://localhost:21525';
   try {
-    const res = await request.post(`${GATEWAY_URL}/api/auth/login`, {
+    const res = await request.post(`${AUTH_URL}/api/auth/login`, {
       data: { email, password },
       headers: { 'Content-Type': 'application/json' },
     });

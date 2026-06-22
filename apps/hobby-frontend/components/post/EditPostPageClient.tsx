@@ -12,6 +12,7 @@ import { LinkedItem } from "@/types/LinkedItem";
 import { Post, Gym, Reading, LinkedHobbyItem, Exercise } from "@/types/posts";
 import HobbyType from "@/types/enums";
 import Cookies from "js-cookie";
+import { authHeaders } from "@/lib/adminClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { FEED_QUERY_KEY } from "@/components/feed/Feed";
 
@@ -120,7 +121,7 @@ export default function EditPostPageClient({ post }: Props) {
         `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ type: queryType.toUpperCase(), query, maxResults: 10 }),
         }
       );

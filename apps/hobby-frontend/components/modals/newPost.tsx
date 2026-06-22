@@ -11,6 +11,7 @@ import SearchBar from "@/components/discover/SearchBar";
 import ResultsList, { ResultItem } from "@/components/discover/ResultsList";
 import { BaseCreatePost, CreateGymPost, CreatePost, CreateReadingPost, ModalProps } from "@/types/interfaces";
 import Cookies from "js-cookie";
+import { authHeaders } from "@/lib/adminClient";
 import HobbyType from "@/types/enums";
 import { motion, AnimatePresence } from "framer-motion";
 import { useErrorToast } from "@/components/ui/ErrorToastProvider";
@@ -160,7 +161,7 @@ export function CreatePostModal({ isOpen, onClose }: ModalProps) {
         `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ type: queryType.toUpperCase(), query, maxResults: 10 }),
         }
       );

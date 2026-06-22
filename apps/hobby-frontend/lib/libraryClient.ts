@@ -1,3 +1,5 @@
+import { authHeaders } from "@/lib/adminClient";
+
 const GATEWAY_URL =
     process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ??
     "http://localhost:23738";
@@ -5,7 +7,9 @@ const GATEWAY_URL =
 const API_BASE = `${GATEWAY_URL}/api/library`;
 
 export async function getLists(userId: string) {
-    const res = await fetch(`${API_BASE}/users/${userId}/lists`);
+    const res = await fetch(`${API_BASE}/users/${userId}/lists`, {
+        headers: authHeaders(),
+    });
     if (!res.ok) throw new Error("Failed to fetch lists");
     return res.json();
 }
@@ -17,7 +21,7 @@ export async function createList(
 ) {
     const res = await fetch(`${API_BASE}/users/${userId}/lists`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ name, description }),
     });
 
@@ -34,7 +38,7 @@ export async function updateList(
 ) {
     const res = await fetch(`${API_BASE}/users/${userId}/lists/${listId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ name, description }),
     });
 
@@ -45,7 +49,7 @@ export async function updateList(
 export async function deleteList(userId: string, listId: string) {
     const res = await fetch(
         `${API_BASE}/users/${userId}/lists/${listId}`,
-        { method: "DELETE" }
+        { method: "DELETE", headers: authHeaders() }
     );
 
     if (!res.ok) throw new Error("Failed to delete list");
@@ -54,7 +58,8 @@ export async function deleteList(userId: string, listId: string) {
 
 export async function getResolvedItems(listId: string) {
     const res = await fetch(
-        `${API_BASE}/lists/${listId}/items/resolved`
+        `${API_BASE}/lists/${listId}/items/resolved`,
+        { headers: authHeaders() }
     );
 
     if (!res.ok) throw new Error("Failed to fetch items");
@@ -66,7 +71,7 @@ export async function addItem(listId: string, body: any) {
         `${API_BASE}/lists/${listId}/items`,
         {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(body),
         }
     );
@@ -78,7 +83,7 @@ export async function addItem(listId: string, body: any) {
 export async function removeItem(listId: string, itemId: string) {
     const res = await fetch(
         `${API_BASE}/lists/${listId}/items/${itemId}`,
-        { method: "DELETE" }
+        { method: "DELETE", headers: authHeaders() }
     );
 
     if (!res.ok) throw new Error("Failed to remove item");
@@ -88,7 +93,7 @@ export async function removeItem(listId: string, itemId: string) {
 export async function reorderItems(listId: string, itemIds: string[]) {
     const res = await fetch(`${API_BASE}/lists/${listId}/items/reorder`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ itemIds }),
     });
 
@@ -102,7 +107,7 @@ export async function searchLibrary(queryType: string, query: string): Promise<a
         `${process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE}/api/library/search`,
         {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: authHeaders({"Content-Type": "application/json"}),
             body: JSON.stringify({type: queryType, query, maxResults: 10}),
         }
     );
