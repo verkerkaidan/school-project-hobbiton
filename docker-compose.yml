@@ -23,7 +23,9 @@ services:
       - microservices-network
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    build:
+      context: ./favicons
+      dockerfile: Dockerfile.pgadmin
     restart: always
     cpus: 0.5
     mem_limit: 256m
@@ -33,7 +35,6 @@ services:
       - "8000:80"
     volumes:
       - ./pgadmin-data:/var/lib/pgadmin
-      - ./docker/pgadmin/HobbitonDb.png:/pgadmin4/web/favicon.ico:ro
     networks:
       - microservices-network
 
@@ -454,7 +455,9 @@ services:
       - middleware-service
 
   grafana:
-    image: grafana/grafana:latest
+    build:
+      context: ./favicons
+      dockerfile: Dockerfile.grafana
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -463,8 +466,6 @@ services:
       - grafana_data:/var/lib/grafana
       - ./logging-monitor/grafana/datasources:/etc/grafana/provisioning/datasources:ro
       - ./logging-monitor/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./docker/grafana/HobbitonLogs.png:/usr/share/grafana/public/img/fav32.png:ro
-      - ./docker/grafana/HobbitonLogs.png:/usr/share/grafana/public/img/apple-touch-icon.png:ro
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
