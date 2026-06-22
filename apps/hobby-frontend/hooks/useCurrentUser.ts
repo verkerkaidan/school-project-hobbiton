@@ -70,7 +70,7 @@ export function useCurrentUser(): CurrentUser | null {
           token: token,
         });
       })
-      .catch(console.error);
+      .catch(() => {});
   }, []);
 
   return user;

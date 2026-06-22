@@ -45,7 +45,6 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
   }
 
   useEffect(() => {
-    console.log(userHasBeenConnected)
     if (!userHasBeenConnected) return;
 
     if (!isConnected) {

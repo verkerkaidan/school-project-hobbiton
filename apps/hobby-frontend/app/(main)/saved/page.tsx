@@ -62,14 +62,14 @@ export default function SavedPage() {
         if (!userId) return;
         getLists(userId)
             .then((res) => setLists(res.data ?? res))
-            .catch(console.error);
+            .catch(() => {});
     }, [userId]);
 
     useEffect(() => {
         if (!activeList) return;
         getResolvedItems(activeList.id)
             .then((res) => setItems(res.data ?? res))
-            .catch(console.error);
+            .catch(() => {});
 
         // Reset search panel state when switching lists
         setSearchOpen(false);
@@ -88,9 +88,7 @@ export default function SavedPage() {
             setNewListName("");
             setNewListDesc("");
             setActiveList(newList);
-        } catch (err) {
-            console.error("Failed to create list:", err);
-        }
+        } catch (err) {}
     }
 
     async function handleDeleteList(listId: string) {
@@ -101,9 +99,7 @@ export default function SavedPage() {
                 setActiveList(null);
                 setItems([]);
             }
-        } catch (err) {
-            console.error("Failed to delete list:", err);
-        }
+        } catch (err) {}
     }
 
     // Inline Search Functionality
@@ -165,9 +161,7 @@ export default function SavedPage() {
             // Refresh the list to catch detailed attributes automatically
             const res = await getResolvedItems(activeList.id);
             setItems(res.data ?? res);
-        } catch (err) {
-            console.error("Failed to add item to list:", err);
-        }
+        } catch (err) {}
     }
 
     async function handleRemoveItem(item: SavedItem) {
@@ -177,9 +171,7 @@ export default function SavedPage() {
         try {
             await removeItem(activeList.id, itemId);
             setItems((prev) => prev.filter((i) => (i.resultType === "exercise" ? i.exerciseId : i.id) !== itemId));
-        } catch (err) {
-            console.error("Failed to remove item:", err);
-        }
+        } catch (err) {}
     }
 
     async function moveItem(index: number, direction: "up" | "down") {
@@ -195,9 +187,7 @@ export default function SavedPage() {
         const orderedIds = updatedItems.map((i) => (i.resultType === "exercise" ? i.exerciseId : i.id));
         try {
             await reorderItems(activeList.id, orderedIds);
-        } catch (err) {
-            console.error("Failed to reorder items:", err);
-        }
+        } catch (err) {}
     }
 
     if (!user) return null;

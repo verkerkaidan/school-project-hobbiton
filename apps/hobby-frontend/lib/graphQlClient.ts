@@ -39,7 +39,6 @@ export async function gqlRequest<T>(
 
   const { data, errors } = json;
   if (errors?.length) {
-    console.error("GraphQL errors:", JSON.stringify(errors, null, 2));
     throw new Error(errors[0].message);
   }
 

@@ -40,7 +40,7 @@ export const Feed = () => {
     const newIds = lastPage.map((p) => p.id);
     batchDoesLikeExist(currentUser.id, newIds)
       .then((liked) => setLikedIds((prev) => new Set([...prev, ...liked])))
-      .catch(console.error);
+      .catch(() => {});
   }, [data?.pages.length, currentUser]);
 
   // Infinite scroll sentinel.

@@ -125,7 +125,6 @@ export function ProfileView({
           setIsSubscribed(subscription.subscribed);
         }
       } catch (error) {
-        console.error("[ProfileView] Failed to load profile:", error);
       } finally {
         setLoading(false);
       }
@@ -145,7 +144,7 @@ export function ProfileView({
             if (isOwnProfile) setTargetFollowing(data);
             setCurrentUserFollowingLoaded(true);
           })
-          .catch(console.error)
+          .catch(() => {})
       : Promise.resolve();
 
   // Opens the followers modal; fetches followers and the current user's following
@@ -154,7 +153,7 @@ export function ProfileView({
     setShowFollowersModal(true);
     const fetchFollowers =
       followers.length === 0
-        ? getFollowers(resolvedUserId).then(setFollowers).catch(console.error)
+        ? getFollowers(resolvedUserId).then(setFollowers).catch(() => {})
         : Promise.resolve();
     setLoadingFollowers(true);
     await Promise.all([fetchFollowers, ensureCurrentUserFollowing()]);
@@ -169,7 +168,7 @@ export function ProfileView({
       !isOwnProfile && targetFollowing.length === 0
         ? getFollowing(resolvedUserId)
             .then(setTargetFollowing)
-            .catch(console.error)
+            .catch(() => {})
         : Promise.resolve();
     setLoadingFollowing(true);
     await Promise.all([fetchTargetFollowing, ensureCurrentUserFollowing()]);

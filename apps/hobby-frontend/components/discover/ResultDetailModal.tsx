@@ -101,15 +101,13 @@ export default function ResultDetailModal({
                                 });
                                 countsMap[list.id] = matches.length;
                             }
-                        } catch (err) {
-                            console.error(`Failed loading count for list ${list.id}:`, err);
-                        }
+                        } catch (err) {}
                     })
                 );
 
                 setSavedCounts(countsMap);
             })
-            .catch((err) => console.error("Error loading lists:", err))
+            .catch((err) => {})
             .finally(() => setLoadingCounts(false));
     }, [showSave, userId, currentTargetId]);
 
@@ -140,9 +138,7 @@ export default function ResultDetailModal({
                 ...prev,
                 [listId]: (prev[listId] || 0) + 1
             }));
-        } catch (err) {
-            console.error("Error saving item to list:", err);
-        }
+        } catch (err) {}
     }
 
     return (

@@ -32,7 +32,6 @@ export const UserPosts = ({
       })
       .catch((error) => {
         if (cancelled) return;
-        console.error("Failed to load user posts:", error);
         setPosts([]);
         onPostsLoaded?.(0);
       })
