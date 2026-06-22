@@ -572,30 +572,24 @@ deploy:
       [ \$DOCS_EXIT -ne 0 ] && echo "ERROR: docs/docs-proxy failed to start (exit \$DOCS_EXIT)."
 
       # 4. Generate Promtail file_sd targets from running containers
-      # (inline — the script file doesn't exist on the remote host)
+      # Uses docker ps (no sudo needed — student user has Docker socket access)
       mkdir -p /tmp/promtail-targets
-      PY_CMD='python3'
-      command -v python3 >/dev/null 2>&1 || PY_CMD='python'
-      test -r /var/lib/docker/containers/ 2>/dev/null || PY_CMD="sudo \$PY_CMD"
-      \$PY_CMD -c "
-      import json, os, glob
-      t = []
-      c = '/var/lib/docker/containers'
-      o = {'middleware-service': 'apigateway-service', 'media-service-elx': 'media-service'}
-      for p in glob.glob(c + '/*/config.v2.json'):
-          try:
-              d = json.load(open(p))
-              n = d.get('Name', '').lstrip('/')
-              n = o.get(n, n)
-              cid = os.path.basename(os.path.dirname(p))
-              l = os.path.join(c, cid, cid + '-json.log')
-              if n and os.path.exists(l):
-                  t.append({'targets': ['localhost'], 'labels': {'__path__': l, 'container': n, 'stream': 'stdout'}})
-          except:
-              pass
-      json.dump(t, open('/tmp/promtail-targets/containers.json', 'w'), indent=2)
-      print('Generated', len(t), 'targets')
-      "
+      printf '' > /tmp/promtail-targets/containers.json
+      sep=''
+      docker ps --format='{{.ID}} {{.Names}}' | while read id name; do
+          case "\$name" in
+              middleware-service) name="apigateway-service" ;;
+              media-service-elx) name="media-service" ;;
+          esac
+          log="/var/lib/docker/containers/\$id/\${id}-json.log"
+          if [ -f "\$log" ]; then
+              printf '%s{"targets":["localhost"],"labels":{"__path__":"%s","container":"%s","stream":"stdout"}}' "\$sep" "\$log" "\$name" >> /tmp/promtail-targets/containers.json
+              sep=','
+          fi
+      done
+      # Wrap in JSON array
+      sed -i 's/^/[/;s/$/]/' /tmp/promtail-targets/containers.json
+      echo "Generated targets"
 
       # 5. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
       LOGGING_EXIT=0
