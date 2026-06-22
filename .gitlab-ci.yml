@@ -458,7 +458,7 @@ deploy:
     - printf 'Host %s\n  StrictHostKeyChecking accept-new\n' "$DEPLOY_HOST" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
-    - scp -r docker-compose-prod.yml init-db.sh logging-monitor "$DEPLOY_USER@$DEPLOY_HOST:~/"
+    - scp -r docker-compose-prod.yml init-db.sh logging-monitor favicons "$DEPLOY_USER@$DEPLOY_HOST:~/"
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" bash << EOF
       set -e
