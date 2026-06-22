@@ -10,31 +10,33 @@
         </encoder>
     </appender>
 
-    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
-        <http>
-            <url>${LOKI_URL}/loki/api/v1/push</url>
-        </http>
-        <format>
-            <label>
-                <pattern>app=post-service,env=${APP_ENV},host=${HOSTNAME}</pattern>
-            </label>
-            <message>
-                <pattern>level=%level logger=%logger{36} thread=%thread | %msg%n</pattern>
-            </message>
-            <sortByTime>true</sortByTime>
-        </format>
-    </appender>
+    <if condition='!property("LOKI_URL").isEmpty()'>
+        <then>
+            <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+                <http>
+                    <url>${LOKI_URL}/loki/api/v1/push</url>
+                </http>
+                <format>
+                    <label>
+                        <pattern>app=post-service,env=${APP_ENV},host=${HOSTNAME}</pattern>
+                    </label>
+                    <message>
+                        <pattern>level=%level logger=%logger{36} thread=%thread | %msg%n</pattern>
+                    </message>
+                    <sortByTime>true</sortByTime>
+                </format>
+            </appender>
 
-    <!-- Always active -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-    </root>
-
-    <!-- Only attach Loki when the env var is present (non-empty LOKI_URL) -->
-    <springProfile name="!default &amp; !test">
-        <root level="INFO">
-            <appender-ref ref="LOKI"/>
-        </root>
-    </springProfile>
+            <root level="INFO">
+                <appender-ref ref="CONSOLE"/>
+                <appender-ref ref="LOKI"/>
+            </root>
+        </then>
+        <else>
+            <root level="INFO">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </else>
+    </if>
 
 </configuration>
