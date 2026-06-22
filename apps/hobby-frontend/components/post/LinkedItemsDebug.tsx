@@ -3,9 +3,6 @@
 import { LinkedHobbyItem } from "@/types/posts";
 
 export function LinkedItemsDebug({ items }: { items: LinkedHobbyItem[] | undefined }) {
-    console.log("🔗 linkedItems received by client:", items);
-    console.log("🔗 count:", items?.length ?? 0);
-
     if (!items?.length) {
         return <p className="text-xs text-red-400 mt-4">⚠️ No linked items (array empty or undefined)</p>;
     }
@@ -14,7 +11,6 @@ export function LinkedItemsDebug({ items }: { items: LinkedHobbyItem[] | undefin
         <div className="mt-6 space-y-3">
             <h2 className="text-lg font-semibold">Linked Items</h2>
             {items.map((item) => {
-                console.log("🎯 item:", item);
                 return (
                     <div key={item.hobbyId ?? item.externalId} className="flex items-center gap-3 border border-gray rounded p-3">
                         {item.imageUrl && (

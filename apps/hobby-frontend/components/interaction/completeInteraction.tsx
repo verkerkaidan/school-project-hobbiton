@@ -32,9 +32,7 @@ export default function CompleteInteraction({ post }: CompleteInteractionProps) 
             );
             setComments(completeComments);
             setLikes(freshPost.interaction.likes);
-        } catch (err) {
-            console.error("Error syncing interactions:", err);
-        }
+        } catch (err) {}
     }
 
     useEffect(() => {
@@ -49,7 +47,7 @@ export default function CompleteInteraction({ post }: CompleteInteractionProps) 
             setNewComment("");
             await syncInteraction();
         } catch (e) {
-            console.error(e);
+
         } finally {
             setIsSubmitting(false);
         }

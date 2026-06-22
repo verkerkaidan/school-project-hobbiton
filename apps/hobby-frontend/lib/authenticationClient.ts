@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 
 const BASE_URL = process.env.NEXT_PUBLIC_AUTHENTICATION_URL;
-console.log("[authClient] BASE_URL =", BASE_URL);
 
 export interface AuthResponse {
   token: string;

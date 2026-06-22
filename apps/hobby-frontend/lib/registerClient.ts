@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 const GATEWAY_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE;
 
 const BASE_URL = `${GATEWAY_URL}/api`;
-console.log("[authClient] BASE_URL =", BASE_URL);
 
 export async function register(
   email: string,

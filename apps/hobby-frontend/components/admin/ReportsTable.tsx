@@ -77,7 +77,6 @@ export const ReportsTable = () => {
       getReportedFiles()
         .then((files) => setPostReportsFiles(files ?? []))
         .catch((e) => {
-          console.error("Failed to fetch reported files for posts", e);
           setPostReportsFiles([]);
         })
         .finally(() => {
