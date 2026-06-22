@@ -1,11 +1,19 @@
+import Cookies from "js-cookie";
+
 const GATEWAY_URL =
     process.env.NEXT_PUBLIC_MIDDLEWARE_URL_CLIENTSIDE ?? "http://localhost:23738";
 
 const API_BASE = `${GATEWAY_URL}/api`;
 
+function authHeaders(): Record<string, string> {
+    const token = Cookies.get("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function toggleLike(userId: string, referenceId: string): Promise<boolean> {
     const res = await fetch(`${API_BASE}/interaction/${userId}/${referenceId}`, {
         method: "PUT",
+        headers: authHeaders(),
     });
 
     if (!res.ok) {
@@ -19,6 +27,7 @@ export async function toggleLike(userId: string, referenceId: string): Promise<b
 export async function doesLikeExist(userId:string, referenceId: string): Promise<boolean> {
     const res = await fetch(`${API_BASE}/interaction/${userId}/${referenceId}`, {
         method: "GET",
+        headers: authHeaders(),
     });
 
     if (!res.ok) {
@@ -37,7 +46,7 @@ export async function batchDoesLikeExist(userId: string, referenceIds: string[])
     if (!referenceIds.length) return new Set();
     const res = await fetch(`${API_BASE}/interaction/likes/batch?userId=${userId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(referenceIds),
     });
     if (!res.ok) return new Set();
@@ -48,9 +57,7 @@ export async function batchDoesLikeExist(userId: string, referenceIds: string[])
 export async function createComment(userId: string, referenceId: string, comment: string): Promise<string> {
     const res = await fetch(`${API_BASE}/interaction`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ userId, referenceId, comment }),
     });
 

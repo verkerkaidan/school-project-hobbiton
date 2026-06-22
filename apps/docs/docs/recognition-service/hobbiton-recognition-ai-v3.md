@@ -3,8 +3,8 @@ sidebar_position: 5
 ---
 # Hobbiton recognition AI
 
-AI image classification model for labeling images "car" or "no-car" for a content warning system in a student project social media app. <br>
-For the resulting model versions used in hobbiton, see the below gitlab repository: <br>
+AI image classification model for labeling images "car" or "no-car" for a content warning system in a student project social media app. <br />
+For the resulting model versions used in hobbiton, see the below gitlab repository: <br />
 https://gitlab.inf-hsleiden.nl/s1147087/my-model-artifacts/-/blob/main/README.md?ref_type=heads
 
 ### Generic imports

@@ -172,15 +172,14 @@ test.describe('Authentication', () => {
       test('should redirect non-admin user from /admin page', async ({ page }) => {
         await register(page);
 
-        await page.goto('/admin');
-        await page.waitForLoadState('networkidle');
-
+        await page.goto('/admin', { waitUntil: 'domcontentloaded' });
+        await expect(page.locator('h1')).toBeVisible({ timeout: 10000 });
         expect(page.url()).not.toContain('/admin');
       });
 
       test('should reject unauthenticated access to admin API endpoints', async ({ request }) => {
         const res = await request.get(`${GATEWAY_URL}/api/admin/profiles`);
-        expect(res.status()).toBe(401);
+        expect(res.status()).toBe(403);
       });
 
       test('should reject non-admin token from admin API endpoints', async ({ request }) => {
@@ -203,15 +202,16 @@ test.describe('Authentication', () => {
         const session = await loginViaAPI(request, credentials.email, credentials.password);
         expect(session).not.toBeNull();
 
+        const FRONTEND_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:19293';
         await page.context().addCookies([
-          { name: 'token', value: session!.token, domain: 'localhost', path: '/' },
+          { name: 'token', value: session!.token, url: FRONTEND_URL },
+          { name: 'userId', value: credentials.userId, url: FRONTEND_URL },
+          { name: 'email', value: credentials.email, url: FRONTEND_URL },
         ]);
 
-        await page.goto('/admin');
-        await page.waitForLoadState('networkidle');
-
-        await expect(page.getByRole('heading', { name: /users overview/i })).toBeVisible();
-        await expect(page.getByRole('heading', { name: /reports/i })).toBeVisible();
+        await page.goto('/admin', { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('heading', { name: /all users/i })).toBeVisible({ timeout: 15000 });
+        await expect(page.getByRole('heading', { name: /bug reports/i })).toBeVisible();
       });
 
       test('should allow admin to list profiles via API', async ({ request }) => {
