@@ -191,11 +191,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "sum(rate({container=\"interaction-service\"} |= `ERROR` [1m]))",
+          "expr": "sum(rate({app=\"interaction-service\"} |= `ERROR` [1m]))",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum(rate({container=\"interaction-service\"} |= `WARN` [1m]))",
+          "expr": "sum(rate({app=\"interaction-service\"} |= `WARN` [1m]))",
           "legendFormat": "WARN"
         }
       ],
@@ -213,7 +213,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 28 },
       "targets": [
         {
-          "expr": "{container=\"interaction-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
+          "expr": "{app=\"interaction-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
           "legendFormat": ""
         }
       ],
@@ -231,7 +231,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 40 },
       "targets": [
         {
-          "expr": "{container=\"interaction-service\"}",
+          "expr": "{app=\"interaction-service\"}",
           "legendFormat": ""
         }
       ],

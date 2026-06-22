@@ -180,7 +180,7 @@
       "gridPos": { "h": 6, "w": 12, "x": 0, "y": 21 },
       "targets": [
         {
-          "expr": "sum by (level) (rate({container=\"profile-service\"} |~ `(?i)(error|warn|fail|exception)` [1m]))",
+          "expr": "sum by (level) (rate({app=\"profile-service\"} |~ `(?i)(error|warn|fail|exception)` [1m]))",
           "legendFormat": "{{level}}"
         }
       ],
@@ -198,7 +198,7 @@
       "gridPos": { "h": 12, "w": 12, "x": 12, "y": 21 },
       "targets": [
         {
-          "expr": "{container=\"profile-service\"}",
+          "expr": "{app=\"profile-service\"}",
           "legendFormat": ""
         }
       ],
