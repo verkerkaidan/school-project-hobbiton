@@ -1,12 +1,13 @@
 {
   "name": "bpset-monorepo",
-  "version": "1.55.8",
+  "version": "1.55.9",
   "description": "BPSET",
   "private": true,
   "packageManager": "npm@10.9.0",
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "@types/pg": "^8.20.0"
   },
   "scripts": {
     "changelog": "node scripts/changelog-entry.mjs",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
+    "pg": "^8.22.0",
     "react": "^19.2.6"
   }
 }

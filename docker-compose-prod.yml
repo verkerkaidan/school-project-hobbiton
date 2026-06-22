@@ -360,6 +360,9 @@ services:
       - "21527:5672"
       - "11528:15672"
 
+    volumes:
+      - ./logging-monitor/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, logout, isLoggedIn, login } from './helpers/auth';
+import { register, logout, isLoggedIn, login, registerViaAPI, promoteToAdmin, loginViaAPI } from './helpers/auth';
 
 test.describe('Authentication', () => {
 
@@ -162,6 +162,82 @@ test.describe('Authentication', () => {
       await logout(page);
 
       expect(await isLoggedIn(page)).toBeFalsy();
+    });
+  });
+
+  test.describe('Admin', () => {
+    const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:23738';
+
+    test.describe('Authorization', () => {
+      test('should redirect non-admin user from /admin page', async ({ page }) => {
+        await register(page);
+
+        await page.goto('/admin');
+        await page.waitForLoadState('networkidle');
+
+        expect(page.url()).not.toContain('/admin');
+      });
+
+      test('should reject unauthenticated access to admin API endpoints', async ({ request }) => {
+        const res = await request.get(`${GATEWAY_URL}/api/admin/profiles`);
+        expect(res.status()).toBe(401);
+      });
+
+      test('should reject non-admin token from admin API endpoints', async ({ request }) => {
+        const { token } = await registerViaAPI(request);
+
+        const res = await request.get(`${GATEWAY_URL}/api/admin/profiles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        expect(res.status()).toBe(403);
+      });
+    });
+
+    test.describe('Admin Flow', () => {
+      test('should allow admin to access /admin page', async ({ page, request }) => {
+        const credentials = await registerViaAPI(request);
+        const promoted = await promoteToAdmin(credentials.userId);
+        test.skip(!promoted, 'Skipping: could not promote user to admin');
+
+        const session = await loginViaAPI(request, credentials.email, credentials.password);
+        expect(session).not.toBeNull();
+
+        await page.context().addCookies([
+          { name: 'token', value: session!.token, domain: 'localhost', path: '/' },
+        ]);
+
+        await page.goto('/admin');
+        await page.waitForLoadState('networkidle');
+
+        await expect(page.getByRole('heading', { name: /users overview/i })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /reports/i })).toBeVisible();
+      });
+
+      test('should allow admin to list profiles via API', async ({ request }) => {
+        const credentials = await registerViaAPI(request);
+        const promoted = await promoteToAdmin(credentials.userId);
+        test.skip(!promoted, 'Skipping: could not promote user to admin');
+
+        const session = await loginViaAPI(request, credentials.email, credentials.password);
+        expect(session).not.toBeNull();
+
+        const res = await request.get(`${GATEWAY_URL}/api/admin/profiles`, {
+          headers: { Authorization: `Bearer ${session!.token}` },
+        });
+
+        expect(res.status()).toBe(200);
+      });
+
+      test('should reject non-admin user from admin API even after promotion attempt fails', async ({ request }) => {
+        const { token } = await registerViaAPI(request);
+
+        const res = await request.get(`${GATEWAY_URL}/api/admin/profiles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        expect(res.status()).toBe(403);
+      });
     });
   });
 });
