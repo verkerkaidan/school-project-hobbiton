@@ -672,14 +672,14 @@ static void handle_client_fd(int client) {
             free(roles_csv);
         }
     }
-    else if (strcmp(method, "DELETE") == 0 && strncmp(path, "/api/auth/delete/", 16) == 0) {
+    else if (strcmp(method, "DELETE") == 0 && strncmp(path, "/api/auth/delete/", 17) == 0) {
         char *token = extract_bearer_token(headers);
         if (!token) { send_response(client, 401, "Unauthorized", "{\"error\":\"Missing token\"}", "application/json");}
         else {
             char *userId = NULL; char *roles_csv = NULL;
             if (jwt_validate_and_extract(token, &userId, &roles_csv) != 0) {send_response(client, 401, "Unauthorized", "\"error\":\"Invalid token\"}", "application/json");}
             else {
-                char *targetId = path + 16; int is_self = strcmp(userId, targetId) == 0; int is_admin = 0;
+                char *targetId = path + 17; int is_self = strcmp(userId, targetId) == 0; int is_admin = 0;
                 if (roles_csv && strstr(roles_csv, "ADMIN") != NULL) { is_admin = 1;}
                 if (!is_self && !is_admin) {send_response(client, 403, "Forbidden",  "{\"error\":\"Not authorized\"}", "application/json"); }
                 else {
