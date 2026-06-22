@@ -1,2 +1,2 @@
 FROM dpage/pgadmin4:latest
-COPY HobbitonDb.png /pgadmin4/web/favicon.ico
+COPY HobbitonDb.png /pgadmin4/pgadmin/static/favicon.ico
