@@ -7,6 +7,7 @@
 // Rule: everything a test might need must be `pub` here.
 
 pub mod adapters;
+pub mod auth;
 pub mod cache;
 pub mod dto;
 pub mod error;
