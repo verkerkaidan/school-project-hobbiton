@@ -2,13 +2,14 @@ use library_service::AppState;
 
 use std::sync::Arc;
 
-use axum::{middleware, Router};
 use axum::http::{HeaderValue, Method};
+use axum::{middleware, Router};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use library_service::auth;
 use library_service::cache::CacheService;
 use library_service::db::DbService;
 use library_service::factory::ServiceFactory;
@@ -30,8 +31,8 @@ async fn main() {
     use tokio::time::{sleep, Duration};
 
     // ── Redis cache ──────────────────────────────────────────────────────────
-    let redis_url = std::env::var("REDIS_URL")
-        .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
+    let redis_url =
+        std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
 
     let cache = loop {
         match CacheService::new(&redis_url).await {
@@ -40,15 +41,18 @@ async fn main() {
                 break Arc::new(c);
             }
             Err(e) => {
-                tracing::warn!("Redis not ready yet ({}), retrying in 2s... error: {}", redis_url, e);
+                tracing::warn!(
+                    "Redis not ready yet ({}), retrying in 2s... error: {}",
+                    redis_url,
+                    e
+                );
                 sleep(Duration::from_secs(2)).await;
             }
         }
     };
 
     // ── Postgres ─────────────────────────────────────────────────────────────
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let db = loop {
         match DbService::new(&database_url).await {
@@ -57,10 +61,7 @@ async fn main() {
                 break Arc::new(db);
             }
             Err(err) => {
-                tracing::warn!(
-                "Postgres not ready yet, retrying in 5s: {}",
-                err
-            );
+                tracing::warn!("Postgres not ready yet, retrying in 5s: {}", err);
                 sleep(Duration::from_secs(5)).await;
             }
         }
@@ -69,9 +70,14 @@ async fn main() {
     // ── Service factory ──────────────────────────────────────────────────────
     let factory = Arc::new(ServiceFactory::new());
 
+    // ── JWT validation ─────────────────────────────────────────────────────────
+    let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+    let jwt_issuer = std::env::var("JWT_ISSUER").expect("JWT_ISSUER must be set");
+    let _ = (jwt_secret, jwt_issuer); // consumed by auth middleware via env vars
+
     let state = AppState { factory, cache, db };
 
-    // ── CORS ─────────────────────────────────────────────────────────────────
+    // ── Security Config ────────────────────────────────────────────────────----
     let allowed_origins = std::env::var("CORS_ALLOWED_ORIGINS")
         .unwrap_or_else(|_| "http://localhost:23738".to_string());
 
@@ -105,6 +111,7 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api/library", library_routes())
+        .layer(middleware::from_fn(auth::require_auth))
         .layer(middleware::from_fn(metrics::track_metrics))
         .layer(TraceLayer::new_for_http())
         .layer(cors)

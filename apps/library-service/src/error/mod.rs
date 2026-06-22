@@ -16,6 +16,8 @@ pub enum AppError {
     Cache(String),
     #[error("Internal error: {0}")]
     Internal(#[from] anyhow::Error),
+    #[error("Unauthorized: {0}")]
+    Unauthorized(String),
 }
 
 impl IntoResponse for AppError {
@@ -26,6 +28,7 @@ impl IntoResponse for AppError {
             AppError::ExternalApi(e) => (StatusCode::BAD_GATEWAY, e.to_string()),
             AppError::Cache(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg.clone()),
             AppError::Internal(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
+            AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg.clone()),
         };
 
         let body = json!({
