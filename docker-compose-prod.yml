@@ -67,6 +67,7 @@ services:
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
       PROFILE_SERVICE_URL: http://profile-service:21526
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
+      LOKI_URL: ${LOKI_URL}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -198,6 +199,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
       NOTIFICATION_ALLOWED_ORIGINS: ${NOTIFICATION_ALLOWED_ORIGINS}
+      LOKI_URL: ${LOKI_URL}
     cpus: 1
     mem_limit: 512m
     networks:
@@ -220,6 +222,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
       BUG_REPORT_ALLOWED_ORIGINS: ${BUG_REPORT_ALLOWED_ORIGINS}
+      LOKI_URL: ${LOKI_URL}
     cpus: 1
     mem_limit: 256m
     networks:

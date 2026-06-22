@@ -7,10 +7,14 @@ import (
 	"bug-report-service/internal/config"
 	"bug-report-service/internal/db"
 	"bug-report-service/internal/handlers"
+	"bug-report-service/internal/logger"
 	"bug-report-service/internal/metrics"
 )
 
 func main() {
+	logger.Init("bug-report-service")
+	defer logger.Shutdown()
+
 	cfg := config.Load()
 
 	database := db.Bootstrap(cfg)
