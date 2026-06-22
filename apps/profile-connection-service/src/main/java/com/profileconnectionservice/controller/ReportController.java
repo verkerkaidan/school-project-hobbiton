@@ -38,7 +38,7 @@ public class ReportController {
         try {
             Report report = reportService.createReport(request.getInitiatorId(), request.getTargetId(),
                     request.getReason(), request.getDescription());
-            log.debug("Report created successfully: {}", report.getId());
+            log.info("Report created: id={} initiator={} target={}", report.getId(), request.getInitiatorId(), request.getTargetId());
             return ResponseEntity.status(HttpStatus.CREATED).body(report);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid report creation request: {}", e.getMessage());
@@ -110,7 +110,7 @@ public class ReportController {
         try {
             Report.ReportStatus newStatus = request.get("status");
             Report report = reportService.updateReportStatus(reportId, newStatus);
-            log.debug("Report status updated: {} -> {}", reportId, newStatus);
+            log.info("Report status updated: id={} newStatus={}", reportId, newStatus);
             return ResponseEntity.ok(report);
         } catch (IllegalArgumentException e) {
             log.warn("Report not found for update: {}", reportId);
@@ -126,7 +126,7 @@ public class ReportController {
         log.debug("Received DELETE /reports/{}", reportId);
         try {
             reportService.deleteReport(reportId);
-            log.debug("Report deleted: {}", reportId);
+            log.info("Report deleted: id={}", reportId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             log.error("Error deleting report: {}", e.getMessage(), e);

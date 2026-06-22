@@ -45,7 +45,7 @@ public class FollowController {
         try {
             boolean isNowFollowing = followService.toggleFollow(currentProfileId,
                     targetProfileId);
-            log.debug("toggleFollow completed: isNowFollowing={}", isNowFollowing);
+            log.info("Follow toggled: user={} target={} isNowFollowing={}", currentProfileId, targetProfileId, isNowFollowing);
 
             return ResponseEntity.ok(isNowFollowing);
         } catch (Exception e) {
