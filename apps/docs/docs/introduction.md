@@ -3,6 +3,17 @@ sidebar_position: 0
 slug: /
 ---
 
+:::tip Read the live documentation instead
+
+Rather than reading this PDF, visit the hosted documentation at **[https://docs-hobbiton.student.inf.st.hsleiden.nl/](https://docs-hobbiton.student.inf.st.hsleiden.nl/)**.
+
+Use the following credentials to log in:
+
+- **Username:** `gl_groep-01_6306`
+- **Password:** `gl_groep-01_6306`
+
+:::
+
 # Introduction
 
 Hobbithon is a hobby-sharing social platform built as a polyglot microservices system. Users can discover others with shared interests, create and react to posts, chat in real-time, and browse a media library — all served by a fleet of independently deployable services written in Java, TypeScript, C#, Rust, Elixir, and Go.
