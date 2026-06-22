@@ -8,7 +8,7 @@ test.describe('Notification Service', () => {
 
   test('should display empty notifications page with no mark-all button', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page).toHaveURL(/\/notifications/);
     await expect(page.getByRole('heading', { name: /notifications/i })).toBeVisible();
@@ -18,7 +18,7 @@ test.describe('Notification Service', () => {
 
   test('should display and toggle notification preferences in settings', async ({ page }) => {
     await page.goto('/settings');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const notificationSection = page.getByRole('button', { name: /notifications/i }).first();
     await notificationSection.click();
@@ -40,7 +40,7 @@ test.describe('Notification Service', () => {
 test.describe('Notification Service — real notifications', () => {
   async function createPost(page: import('@playwright/test').Page, title: string) {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const createButton = page.getByRole('button', { name: /create new post/i });
     await expect(createButton).toBeVisible({ timeout: 10000 });
@@ -66,7 +66,7 @@ test.describe('Notification Service — real notifications', () => {
     const userB = await register(pageB);
 
     await pageB.goto(`/profile/${userA.username}`);
-    await pageB.waitForLoadState('networkidle');
+    await pageB.waitForLoadState('load');
 
     const followButton = pageB.getByRole('button', { name: /^follow$/i });
     await followButton.waitFor({ state: 'visible', timeout: 10000 });
@@ -76,7 +76,7 @@ test.describe('Notification Service — real notifications', () => {
     await contextB.close();
 
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.getByText(new RegExp(`${userB.username}.*following`, 'i'))).toBeVisible({ timeout: 15000 });
 
@@ -97,7 +97,7 @@ test.describe('Notification Service — real notifications', () => {
 
     // User B likes and comments on User A's post
     await pageB.goto(`/profile/${userA.username}`);
-    await pageB.waitForLoadState('networkidle');
+    await pageB.waitForLoadState('load');
 
     await pageB.getByRole('heading', { name: postTitle }).click();
     await pageB.waitForURL('**/posts/**', { timeout: 10000 });
@@ -115,7 +115,7 @@ test.describe('Notification Service — real notifications', () => {
 
     // User A follows User B, then User B publishes a post
     await page.goto(`/profile/${userB.username}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const followButton = page.getByRole('button', { name: /^follow$/i });
     await followButton.waitFor({ state: 'visible', timeout: 10000 });
@@ -135,7 +135,7 @@ test.describe('Notification Service — real notifications', () => {
 
     // User A should see all three notification types
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.getByText(/liked your post/i)).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/commented on your post/i)).toBeVisible({ timeout: 15000 });

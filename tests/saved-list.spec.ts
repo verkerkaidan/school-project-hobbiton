@@ -158,7 +158,7 @@ test.describe('Saved Lists Framework', () => {
         // Add Items via main panel search overlay
         await mainPanel.getByRole('button', { name: '+ Add Item' }).click();
         await mainPanel.getByPlaceholder('Type a book...').fill('JS');
-        await mainPanel.getByRole('button', { name: 'Search' }).click();
+        await mainPanel.getByRole('button', { name: 'Search', exact: true }).click();
 
         await mainPanel.getByRole('listitem').filter({ hasText: 'Eloquent JavaScript' }).first().click();
         await mainPanel.getByRole('listitem').filter({ hasText: 'Programming Rust' }).first().click();
@@ -186,7 +186,7 @@ test.describe('Saved Lists Framework', () => {
 
         await mainPanel.getByRole('button', { name: '+ Add Item' }).click();
         await mainPanel.getByPlaceholder('Type a book...').fill('Rust');
-        await mainPanel.getByRole('button', { name: 'Search' }).click();
+        await mainPanel.getByRole('button', { name: 'Search', exact: true }).click();
         await mainPanel.getByRole('listitem').filter({ hasText: 'Programming Rust' }).first().click();
         await mainPanel.getByRole('button', { name: '− Close Search' }).click();
 
@@ -216,7 +216,7 @@ test.describe('Saved Lists Framework', () => {
         // 3. Populate Source List
         await mainPanel.getByRole('button', { name: '+ Add Item' }).click();
         await mainPanel.getByPlaceholder('Type a book...').fill('JavaScript');
-        await mainPanel.getByRole('button', { name: 'Search' }).click();
+        await mainPanel.getByRole('button', { name: 'Search', exact: true }).click();
         await mainPanel.getByRole('listitem').filter({ hasText: 'Eloquent JavaScript' }).first().click();
         await mainPanel.getByRole('button', { name: '− Close Search' }).click();
 

@@ -28,7 +28,7 @@ test.beforeAll(async ({ browser }) => {
 test.beforeEach(async ({ page }) => {
     await page.context().addCookies(savedCookies);
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
-    await page.waitForLoadState('networkidle', { timeout: 15_000 });
+    await page.waitForLoadState('load', { timeout: 15_000 });
 });
 
 // ---------------------------------------------------------------------------

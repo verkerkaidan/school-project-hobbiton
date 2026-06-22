@@ -11,6 +11,7 @@ import { Trash2, Pencil } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { FEED_QUERY_KEY } from "@/components/feed/Feed";
+import { authHeaders } from "@/lib/adminClient";
 
 type ResultItem =
     | { resultType: "book";     title: string; authors?: string[]; publishers?: string[]; publishedDate?: string; isbn?: string[]; pageCount?: number; languages?: string[]; coverId?: string; thumbnailUrl?: string; id?: string }
@@ -65,7 +66,7 @@ export default function PostPageClient({ post, isGym, isReading, gymPost, readin
         setLoadingItem(item.externalId);
 
         try {
-            const res = await fetch(`${endpoint}/api/library/${apiType}/${item.externalId}`);
+            const res = await fetch(`${endpoint}/api/library/${apiType}/${item.externalId}`, { headers: authHeaders() });
             const json = await res.json();
             const data = json?.data ?? json;
 

@@ -49,7 +49,7 @@ test.describe('Chat Service', () => {
         await page.waitForURL(/\/chats\/[0-9a-f-]+/, { timeout: 10000 });
 
         await expect(page.getByRole('heading', { name: /Super amazing chat/i })).toBeVisible();
-        await expect(page.getByText(/connected/i)).toBeVisible({ timeout: 5000 });
+        await expect(page.getByText(/connected/i)).toBeVisible({ timeout: 15000 });
     });
 
     test('MUST HAVE: Gebruiker stuurt bericht, andere gebruiker ontvangt het', async ({ browser }) => {

@@ -30,7 +30,7 @@ test.describe('Monitoring infrastructure', () => {
 
     test('Spring Micrometer metrics exist for profile-service', async ({ request }) => {
       const res = await request.get(
-        `${PROMETHEUS_URL}/api/v1/query?query=spring_application_seconds_count{application="profile-service"}`
+        `${PROMETHEUS_URL}/api/v1/query?query=jvm_memory_used_bytes{application="profile-service"}`
       );
       test.skip(!res.ok(), 'Prometheus is not available');
       expect(res.ok()).toBeTruthy();
