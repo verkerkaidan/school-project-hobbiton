@@ -161,6 +161,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD_LIBRARY}
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
       DATABASE_URL: postgresql://${SPRING_DATASOURCE_USERNAME_LIBRARY}:${SPRING_DATASOURCE_PASSWORD_LIBRARY}@database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
     cpus: 1
     mem_limit: 1024m
     networks:
@@ -180,7 +182,6 @@ services:
     mem_limit: 1024m
     networks:
       - hobbithon-network
-
   notification-service:
     image: ${CI_REGISTRY_IMAGE}/notification-service:latest
     restart: always
@@ -355,6 +356,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    restart: unless-stopped
 
     ports:
       - "21527:5672"
