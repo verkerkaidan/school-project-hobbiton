@@ -1,3 +1,5 @@
 FROM grafana/grafana:latest
 COPY HobbitonLogs.png /usr/share/grafana/public/img/fav32.png
 COPY HobbitonLogs.png /usr/share/grafana/public/img/apple-touch-icon.png
+COPY HobbitonLogs.png /usr/share/grafana/public/img/icon.png
+COPY HobbitonLogs.png /usr/share/grafana/public/img/grafana_icon.png
