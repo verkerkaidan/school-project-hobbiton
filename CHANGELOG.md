@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.55.11] - 2026-06-22
+
+### Changed
+- **chore**: Reduce favicon file sizes & fix grafana
+
 ## [1.55.10] - 2026-06-22
 
 ### Changed

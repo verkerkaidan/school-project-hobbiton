@@ -1,6 +1,8 @@
 FROM grafana/grafana:latest
+# Grafana's index.html references favicons from public/build/img/ (the built asset dir).
+# Copying to public/img/ alone has no effect — the browser never requests that path.
+COPY HobbitonLogs.png /usr/share/grafana/public/build/img/fav32.png
+COPY HobbitonLogs.png /usr/share/grafana/public/build/img/apple-touch-icon.png
+# Keep the legacy public/img/ copies too, for older/other references.
 COPY HobbitonLogs.png /usr/share/grafana/public/img/fav32.png
 COPY HobbitonLogs.png /usr/share/grafana/public/img/apple-touch-icon.png
-COPY HobbitonLogs.png /usr/share/grafana/public/img/icon.png
-COPY HobbitonLogs.png /usr/share/grafana/public/img/grafana_icon.png
-COPY grafana_icon.svg /usr/share/grafana/public/img/grafana_icon.svg
