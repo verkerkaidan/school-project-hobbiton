@@ -284,11 +284,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
       "targets": [
         {
-          "expr": "sum(rate({container=\"library-service\"} |= `ERROR` [1m]))",
+          "expr": "sum(rate({app=\"library-service\"} |= `ERROR` [1m]))",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum(rate({container=\"library-service\"} |= `WARN` [1m]))",
+          "expr": "sum(rate({app=\"library-service\"} |= `WARN` [1m]))",
           "legendFormat": "WARN"
         }
       ],
@@ -306,7 +306,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 44 },
       "targets": [
         {
-          "expr": "{container=\"library-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout|unhealthy|invalid)`",
+          "expr": "{app=\"library-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout|unhealthy|invalid)`",
           "legendFormat": ""
         }
       ],
@@ -324,7 +324,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 56 },
       "targets": [
         {
-          "expr": "{container=\"library-service\"}",
+          "expr": "{app=\"library-service\"}",
           "legendFormat": ""
         }
       ],

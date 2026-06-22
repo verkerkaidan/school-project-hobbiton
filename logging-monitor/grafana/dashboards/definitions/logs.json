@@ -11,11 +11,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum by (level) (rate({container=~\".+\"} |= `ERROR` [1m]))",
+          "expr": "sum by (level) (rate({app=~\".+\"} |= `ERROR` [1m]))",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum by (level) (rate({container=~\".+\"} |= `WARN` [1m]))",
+          "expr": "sum by (level) (rate({app=~\".+\"} |= `WARN` [1m]))",
           "legendFormat": "WARN"
         }
       ],
@@ -33,7 +33,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "{container=~\".+\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
+          "expr": "{app=~\".+\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
           "legendFormat": ""
         }
       ],
@@ -51,7 +51,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "{container=~\".+\"}",
+          "expr": "{app=~\".+\"}",
           "legendFormat": ""
         }
       ],
