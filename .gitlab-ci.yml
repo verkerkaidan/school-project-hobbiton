@@ -563,7 +563,7 @@ deploy:
 
       # 2. PgAdmin
       PGADMIN_EXIT=0
-      docker compose -f docker-compose-prod.yml --profile pgadmin up -d || PGADMIN_EXIT=\$?
+      docker compose -f docker-compose-prod.yml --profile pgadmin up -d --build || PGADMIN_EXIT=\$?
       [ \$PGADMIN_EXIT -ne 0 ] && echo "ERROR: pgadmin failed to start (exit \$PGADMIN_EXIT)."
 
       # 3. Docs & docs-proxy
@@ -593,7 +593,7 @@ deploy:
 
       # 5. Logging & monitoring (Grafana, Loki, Prometheus, Promtail)
       LOGGING_EXIT=0
-      docker compose -f docker-compose-prod.yml --profile logging-monitor up -d || LOGGING_EXIT=\$?
+      docker compose -f docker-compose-prod.yml --profile logging-monitor up -d --build || LOGGING_EXIT=\$?
       [ \$LOGGING_EXIT -ne 0 ] && echo "ERROR: logging-monitor services failed to start (exit \$LOGGING_EXIT)."
 
       # Fail the pipeline if any group failed
