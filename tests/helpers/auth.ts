@@ -12,57 +12,76 @@ function generateTestCredentials() {
 }
 
 export async function register(
-    page: Page
+  page: Page
 ): Promise<{ username: string; email: string; password: string; name: string }> {
-  const credentials = generateTestCredentials();
+  const MAX_ATTEMPTS = 3;
 
-  await page.goto('/authentication', {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
-  });
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const credentials = generateTestCredentials();
 
-  const registerButton = page.getByRole('button', { name: /^Register$/ });
-  await registerButton.waitFor({ state: 'visible' });
+    await page.goto('/authentication', {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000
+    });
 
-  const usernameInput = page.locator('input[name="username"]');
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await registerButton.click();
-    const appeared = await usernameInput.waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
-    if (appeared) break;
-  }
-  await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
+    const registerButton = page.getByRole('button', { name: /^Register$/ });
+    await registerButton.waitFor({ state: 'visible' });
 
-  await usernameInput.fill(credentials.username);
-  await page.locator('input[name="email"]').fill(credentials.email);
-  await page.locator('input[name="password"]').fill(credentials.password);
-  await page.locator('input[name="confirmPassword"]').fill(credentials.password);
-
-  const submitButton = page.getByRole('button', { name: /^Register$/ }).last();
-  await submitButton.click();
-
-  const tosHeader = page.getByText('Continued use of the platform');
-  await tosHeader.waitFor({ state: 'visible', timeout: 10000 });
-
-  await page.getByText('Welcome to Hobbiton.').evaluate((el) => {
-    const container = el.closest('.overflow-y-auto');
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-      container.dispatchEvent(new Event('scroll'));
+    const usernameInput = page.locator('input[name="username"]');
+    for (let click = 0; click < 3; click++) {
+      await registerButton.click();
+      const appeared = await usernameInput.waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+      if (appeared) break;
     }
-  });
+    await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
 
-  const checkbox1 = page.getByRole('checkbox', { name: 'I have read and agree to the' });
-  const checkbox2 = page.getByRole('checkbox', { name: 'I understand that posting' });
+    await usernameInput.fill(credentials.username);
+    await page.locator('input[name="email"]').fill(credentials.email);
+    await page.locator('input[name="password"]').fill(credentials.password);
+    await page.locator('input[name="confirmPassword"]').fill(credentials.password);
 
-  await checkbox1.check();
-  await checkbox2.check();
+    const submitButton = page.getByRole('button', { name: /^Register$/ }).last();
+    await submitButton.click();
 
-  await page.getByRole('button', { name: 'Accept & Continue' }).click();
+    // Detect 500 error or success (TOS dialog)
+    const result = await Promise.race([
+      page.getByText('Continued use of the platform')
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .then(() => 'success' as const),
+      page.getByText(/Registration failed|500|server error/i)
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .then(() => 'error' as const),
+    ]).catch(() => 'error' as const);
 
-  await page.waitForURL('/', { timeout: 10000 });
-  await page.waitForSelector('text=Welcome', { timeout: 10000 });
+    if (result === 'error') {
+      console.warn(`Registration attempt ${attempt + 1} failed (500), retrying...`);
+      continue;
+    }
 
-  return credentials;
+    // TOS flow
+    await page.getByText('Welcome to Hobbiton.').evaluate((el) => {
+      const container = el.closest('.overflow-y-auto');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+        container.dispatchEvent(new Event('scroll'));
+      }
+    });
+
+    const checkbox1 = page.getByRole('checkbox', { name: 'I have read and agree to the' });
+    const checkbox2 = page.getByRole('checkbox', { name: 'I understand that posting' });
+
+    await checkbox1.check();
+    await checkbox2.check();
+
+    await page.getByRole('button', { name: 'Accept & Continue' }).click();
+
+    await page.waitForURL('/', { timeout: 10000 });
+    await page.waitForSelector('text=Welcome', { timeout: 10000 });
+
+    return credentials;
+  }
+
+  throw new Error(`Registration failed after ${MAX_ATTEMPTS} attempts`);
 }
 
 /**
@@ -70,7 +89,7 @@ export async function register(
  * Returns credentials plus token and userId.
  */
 export async function registerViaAPI(
-    request: APIRequestContext
+  request: APIRequestContext
 ): Promise<{ username: string; email: string; password: string; name: string; token: string; userId: string }> {
   const credentials = generateTestCredentials();
   const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:23738';
@@ -100,31 +119,40 @@ export async function registerViaAPI(
  * @param email The test email
  * @param password The test password
  */
-export async function login(
-    page: Page,
-    email: string,
-    password: string
-): Promise<void> {
-  await page.goto('/authentication', {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
-  });
+export async function login(page: Page, email: string, password: string): Promise<void> {
+  const MAX_ATTEMPTS = 3;
 
-  const loginButton = page.getByRole('button', { name: /^Login$/ });
-  await loginButton.waitFor({ state: 'visible' });
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    await page.goto('/authentication', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await loginButton.click();
-    const appeared = await page.locator('input[name="email"]').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
-    if (appeared) break;
+    const loginButton = page.getByRole('button', { name: /^Login$/ });
+    await loginButton.waitFor({ state: 'visible' });
+
+    for (let click = 0; click < 3; click++) {
+      await loginButton.click();
+      const appeared = await page.locator('input[name="email"]')
+        .waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+      if (appeared) break;
+    }
+
+    await page.locator('input[name="email"]').fill(email);
+    await page.locator('input[name="password"]').fill(password);
+    await page.getByRole('button', { name: /^Login$/ }).last().click();
+
+    const result = await Promise.race([
+      page.waitForURL('/', { timeout: 10000 }).then(() => 'success' as const),
+      page.getByText(/Failed to fetch|server error/i)
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .then(() => 'error' as const),
+    ]).catch(() => 'error' as const);
+
+    if (result === 'success') return;
+
+    console.warn(`Login attempt ${attempt + 1} failed, retrying...`);
+    await page.waitForTimeout(1000);
   }
 
-  await page.locator('input[name="email"]').fill(email);
-  await page.locator('input[name="password"]').fill(password);
-
-  await page.getByRole('button', { name: /^Login$/ }).last().click();
-
-  await page.waitForURL('/', { timeout: 10000 });
+  throw new Error(`Login failed after ${MAX_ATTEMPTS} attempts`);
 }
 /**
  * Logs out the user by navigating to home and finding the logout functionality

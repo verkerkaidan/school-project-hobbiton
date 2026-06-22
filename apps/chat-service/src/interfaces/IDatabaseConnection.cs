@@ -14,4 +14,5 @@ public interface IDatabaseConnection
     Dictionary<string, int> GetUnreadCountsForUser(string userId);
     void MarkChatAsRead(string userId, string chatId);
     void MarkAllChatsAsRead(string userId);
+    bool RemoveAllUserInformation(Guid userId);
 }

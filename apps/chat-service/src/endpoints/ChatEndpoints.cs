@@ -6,7 +6,7 @@ public static class ChatEndpoints
     public static void Map(
         WebApplication app,
         ConcurrentDictionary<string, WebSocket> userSockets,
-        DatabaseConnection db)
+        IDatabaseConnection db)
     {
         app.MapPost("/create-chat", (ChatModel chatModel) =>
         {
