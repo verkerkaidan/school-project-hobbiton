@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **chore**: Added logging to grafana to post-service
+
 ## [1.55.16] - 2026-06-22
 
 ### Fixed
