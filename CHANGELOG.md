@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.55.18] - 2026-06-22
+
 ### Changed
+- **chore**: dashboard version update
 - **chore**: Added changes for logging in posts
 
 ## [1.55.17] - 2026-06-22

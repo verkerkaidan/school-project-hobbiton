@@ -1,6 +1,6 @@
 {
   "name": "bpset-monorepo",
-  "version": "1.55.17",
+  "version": "1.55.18",
   "description": "BPSET",
   "private": true,
   "packageManager": "npm@10.9.0",
