@@ -137,7 +137,7 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
               <p>Leave chat</p>
               <Image
                 src="/svgs/person-walking-right.svg"
-                alt="Edit title"
+                alt="Leave chat"
                 width={25}
                 height={25}
                 className=""
@@ -147,7 +147,7 @@ export default function ChatPage({ params }: { params: Promise<{ chatId: string 
               <p>Manage users</p>
               <Image
                 src="/svgs/bars.svg"
-                alt="Edit title"
+                alt="Open menu"
                 width={25}
                 height={25}
                 className=""

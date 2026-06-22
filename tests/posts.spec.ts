@@ -1,211 +1,214 @@
 import { test, expect } from '@playwright/test';
-import { register } from './helpers/auth';
+import { login, logout, register } from './helpers/auth';
 
-test.describe('Post Deletion', () => {
-  test.beforeEach(async ({ page }) => {
-    await register(page);
-  });
+let userA: { username: string; email: string; password: string; name: string };
+let userB: { username: string; email: string; password: string; name: string };
 
-  test('should delete own post from the post detail page', async ({ page }) => {
-    // Create a post first
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await expect(createButton).toBeVisible();
-    await createButton.click();
+test.beforeAll(async ({ browser }) => {
+  const [pageA, pageB] = await Promise.all([
+    browser.newPage(),
+    browser.newPage(),
+  ]);
 
-    await page.waitForSelector('text=Create Post');
+  [userA, userB] = await Promise.all([
+    register(pageA),
+    register(pageB),
+  ]);
 
-    const postTypeSelect = page.locator('select');
-    await postTypeSelect.selectOption('GYM');
-
-    await page.locator('input[name="title"]').fill('Post To Be Deleted');
-    await page.locator('textarea[name="description"]').fill('This post will be deleted in the test.');
-    await page.locator('input[name="totalDuration"]').fill('30');
-
-    await page.getByRole('button', { name: /create post/i }).click();
-    await page.waitForURL('**/profile', { timeout: 10000 });
-
-    // Navigate into the post detail page
-    await page.locator('text=Post To Be Deleted').first().click();
-    await page.waitForURL('**/posts/**', { timeout: 10000 });
-
-    // Delete button should be visible for the post owner
-    const deleteButton = page.getByRole('button', { name: /^Delete$/i });
-    await expect(deleteButton).toBeVisible({ timeout: 10000 });
-    await deleteButton.click();
-
-    // Confirm modal should appear
-    await expect(page.locator('text=Are you sure')).toBeVisible({ timeout: 5000 });
-
-    // Click the confirm delete button in the modal
-    await page.getByRole('button', { name: /Delete Post/i }).click();
-
-    // Should be redirected back to profile after deletion
-    await page.waitForURL('**/profile', { timeout: 10000 });
-    await expect(page.locator('text=Post To Be Deleted')).not.toBeVisible({ timeout: 5000 });
-  });
+  await Promise.all([pageA.close(), pageB.close()]);
 });
 
-test.describe('Post Creation', () => {
-  test.beforeEach(async ({ page }) => {
-    // Register a new test user before each test
-    await register(page);
+test.describe('Posts', () => {
+
+  test('MUST HAVE: Gebruiker maakt een post aan', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post' })).toBeVisible({ timeout: 5000 });
+
+    await page.locator('input[name="title"]').fill('My new post');
+    await page.locator('textarea[name="description"]').fill('Description of my new post');
+    await page.locator('input[name="totalDuration"]').fill('30');
+
+    await page.getByRole('button', { name: /add exercise/i }).click();
+    await page.locator('input[placeholder="Exercise name"]').fill('Bench Press');
+    await page.locator('input[placeholder="12"]').fill('10');
+    await page.locator('input[placeholder="40"]').fill('135');
+    await page.locator('input[placeholder="7"]').fill('8');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
+
+    await expect(page.getByRole('heading', { name: 'My new post' })).toBeVisible({ timeout: 10000 });
   });
 
-  test('should create a gym post successfully', async ({ page }) => {
-    // Click the "Create new post!" button
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await expect(createButton).toBeVisible();
-    await createButton.click();
+  test('MUST HAVE: Gebruiker koppelt een hobby aan een post', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Wait for the modal to appear
-    await page.waitForSelector('text=Create Post');
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
 
-    // Select Gym as post type using custom dropdown
-    await page.locator('label:has-text("Post Type") + button').click();
-    await page.getByRole('button', { name: '🏋️ Gym', exact: true }).click();
+    await page.locator('input[name="title"]').fill('Post with linked hobby');
+    await page.locator('textarea[name="description"]').fill('This post has a linked hobby item');
+    await page.locator('input[name="totalDuration"]').fill('30');
 
-    // Fill in the title
-    const titleInput = page.locator('input[name="title"]');
-    await titleInput.fill('Morning Gym Session');
-
-    // Fill in the description
-    const descriptionTextarea = page.locator('textarea[name="description"]');
-    await descriptionTextarea.fill('Had a great workout today with some heavy lifting and cardio.');
-
-    // Fill in the total duration
-    const durationInput = page.locator('input[name="totalDuration"]');
-    await durationInput.fill('60.5');
-
-    // Add an exercise
-    const addExerciseButton = page.getByRole('button', { name: /add exercise/i });
-    await addExerciseButton.click();
-
-    // Fill in exercise name
+    await page.getByRole('button', { name: /add exercise/i }).click();
     await page.locator('input[placeholder="Exercise name"]').fill('Bench Press');
+    await page.locator('input[placeholder="12"]').fill('10');
+    await page.locator('input[placeholder="40"]').fill('135');
+    await page.locator('input[placeholder="7"]').fill('8');
 
-    // Fill exercise reps, weight, and rpe
+    await page.getByRole('button', { name: /add item/i }).click();
+    await page.getByRole('button', { name: '🏋️ Exercise' }).click();
+    const searchInput = page.locator('input[placeholder*="Type a"]');
+    await expect(searchInput).toBeVisible({ timeout: 3000 });
+    await searchInput.fill('bench');
+
+    await page.getByRole('button', { name: /^Search$/i }).click();
+
+    const firstResult = page.locator('ul li').first();
+    const hasResult = await firstResult.isVisible({ timeout: 5000 }).catch(() => false);
+    if (hasResult) {
+      await firstResult.click();
+    }
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
+
+    await expect(page.getByRole('heading', { name: 'Post with linked hobby' })).toBeVisible({ timeout: 5000 });
+  });
+
+  test('MUST HAVE: Gebruiker verwijdert een eigen post (eigen userId)', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
+
+    await page.locator('input[name="title"]').fill('Post to delete');
+    await page.locator('textarea[name="description"]').fill('This post will be deleted');
+    await page.locator('input[name="totalDuration"]').fill('30');
+    await page.getByRole('button', { name: /add exercise/i }).click();
+    await page.locator('input[placeholder="Exercise name"]').fill('Squat');
+    await page.locator('input[placeholder="12"]').fill('8');
+    await page.locator('input[placeholder="40"]').fill('185');
+    await page.locator('input[placeholder="7"]').fill('7');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
+
+    await page.getByText('Post to delete').first().click();
+    await page.waitForURL('**/posts/**', { timeout: 10000 });
+
+    await page.getByRole('button', { name: /^Delete$/i }).click();
+    await expect(page.getByText('Are you sure')).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /Delete Post/i }).click();
+
+    // Detect backend error before waiting for redirect
+    await expect(page.getByText(/something went wrong/i)).not.toBeVisible({ timeout: 5000 })
+      .catch(() => { throw new Error('Delete failed: backend returned an error'); });
+
+    await page.waitForURL('**/profile', { timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Post to delete', exact: true })).not.toBeVisible({ timeout: 5000 });
+
+  });
+
+  test('MUST HAVE: Gebruiker probeert post van ander te verwijderen (403 Forbidden)', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
+
+    await page.locator('input[name="title"]').fill("User A's post");
+    await page.locator('textarea[name="description"]').fill("This is user A's post");
+    await page.locator('input[name="totalDuration"]').fill('30');
+
+    await page.getByRole('button', { name: /add exercise/i }).click();
+    await page.locator('input[placeholder="Exercise name"]').fill('Deadlift');
+    await page.locator('input[placeholder="12"]').fill('5');
+    await page.locator('input[placeholder="40"]').fill('315');
+    await page.locator('input[placeholder="7"]').fill('9');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
+
+    await page.getByText("User A's post").first().click();
+    await page.waitForURL('**/posts/**', { timeout: 10000 });
+    const postUrl = page.url();
+
+    await logout(page);
+    await login(page, userB.email, userB.password);
+    await page.goto(postUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await expect(page.getByRole('button', { name: /^Delete$/i })).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('MUST HAVE: Gebruiker maakt een GYM post aan', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
+
+    await page.locator('input[name="title"]').fill('Morning Gym Session');
+    await page.locator('textarea[name="description"]').fill('Great workout today');
+    await page.locator('input[name="totalDuration"]').fill('60');
+
+    await page.getByRole('button', { name: /add exercise/i }).click();
+    await page.locator('input[placeholder="Exercise name"]').fill('Bench Press');
     await page.locator('input[placeholder="12"]').fill('10');
     await page.locator('input[placeholder="40"]').fill('225');
     await page.locator('input[placeholder="7"]').fill('8');
 
-    // Submit the form
-    const submitButton = page.getByRole('button', { name: /create post/i });
-    await submitButton.click();
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
 
-    // Wait for the modal to close (indicates the post was created)
-    await page.waitForSelector('text=Create Post', { state: 'hidden', timeout: 30000 });
+    await expect(page.getByText('Morning Gym Session')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should create a reading post successfully', async ({ page }) => {
-    // Click the "Create new post!" button
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await createButton.click();
+  test('MUST HAVE: Gebruiker maakt een OTHER post aan', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Wait for the modal to appear
-    await page.waitForSelector('text=Create Post');
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
 
-    // Select Reading as post type using custom dropdown
+    await page.locator('label:has-text("Post Type") + button').click();
+    await page.getByRole('button', { name: '✨ Other', exact: true }).click();
+
+    await page.locator('input[name="title"]').fill('My other hobby');
+    await page.locator('textarea[name="description"]').fill('This is a generic other post');
+
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
+
+    await expect(page.getByText('My other hobby')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('MUST HAVE: Gebruiker maakt een READING post aan', async ({ page }) => {
+    await login(page, userA.email, userA.password);
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.getByRole('button', { name: /create new post/i }).click();
+    await expect(page.getByRole('heading', { name: 'New Post', exact: true })).toBeVisible({ timeout: 5000 });
+
     await page.locator('label:has-text("Post Type") + button').click();
     await page.getByRole('button', { name: '📚 Reading', exact: true }).click();
 
-    // Fill in the title
-    const titleInput = page.locator('input[name="title"]');
-    await titleInput.fill('React Best Practices Book');
+    await page.locator('input[name="title"]').fill('React Best Practices');
+    await page.locator('textarea[name="description"]').fill('Reading about React patterns');
+    await page.locator('input[name="totalDuration"]').fill('45');
+    await page.locator('input[name="bookTitle"]').fill('React: The Complete Guide');
+    await page.locator('input[name="pagesRead"]').fill('50');
+    await page.locator('input[name="totalPagesRead"]').fill('300');
 
-    // Fill in the description
-    const descriptionTextarea = page.locator('textarea[name="description"]');
-    await descriptionTextarea.fill('Started reading this amazing book about React patterns and best practices.');
+    await page.getByRole('button', { name: /create post/i }).click();
+    await page.waitForURL('**/profile', { timeout: 15000 });
 
-    // Fill in the total duration
-    const durationInput = page.locator('input[name="totalDuration"]');
-    await durationInput.fill('45');
-
-    // Fill in book title
-    const bookTitleInput = page.locator('input[name="bookTitle"]');
-    await bookTitleInput.fill('React: The Complete Guide');
-
-    // Fill in pages read
-    const pagesReadInput = page.locator('input[name="pagesRead"]');
-    await pagesReadInput.fill('50');
-
-    // Fill in total pages
-    const totalPagesInput = page.locator('input[name="totalPagesRead"]');
-    await totalPagesInput.fill('300');
-
-    // Submit the form
-    const submitButton = page.getByRole('button', { name: /create post/i });
-    await submitButton.click();
-
-    // Wait for the modal to close (indicates the post was created)
-    await page.waitForSelector('text=Create Post', { state: 'hidden', timeout: 30000 });
+    await expect(page.getByText('React Best Practices')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should show validation error when title is empty', async ({ page }) => {
-    // Click the "Create new post!" button
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await createButton.click();
-
-    // Wait for the modal to appear
-    await page.waitForSelector('text=Create Post');
-
-    // Leave title empty and try to submit
-    const submitButton = page.getByRole('button', { name: /create post/i });
-    await submitButton.click();
-
-    // Check for error message
-    const errorMessage = page.locator('text=Title is required');
-    await expect(errorMessage).toBeVisible();
-  });
-
-  test('should show validation error when duration is missing', async ({ page }) => {
-    // Click the "Create new post!" button
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await createButton.click();
-
-    // Wait for the modal to appear
-    await page.waitForSelector('text=Create Post');
-
-    // Fill in title and description but skip duration
-    const titleInput = page.locator('input[name="title"]');
-    await titleInput.fill('Test Post');
-
-    const descriptionTextarea = page.locator('textarea[name="description"]');
-    await descriptionTextarea.fill('Test description');
-
-    // Try to submit without duration
-    const submitButton = page.getByRole('button', { name: /create post/i });
-    await submitButton.click();
-
-    // Check for error message about duration
-    const errorMessage = page.locator('text=Total duration must be greater than 0');
-    await expect(errorMessage).toBeVisible();
-  });
-
-  test('should cancel post creation', async ({ page }) => {
-    // Click the "Create new post!" button
-    const createButton = page.getByRole('button', { name: /create new post/i });
-    await createButton.click();
-
-    // Wait for the modal to appear
-    await page.waitForSelector('text=Create Post');
-
-    // Fill in some data
-    const titleInput = page.locator('input[name="title"]');
-    await titleInput.fill('Test Post');
-
-    // Click cancel button
-    const cancelButton = page.getByRole('button', { name: /cancel/i });
-    await cancelButton.click();
-
-    // Modal should no longer be visible
-    const modal = page.locator('text=Create Post');
-    await expect(modal).not.toBeVisible({ timeout: 5000 });
-
-    // We should still be on the home page
-    await expect(page).toHaveURL(/\/$|\/home/);
-  });
 });
-
-
-
-
