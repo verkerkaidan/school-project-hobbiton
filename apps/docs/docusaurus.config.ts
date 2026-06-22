@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "Hobbithon Docs",
   tagline: "Documentation for all Hobbithon microservices",
-  favicon: "img/Hobbitch.png",
+  favicon: "img/HobbitonDocs.png",
 
   url: "https://docs-hobbiton.student.inf.st.hsleiden.nl",
   baseUrl: "/",

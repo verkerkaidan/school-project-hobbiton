@@ -32,6 +32,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/HobbitonDb.png:/pgadmin4/web/favicon.ico:ro
     cpus: 0.5
     mem_limit: 256m
     networks:
@@ -429,6 +430,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ./logging-monitor/grafana/datasources:/etc/grafana/provisioning/datasources:ro
       - ./logging-monitor/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/HobbitonLogs.png:/usr/share/grafana/public/img/fav32.png:ro
+      - ./docker/grafana/HobbitonLogs.png:/usr/share/grafana/public/img/apple-touch-icon.png:ro
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
