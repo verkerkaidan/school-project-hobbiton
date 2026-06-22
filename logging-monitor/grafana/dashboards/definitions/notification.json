@@ -210,11 +210,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "sum(rate({container=\"notification-service\"} |= `ERROR` [1m]))",
+          "expr": "sum(rate({app=\"notification-service\"} |= `ERROR` [1m]))",
           "legendFormat": "ERROR"
         },
         {
-          "expr": "sum(rate({container=\"notification-service\"} |= `WARN` [1m]))",
+          "expr": "sum(rate({app=\"notification-service\"} |= `WARN` [1m]))",
           "legendFormat": "WARN"
         }
       ],
@@ -232,7 +232,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 28 },
       "targets": [
         {
-          "expr": "{container=\"notification-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
+          "expr": "{app=\"notification-service\"} |~ `(?i)(error|warn|exception|failed|refused|denied|timeout)`",
           "legendFormat": ""
         }
       ],
@@ -250,7 +250,7 @@
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 40 },
       "targets": [
         {
-          "expr": "{container=\"notification-service\"}",
+          "expr": "{app=\"notification-service\"}",
           "legendFormat": ""
         }
       ],

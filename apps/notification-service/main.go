@@ -8,10 +8,14 @@ import (
 	"notification-service/internal/db"
 	"notification-service/internal/handlers"
 	"notification-service/internal/hub"
+	"notification-service/internal/logger"
 	"notification-service/internal/metrics"
 )
 
 func main() {
+	logger.Init("notification-service")
+	defer logger.Shutdown()
+
 	cfg := config.Load()
 
 	database := db.Connect(cfg)
