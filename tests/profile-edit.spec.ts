@@ -91,7 +91,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const editButton = page.locator('span:has-text("Email address")').locator('..').getByRole('button', { name: /Edit/i });
@@ -113,7 +113,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const editButton = page.locator('span:has-text("Email address")').locator('..').getByRole('button', { name: /Edit/i });
@@ -131,7 +131,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -150,7 +150,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -169,7 +169,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -188,7 +188,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -207,7 +207,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -226,7 +226,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -245,7 +245,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -264,7 +264,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });
@@ -292,7 +292,7 @@ test.describe('Profile Editing', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    const securitySection = page.getByRole('button', { name: /^Security$/ });
+    const securitySection = page.getByRole('button', { name: /Security/ });
     await securitySection.click();
 
     const changeButton = page.locator('span:has-text("Password")').locator('..').getByRole('button', { name: /Change/i });

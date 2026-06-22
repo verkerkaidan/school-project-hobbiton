@@ -4,7 +4,7 @@ import { authCookieValue, getPostById, getPostByTitle } from './helpers/api';
 
 async function createOtherPost(page: Page, title: string) {
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('load');
 
   const createButton = page.getByRole('button', { name: /create new post/i });
   await expect(createButton).toBeVisible({ timeout: 10000 });
