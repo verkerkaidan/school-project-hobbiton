@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.55.7] - 2026-06-22
+
+### Changed
+- **chore**: Add --build to CI docker compose up
+
 ## [1.55.6] - 2026-06-22
 
 ### Security
