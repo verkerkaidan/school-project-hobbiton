@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -16,8 +17,7 @@ public class CorsConfig {
     @Value("${gateway.allowed-origin-patterns:http://localhost:*,http://*.student.inf.st.hsleiden.nl:*,https://hobbiton.student.inf.st.hsleiden.nl,https://hobbiton.student.inf.st.hsleiden.nl:*}")
     private String allowedOriginPatterns;
 
-    @Bean
-    public CorsFilter corsFilter() {
+    private CorsConfiguration corsConfiguration() {
         CorsConfiguration config = new CorsConfiguration();
         List<String> originPatterns = Arrays.stream(allowedOriginPatterns.split(","))
                 .map(String::trim)
@@ -27,10 +27,18 @@ public class CorsConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        return config;
+    }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", corsConfiguration());
+        return source;
+    }
 
-        return new CorsFilter(source);
+    @Bean
+    public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
     }
 }

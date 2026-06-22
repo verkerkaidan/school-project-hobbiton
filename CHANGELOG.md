@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.55.9] - 2026-06-22
+
+### Fixed
+- **fix**: Fix authentication in middleware
+
 ## [1.55.8] - 2026-06-22
 
 ### Changed

@@ -400,6 +400,9 @@ services:
       - "21527:5672"
       - "11527:11527"
 
+    volumes:
+      - ./logging-monitor/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
@@ -428,6 +431,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logging-monitor/loki/promtail.yml:/etc/promtail/promtail.yml:ro
+      - ./logging-monitor/loki/targets:/etc/promtail/targets:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: -config.file=/etc/promtail/promtail.yml

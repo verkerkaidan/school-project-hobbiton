@@ -50,6 +50,9 @@ pgadmin-data
 /playwright/.cache/
 /playwright/.auth/
 
+# Promtail generated targets
+logging-monitor/loki/targets/
+
 # AI-models
 *.pt
 *.pth

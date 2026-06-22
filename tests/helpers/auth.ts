@@ -1,4 +1,5 @@
 import { type Page, type APIRequestContext } from '@playwright/test';
+import { Pool } from 'pg';
 
 function generateTestCredentials() {
   const timestamp = Date.now();
@@ -172,4 +173,60 @@ export async function logout(page: Page): Promise<void> {
 export async function isLoggedIn(page: Page): Promise<boolean> {
   const cookies = await page.context().cookies();
   return cookies.some(cookie => cookie.name === 'token');
+}
+
+/**
+ * Promotes a user to ROLE_ADMIN by inserting directly into the authentication database.
+ * Returns true if the promotion succeeded.
+ */
+export async function promoteToAdmin(userId: string): Promise<boolean> {
+  const pool = new Pool({
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    user: process.env.SPRING_DATASOURCE_USERNAME_AUTHENTICATION || 'authentication_database_user',
+    password: process.env.SPRING_DATASOURCE_PASSWORD_AUTHENTICATION || 'di*8jdK',
+    database: process.env.SPRING_DATASOURCE_AUTHENTICATION_DATABASE || 'authentication_service',
+  });
+
+  try {
+    const roleResult = await pool.query("SELECT id FROM role WHERE name = 'ROLE_ADMIN'");
+    if (roleResult.rows.length === 0) {
+      console.warn('[promoteToAdmin] ROLE_ADMIN not found in database');
+      return false;
+    }
+    const roleId = roleResult.rows[0].id;
+
+    await pool.query(
+      'INSERT INTO users_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [userId, roleId]
+    );
+
+    return true;
+  } catch (err) {
+    console.warn('[promoteToAdmin] Failed to promote user:', err);
+    return false;
+  } finally {
+    await pool.end();
+  }
+}
+
+/**
+ * Logs in via the API Gateway and returns token + userId.
+ */
+export async function loginViaAPI(
+  request: APIRequestContext,
+  email: string,
+  password: string
+): Promise<{ token: string; userId: string } | null> {
+  const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:23738';
+  try {
+    const res = await request.post(`${GATEWAY_URL}/api/auth/login`, {
+      data: { email, password },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (res.status() !== 200) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
