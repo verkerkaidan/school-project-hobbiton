@@ -70,11 +70,14 @@ export const DesktopSidebar = () => {
     >
       {/* Top */}
       <div className="flex flex-col md:flex-row items-center justify-between w-full gap-3 shrink-0">
-        <Link
-          href="/"
-          className="p-2 md:p-3 bg-brand-muted rounded-2xl border border-brand/20 group"
-        >
-          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full border-4 border-brand group-hover:border-brand-light transition-colors" />
+        <Link href="/" className="group">
+          <Image
+            src="/Hobbiton.png"
+            alt="Home"
+            width={48}
+            height={48}
+            className="w-10 h-10 md:w-12 md:h-12 object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
         <button
