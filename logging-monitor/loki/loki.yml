@@ -6,7 +6,8 @@ server:
 
 common:
   ring:
-    instance_addr: 127.0.0.1
+    instance_interface_names:
+      - eth0
     kvstore:
       store: inmemory
   replication_factor: 1

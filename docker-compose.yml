@@ -209,6 +209,8 @@ services:
       DATABASE_URL: postgresql://${SPRING_DATASOURCE_USERNAME_LIBRARY}:${SPRING_DATASOURCE_PASSWORD_LIBRARY}@database:5432/${SPRING_DATASOURCE_LIBRARY_DATABASE}
       RUST_LOG: debug
       CORS_ALLOWED_ORIGINS: ${MIDDLEWARE_ALLOWED_ORIGINS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
     cpus: 0.5
     mem_limit: 256m          # bump from 128m — sqlx + migrations need headroom
     networks:
@@ -302,6 +304,9 @@ services:
     mem_limit: 512m
     networks:
       - microservices-network
+    depends_on:
+      rabbitmq:
+        condition: service_started
     environment:
       AUTHENTICATION_SERVICE_URL: ${AUTHENTICATION_SERVICE_URL}
       MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
@@ -395,10 +400,11 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    restart: unless-stopped
 
     ports:
       - "21527:5672"
-      - "11527:11527"
+      - "11527:15672"
 
     volumes:
       - ./logging-monitor/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
