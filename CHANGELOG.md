@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **chore**: Removed corrupt e2e test code
 - **chore**: Added testing for both chats and posts (E2E)
 
 ## [1.55.2] - 2026-06-22

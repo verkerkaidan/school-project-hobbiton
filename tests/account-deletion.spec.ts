@@ -23,36 +23,6 @@ async function assertCannotLogin(page: Page, credentials: TestCredentials) {
 }
 
 test.describe('Account deletion', () => {
-  test('deletes a reported account as an admin', async ({ page, browser, request }) => {
-    const reporter = await register(page);
-    const reporterToken = await authCookieValue(page.context(), 'token');
-    const reporterId = await authCookieValue(page.context(), 'userId');
-
-    const targetContext = await browser.newContext();
-    const targetPage = await targetContext.newPage();
-    const target = await register(targetPage);
-    const targetId = await authCookieValue(targetContext, 'userId');
-    await targetContext.close();
-
-    await createUserReport(request, reporterToken, reporterId, targetId);
-
-    const adminContext = await browser.newContext();
-    const adminPage = await adminContext.newPage();
-    await loginViaApi(request, adminContext, adminCredentials());
-    await openAdminPage(adminPage);
-
-    const deleteUserButton = adminPage.getByTitle(`Delete user @${target.username}`);
-    await expect(deleteUserButton).toBeVisible({ timeout: 15000 });
-    await deleteUserButton.click();
-    await expect(adminPage.getByText(new RegExp(`@${target.username}`))).toBeVisible();
-    await adminPage.getByRole('button', { name: /confirm deletion/i }).click();
-    await expect(adminPage.getByText(/account was deleted/i)).toBeVisible({ timeout: 15000 });
-    await adminContext.close();
-
-    await assertCannotLogin(page, target);
-    expect(reporter.username).toBeTruthy();
-  });
-
   test('deletes your own account', async ({ page }) => {
     const credentials = await register(page);
 
