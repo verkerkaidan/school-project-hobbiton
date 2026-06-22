@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty name="LOKI_URL" source="loki.url" defaultValue=""/>
+    <springProperty name="APP_ENV" source="spring.profiles.active" defaultValue="production"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>${LOKI_URL}/loki/api/v1/push</url>
+        </http>
+        <format>
+            <label>
+                <pattern>app=post-service,env=${APP_ENV},host=${HOSTNAME}</pattern>
+            </label>
+            <message>
+                <pattern>level=%level logger=%logger{36} thread=%thread | %msg%n</pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <!-- Always active -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Only attach Loki when the env var is present (non-empty LOKI_URL) -->
+    <springProfile name="!default &amp; !test">
+        <root level="INFO">
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+</configuration>
