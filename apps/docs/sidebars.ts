@@ -144,6 +144,7 @@ const sidebars: SidebarsConfig = {
         "recognition-service/architecture",
         "recognition-service/http-api",
         "recognition-service/deployment",
+        "recognition-service/hobbiton-recognition-ai-v3",
       ],
     },
     {
