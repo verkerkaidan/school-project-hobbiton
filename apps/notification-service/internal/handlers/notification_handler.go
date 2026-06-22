@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -86,6 +87,9 @@ func (h *Handler) batchCreateNotifications(w http.ResponseWriter, r *http.Reques
 		created++
 	}
 
+	log.Printf("INFO batch notifications: created=%d skipped=%d recipients=%d actor=%s type=%s",
+		created, skipped, len(req.RecipientIDs), req.ActorID, req.Type)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]int{"created": created, "skipped": skipped})
@@ -128,9 +132,12 @@ func (h *Handler) createNotification(w http.ResponseWriter, r *http.Request) {
 		notif.ID, notif.UserID, notif.ActorID, string(notif.Type), notif.Message, notif.Content, notif.ReferenceID, notif.CreatedAt,
 	)
 	if err != nil {
+		log.Printf("ERROR create notification: db insert failed for user=%s type=%s: %v", req.UserID, req.Type, err)
 		http.Error(w, "failed to persist notification", http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("INFO notification created: id=%s user=%s type=%s", notif.ID, notif.UserID, notif.Type)
 
 	// Push to user's WebSocket connection if they are currently online
 	msg, _ := json.Marshal(models.WebSocketMessage{Type: "NOTIFICATION", Payload: notif})
@@ -291,11 +298,13 @@ func (h *Handler) deleteUserNotifications(w http.ResponseWriter, r *http.Request
 		claims.UserID,
 	)
 	if err != nil {
+		log.Printf("ERROR delete user notifications: db failed for user=%s: %v", claims.UserID, err)
 		http.Error(w, "failed to delete notifications", http.StatusInternalServerError)
 		return
 	}
 
 	deleted, _ := result.RowsAffected()
+	log.Printf("INFO user notifications deleted: user=%s count=%d", claims.UserID, deleted)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]int64{"deleted": deleted})
@@ -340,11 +349,13 @@ func (h *Handler) adminDeleteUserNotifications(w http.ResponseWriter, r *http.Re
 		targetID,
 	)
 	if err != nil {
+		log.Printf("ERROR admin delete notifications: db failed for target=%s by admin=%s: %v", targetID, claims.UserID, err)
 		http.Error(w, "failed to delete notifications", http.StatusInternalServerError)
 		return
 	}
 
 	deleted, _ := result.RowsAffected()
+	log.Printf("INFO admin deleted notifications: target=%s count=%d by admin=%s", targetID, deleted, claims.UserID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]int64{"deleted": deleted})

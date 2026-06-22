@@ -45,7 +45,7 @@ public class BlockController {
         try {
             boolean isNowBlocking = blockService.toggleBlock(currentProfileId,
                     targetProfileId);
-            log.debug("toggleBlock completed: isNowBlocking={}", isNowBlocking);
+            log.info("Block toggled: user={} target={} isNowBlocking={}", currentProfileId, targetProfileId, isNowBlocking);
             return ResponseEntity.ok(isNowBlocking);
         } catch (Exception e) {
             log.error("Error during toggleBlock: {}", e.getMessage(), e);

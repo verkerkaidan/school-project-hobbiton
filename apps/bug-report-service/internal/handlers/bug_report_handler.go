@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ func (h *Handler) createBugReport(w http.ResponseWriter, r *http.Request) {
 
 	var req models.CreateBugReportRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("ERROR create bug report: invalid request body: %v", err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -29,6 +31,7 @@ func (h *Handler) createBugReport(w http.ResponseWriter, r *http.Request) {
 	req.Description = strings.TrimSpace(req.Description)
 
 	if req.Title == "" || req.Description == "" {
+		log.Printf("WARN create bug report: title or description empty")
 		http.Error(w, "title and description are required", http.StatusBadRequest)
 		return
 	}
@@ -42,9 +45,12 @@ func (h *Handler) createBugReport(w http.ResponseWriter, r *http.Request) {
 		id, req.Title, req.Description, createdAt,
 	)
 	if err != nil {
+		log.Printf("ERROR create bug report: db insert failed: %v", err)
 		http.Error(w, "failed to save bug report", http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("INFO bug report created: id=%s title=%q", id, req.Title)
 
 	report := models.BugReport{
 		ID:          id,
@@ -87,6 +93,7 @@ func (h *Handler) listBugReports(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		log.Printf("ERROR list bug reports: db query failed: %v", err)
 		http.Error(w, "failed to fetch bug reports", http.StatusInternalServerError)
 		return
 	}
@@ -125,15 +132,19 @@ func (h *Handler) closeBugReport(w http.ResponseWriter, r *http.Request) {
 		closedAt, id,
 	)
 	if err != nil {
+		log.Printf("ERROR close bug report: db update failed for id=%s: %v", id, err)
 		http.Error(w, "failed to close bug report", http.StatusInternalServerError)
 		return
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
+		log.Printf("WARN close bug report: not found or already closed id=%s", id)
 		http.Error(w, "report not found or already closed", http.StatusNotFound)
 		return
 	}
+
+	log.Printf("INFO bug report closed: id=%s", id)
 
 	var report models.BugReport
 	err = h.db.QueryRow(
