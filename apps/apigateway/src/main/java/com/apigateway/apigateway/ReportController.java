@@ -75,8 +75,7 @@ public class ReportController {
     }
 
     @QueryMapping
-    public List<FullMediaFile> getReportedFiles(
-            @RequestHeader("Authorization") String authorization) {
+    public List<FullMediaFile> getReportedFiles() {
         try {
             return mediaClient.getReportedFiles();
         } catch (Exception e) {
