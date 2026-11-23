@@ -53,8 +53,8 @@ Supporting infrastructure: RabbitMQ, Redis, Grafana, Prometheus, Loki and Promta
 ### Full stack with Docker
 
 ```bash
-git clone https://github.com/verkerkaidan/01-bpset-p4.git
-cd 01-bpset-p4
+git clone https://github.com/verkerkaidan/school-project-hobbiton.git
+cd school-project-hobbiton
 cp .env.example .env
 ```
 
