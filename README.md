@@ -106,7 +106,3 @@ npm install
 npx playwright install
 npx playwright test
 ```
-
-## Team
-
-Built by Aidan Verkerk, Dagmar Dinjens, Demi Elstgeest, Matthijs Harteveld and Tygo Houweling.
